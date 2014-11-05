@@ -1,5 +1,0 @@
-¡‰ïĞ‚Å
-cd C:\Users\yonezawa.NJC-DC\Google ƒhƒ‰ƒCƒu\project_lovelive\grunt
-grunt watch
-
-¡‰Æ‚Å
