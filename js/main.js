@@ -1,20 +1,18 @@
-(function() {
-  window.myClass = (function() {
-    var hello;
+var myClass;
 
-    function myClass() {}
+myClass = (function() {
+  function myClass() {}
 
-    hello = function() {
-      return console.log("Hello World!");
-    };
+  myClass.prototype.hello = function() {
+    return console.log("Hello World!");
+  };
 
-    return myClass;
+  return myClass;
 
-  })();
+})();
 
-}).call(this);
+var cls;
 
-(function() {
-  hello();
+cls = new myClass();
 
-}).call(this);
+cls.hello();

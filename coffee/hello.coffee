@@ -1,3 +1,3 @@
-class window.myClass
-    hello = ->
+class myClass
+    hello:() ->
         console.log("Hello World!")

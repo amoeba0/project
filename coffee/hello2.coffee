@@ -1,1 +1,2 @@
-hello()
+cls = new myClass()
+cls.hello()
