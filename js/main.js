@@ -1,3 +1,7 @@
+var Bear, Character, Player, appSprite,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
 enchant();
 
 window.onload = function() {
@@ -13,15 +17,44 @@ window.onload = function() {
   return game.start();
 };
 
-var Bear,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+appSprite = (function(_super) {
+  __extends(appSprite, _super);
+
+  function appSprite(w, h, image) {
+    appSprite.__super__.constructor.call(this, w, h);
+  }
+
+  return appSprite;
+
+})(Sprite);
+
+Character = (function(_super) {
+  __extends(Character, _super);
+
+  function Character(w, h, image) {
+    Character.__super__.constructor.call(this, w, h, image);
+  }
+
+  return Character;
+
+})(appSprite);
+
+Player = (function(_super) {
+  __extends(Player, _super);
+
+  function Player(w, h, image) {
+    Player.__super__.constructor.call(this, w, h, image);
+  }
+
+  return Player;
+
+})(Character);
 
 Bear = (function(_super) {
   __extends(Bear, _super);
 
   function Bear(w, h, image) {
-    Bear.__super__.constructor.call(this, 32, 32);
+    Bear.__super__.constructor.call(this, 32, 32, image);
     this.image = Game.instance.assets[image];
     this.x = 0;
     this.y = 0;
@@ -33,4 +66,6 @@ Bear = (function(_super) {
 
   return Bear;
 
-})(Sprite);
+})(Player);
+
+//# sourceMappingURL=main.js.map
