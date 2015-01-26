@@ -1,4 +1,4 @@
-var Bear, Character, Player, appSprite,
+var Bear, Character, MyGame, Player, appSprite,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -6,14 +6,7 @@ enchant();
 
 window.onload = function() {
   var game;
-  game = new Game(320, 320);
-  game.fps = 24;
-  game.preload('images/chara1.png');
-  game.onload = function() {
-    var bear;
-    bear = new Bear(32, 32, "images/chara1.png");
-    return game.rootScene.addChild(bear);
-  };
+  game = new MyGame();
   return game.start();
 };
 
@@ -27,6 +20,27 @@ appSprite = (function(_super) {
   return appSprite;
 
 })(Sprite);
+
+MyGame = (function(_super) {
+  __extends(MyGame, _super);
+
+  function MyGame(w, h) {
+    MyGame.__super__.constructor.call(this, width, height);
+    this.width = 320;
+    this.height = 320;
+    this.fps = 24;
+    this.preload('images/chara1.png');
+  }
+
+  MyGame.prototype.onload = function() {
+    var bear;
+    bear = new Bear(32, 32, "images/chara1.png");
+    return this.rootScene.addChild(bear);
+  };
+
+  return MyGame;
+
+})(Game);
 
 Character = (function(_super) {
   __extends(Character, _super);

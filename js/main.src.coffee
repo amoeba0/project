@@ -1,13 +1,6 @@
 enchant()
 window.onload = ->
-    game = new Game(320, 320)
-    game.fps = 24
-    game.preload('images/chara1.png')
-
-    game.onload = ->
-        bear = new Bear(32, 32, "images/chara1.png")
-        game.rootScene.addChild(bear)
-
+    game = new MyGame()
     game.start()
 
 
@@ -16,7 +9,17 @@ window.onload = ->
 class appSprite extends Sprite
     constructor: (w, h, image) ->
         super w, h
+class MyGame extends Game
+    constructor:(w, h)->
+        super width, height
+        @width = 320
+        @height = 320
+        @fps = 24
+        @preload('images/chara1.png')
 
+    onload:() ->
+        bear = new Bear(32, 32, "images/chara1.png")
+        @rootScene.addChild(bear)
 
 class Character extends appSprite
     constructor: (w, h, image) ->
