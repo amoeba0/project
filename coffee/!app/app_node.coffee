@@ -1,0 +1,1 @@
+class appNode extends Node

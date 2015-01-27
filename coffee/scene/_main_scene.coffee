@@ -1,0 +1,1 @@
+class mainScene extends appScene

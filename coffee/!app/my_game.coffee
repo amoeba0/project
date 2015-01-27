@@ -1,6 +1,6 @@
 class MyGame extends Game
     constructor:(w, h)->
-        super width, height
+        super @width, @height
         @width = 320
         @height = 320
         @fps = 24

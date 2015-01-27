@@ -1,0 +1,1 @@
+class appGroup extends Group

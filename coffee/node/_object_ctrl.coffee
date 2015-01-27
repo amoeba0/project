@@ -1,0 +1,1 @@
+class objectCtrl extends appNode

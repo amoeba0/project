@@ -1,3 +1,3 @@
-class Money extends Item
+class Panorama extends backGround
     constructor: (w, h, image) ->
         super w, h, image

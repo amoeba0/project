@@ -1,0 +1,1 @@
+class titleScene extends appScene

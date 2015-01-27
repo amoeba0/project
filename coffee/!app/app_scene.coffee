@@ -1,0 +1,1 @@
+class appScene extends Scene

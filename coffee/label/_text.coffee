@@ -1,0 +1,1 @@
+class text extends appLabel

@@ -1,0 +1,1 @@
+class slotCtrl extends appNode
