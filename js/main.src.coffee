@@ -1,6 +1,7 @@
 enchant()
 window.onload = ->
-    game = new MyGame()
+    #グローバル変数にはwindow.をつけて宣言する
+    window.game = new MyGame()
     game.start()
 class appGroup extends Group
     constructor: () ->
@@ -18,16 +19,47 @@ class appSprite extends Sprite
     constructor: (w, h) ->
         super w, h
 class MyGame extends Game
-    constructor:(w, h)->
+    constructor:()->
         super @width, @height
         @width = 320
         @height = 320
         @fps = 24
-        @preload('images/chara1.png')
+        #ミュート（消音）フラグ
+        @mute = false
+        #画像リスト
+        @imgList = ['chara1', 'icon1']
+        #音声リスト
+        @sondList = []
+        @preloadAll()
 
     onload:() ->
         @main_scene = new mainScene()
         @pushScene(@main_scene)
+
+    ###
+        画像の呼び出し
+    ###
+    imageload:(img) ->
+        return @assets["images/"+img+".png"]
+
+    ###
+        音声の呼び出し
+    ###
+    soundload:(sound) ->
+        return @assets["sounds/"+sound+".mp3"]
+
+    ###
+        素材をすべて読み込む
+    ###
+    preloadAll:()->
+        tmp = []
+        if @imgList?
+            for val in @imgList
+                tmp.push "images/"+val+".png"
+        if @mute is false and @soundList?
+            for val in @soundList
+                tmp.push "sounds/"+val+".mp3"
+        @preload(tmp)
 class text extends appLabel
     constructor: () ->
         super
@@ -77,7 +109,7 @@ class Player extends Character
 class Bear extends Player
     constructor: () ->
         super 32, 32
-        @image = Game.instance.assets["images/chara1.png"]
+        @image = game.imageload("chara1")
         @x = 0
         @y = 0
 
@@ -93,14 +125,14 @@ class Money extends Item
     constructor: (w, h) ->
         super w, h
 class Slot extends appSprite
-    constructor: (w, h, image) ->
-        super w, h, image
+    constructor: (w, h) ->
+        super w, h
 class System extends appSprite
-    constructor: (w, h, image) ->
-        super w, h, image
+    constructor: (w, h) ->
+        super w, h
 class Button extends System
-    constructor: (w, h, image) ->
-        super w, h, image
+    constructor: (w, h) ->
+        super w, h
 class Param extends System
-    constructor: (w, h, image) ->
-        super w, h, image
+    constructor: (w, h) ->
+        super w, h

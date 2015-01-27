@@ -5,8 +5,7 @@ var Bear, Button, Catch, Character, Floor, Guest, Item, Money, MyGame, Panorama,
 enchant();
 
 window.onload = function() {
-  var game;
-  game = new MyGame();
+  window.game = new MyGame();
   return game.start();
 };
 
@@ -68,17 +67,63 @@ appSprite = (function(_super) {
 MyGame = (function(_super) {
   __extends(MyGame, _super);
 
-  function MyGame(w, h) {
+  function MyGame() {
     MyGame.__super__.constructor.call(this, this.width, this.height);
     this.width = 320;
     this.height = 320;
     this.fps = 24;
-    this.preload('images/chara1.png');
+    this.mute = false;
+    this.imgList = ['chara1', 'icon1'];
+    this.sondList = [];
+    this.preloadAll();
   }
 
   MyGame.prototype.onload = function() {
     this.main_scene = new mainScene();
     return this.pushScene(this.main_scene);
+  };
+
+
+  /*
+      画像の呼び出し
+   */
+
+  MyGame.prototype.imageload = function(img) {
+    return this.assets["images/" + img + ".png"];
+  };
+
+
+  /*
+      音声の呼び出し
+   */
+
+  MyGame.prototype.soundload = function(sound) {
+    return this.assets["sounds/" + sound + ".mp3"];
+  };
+
+
+  /*
+      素材をすべて読み込む
+   */
+
+  MyGame.prototype.preloadAll = function() {
+    var tmp, val, _i, _j, _len, _len1, _ref, _ref1;
+    tmp = [];
+    if (this.imgList != null) {
+      _ref = this.imgList;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        val = _ref[_i];
+        tmp.push("images/" + val + ".png");
+      }
+    }
+    if (this.mute === false && (this.soundList != null)) {
+      _ref1 = this.soundList;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        val = _ref1[_j];
+        tmp.push("sounds/" + val + ".mp3");
+      }
+    }
+    return this.preload(tmp);
   };
 
   return MyGame;
@@ -243,7 +288,7 @@ Bear = (function(_super) {
 
   function Bear() {
     Bear.__super__.constructor.call(this, 32, 32);
-    this.image = Game.instance.assets["images/chara1.png"];
+    this.image = game.imageload("chara1");
     this.x = 0;
     this.y = 0;
   }
@@ -292,8 +337,8 @@ Money = (function(_super) {
 Slot = (function(_super) {
   __extends(Slot, _super);
 
-  function Slot(w, h, image) {
-    Slot.__super__.constructor.call(this, w, h, image);
+  function Slot(w, h) {
+    Slot.__super__.constructor.call(this, w, h);
   }
 
   return Slot;
@@ -303,8 +348,8 @@ Slot = (function(_super) {
 System = (function(_super) {
   __extends(System, _super);
 
-  function System(w, h, image) {
-    System.__super__.constructor.call(this, w, h, image);
+  function System(w, h) {
+    System.__super__.constructor.call(this, w, h);
   }
 
   return System;
@@ -314,8 +359,8 @@ System = (function(_super) {
 Button = (function(_super) {
   __extends(Button, _super);
 
-  function Button(w, h, image) {
-    Button.__super__.constructor.call(this, w, h, image);
+  function Button(w, h) {
+    Button.__super__.constructor.call(this, w, h);
   }
 
   return Button;
@@ -325,8 +370,8 @@ Button = (function(_super) {
 Param = (function(_super) {
   __extends(Param, _super);
 
-  function Param(w, h, image) {
-    Param.__super__.constructor.call(this, w, h, image);
+  function Param(w, h) {
+    Param.__super__.constructor.call(this, w, h);
   }
 
   return Param;

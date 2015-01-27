@@ -5,7 +5,7 @@ class Player extends Character
 class Bear extends Player
     constructor: () ->
         super 32, 32
-        @image = Game.instance.assets["images/chara1.png"]
+        @image = game.imageload("chara1")
         @x = 0
         @y = 0
 
