@@ -1,21 +1,10 @@
-class MyGame extends Game
-    constructor:()->
-        super @width, @height
-        @width = 320
-        @height = 320
-        @fps = 24
+class appGame extends Game
+    constructor:(w, h)->
+        super w, h
         #ミュート（消音）フラグ
         @mute = false
-        #画像リスト
-        @imgList = ['chara1', 'icon1']
-        #音声リスト
-        @sondList = []
-        @preloadAll()
-
-    onload:() ->
-        @main_scene = new mainScene()
-        @pushScene(@main_scene)
-
+        @imgList = []
+        @soundList = []
     ###
         画像の呼び出し
     ###

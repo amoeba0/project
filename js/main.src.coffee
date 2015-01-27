@@ -1,41 +1,15 @@
 enchant()
 window.onload = ->
     #グローバル変数にはwindow.をつけて宣言する
-    window.game = new MyGame()
+    window.game = new LoveliveGame()
     game.start()
-class appGroup extends Group
-    constructor: () ->
-        super
-class appLabel extends Label
-    constructor: () ->
-        super
-class appNode extends Node
-    constructor: () ->
-        super
-class appScene extends Scene
-    constructor: () ->
-        super
-class appSprite extends Sprite
-    constructor: (w, h) ->
+class appGame extends Game
+    constructor:(w, h)->
         super w, h
-class MyGame extends Game
-    constructor:()->
-        super @width, @height
-        @width = 320
-        @height = 320
-        @fps = 24
         #ミュート（消音）フラグ
         @mute = false
-        #画像リスト
-        @imgList = ['chara1', 'icon1']
-        #音声リスト
-        @sondList = []
-        @preloadAll()
-
-    onload:() ->
-        @main_scene = new mainScene()
-        @pushScene(@main_scene)
-
+        @imgList = []
+        @soundList = []
     ###
         画像の呼び出し
     ###
@@ -60,6 +34,40 @@ class MyGame extends Game
             for val in @soundList
                 tmp.push "sounds/"+val+".mp3"
         @preload(tmp)
+class appGroup extends Group
+    constructor: () ->
+        super
+class appLabel extends Label
+    constructor: () ->
+        super
+class appNode extends Node
+    constructor: () ->
+        super
+class appScene extends Scene
+    constructor: () ->
+        super
+class appSprite extends Sprite
+    constructor: (w, h) ->
+        super w, h
+class catchAndSlotGame extends appGame
+    constructor:(w, h)->
+        super w, h
+
+class LoveliveGame extends catchAndSlotGame
+    constructor:()->
+        super @width, @height
+        @width = 320
+        @height = 320
+        @fps = 24
+        #画像リスト
+        @imgList = ['chara1', 'icon1']
+        #音声リスト
+        @sondList = []
+        @preloadAll()
+
+    onload:() ->
+        @main_scene = new mainScene()
+        @pushScene(@main_scene)
 class text extends appLabel
     constructor: () ->
         super

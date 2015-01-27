@@ -1,13 +1,70 @@
-var Bear, Button, Catch, Character, Floor, Guest, Item, Money, MyGame, Panorama, Param, Player, Slot, System, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, gameCycle, mainScene, objectCtrl, slotCtrl, text, titleScene,
+var Bear, Button, Catch, Character, Floor, Guest, Item, LoveliveGame, Money, Panorama, Param, Player, Slot, System, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, catchAndSlotGame, gameCycle, mainScene, objectCtrl, slotCtrl, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 enchant();
 
 window.onload = function() {
-  window.game = new MyGame();
+  window.game = new LoveliveGame();
   return game.start();
 };
+
+appGame = (function(_super) {
+  __extends(appGame, _super);
+
+  function appGame(w, h) {
+    appGame.__super__.constructor.call(this, w, h);
+    this.mute = false;
+    this.imgList = [];
+    this.soundList = [];
+  }
+
+
+  /*
+      画像の呼び出し
+   */
+
+  appGame.prototype.imageload = function(img) {
+    return this.assets["images/" + img + ".png"];
+  };
+
+
+  /*
+      音声の呼び出し
+   */
+
+  appGame.prototype.soundload = function(sound) {
+    return this.assets["sounds/" + sound + ".mp3"];
+  };
+
+
+  /*
+      素材をすべて読み込む
+   */
+
+  appGame.prototype.preloadAll = function() {
+    var tmp, val, _i, _j, _len, _len1, _ref, _ref1;
+    tmp = [];
+    if (this.imgList != null) {
+      _ref = this.imgList;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        val = _ref[_i];
+        tmp.push("images/" + val + ".png");
+      }
+    }
+    if (this.mute === false && (this.soundList != null)) {
+      _ref1 = this.soundList;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        val = _ref1[_j];
+        tmp.push("sounds/" + val + ".mp3");
+      }
+    }
+    return this.preload(tmp);
+  };
+
+  return appGame;
+
+})(Game);
 
 appGroup = (function(_super) {
   __extends(appGroup, _super);
@@ -64,71 +121,38 @@ appSprite = (function(_super) {
 
 })(Sprite);
 
-MyGame = (function(_super) {
-  __extends(MyGame, _super);
+catchAndSlotGame = (function(_super) {
+  __extends(catchAndSlotGame, _super);
 
-  function MyGame() {
-    MyGame.__super__.constructor.call(this, this.width, this.height);
+  function catchAndSlotGame(w, h) {
+    catchAndSlotGame.__super__.constructor.call(this, w, h);
+  }
+
+  return catchAndSlotGame;
+
+})(appGame);
+
+LoveliveGame = (function(_super) {
+  __extends(LoveliveGame, _super);
+
+  function LoveliveGame() {
+    LoveliveGame.__super__.constructor.call(this, this.width, this.height);
     this.width = 320;
     this.height = 320;
     this.fps = 24;
-    this.mute = false;
     this.imgList = ['chara1', 'icon1'];
     this.sondList = [];
     this.preloadAll();
   }
 
-  MyGame.prototype.onload = function() {
+  LoveliveGame.prototype.onload = function() {
     this.main_scene = new mainScene();
     return this.pushScene(this.main_scene);
   };
 
+  return LoveliveGame;
 
-  /*
-      画像の呼び出し
-   */
-
-  MyGame.prototype.imageload = function(img) {
-    return this.assets["images/" + img + ".png"];
-  };
-
-
-  /*
-      音声の呼び出し
-   */
-
-  MyGame.prototype.soundload = function(sound) {
-    return this.assets["sounds/" + sound + ".mp3"];
-  };
-
-
-  /*
-      素材をすべて読み込む
-   */
-
-  MyGame.prototype.preloadAll = function() {
-    var tmp, val, _i, _j, _len, _len1, _ref, _ref1;
-    tmp = [];
-    if (this.imgList != null) {
-      _ref = this.imgList;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        val = _ref[_i];
-        tmp.push("images/" + val + ".png");
-      }
-    }
-    if (this.mute === false && (this.soundList != null)) {
-      _ref1 = this.soundList;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        val = _ref1[_j];
-        tmp.push("sounds/" + val + ".mp3");
-      }
-    }
-    return this.preload(tmp);
-  };
-
-  return MyGame;
-
-})(Game);
+})(catchAndSlotGame);
 
 text = (function(_super) {
   __extends(text, _super);
