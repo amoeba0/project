@@ -1,3 +1,3 @@
 class Panorama extends backGround
-    constructor: (w, h, image) ->
-        super w, h, image
+    constructor: (w, h) ->
+        super w, h

@@ -1,3 +1,3 @@
 class appSprite extends Sprite
-    constructor: (w, h, image) ->
+    constructor: (w, h) ->
         super w, h

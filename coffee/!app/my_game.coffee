@@ -7,5 +7,5 @@ class MyGame extends Game
         @preload('images/chara1.png')
 
     onload:() ->
-        bear = new Bear(32, 32, "images/chara1.png")
-        @rootScene.addChild(bear)
+        @main_scene = new mainScene()
+        @pushScene(@main_scene)

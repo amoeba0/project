@@ -14,7 +14,7 @@ appGroup = (function(_super) {
   __extends(appGroup, _super);
 
   function appGroup() {
-    return appGroup.__super__.constructor.apply(this, arguments);
+    appGroup.__super__.constructor.apply(this, arguments);
   }
 
   return appGroup;
@@ -25,7 +25,7 @@ appLabel = (function(_super) {
   __extends(appLabel, _super);
 
   function appLabel() {
-    return appLabel.__super__.constructor.apply(this, arguments);
+    appLabel.__super__.constructor.apply(this, arguments);
   }
 
   return appLabel;
@@ -36,7 +36,7 @@ appNode = (function(_super) {
   __extends(appNode, _super);
 
   function appNode() {
-    return appNode.__super__.constructor.apply(this, arguments);
+    appNode.__super__.constructor.apply(this, arguments);
   }
 
   return appNode;
@@ -47,7 +47,7 @@ appScene = (function(_super) {
   __extends(appScene, _super);
 
   function appScene() {
-    return appScene.__super__.constructor.apply(this, arguments);
+    appScene.__super__.constructor.apply(this, arguments);
   }
 
   return appScene;
@@ -57,7 +57,7 @@ appScene = (function(_super) {
 appSprite = (function(_super) {
   __extends(appSprite, _super);
 
-  function appSprite(w, h, image) {
+  function appSprite(w, h) {
     appSprite.__super__.constructor.call(this, w, h);
   }
 
@@ -77,9 +77,8 @@ MyGame = (function(_super) {
   }
 
   MyGame.prototype.onload = function() {
-    var bear;
-    bear = new Bear(32, 32, "images/chara1.png");
-    return this.rootScene.addChild(bear);
+    this.main_scene = new mainScene();
+    return this.pushScene(this.main_scene);
   };
 
   return MyGame;
@@ -90,7 +89,7 @@ text = (function(_super) {
   __extends(text, _super);
 
   function text() {
-    return text.__super__.constructor.apply(this, arguments);
+    text.__super__.constructor.apply(this, arguments);
   }
 
   return text;
@@ -101,7 +100,7 @@ gameCycle = (function(_super) {
   __extends(gameCycle, _super);
 
   function gameCycle() {
-    return gameCycle.__super__.constructor.apply(this, arguments);
+    gameCycle.__super__.constructor.apply(this, arguments);
   }
 
   return gameCycle;
@@ -112,7 +111,7 @@ objectCtrl = (function(_super) {
   __extends(objectCtrl, _super);
 
   function objectCtrl() {
-    return objectCtrl.__super__.constructor.apply(this, arguments);
+    objectCtrl.__super__.constructor.apply(this, arguments);
   }
 
   return objectCtrl;
@@ -123,7 +122,7 @@ slotCtrl = (function(_super) {
   __extends(slotCtrl, _super);
 
   function slotCtrl() {
-    return slotCtrl.__super__.constructor.apply(this, arguments);
+    slotCtrl.__super__.constructor.apply(this, arguments);
   }
 
   return slotCtrl;
@@ -134,8 +133,18 @@ mainScene = (function(_super) {
   __extends(mainScene, _super);
 
   function mainScene() {
-    return mainScene.__super__.constructor.apply(this, arguments);
+    mainScene.__super__.constructor.apply(this, arguments);
+    this.initial();
   }
+
+  mainScene.prototype.initial = function() {
+    return this.setPlayer();
+  };
+
+  mainScene.prototype.setPlayer = function() {
+    this.bear = new Bear();
+    return this.addChild(this.bear);
+  };
 
   return mainScene;
 
@@ -145,7 +154,7 @@ titleScene = (function(_super) {
   __extends(titleScene, _super);
 
   function titleScene() {
-    return titleScene.__super__.constructor.apply(this, arguments);
+    titleScene.__super__.constructor.apply(this, arguments);
   }
 
   return titleScene;
@@ -155,8 +164,8 @@ titleScene = (function(_super) {
 backGround = (function(_super) {
   __extends(backGround, _super);
 
-  function backGround(w, h, image) {
-    backGround.__super__.constructor.call(this, w, h, image);
+  function backGround(w, h) {
+    backGround.__super__.constructor.call(this, w, h);
   }
 
   return backGround;
@@ -166,8 +175,8 @@ backGround = (function(_super) {
 Floor = (function(_super) {
   __extends(Floor, _super);
 
-  function Floor(w, h, image) {
-    Floor.__super__.constructor.call(this, w, h, image);
+  function Floor(w, h) {
+    Floor.__super__.constructor.call(this, w, h);
   }
 
   return Floor;
@@ -177,8 +186,8 @@ Floor = (function(_super) {
 Panorama = (function(_super) {
   __extends(Panorama, _super);
 
-  function Panorama(w, h, image) {
-    Panorama.__super__.constructor.call(this, w, h, image);
+  function Panorama(w, h) {
+    Panorama.__super__.constructor.call(this, w, h);
   }
 
   return Panorama;
@@ -188,8 +197,8 @@ Panorama = (function(_super) {
 appObject = (function(_super) {
   __extends(appObject, _super);
 
-  function appObject(w, h, image) {
-    appObject.__super__.constructor.call(this, w, h, image);
+  function appObject(w, h) {
+    appObject.__super__.constructor.call(this, w, h);
   }
 
   return appObject;
@@ -199,8 +208,8 @@ appObject = (function(_super) {
 Character = (function(_super) {
   __extends(Character, _super);
 
-  function Character(w, h, image) {
-    Character.__super__.constructor.call(this, w, h, image);
+  function Character(w, h) {
+    Character.__super__.constructor.call(this, w, h);
   }
 
   return Character;
@@ -210,8 +219,8 @@ Character = (function(_super) {
 Guest = (function(_super) {
   __extends(Guest, _super);
 
-  function Guest(w, h, image) {
-    Guest.__super__.constructor.call(this, w, h, image);
+  function Guest(w, h) {
+    Guest.__super__.constructor.call(this, w, h);
   }
 
   return Guest;
@@ -221,8 +230,8 @@ Guest = (function(_super) {
 Player = (function(_super) {
   __extends(Player, _super);
 
-  function Player(w, h, image) {
-    Player.__super__.constructor.call(this, w, h, image);
+  function Player(w, h) {
+    Player.__super__.constructor.call(this, w, h);
   }
 
   return Player;
@@ -232,9 +241,9 @@ Player = (function(_super) {
 Bear = (function(_super) {
   __extends(Bear, _super);
 
-  function Bear(w, h, image) {
-    Bear.__super__.constructor.call(this, 32, 32, image);
-    this.image = Game.instance.assets[image];
+  function Bear() {
+    Bear.__super__.constructor.call(this, 32, 32);
+    this.image = Game.instance.assets["images/chara1.png"];
     this.x = 0;
     this.y = 0;
   }
@@ -250,8 +259,8 @@ Bear = (function(_super) {
 Item = (function(_super) {
   __extends(Item, _super);
 
-  function Item(w, h, image) {
-    Item.__super__.constructor.call(this, w, h, image);
+  function Item(w, h) {
+    Item.__super__.constructor.call(this, w, h);
   }
 
   return Item;
@@ -261,8 +270,8 @@ Item = (function(_super) {
 Catch = (function(_super) {
   __extends(Catch, _super);
 
-  function Catch(w, h, image) {
-    Catch.__super__.constructor.call(this, w, h, image);
+  function Catch(w, h) {
+    Catch.__super__.constructor.call(this, w, h);
   }
 
   return Catch;
@@ -272,8 +281,8 @@ Catch = (function(_super) {
 Money = (function(_super) {
   __extends(Money, _super);
 
-  function Money(w, h, image) {
-    Money.__super__.constructor.call(this, w, h, image);
+  function Money(w, h) {
+    Money.__super__.constructor.call(this, w, h);
   }
 
   return Money;

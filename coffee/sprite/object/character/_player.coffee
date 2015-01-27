@@ -1,11 +1,11 @@
 class Player extends Character
-    constructor: (w, h, image) ->
-        super w, h, image
+    constructor: (w, h) ->
+        super w, h
 
 class Bear extends Player
-    constructor: (w, h, image) ->
-        super 32, 32, image
-        @image = Game.instance.assets[image]
+    constructor: () ->
+        super 32, 32
+        @image = Game.instance.assets["images/chara1.png"]
         @x = 0
         @y = 0
 
