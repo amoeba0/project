@@ -3,7 +3,7 @@ class mainScene extends appScene
         super
         @initial()
     initial:()->
-        @setPlayer()
-    setPlayer:()->
-        @bear = new Bear()
-        @addChild(@bear)
+        @setGroup()
+    setGroup:()->
+        @gp_stage = new gpStage()
+        @addChild(@gp_stage)

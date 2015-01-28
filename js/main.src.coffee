@@ -68,6 +68,24 @@ class LoveliveGame extends catchAndSlotGame
     onload:() ->
         @main_scene = new mainScene()
         @pushScene(@main_scene)
+class gpPanorama extends appGroup
+    constructor: () ->
+        super
+class gpSlot extends appGroup
+    constructor: () ->
+        super
+class gpStage extends appGroup
+    constructor: () ->
+        super
+        @initial()
+    initial:()->
+        @setPlayer()
+    setPlayer:()->
+        @bear = new Bear()
+        @addChild(@bear)
+class gpSystem extends appGroup
+    constructor: () ->
+        super
 class text extends appLabel
     constructor: () ->
         super
@@ -85,10 +103,10 @@ class mainScene extends appScene
         super
         @initial()
     initial:()->
-        @setPlayer()
-    setPlayer:()->
-        @bear = new Bear()
-        @addChild(@bear)
+        @setGroup()
+    setGroup:()->
+        @gp_stage = new gpStage()
+        @addChild(@gp_stage)
 class titleScene extends appScene
     constructor: () ->
         super

@@ -1,4 +1,4 @@
-var Bear, Button, Catch, Character, Floor, Guest, Item, LoveliveGame, Money, Panorama, Param, Player, Slot, System, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, catchAndSlotGame, gameCycle, mainScene, objectCtrl, slotCtrl, text, titleScene,
+var Bear, Button, Catch, Character, Floor, Guest, Item, LoveliveGame, Money, Panorama, Param, Player, Slot, System, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, catchAndSlotGame, gameCycle, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, objectCtrl, slotCtrl, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -154,6 +154,60 @@ LoveliveGame = (function(_super) {
 
 })(catchAndSlotGame);
 
+gpPanorama = (function(_super) {
+  __extends(gpPanorama, _super);
+
+  function gpPanorama() {
+    gpPanorama.__super__.constructor.apply(this, arguments);
+  }
+
+  return gpPanorama;
+
+})(appGroup);
+
+gpSlot = (function(_super) {
+  __extends(gpSlot, _super);
+
+  function gpSlot() {
+    gpSlot.__super__.constructor.apply(this, arguments);
+  }
+
+  return gpSlot;
+
+})(appGroup);
+
+gpStage = (function(_super) {
+  __extends(gpStage, _super);
+
+  function gpStage() {
+    gpStage.__super__.constructor.apply(this, arguments);
+    this.initial();
+  }
+
+  gpStage.prototype.initial = function() {
+    return this.setPlayer();
+  };
+
+  gpStage.prototype.setPlayer = function() {
+    this.bear = new Bear();
+    return this.addChild(this.bear);
+  };
+
+  return gpStage;
+
+})(appGroup);
+
+gpSystem = (function(_super) {
+  __extends(gpSystem, _super);
+
+  function gpSystem() {
+    gpSystem.__super__.constructor.apply(this, arguments);
+  }
+
+  return gpSystem;
+
+})(appGroup);
+
 text = (function(_super) {
   __extends(text, _super);
 
@@ -207,12 +261,12 @@ mainScene = (function(_super) {
   }
 
   mainScene.prototype.initial = function() {
-    return this.setPlayer();
+    return this.setGroup();
   };
 
-  mainScene.prototype.setPlayer = function() {
-    this.bear = new Bear();
-    return this.addChild(this.bear);
+  mainScene.prototype.setGroup = function() {
+    this.gp_stage = new gpStage();
+    return this.addChild(this.gp_stage);
   };
 
   return mainScene;
