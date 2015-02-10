@@ -365,6 +365,8 @@ appObject = (function(_super) {
 
   function appObject(w, h) {
     appObject.__super__.constructor.call(this, w, h);
+    this.gravity = 1.4;
+    this.friction = 0.9;
   }
 
   return appObject;
@@ -381,6 +383,11 @@ Character = (function(_super) {
       'right': false,
       'jump': false
     };
+    this.vx = 0;
+    this.vy = 0;
+    this.ax = 1.5;
+    this.mx = 8;
+    this.my = 22;
   }
 
   Character.prototype.onenterframe = function(e) {
@@ -391,12 +398,54 @@ Character = (function(_super) {
   /*キャラクターの動き */
 
   Character.prototype.charMove = function() {
-    if (this.moveFlg.left === true) {
-      this.x -= 1;
-    }
+    this._speedWidthFloor();
+    return this._moveExe();
+  };
+
+
+  /*地面にいるときの横向きの速度を決める */
+
+  Character.prototype._speedWidthFloor = function() {
     if (this.moveFlg.right === true) {
-      return this.x += 1;
+      if (this.vx < 0) {
+        return this.vx = 0;
+      } else if (this.vx < this.mx) {
+        return this.vx += this.ax;
+      }
+    } else if (this.moveFlg.left === true) {
+      if (this.vx > 0) {
+        return this.vx = 0;
+      } else if (this.vx > this.mx * -1) {
+        return this.vx -= this.ax;
+      }
+    } else {
+      if (this.vx > 0) {
+        this.vx -= this.friction;
+        if (this.vx < 0) {
+          this.vx = 0;
+        }
+      }
+      if (this.vx < 0) {
+        this.vx += this.friction;
+        if (this.vx > 0) {
+          return this.vx = 0;
+        }
+      }
     }
+  };
+
+
+  /*動きの実行 */
+
+  Character.prototype._moveExe = function() {
+    var velocityX;
+    velocityX = 0;
+    if (this.vx > 0) {
+      velocityX = Math.floor(this.vx);
+    } else {
+      velocityX = Math.ceil(this.vx);
+    }
+    return this.x += velocityX;
   };
 
   return Character;
