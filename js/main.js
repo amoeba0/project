@@ -142,12 +142,55 @@ LoveliveGame = (function(_super) {
     this.fps = 24;
     this.imgList = ['chara1', 'icon1'];
     this.sondList = [];
+    this.keyList = {
+      'left': false,
+      'right': false,
+      'jump': false
+    };
+    this.keybind(90, 'z');
     this.preloadAll();
   }
 
   LoveliveGame.prototype.onload = function() {
     this.main_scene = new mainScene();
     return this.pushScene(this.main_scene);
+  };
+
+  LoveliveGame.prototype.onenterframe = function(e) {
+    return this.buttonPush();
+  };
+
+
+  /*ボタン操作、物理キーとソフトキー両方に対応 */
+
+  LoveliveGame.prototype.buttonPush = function() {
+    if (this.input.left === true) {
+      if (this.keyList.left === false) {
+        this.keyList.left = true;
+      }
+    } else {
+      if (this.keyList.left === true) {
+        this.keyList.left = false;
+      }
+    }
+    if (this.input.right === true) {
+      if (this.keyList.right === false) {
+        this.keyList.right = true;
+      }
+    } else {
+      if (this.keyList.right === true) {
+        this.keyList.right = false;
+      }
+    }
+    if (this.input.z === true) {
+      if (this.keyList.jump === false) {
+        return this.keyList.jump = true;
+      }
+    } else {
+      if (this.keyList.jump === true) {
+        return this.keyList.jump = false;
+      }
+    }
   };
 
   return LoveliveGame;
@@ -333,7 +376,28 @@ Character = (function(_super) {
 
   function Character(w, h) {
     Character.__super__.constructor.call(this, w, h);
+    this.moveFlg = {
+      'left': false,
+      'right': false,
+      'jump': false
+    };
   }
+
+  Character.prototype.onenterframe = function(e) {
+    return this.charMove();
+  };
+
+
+  /*キャラクターの動き */
+
+  Character.prototype.charMove = function() {
+    if (this.moveFlg.left === true) {
+      this.x -= 1;
+    }
+    if (this.moveFlg.right === true) {
+      return this.x += 1;
+    }
+  };
 
   return Character;
 
@@ -355,7 +419,43 @@ Player = (function(_super) {
 
   function Player(w, h) {
     Player.__super__.constructor.call(this, w, h);
+    this.addEventListener("enterframe", function() {
+      return this.keyMove();
+    });
   }
+
+
+  /*キーを押した時の動作 */
+
+  Player.prototype.keyMove = function() {
+    if (game.keyList.left === true) {
+      if (this.moveFlg.left === false) {
+        this.moveFlg.left = true;
+      }
+    } else {
+      if (this.moveFlg.left === true) {
+        this.moveFlg.left = false;
+      }
+    }
+    if (game.keyList.right === true) {
+      if (this.moveFlg.right === false) {
+        this.moveFlg.right = true;
+      }
+    } else {
+      if (this.moveFlg.right === true) {
+        this.moveFlg.right = false;
+      }
+    }
+    if (game.keyList.jump === true) {
+      if (this.moveFlg.jump === false) {
+        return this.moveFlg.jump = true;
+      }
+    } else {
+      if (this.moveFlg.jump === true) {
+        return this.moveFlg.jump = false;
+      }
+    }
+  };
 
   return Player;
 
@@ -370,10 +470,6 @@ Bear = (function(_super) {
     this.x = 0;
     this.y = 0;
   }
-
-  Bear.prototype.onenterframe = function(e) {
-    return this.x = this.x + 1;
-  };
 
   return Bear;
 

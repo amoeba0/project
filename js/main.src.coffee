@@ -63,11 +63,41 @@ class LoveliveGame extends catchAndSlotGame
         @imgList = ['chara1', 'icon1']
         #音声リスト
         @sondList = []
+        #キーのリスト、物理キーとソフトキー両方に対応
+        @keyList = {'left':false, 'right':false, 'jump':false}
+        @keybind(90, 'z')
         @preloadAll()
 
     onload:() ->
         @main_scene = new mainScene()
         @pushScene(@main_scene)
+
+    onenterframe: (e) ->
+        @buttonPush()
+
+    ###ボタン操作、物理キーとソフトキー両方に対応###
+    buttonPush:()->
+        # 左
+        if @input.left is true
+            if @keyList.left is false
+                @keyList.left = true
+        else
+            if @keyList.left is true
+                @keyList.left = false
+        # 右
+        if @input.right is true
+            if @keyList.right is false
+                @keyList.right = true
+        else
+            if @keyList.right is true
+                @keyList.right = false
+        # ジャンプ
+        if @input.z is true
+            if @keyList.jump is false
+                @keyList.jump = true
+        else
+            if @keyList.jump is true
+                @keyList.jump = false
 class gpPanorama extends appGroup
     constructor: () ->
         super
@@ -125,12 +155,47 @@ class appObject extends appSprite
 class Character extends appObject
     constructor: (w, h) ->
         super w, h
+        @moveFlg = {'left':false, 'right':false, 'jump':false}
+    onenterframe: (e) ->
+        @charMove()
+    ###キャラクターの動き###
+    charMove:()->
+        if @moveFlg.left is true
+            @x -= 1
+        if @moveFlg.right is true
+            @x += 1
 class Guest extends Character
     constructor: (w, h) ->
         super w, h
 class Player extends Character
     constructor: (w, h) ->
         super w, h
+        @addEventListener("enterframe", ()->
+            @keyMove()
+        )
+    ###キーを押した時の動作###
+    keyMove:()->
+        # 左
+        if game.keyList.left is true
+            if @moveFlg.left is false
+                @moveFlg.left = true
+        else
+            if @moveFlg.left is true
+                @moveFlg.left = false
+        # 右
+        if game.keyList.right is true
+            if @moveFlg.right is false
+                @moveFlg.right = true
+        else
+            if @moveFlg.right is true
+                @moveFlg.right = false
+        # ジャンプ
+        if game.keyList.jump is true
+            if @moveFlg.jump is false
+                @moveFlg.jump = true
+        else
+            if @moveFlg.jump is true
+                @moveFlg.jump = false
 
 class Bear extends Player
     constructor: () ->
@@ -138,9 +203,6 @@ class Bear extends Player
         @image = game.imageload("chara1")
         @x = 0
         @y = 0
-
-    onenterframe: (e) ->
-        @x = @x + 1
 class Item extends appObject
     constructor: (w, h) ->
         super w, h
