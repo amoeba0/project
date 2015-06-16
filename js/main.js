@@ -115,6 +115,8 @@ appSprite = (function(_super) {
 
   function appSprite(w, h) {
     appSprite.__super__.constructor.call(this, w, h);
+    this.w = w;
+    this.h = h;
   }
 
   return appSprite;
@@ -138,7 +140,7 @@ LoveliveGame = (function(_super) {
   function LoveliveGame() {
     LoveliveGame.__super__.constructor.call(this, this.width, this.height);
     this.width = 320;
-    this.height = 320;
+    this.height = 568;
     this.fps = 24;
     this.imgList = ['chara1', 'icon1'];
     this.sondList = [];
@@ -224,6 +226,7 @@ gpStage = (function(_super) {
 
   function gpStage() {
     gpStage.__super__.constructor.apply(this, arguments);
+    this.floor = 300;
     this.initial();
   }
 
@@ -233,6 +236,7 @@ gpStage = (function(_super) {
 
   gpStage.prototype.setPlayer = function() {
     this.bear = new Bear();
+    this.bear.y = this.floor;
     return this.addChild(this.bear);
   };
 
@@ -363,6 +367,12 @@ Panorama = (function(_super) {
 appObject = (function(_super) {
   __extends(appObject, _super);
 
+
+  /*
+  制約
+  ・objectは必ずstageに対して追加する
+   */
+
   function appObject(w, h) {
     appObject.__super__.constructor.call(this, w, h);
     this.gravity = 1.4;
@@ -383,6 +393,7 @@ Character = (function(_super) {
       'right': false,
       'jump': false
     };
+    this.isAir = true;
     this.vx = 0;
     this.vy = 0;
     this.ax = 1.5;
@@ -398,54 +409,146 @@ Character = (function(_super) {
   /*キャラクターの動き */
 
   Character.prototype.charMove = function() {
-    this._speedWidthFloor();
-    return this._moveExe();
+    var vx, vy;
+    vx = this.vx;
+    vy = this.vy;
+    if (this.isAir === true) {
+      vy = this._speedHeight(vy);
+      vx = this._speedWidthAir(vx);
+    } else {
+      vx = this._speedWidthFloor(vx);
+      vy = this._separateFloor();
+    }
+    return this._moveExe(vx, vy);
   };
 
 
-  /*地面にいるときの横向きの速度を決める */
+  /*
+  地面にいるキャラクターを地面から離す
+  ジャンプボタンをおした時、足場から離れた時など
+   */
 
-  Character.prototype._speedWidthFloor = function() {
+  Character.prototype._separateFloor = function() {
+    var vy;
+    vy = 0;
+    if (this.moveFlg.jump === true) {
+      vy -= this.my;
+      this.isAir = true;
+    }
+    return vy;
+  };
+
+
+  /*
+  地面にいるときの横向きの速度を決める
+  @vx num x軸速度
+  @return num
+   */
+
+  Character.prototype._speedWidthFloor = function(vx) {
     if (this.moveFlg.right === true) {
-      if (this.vx < 0) {
-        return this.vx = 0;
-      } else if (this.vx < this.mx) {
-        return this.vx += this.ax;
+      if (vx < 0) {
+        vx = 0;
+      } else if (vx < this.mx) {
+        vx += this.ax;
       }
     } else if (this.moveFlg.left === true) {
-      if (this.vx > 0) {
-        return this.vx = 0;
-      } else if (this.vx > this.mx * -1) {
-        return this.vx -= this.ax;
+      if (vx > 0) {
+        vx = 0;
+      } else if (vx > this.mx * -1) {
+        vx -= this.ax;
       }
     } else {
-      if (this.vx > 0) {
-        this.vx -= this.friction;
-        if (this.vx < 0) {
-          this.vx = 0;
+      if (vx > 0) {
+        vx -= this.friction;
+        if (vx < 0) {
+          vx = 0;
         }
       }
-      if (this.vx < 0) {
-        this.vx += this.friction;
-        if (this.vx > 0) {
-          return this.vx = 0;
+      if (vx < 0) {
+        vx += this.friction;
+        if (vx > 0) {
+          vx = 0;
         }
       }
     }
+    return vx;
   };
 
 
-  /*動きの実行 */
+  /*
+  空中にいるときの横向きの速度を決める
+  @vy num y軸速度
+  @return num
+   */
 
-  Character.prototype._moveExe = function() {
-    var velocityX;
-    velocityX = 0;
-    if (this.vx > 0) {
-      velocityX = Math.floor(this.vx);
+  Character.prototype._speedWidthAir = function(vx) {
+    return vx;
+  };
+
+
+  /*
+  縦向きの速度を決める
+  @vy num y軸速度
+  @return num
+   */
+
+  Character.prototype._speedHeight = function(vy) {
+    vy += this.gravity;
+    if (vy < 0) {
+      if (this.moveFlg.jump === false) {
+        vy = 0;
+      }
     } else {
-      velocityX = Math.ceil(this.vx);
+      if (this._crossFloor() === true) {
+        vy = 0;
+      }
     }
-    return this.x += velocityX;
+    return vy;
+  };
+
+
+  /*地面にめり込んでる時trueを返す */
+
+  Character.prototype._crossFloor = function() {
+    var flg;
+    flg = false;
+    if (this.vy > 0 && this.y + this.h > this.parentNode.floor) {
+      flg = true;
+    }
+    return flg;
+  };
+
+
+  /*
+  動きの実行
+  @ｖx num x軸速度
+  @vy num y軸速度
+   */
+
+  Character.prototype._moveExe = function(vx, vy) {
+    var velocityX, velocityY;
+    velocityX = 0;
+    velocityY = 0;
+    if (vx > 0) {
+      velocityX = Math.floor(vx);
+    } else {
+      velocityX = Math.ceil(vx);
+    }
+    if (vy > 0) {
+      velocityY = Math.floor(vy);
+    } else {
+      velocityY = Math.ceil(vy);
+    }
+    this.vx = vx;
+    this.vy = vy;
+    this.x += velocityX;
+    this.y += velocityY;
+    if (this.isAir === true && this._crossFloor() === true) {
+      this.vy = 0;
+      this.y = this.parentNode.floor - this.h;
+      return this.isAir = false;
+    }
   };
 
   return Character;

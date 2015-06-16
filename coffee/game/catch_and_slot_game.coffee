@@ -6,7 +6,7 @@ class LoveliveGame extends catchAndSlotGame
     constructor:()->
         super @width, @height
         @width = 320
-        @height = 320
+        @height = 568
         @fps = 24
         #画像リスト
         @imgList = ['chara1', 'icon1']
