@@ -396,9 +396,9 @@ Character = (function(_super) {
     this.isAir = true;
     this.vx = 0;
     this.vy = 0;
-    this.ax = 1.5;
-    this.mx = 8;
-    this.my = 22;
+    this.ax = 1;
+    this.mx = 3;
+    this.my = 17;
   }
 
   Character.prototype.onenterframe = function(e) {
@@ -419,7 +419,9 @@ Character = (function(_super) {
       vx = this._speedWidthFloor(vx);
       vy = this._separateFloor();
     }
-    return this._moveExe(vx, vy);
+    this._moveExe(vx, vy);
+    this._direction();
+    return this._animation();
   };
 
 
@@ -548,6 +550,40 @@ Character = (function(_super) {
       this.vy = 0;
       this.y = this.parentNode.floor - this.h;
       return this.isAir = false;
+    }
+  };
+
+
+  /*
+  ボタンを押している方向を向く
+   */
+
+  Character.prototype._direction = function() {
+    if (this.moveFlg.right === true && this.scaleX < 0) {
+      return this.scaleX *= -1;
+    } else if (this.moveFlg.left === true && this.scaleX > 0) {
+      return this.scaleX *= -1;
+    }
+  };
+
+
+  /*
+  アニメーションする
+   */
+
+  Character.prototype._animation = function() {
+    var tmpAge;
+    if (this.isAir === false) {
+      if (this.vx === 0) {
+        return this.frame = 0;
+      } else {
+        tmpAge = this.age % 10;
+        if (tmpAge <= 5) {
+          return this.frame = 1;
+        } else {
+          return this.frame = 2;
+        }
+      }
     }
   };
 

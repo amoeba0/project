@@ -6,9 +6,9 @@ class Character extends appObject
         @isAir = true; #空中判定
         @vx = 0 #x軸速度
         @vy = 0 #y軸速度
-        @ax = 1.5 #x軸加速度
-        @mx = 8 #x軸速度最大値
-        @my = 22 #y軸初速度
+        @ax = 1 #x軸加速度
+        @mx = 3 #x軸速度最大値
+        @my = 17 #y軸初速度
     onenterframe: (e) ->
         @charMove()
 
@@ -23,6 +23,8 @@ class Character extends appObject
             vx = @_speedWidthFloor(vx)
             vy = @_separateFloor()
         @_moveExe(vx, vy)
+        @_direction()
+        @_animation()
 
     ###
     地面にいるキャラクターを地面から離す
@@ -118,3 +120,26 @@ class Character extends appObject
             @vy = 0
             @y = @parentNode.floor - @h
             @isAir = false
+
+    ###
+    ボタンを押している方向を向く
+    ###
+    _direction:()->
+        if @moveFlg.right is true && @scaleX < 0
+            @scaleX *= -1
+        else if @moveFlg.left is true && @scaleX > 0
+            @scaleX *= -1
+
+    ###
+    アニメーションする
+    ###
+    _animation:()->
+        if @isAir is false
+            if @vx is 0
+                @frame = 0
+            else
+                tmpAge = @age % 10
+                if tmpAge <= 5
+                    @frame = 1
+                else
+                    @frame = 2
