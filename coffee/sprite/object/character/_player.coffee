@@ -30,7 +30,7 @@ class Player extends Character
 
 class Bear extends Player
     constructor: () ->
-        super 32, 32
+        super 96, 96
         @image = game.imageload("chara1")
         @x = 0
         @y = 0

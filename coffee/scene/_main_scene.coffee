@@ -1,6 +1,7 @@
 class mainScene extends appScene
     constructor:()->
         super
+        @backgroundColor = 'rgb(153,204,255)';
         @initial()
     initial:()->
         @setGroup()

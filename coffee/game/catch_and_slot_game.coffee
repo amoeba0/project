@@ -5,8 +5,8 @@ class catchAndSlotGame extends appGame
 class LoveliveGame extends catchAndSlotGame
     constructor:()->
         super @width, @height
-        @width = 320
-        @height = 568
+        @width = 640
+        @height = 960
         @fps = 24
         #画像リスト
         @imgList = ['chara1', 'icon1']

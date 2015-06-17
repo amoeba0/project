@@ -58,8 +58,8 @@ class catchAndSlotGame extends appGame
 class LoveliveGame extends catchAndSlotGame
     constructor:()->
         super @width, @height
-        @width = 320
-        @height = 568
+        @width = 640
+        @height = 960
         @fps = 24
         #画像リスト
         @imgList = ['chara1', 'icon1']
@@ -109,9 +109,8 @@ class gpSlot extends appGroup
 class gpStage extends appGroup
     constructor: () ->
         super
-        @floor = 300
+        @floor = 900
         @initial()
-        #@bg_color = 'rgb(153,204,255)';
     initial:()->
         @setPlayer()
     setPlayer:()->
@@ -136,6 +135,7 @@ class slotCtrl extends appNode
 class mainScene extends appScene
     constructor:()->
         super
+        @backgroundColor = 'rgb(153,204,255)';
         @initial()
     initial:()->
         @setGroup()
@@ -161,8 +161,8 @@ class appObject extends appSprite
     ###
     constructor: (w, h) ->
         super w, h
-        @gravity = 1.4 #物体に働く重力
-        @friction = 0.9 #物体に働く摩擦
+        @gravity = 1.6 #物体に働く重力
+        @friction = 2.3 #物体に働く摩擦
 class Character extends appObject
     constructor: (w, h) ->
         super w, h
@@ -171,9 +171,9 @@ class Character extends appObject
         @isAir = true; #空中判定
         @vx = 0 #x軸速度
         @vy = 0 #y軸速度
-        @ax = 1 #x軸加速度
-        @mx = 3 #x軸速度最大値
-        @my = 17 #y軸初速度
+        @ax = 4 #x軸加速度
+        @mx = 8 #x軸速度最大値
+        @my = 25 #y軸初速度
     onenterframe: (e) ->
         @charMove()
 
@@ -344,7 +344,7 @@ class Player extends Character
 
 class Bear extends Player
     constructor: () ->
-        super 32, 32
+        super 96, 96
         @image = game.imageload("chara1")
         @x = 0
         @y = 0

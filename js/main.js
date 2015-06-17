@@ -139,8 +139,8 @@ LoveliveGame = (function(_super) {
 
   function LoveliveGame() {
     LoveliveGame.__super__.constructor.call(this, this.width, this.height);
-    this.width = 320;
-    this.height = 568;
+    this.width = 640;
+    this.height = 960;
     this.fps = 24;
     this.imgList = ['chara1', 'icon1'];
     this.sondList = [];
@@ -226,7 +226,7 @@ gpStage = (function(_super) {
 
   function gpStage() {
     gpStage.__super__.constructor.apply(this, arguments);
-    this.floor = 300;
+    this.floor = 900;
     this.initial();
   }
 
@@ -304,6 +304,7 @@ mainScene = (function(_super) {
 
   function mainScene() {
     mainScene.__super__.constructor.apply(this, arguments);
+    this.backgroundColor = 'rgb(153,204,255)';
     this.initial();
   }
 
@@ -375,8 +376,8 @@ appObject = (function(_super) {
 
   function appObject(w, h) {
     appObject.__super__.constructor.call(this, w, h);
-    this.gravity = 1.4;
-    this.friction = 0.9;
+    this.gravity = 1.6;
+    this.friction = 2.3;
   }
 
   return appObject;
@@ -396,9 +397,9 @@ Character = (function(_super) {
     this.isAir = true;
     this.vx = 0;
     this.vy = 0;
-    this.ax = 1;
-    this.mx = 3;
-    this.my = 17;
+    this.ax = 4;
+    this.mx = 8;
+    this.my = 25;
   }
 
   Character.prototype.onenterframe = function(e) {
@@ -653,7 +654,7 @@ Bear = (function(_super) {
   __extends(Bear, _super);
 
   function Bear() {
-    Bear.__super__.constructor.call(this, 32, 32);
+    Bear.__super__.constructor.call(this, 96, 96);
     this.image = game.imageload("chara1");
     this.x = 0;
     this.y = 0;
