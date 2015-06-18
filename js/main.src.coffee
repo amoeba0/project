@@ -109,14 +109,33 @@ class gpSlot extends appGroup
 class gpStage extends appGroup
     constructor: () ->
         super
-        @floor = 900
+        @floor = 900 #床の位置
+        @itemFallSec = 5 #アイテムを降らせる周期（秒）
+        @catchItems = [] #キャッチアイテムのコンストラクタを格納
+        @nowCatchItemsNum = 0
         @initial()
     initial:()->
         @setPlayer()
+    onenterframe: () ->
+        @_stageCycle()
     setPlayer:()->
-        @bear = new Bear()
-        @bear.y = @floor
-        @addChild(@bear)
+        @player = new Bear()
+        @player.y = @floor
+        @addChild(@player)
+    ###
+    一定周期でステージに発生するイベント
+    ###
+    _stageCycle:()->
+        if @age % (game.fps * @itemFallSec) is 0
+            @_catchFall()
+    ###
+    キャッチアイテムをランダムな位置から降らせる
+    ###
+    _catchFall:()->
+        @catchItems.push(new MacaroonCatch())
+        @addChild(@catchItems[@nowCatchItemsNum])
+        @catchItems[@nowCatchItemsNum].setPosition(1)
+        @nowCatchItemsNum += 1
 class gpSystem extends appGroup
     constructor: () ->
         super
@@ -402,9 +421,47 @@ class Bear extends Player
 class Item extends appObject
     constructor: (w, h) ->
         super w, h
+###
+キャッチする用のアイテム
+###
 class Catch extends Item
     constructor: (w, h) ->
         super w, h
+        @vx = 0 #x軸速度
+        @vy = 0 #y軸速度
+    onenterframe: (e) ->
+        @vy += @gravity
+        @y += @vy
+        @hitPlayer()
+        @removeOnFloor()
+    ###
+    プレイヤーに当たった時
+    ###
+    hitPlayer:()->
+        if @parentNode.player.intersect(@)
+            @parentNode.removeChild(@)
+            console.log('hit!')
+    ###
+    座標と落下速度の設定
+    ###
+    setPosition:(gravity)->
+        @y = @h * -1
+        @x = Math.floor((game.width - @w) * Math.random())
+        @gravity = gravity
+    ###
+    地面に落ちたら消す
+    ###
+    removeOnFloor:()->
+        if @y > game.height + @h
+            @parentNode.removeChild(@)
+
+###
+マカロン
+###
+class MacaroonCatch extends Catch
+    constructor: (w, h) ->
+        super 16, 16
+        @image = game.imageload("icon1")
 class Money extends Item
     constructor: (w, h) ->
         super w, h

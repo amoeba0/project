@@ -1,4 +1,4 @@
-var Bear, Button, Catch, Character, Floor, Guest, Item, LoveliveGame, Money, Panorama, Param, Player, Slot, System, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, catchAndSlotGame, gameCycle, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, objectCtrl, slotCtrl, text, titleScene,
+var Bear, Button, Catch, Character, Floor, Guest, Item, LoveliveGame, MacaroonCatch, Money, Panorama, Param, Player, Slot, System, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, catchAndSlotGame, gameCycle, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, objectCtrl, slotCtrl, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -227,6 +227,9 @@ gpStage = (function(_super) {
   function gpStage() {
     gpStage.__super__.constructor.apply(this, arguments);
     this.floor = 900;
+    this.itemFallSec = 5;
+    this.catchItems = [];
+    this.nowCatchItemsNum = 0;
     this.initial();
   }
 
@@ -234,10 +237,37 @@ gpStage = (function(_super) {
     return this.setPlayer();
   };
 
+  gpStage.prototype.onenterframe = function() {
+    return this._stageCycle();
+  };
+
   gpStage.prototype.setPlayer = function() {
-    this.bear = new Bear();
-    this.bear.y = this.floor;
-    return this.addChild(this.bear);
+    this.player = new Bear();
+    this.player.y = this.floor;
+    return this.addChild(this.player);
+  };
+
+
+  /*
+  一定周期でステージに発生するイベント
+   */
+
+  gpStage.prototype._stageCycle = function() {
+    if (this.age % (game.fps * this.itemFallSec) === 0) {
+      return this._catchFall();
+    }
+  };
+
+
+  /*
+  キャッチアイテムをランダムな位置から降らせる
+   */
+
+  gpStage.prototype._catchFall = function() {
+    this.catchItems.push(new MacaroonCatch());
+    this.addChild(this.catchItems[this.nowCatchItemsNum]);
+    this.catchItems[this.nowCatchItemsNum].setPosition(1);
+    return this.nowCatchItemsNum += 1;
   };
 
   return gpStage;
@@ -751,16 +781,81 @@ Item = (function(_super) {
 
 })(appObject);
 
+
+/*
+キャッチする用のアイテム
+ */
+
 Catch = (function(_super) {
   __extends(Catch, _super);
 
   function Catch(w, h) {
     Catch.__super__.constructor.call(this, w, h);
+    this.vx = 0;
+    this.vy = 0;
   }
+
+  Catch.prototype.onenterframe = function(e) {
+    this.vy += this.gravity;
+    this.y += this.vy;
+    this.hitPlayer();
+    return this.removeOnFloor();
+  };
+
+
+  /*
+  プレイヤーに当たった時
+   */
+
+  Catch.prototype.hitPlayer = function() {
+    if (this.parentNode.player.intersect(this)) {
+      this.parentNode.removeChild(this);
+      return console.log('hit!');
+    }
+  };
+
+
+  /*
+  座標と落下速度の設定
+   */
+
+  Catch.prototype.setPosition = function(gravity) {
+    this.y = this.h * -1;
+    this.x = Math.floor((game.width - this.w) * Math.random());
+    return this.gravity = gravity;
+  };
+
+
+  /*
+  地面に落ちたら消す
+   */
+
+  Catch.prototype.removeOnFloor = function() {
+    if (this.y > game.height + this.h) {
+      return this.parentNode.removeChild(this);
+    }
+  };
 
   return Catch;
 
 })(Item);
+
+
+/*
+マカロン
+ */
+
+MacaroonCatch = (function(_super) {
+  __extends(MacaroonCatch, _super);
+
+  function MacaroonCatch(w, h) {
+    MacaroonCatch.__super__.constructor.call(this, 16, 16);
+    this.image = game.imageload("icon1");
+  }
+
+  return MacaroonCatch;
+
+})(Catch);
 
 Money = (function(_super) {
   __extends(Money, _super);
