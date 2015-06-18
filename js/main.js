@@ -449,13 +449,13 @@ Character = (function(_super) {
    */
 
   Character.prototype._speedWidthFloor = function(vx) {
-    if (this.moveFlg.right === true) {
+    if (this.moveFlg.right === true && this.stopAtRight() === true) {
       if (vx < 0) {
         vx = 0;
       } else if (vx < this.mx) {
         vx += this.ax;
       }
-    } else if (this.moveFlg.left === true) {
+    } else if (this.moveFlg.left === true && this.stopAtLeft() === true) {
       if (vx > 0) {
         vx = 0;
       } else if (vx > this.mx * -1) {
@@ -475,6 +475,7 @@ Character = (function(_super) {
         }
       }
     }
+    vx = this.stopAtEnd(vx);
     return vx;
   };
 
@@ -486,7 +487,36 @@ Character = (function(_super) {
    */
 
   Character.prototype._speedWidthAir = function(vx) {
+    vx = this.stopAtEnd(vx);
     return vx;
+  };
+
+
+  /*
+  画面端では横向きの速度を0にする
+  @param num vx ｘ軸速度
+   */
+
+  Character.prototype.stopAtEnd = function(vx) {
+    return vx;
+  };
+
+
+  /*
+  画面右端で右に移動するのを許可しない
+   */
+
+  Character.prototype.stopAtRight = function() {
+    return true;
+  };
+
+
+  /*
+  画面左端で左に移動するのを許可しない
+   */
+
+  Character.prototype.stopAtLeft = function() {
+    return true;
   };
 
 
@@ -644,6 +674,52 @@ Player = (function(_super) {
         return this.moveFlg.jump = false;
       }
     }
+  };
+
+
+  /*
+  画面端では横向きの速度を0にする
+  @param num vx ｘ軸速度
+   */
+
+  Player.prototype.stopAtEnd = function(vx) {
+    if (0 !== this.vx) {
+      if (this.x <= 0) {
+        vx = 0;
+      }
+      if (this.x + this.w >= game.width) {
+        vx = 0;
+      }
+    }
+    return vx;
+  };
+
+
+  /*
+  画面右端で右に移動するのを許可しない
+   */
+
+  Player.prototype.stopAtRight = function() {
+    var flg;
+    flg = true;
+    if (this.x + this.w >= game.width) {
+      flg = false;
+    }
+    return flg;
+  };
+
+
+  /*
+  画面左端で左に移動するのを許可しない
+   */
+
+  Player.prototype.stopAtLeft = function() {
+    var flg;
+    flg = true;
+    if (this.x <= 0) {
+      flg = false;
+    }
+    return flg;
   };
 
   return Player;

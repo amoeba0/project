@@ -28,6 +28,36 @@ class Player extends Character
             if @moveFlg.jump is true
                 @moveFlg.jump = false
 
+    ###
+    画面端では横向きの速度を0にする
+    @param num vx ｘ軸速度
+    ###
+    stopAtEnd:(vx)->
+        if 0 != @vx
+            if @x <= 0
+                vx = 0
+            if @x + @w >= game.width
+                vx = 0
+        return vx
+
+    ###
+    画面右端で右に移動するのを許可しない
+    ###
+    stopAtRight:()->
+        flg = true
+        if @x + @w >= game.width
+            flg = false
+        return flg
+
+    ###
+    画面左端で左に移動するのを許可しない
+    ###
+    stopAtLeft:()->
+        flg = true
+        if @x <= 0
+            flg = false
+        return flg
+
 class Bear extends Player
     constructor: () ->
         super 96, 96

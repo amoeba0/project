@@ -208,12 +208,12 @@ class Character extends appObject
     @return num
     ###
     _speedWidthFloor:(vx)->
-        if @moveFlg.right is true
+        if @moveFlg.right is true && @stopAtRight() is true
             if vx < 0
                 vx = 0
             else if vx < @mx
                 vx += @ax
-        else if @moveFlg.left is true
+        else if @moveFlg.left is true && @stopAtLeft() is true
             if vx > 0
                 vx = 0
             else if vx > @mx * -1
@@ -227,6 +227,7 @@ class Character extends appObject
                 vx += @friction
                 if vx > 0
                     vx = 0
+        vx = @stopAtEnd(vx)
         return vx
 
     ###
@@ -235,7 +236,27 @@ class Character extends appObject
     @return num
     ###
     _speedWidthAir:(vx)->
+        vx = @stopAtEnd(vx)
         return vx
+
+    ###
+    画面端では横向きの速度を0にする
+    @param num vx ｘ軸速度
+    ###
+    stopAtEnd:(vx)->
+        return vx
+
+    ###
+    画面右端で右に移動するのを許可しない
+    ###
+    stopAtRight:()->
+        return true
+
+    ###
+    画面左端で左に移動するのを許可しない
+    ###
+    stopAtLeft:()->
+        return true
 
     ###
     縦向きの速度を決める
@@ -341,6 +362,36 @@ class Player extends Character
         else
             if @moveFlg.jump is true
                 @moveFlg.jump = false
+
+    ###
+    画面端では横向きの速度を0にする
+    @param num vx ｘ軸速度
+    ###
+    stopAtEnd:(vx)->
+        if 0 != @vx
+            if @x <= 0
+                vx = 0
+            if @x + @w >= game.width
+                vx = 0
+        return vx
+
+    ###
+    画面右端で右に移動するのを許可しない
+    ###
+    stopAtRight:()->
+        flg = true
+        if @x + @w >= game.width
+            flg = false
+        return flg
+
+    ###
+    画面左端で左に移動するのを許可しない
+    ###
+    stopAtLeft:()->
+        flg = true
+        if @x <= 0
+            flg = false
+        return flg
 
 class Bear extends Player
     constructor: () ->
