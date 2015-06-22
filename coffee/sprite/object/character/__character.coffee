@@ -7,7 +7,7 @@ class Character extends appObject
         @vx = 0 #x軸速度
         @vy = 0 #y軸速度
         @ax = 4 #x軸加速度
-        @mx = 8 #x軸速度最大値
+        @mx = 9 #x軸速度最大値
         @my = 25 #y軸初速度
     onenterframe: (e) ->
         @charMove()

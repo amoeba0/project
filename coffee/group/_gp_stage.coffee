@@ -28,3 +28,4 @@ class gpStage extends appGroup
         @addChild(@catchItems[@nowCatchItemsNum])
         @catchItems[@nowCatchItemsNum].setPosition(1)
         @nowCatchItemsNum += 1
+        game.main_scene.gp_slot.slotStart()

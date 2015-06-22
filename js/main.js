@@ -1,4 +1,4 @@
-var Bear, Button, Catch, Character, Floor, Guest, Item, LoveliveGame, MacaroonCatch, Money, Panorama, Param, Player, Slot, System, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, catchAndSlotGame, gameCycle, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, objectCtrl, slotCtrl, text, titleScene,
+var Bear, Button, Catch, Character, Floor, Frame, Guest, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, Panorama, Param, Player, RightLille, Slot, System, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, catchAndSlotGame, gameCycle, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, objectCtrl, slotCtrl, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -142,7 +142,7 @@ LoveliveGame = (function(_super) {
     this.width = 640;
     this.height = 960;
     this.fps = 24;
-    this.imgList = ['chara1', 'icon1'];
+    this.imgList = ['chara1', 'icon1', 'lille', 'under_frame'];
     this.sondList = [];
     this.keyList = {
       'left': false,
@@ -215,7 +215,75 @@ gpSlot = (function(_super) {
 
   function gpSlot() {
     gpSlot.__super__.constructor.apply(this, arguments);
+    this.underFrame = new UnderFrame();
+    this.addChild(this.underFrame);
+    this.isStopping = false;
+    this.stopIntervalFrameInit = 9;
+    this.stopIntervalFrame = 0;
+    this.stopStartAge = 0;
+    this.slotSet();
   }
+
+  gpSlot.prototype.onenterframe = function(e) {
+    return this.slotStopping();
+  };
+
+
+  /*
+  スロットが一定の時間差で連続で停止する
+   */
+
+  gpSlot.prototype.slotStopping = function() {
+    if (this.isStopping === true) {
+      if (this.age === this.stopStartAge) {
+        this.left_lille.isRotation = false;
+      }
+      if (this.age === this.stopStartAge + this.stopIntervalFrame) {
+        this.middle_lille.isRotation = false;
+      }
+      if (this.age === this.stopStartAge + this.stopIntervalFrame * 2) {
+        this.right_lille.isRotation = false;
+        return this.isStopping = false;
+      }
+    }
+  };
+
+
+  /*
+  スロットマシンを画面に設置する
+   */
+
+  gpSlot.prototype.slotSet = function() {
+    this.left_lille = new LeftLille();
+    this.addChild(this.left_lille);
+    this.middle_lille = new MiddleLille();
+    this.addChild(this.middle_lille);
+    this.right_lille = new RightLille();
+    return this.addChild(this.right_lille);
+  };
+
+
+  /*
+  スロットマシンの回転を始める
+   */
+
+  gpSlot.prototype.slotStart = function() {
+    this.left_lille.isRotation = true;
+    this.middle_lille.isRotation = true;
+    return this.right_lille.isRotation = true;
+  };
+
+
+  /*
+  スロットマシンの回転を止める
+   */
+
+  gpSlot.prototype.slotStop = function() {
+    this.stopIntervalFrame = this.stopIntervalFrameInit + this.age % 3;
+    this.stopStartAge = this.age;
+    this.isStopping = true;
+    return this.slotStopping();
+  };
 
   return gpSlot;
 
@@ -267,7 +335,8 @@ gpStage = (function(_super) {
     this.catchItems.push(new MacaroonCatch());
     this.addChild(this.catchItems[this.nowCatchItemsNum]);
     this.catchItems[this.nowCatchItemsNum].setPosition(1);
-    return this.nowCatchItemsNum += 1;
+    this.nowCatchItemsNum += 1;
+    return game.main_scene.gp_slot.slotStart();
   };
 
   return gpStage;
@@ -343,8 +412,12 @@ mainScene = (function(_super) {
   };
 
   mainScene.prototype.setGroup = function() {
+    this.gp_slot = new gpSlot();
+    this.addChild(this.gp_slot);
     this.gp_stage = new gpStage();
-    return this.addChild(this.gp_stage);
+    this.addChild(this.gp_stage);
+    this.gp_slot.x = 150;
+    return this.gp_slot.y = 200;
   };
 
   return mainScene;
@@ -428,7 +501,7 @@ Character = (function(_super) {
     this.vx = 0;
     this.vy = 0;
     this.ax = 4;
-    this.mx = 8;
+    this.mx = 9;
     this.my = 25;
   }
 
@@ -810,7 +883,8 @@ Catch = (function(_super) {
   Catch.prototype.hitPlayer = function() {
     if (this.parentNode.player.intersect(this)) {
       this.parentNode.removeChild(this);
-      return console.log('hit!');
+      console.log('hit!');
+      return game.main_scene.gp_slot.slotStop();
     }
   };
 
@@ -849,7 +923,7 @@ MacaroonCatch = (function(_super) {
   __extends(MacaroonCatch, _super);
 
   function MacaroonCatch(w, h) {
-    MacaroonCatch.__super__.constructor.call(this, 16, 16);
+    MacaroonCatch.__super__.constructor.call(this, 48, 48);
     this.image = game.imageload("icon1");
   }
 
@@ -873,11 +947,137 @@ Slot = (function(_super) {
 
   function Slot(w, h) {
     Slot.__super__.constructor.call(this, w, h);
+    this.scaleX = 1.5;
+    this.scaleY = 1.5;
   }
 
   return Slot;
 
 })(appSprite);
+
+Frame = (function(_super) {
+  __extends(Frame, _super);
+
+  function Frame(w, h) {
+    Frame.__super__.constructor.call(this, w, h);
+  }
+
+  return Frame;
+
+})(Slot);
+
+UnderFrame = (function(_super) {
+  __extends(UnderFrame, _super);
+
+  function UnderFrame(w, h) {
+    UnderFrame.__super__.constructor.call(this, 330, 110);
+    this.image = game.imageload("under_frame");
+  }
+
+  return UnderFrame;
+
+})(Frame);
+
+UpperFrame = (function(_super) {
+  __extends(UpperFrame, _super);
+
+  function UpperFrame(w, h) {
+    UpperFrame.__super__.constructor.call(this, w, h);
+  }
+
+  return UpperFrame;
+
+})(Frame);
+
+Lille = (function(_super) {
+  __extends(Lille, _super);
+
+  function Lille(w, h) {
+    Lille.__super__.constructor.call(this, 110, 110);
+    this.image = game.imageload("lille");
+    this.lilleArray = [];
+    this.isRotation = false;
+    this.nowEye = 0;
+  }
+
+  Lille.prototype.onenterframe = function(e) {
+    if (this.isRotation === true) {
+      return this.eyeIncriment();
+    }
+  };
+
+
+  /*
+  回転中にリールの目を１つ進める
+   */
+
+  Lille.prototype.eyeIncriment = function() {
+    this.nowEye += 1;
+    if (this.lilleArray[this.nowEye] === void 0) {
+      this.nowEye = 0;
+    }
+    return this.frame = this.lilleArray[this.nowEye];
+  };
+
+  Lille.prototype.rotationStop = function() {
+    return this.isRotation = false;
+  };
+
+
+  /*
+  初回リールの位置をランダムに決める
+   */
+
+  Lille.prototype.eyeInit = function() {
+    this.nowEye = Math.floor(Math.random() * this.lilleArray.length);
+    return this.eyeIncriment();
+  };
+
+  return Lille;
+
+})(Slot);
+
+LeftLille = (function(_super) {
+  __extends(LeftLille, _super);
+
+  function LeftLille() {
+    LeftLille.__super__.constructor.apply(this, arguments);
+    this.lilleArray = [1, 2, 3, 4, 2, 3, 5, 2, 1, 3, 4, 5, 2, 5, 7, 1, 2, 3, 4, 5, 1, 7];
+    this.eyeInit();
+    this.x = -50;
+  }
+
+  return LeftLille;
+
+})(Lille);
+
+MiddleLille = (function(_super) {
+  __extends(MiddleLille, _super);
+
+  function MiddleLille() {
+    MiddleLille.__super__.constructor.apply(this, arguments);
+    this.lilleArray = [3, 5, 2, 5, 4, 2, 3, 4, 7, 2, 1, 5, 4, 3, 5, 2, 3, 7, 1, 4, 5, 3];
+    this.eyeInit();
+    this.x = 120;
+  }
+
+  return MiddleLille;
+
+})(Lille);
+
+RightLille = (function(_super) {
+  __extends(RightLille, _super);
+
+  function RightLille() {
+    RightLille.__super__.constructor.apply(this, arguments);
+    this.lilleArray = [2, 4, 1, 5, 1, 4, 2, 7, 2, 4, 3, 1, 7, 2, 3, 7, 1, 5, 3, 2, 4, 5];
+    this.eyeInit();
+    this.x = 300;
+  }
+
+  return RightLille;
+
+})(Lille);
 
 System = (function(_super) {
   __extends(System, _super);

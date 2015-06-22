@@ -62,7 +62,7 @@ class LoveliveGame extends catchAndSlotGame
         @height = 960
         @fps = 24
         #画像リスト
-        @imgList = ['chara1', 'icon1']
+        @imgList = ['chara1', 'icon1', 'lille', 'under_frame']
         #音声リスト
         @sondList = []
         #キーのリスト、物理キーとソフトキー両方に対応
@@ -106,6 +106,56 @@ class gpPanorama extends appGroup
 class gpSlot extends appGroup
     constructor: () ->
         super
+        @underFrame = new UnderFrame()
+        @addChild(@underFrame)
+        @isStopping = false #スロット停止中
+        @stopIntervalFrameInit = 9
+        @stopIntervalFrame = 0 #スロットが連続で止まる間隔（フレーム）
+        @stopStartAge = 0 #スロットの停止が開始したフレーム
+        @slotSet()
+        #@slotStart()
+    onenterframe: (e) ->
+        @slotStopping()
+
+    ###
+    スロットが一定の時間差で連続で停止する
+    ###
+    slotStopping: ()->
+        if @isStopping is true
+            if @age is @stopStartAge
+                @left_lille.isRotation = false
+            if @age is @stopStartAge + @stopIntervalFrame
+                @middle_lille.isRotation = false
+            if @age is @stopStartAge + @stopIntervalFrame * 2
+                @right_lille.isRotation = false
+                @isStopping = false
+
+    ###
+    スロットマシンを画面に設置する
+    ###
+    slotSet: () ->
+        @left_lille = new LeftLille()
+        @addChild(@left_lille)
+        @middle_lille = new MiddleLille()
+        @addChild(@middle_lille)
+        @right_lille = new RightLille()
+        @addChild(@right_lille)
+    ###
+    スロットマシンの回転を始める
+    ###
+    slotStart: () ->
+        @left_lille.isRotation = true
+        @middle_lille.isRotation = true
+        @right_lille.isRotation = true
+
+    ###
+    スロットマシンの回転を止める
+    ###
+    slotStop:() ->
+        @stopIntervalFrame = @stopIntervalFrameInit + @age % 3
+        @stopStartAge = @age
+        @isStopping = true
+        @slotStopping()
 class gpStage extends appGroup
     constructor: () ->
         super
@@ -136,6 +186,7 @@ class gpStage extends appGroup
         @addChild(@catchItems[@nowCatchItemsNum])
         @catchItems[@nowCatchItemsNum].setPosition(1)
         @nowCatchItemsNum += 1
+        game.main_scene.gp_slot.slotStart()
 class gpSystem extends appGroup
     constructor: () ->
         super
@@ -159,8 +210,12 @@ class mainScene extends appScene
     initial:()->
         @setGroup()
     setGroup:()->
+        @gp_slot = new gpSlot()
+        @addChild(@gp_slot)
         @gp_stage = new gpStage()
         @addChild(@gp_stage)
+        @gp_slot.x = 150
+        @gp_slot.y = 200
 class titleScene extends appScene
     constructor: () ->
         super
@@ -191,7 +246,7 @@ class Character extends appObject
         @vx = 0 #x軸速度
         @vy = 0 #y軸速度
         @ax = 4 #x軸加速度
-        @mx = 8 #x軸速度最大値
+        @mx = 9 #x軸速度最大値
         @my = 25 #y軸初速度
     onenterframe: (e) ->
         @charMove()
@@ -441,6 +496,7 @@ class Catch extends Item
         if @parentNode.player.intersect(@)
             @parentNode.removeChild(@)
             console.log('hit!')
+            game.main_scene.gp_slot.slotStop()
     ###
     座標と落下速度の設定
     ###
@@ -460,7 +516,7 @@ class Catch extends Item
 ###
 class MacaroonCatch extends Catch
     constructor: (w, h) ->
-        super 16, 16
+        super 48, 48
         @image = game.imageload("icon1")
 class Money extends Item
     constructor: (w, h) ->
@@ -468,6 +524,69 @@ class Money extends Item
 class Slot extends appSprite
     constructor: (w, h) ->
         super w, h
+        @scaleX = 1.5
+        @scaleY = 1.5
+class Frame extends Slot
+    constructor: (w, h) ->
+        super w, h
+
+class UnderFrame extends Frame
+    constructor: (w,h) ->
+        super 330, 110
+        @image = game.imageload("under_frame")
+
+class UpperFrame extends Frame
+    constructor: (w,h) ->
+        super w, h
+class Lille extends Slot
+    constructor: (w, h) ->
+        super 110, 110
+        @image = game.imageload("lille")
+        @lilleArray = [] #リールの並び
+        @isRotation = false #trueならリールが回転中
+        @nowEye = 0 #リールの現在の目
+    onenterframe: (e) ->
+        if @isRotation is true
+            @eyeIncriment()
+    ###
+    回転中にリールの目を１つ進める
+    ###
+    eyeIncriment: () ->
+        @nowEye += 1
+        if @lilleArray[@nowEye] is undefined
+            @nowEye = 0
+        @frame = @lilleArray[@nowEye]
+
+    rotationStop: ()->
+        @isRotation = false
+
+    ###
+    初回リールの位置をランダムに決める
+    ###
+    eyeInit: () ->
+        @nowEye = Math.floor(Math.random() * @lilleArray.length)
+        @eyeIncriment()
+
+class LeftLille extends Lille
+    constructor: () ->
+        super
+        @lilleArray = [1,2,3,4,2,3,5,2,1,3,4,5,2,5,7,1,2,3,4,5,1,7]
+        @eyeInit()
+        @x = -50
+
+class MiddleLille extends Lille
+    constructor: () ->
+        super
+        @lilleArray = [3,5,2,5,4,2,3,4,7,2,1,5,4,3,5,2,3,7,1,4,5,3]
+        @eyeInit()
+        @x = 120
+
+class RightLille extends Lille
+    constructor: () ->
+        super
+        @lilleArray = [2,4,1,5,1,4,2,7,2,4,3,1,7,2,3,7,1,5,3,2,4,5]
+        @eyeInit()
+        @x = 300
 class System extends appSprite
     constructor: (w, h) ->
         super w, h

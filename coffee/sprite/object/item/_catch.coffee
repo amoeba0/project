@@ -18,6 +18,7 @@ class Catch extends Item
         if @parentNode.player.intersect(@)
             @parentNode.removeChild(@)
             console.log('hit!')
+            game.main_scene.gp_slot.slotStop()
     ###
     座標と落下速度の設定
     ###
@@ -37,5 +38,5 @@ class Catch extends Item
 ###
 class MacaroonCatch extends Catch
     constructor: (w, h) ->
-        super 16, 16
+        super 48, 48
         @image = game.imageload("icon1")

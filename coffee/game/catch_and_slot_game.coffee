@@ -9,7 +9,7 @@ class LoveliveGame extends catchAndSlotGame
         @height = 960
         @fps = 24
         #画像リスト
-        @imgList = ['chara1', 'icon1']
+        @imgList = ['chara1', 'icon1', 'lille', 'under_frame']
         #音声リスト
         @sondList = []
         #キーのリスト、物理キーとソフトキー両方に対応
