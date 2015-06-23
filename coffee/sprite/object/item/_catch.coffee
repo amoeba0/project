@@ -4,8 +4,6 @@
 class Catch extends Item
     constructor: (w, h) ->
         super w, h
-        @vx = 0 #x軸速度
-        @vy = 0 #y軸速度
     onenterframe: (e) ->
         @vy += @gravity
         @y += @vy
@@ -24,14 +22,19 @@ class Catch extends Item
     ###
     setPosition:(gravity)->
         @y = @h * -1
-        @x = Math.floor((game.width - @w) * Math.random())
+        @x = @_setPositoinX()
         @gravity = gravity
+
     ###
-    地面に落ちたら消す
+    X座標の位置の設定
     ###
-    removeOnFloor:()->
-        if @y > game.height + @h
-            @parentNode.removeChild(@)
+    _setPositoinX:()->
+        ret_x = 0
+        if game.debug.item_flg
+            ret_x = @parentNode.player.x
+        else
+            ret_x = Math.floor((game.width - @w) * Math.random())
+        return ret_x
 
 ###
 マカロン
@@ -40,3 +43,4 @@ class MacaroonCatch extends Catch
     constructor: (w, h) ->
         super 48, 48
         @image = game.imageload("icon1")
+        @frame = 1

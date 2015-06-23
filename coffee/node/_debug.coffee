@@ -6,9 +6,13 @@ class Debug extends appNode
         super
         #デバッグ用リールにすりかえる
         @lille_flg = false
+        #降ってくるアイテムの位置が常にプレイヤーの頭上
+        @item_flg = false
+        #アイテムが降ってくる頻度を上げる
+        @item_fall_early_flg = false
         #デバッグ用リール配列
         @lille_array = [
-            [2,3],
-            [3,2],
-            [2,3]
+            [1,7],
+            [7,1],
+            [1,7]
         ]

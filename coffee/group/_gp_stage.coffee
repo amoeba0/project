@@ -26,6 +26,8 @@ class stageFront extends gpStage
     一定周期でステージに発生するイベント
     ###
     _stageCycle:()->
+        if game.debug.item_fall_early_flg is true
+            @itemFallSec = 3
         if @age % (game.fps * @itemFallSec) is 0
             @_catchFall()
     ###

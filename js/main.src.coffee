@@ -124,8 +124,8 @@ class gpSlot extends appGroup
         @underFrame = new UnderFrame()
         @addChild(@underFrame)
         @isStopping = false #スロット停止中
-        @stopIntervalFrameInit = 9
-        @stopIntervalFrame = 0 #スロットが連続で止まる間隔（フレーム）
+        @stopIntervalFrame = 9 #スロットが連続で止まる間隔（フレーム）
+        @slotIntervalFrameRandom = 0
         @stopStartAge = 0 #スロットの停止が開始したフレーム
         @slotSet()
     onenterframe: (e) ->
@@ -139,10 +139,10 @@ class gpSlot extends appGroup
             if @age is @stopStartAge
                 @left_lille.isRotation = false
                 @setIntervalFrame()
-            if @age is @stopStartAge + @stopIntervalFrame
+            if @age is @stopStartAge + @stopIntervalFrame + @slotIntervalFrameRandom
                 @middle_lille.isRotation = false
                 @setIntervalFrame()
-            if @age is @stopStartAge + @stopIntervalFrame * 2
+            if @age is @stopStartAge + @stopIntervalFrame * 2 + @slotIntervalFrameRandom
                 @right_lille.isRotation = false
                 @isStopping = false
                 @slotHitTest()
@@ -152,7 +152,17 @@ class gpSlot extends appGroup
     ###
     slotHitTest: () ->
         if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
-            console.log('atari')
+            prize_money = @_calcPrizeMoney()
+
+    ###
+    スロットの当選金額を計算
+    ###
+    _calcPrizeMoney: () ->
+        ret_money = 0
+        eye = @middle_lille.lilleArray[@middle_lille.nowEye]
+        ret_money = game.bet * game.slot_setting.bairitu[eye]
+        console.log(ret_money)
+        return ret_money
 
     ###
     スロットマシンを画面に設置する
@@ -176,16 +186,16 @@ class gpSlot extends appGroup
     スロットマシンの回転を止める
     ###
     slotStop:() ->
-        @setIntervalFrame()
         @stopStartAge = @age
         @isStopping = true
+        @setIntervalFrame()
         @slotStopping()
 
     ###
     スロットマシン止まる間隔を決める
     ###
     setIntervalFrame:() ->
-        @stopIntervalFrame = @stopIntervalFrameInit + Math.floor(Math.random() * 2)
+        @slotIntervalFrameRandom = Math.floor(Math.random() * 3)
 
     ###
     デバッグ用スロットにすりかえる
@@ -221,6 +231,8 @@ class stageFront extends gpStage
     一定周期でステージに発生するイベント
     ###
     _stageCycle:()->
+        if game.debug.item_fall_early_flg is true
+            @itemFallSec = 3
         if @age % (game.fps * @itemFallSec) is 0
             @_catchFall()
     ###
@@ -304,11 +316,15 @@ class Debug extends appNode
         super
         #デバッグ用リールにすりかえる
         @lille_flg = false
+        #降ってくるアイテムの位置が常にプレイヤーの頭上
+        @item_flg = false
+        #アイテムが降ってくる頻度を上げる
+        @item_fall_early_flg = false
         #デバッグ用リール配列
         @lille_array = [
-            [2,3],
-            [3,2],
-            [2,3]
+            [1,7],
+            [7,1],
+            [1,7]
         ]
 ###
 スロットのリールの並びや掛け金に対する当選額
@@ -608,14 +624,20 @@ class Bear extends Player
 class Item extends appObject
     constructor: (w, h) ->
         super w, h
+        @vx = 0 #x軸速度
+        @vy = 0 #y軸速度
+    ###
+    地面に落ちたら消す
+    ###
+    removeOnFloor:()->
+        if @y > game.height + @h
+            @parentNode.removeChild(@)
 ###
 キャッチする用のアイテム
 ###
 class Catch extends Item
     constructor: (w, h) ->
         super w, h
-        @vx = 0 #x軸速度
-        @vy = 0 #y軸速度
     onenterframe: (e) ->
         @vy += @gravity
         @y += @vy
@@ -634,14 +656,19 @@ class Catch extends Item
     ###
     setPosition:(gravity)->
         @y = @h * -1
-        @x = Math.floor((game.width - @w) * Math.random())
+        @x = @_setPositoinX()
         @gravity = gravity
+
     ###
-    地面に落ちたら消す
+    X座標の位置の設定
     ###
-    removeOnFloor:()->
-        if @y > game.height + @h
-            @parentNode.removeChild(@)
+    _setPositoinX:()->
+        ret_x = 0
+        if game.debug.item_flg
+            ret_x = @parentNode.player.x
+        else
+            ret_x = Math.floor((game.width - @w) * Math.random())
+        return ret_x
 
 ###
 マカロン
@@ -650,9 +677,58 @@ class MacaroonCatch extends Catch
     constructor: (w, h) ->
         super 48, 48
         @image = game.imageload("icon1")
+        @frame = 1
+###
+降ってくるお金
+###
 class Money extends Item
     constructor: (w, h) ->
         super w, h
+        @price = 1 #単価
+        super 48, 48
+        @image = game.imageload("icon1")
+
+    onenterframe: (e) ->
+        @vy += @gravity
+        @y += @vy
+        @hitPlayer()
+        @removeOnFloor()
+
+    ###
+    プレイヤーに当たった時
+    ###
+    hitPlayer:()->
+        if @parentNode.player.intersect(@)
+            @parentNode.removeChild(@)
+            game.money += @price
+            game.main_scene.gp_system.money_text.setValue()
+
+###
+安い
+###
+class CheapMoney extends Money
+    constructor: (w, h) ->
+        super w, h
+        @price = 10
+        @frame = 3
+
+###
+普通
+###
+class NormalMoney extends Money
+    constructor: (w, h) ->
+        super w, h
+        @price = 100
+        @frame = 4
+
+###
+高い
+###
+class ExpensiveMoney extends Money
+    constructor: (w, h) ->
+        super w, h
+        @price = 1000
+        @frame = 5
 class Slot extends appSprite
     constructor: (w, h) ->
         super w, h

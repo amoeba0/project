@@ -5,8 +5,8 @@ class gpSlot extends appGroup
         @underFrame = new UnderFrame()
         @addChild(@underFrame)
         @isStopping = false #スロット停止中
-        @stopIntervalFrameInit = 9
-        @stopIntervalFrame = 0 #スロットが連続で止まる間隔（フレーム）
+        @stopIntervalFrame = 9 #スロットが連続で止まる間隔（フレーム）
+        @slotIntervalFrameRandom = 0
         @stopStartAge = 0 #スロットの停止が開始したフレーム
         @slotSet()
     onenterframe: (e) ->
@@ -20,10 +20,10 @@ class gpSlot extends appGroup
             if @age is @stopStartAge
                 @left_lille.isRotation = false
                 @setIntervalFrame()
-            if @age is @stopStartAge + @stopIntervalFrame
+            if @age is @stopStartAge + @stopIntervalFrame + @slotIntervalFrameRandom
                 @middle_lille.isRotation = false
                 @setIntervalFrame()
-            if @age is @stopStartAge + @stopIntervalFrame * 2
+            if @age is @stopStartAge + @stopIntervalFrame * 2 + @slotIntervalFrameRandom
                 @right_lille.isRotation = false
                 @isStopping = false
                 @slotHitTest()
@@ -33,7 +33,17 @@ class gpSlot extends appGroup
     ###
     slotHitTest: () ->
         if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
-            console.log('atari')
+            prize_money = @_calcPrizeMoney()
+
+    ###
+    スロットの当選金額を計算
+    ###
+    _calcPrizeMoney: () ->
+        ret_money = 0
+        eye = @middle_lille.lilleArray[@middle_lille.nowEye]
+        ret_money = game.bet * game.slot_setting.bairitu[eye]
+        console.log(ret_money)
+        return ret_money
 
     ###
     スロットマシンを画面に設置する
@@ -57,16 +67,16 @@ class gpSlot extends appGroup
     スロットマシンの回転を止める
     ###
     slotStop:() ->
-        @setIntervalFrame()
         @stopStartAge = @age
         @isStopping = true
+        @setIntervalFrame()
         @slotStopping()
 
     ###
     スロットマシン止まる間隔を決める
     ###
     setIntervalFrame:() ->
-        @stopIntervalFrame = @stopIntervalFrameInit + Math.floor(Math.random() * 2)
+        @slotIntervalFrameRandom = Math.floor(Math.random() * 3)
 
     ###
     デバッグ用スロットにすりかえる
