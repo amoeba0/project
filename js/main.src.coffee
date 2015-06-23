@@ -58,6 +58,8 @@ class catchAndSlotGame extends appGame
 class LoveliveGame extends catchAndSlotGame
     constructor:()->
         super @width, @height
+        @slot_setting = new slotSetting()
+        @debug = new Debug()
         @width = 640
         @height = 960
         @fps = 24
@@ -70,9 +72,21 @@ class LoveliveGame extends catchAndSlotGame
         @keybind(90, 'z')
         @preloadAll()
 
+        #ゲーム中どこからでもアクセスのある数値
+        @money_init = 100 #ゲーム開始時の所持金
+        @money = 0 #現在の所持金
+        @bet = 1 #現在の掛け金
+
     onload:() ->
+        @gameInit()
         @main_scene = new mainScene()
         @pushScene(@main_scene)
+
+    ###
+    ゲーム開始時の初期数値調整
+    ###
+    gameInit:() ->
+        @money = @money_init
 
     onenterframe: (e) ->
         @buttonPush()
@@ -106,6 +120,7 @@ class gpPanorama extends appGroup
 class gpSlot extends appGroup
     constructor: () ->
         super
+        @debugSlot()
         @underFrame = new UnderFrame()
         @addChild(@underFrame)
         @isStopping = false #スロット停止中
@@ -113,7 +128,6 @@ class gpSlot extends appGroup
         @stopIntervalFrame = 0 #スロットが連続で止まる間隔（フレーム）
         @stopStartAge = 0 #スロットの停止が開始したフレーム
         @slotSet()
-        #@slotStart()
     onenterframe: (e) ->
         @slotStopping()
 
@@ -124,11 +138,21 @@ class gpSlot extends appGroup
         if @isStopping is true
             if @age is @stopStartAge
                 @left_lille.isRotation = false
+                @setIntervalFrame()
             if @age is @stopStartAge + @stopIntervalFrame
                 @middle_lille.isRotation = false
+                @setIntervalFrame()
             if @age is @stopStartAge + @stopIntervalFrame * 2
                 @right_lille.isRotation = false
                 @isStopping = false
+                @slotHitTest()
+
+    ###
+    スロットの当選判定
+    ###
+    slotHitTest: () ->
+        if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
+            console.log('atari')
 
     ###
     スロットマシンを画面に設置する
@@ -152,10 +176,23 @@ class gpSlot extends appGroup
     スロットマシンの回転を止める
     ###
     slotStop:() ->
-        @stopIntervalFrame = @stopIntervalFrameInit + @age % 3
+        @setIntervalFrame()
         @stopStartAge = @age
         @isStopping = true
         @slotStopping()
+
+    ###
+    スロットマシン止まる間隔を決める
+    ###
+    setIntervalFrame:() ->
+        @stopIntervalFrame = @stopIntervalFrameInit + Math.floor(Math.random() * 2)
+
+    ###
+    デバッグ用スロットにすりかえる
+    ###
+    debugSlot:() ->
+        if game.debug.lille_flg is true
+            game.slot_setting.lille_array = game.debug.lille_array
 class gpStage extends appGroup
     constructor: () ->
         super
@@ -163,6 +200,14 @@ class gpStage extends appGroup
         @itemFallSec = 5 #アイテムを降らせる周期（秒）
         @catchItems = [] #キャッチアイテムのコンストラクタを格納
         @nowCatchItemsNum = 0
+
+###
+ステージ前面
+プレイヤーや落下アイテムがある
+###
+class stageFront extends gpStage
+    constructor: () ->
+        super
         @initial()
     initial:()->
         @setPlayer()
@@ -182,26 +227,109 @@ class gpStage extends appGroup
     キャッチアイテムをランダムな位置から降らせる
     ###
     _catchFall:()->
-        @catchItems.push(new MacaroonCatch())
-        @addChild(@catchItems[@nowCatchItemsNum])
-        @catchItems[@nowCatchItemsNum].setPosition(1)
-        @nowCatchItemsNum += 1
-        game.main_scene.gp_slot.slotStart()
+        if (game.money >= game.bet)
+            @catchItems.push(new MacaroonCatch())
+            @addChild(@catchItems[@nowCatchItemsNum])
+            @catchItems[@nowCatchItemsNum].setPosition(1)
+            @nowCatchItemsNum += 1
+            game.money -= game.bet
+            game.main_scene.gp_system.money_text.setValue()
+            game.main_scene.gp_slot.slotStart()
+
+###
+ステージ背面
+コインがある
+###
+class stageBack extends gpStage
+    constructor: () ->
+        super
 class gpSystem extends appGroup
     constructor: () ->
         super
+        @money_text = new moneyText()
+        @addChild(@money_text)
+        @bet_text = new betText()
+        @addChild(@bet_text)
+
 class text extends appLabel
     constructor: () ->
         super
-class gameCycle extends appNode
+###
+所持金
+###
+class moneyText extends text
     constructor: () ->
         super
-class objectCtrl extends appNode
+        @text = 0
+        @color = 'black'
+        @font_size = 30
+        @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
+        @x = 0
+        @y = 10
+        @zandaka_text = '残高'
+        @yen_text = '円'
+        @setValue()
+    ###
+    所持金の文字列を設定する
+    @param number val 所持金
+    ###
+    setValue: ()->
+        @text = @zandaka_text + game.money + @yen_text
+        @setXposition()
+    ###
+    X座標の位置を設定
+    ###
+    setXposition: () ->
+        @x = game.width - @_boundWidth - 10
+
+class betText extends text
     constructor: () ->
         super
-class slotCtrl extends appNode
+        @text = 0
+        @color = 'black'
+        @font_size = 30
+        @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
+        @x = 10
+        @y = 10
+        @kakekin_text = '掛金'
+        @yen_text = '円'
+        @setValue()
+    setValue: () ->
+        @text = @kakekin_text + game.bet + @yen_text
+###
+デバッグ用設定
+###
+class Debug extends appNode
     constructor: () ->
         super
+        #デバッグ用リールにすりかえる
+        @lille_flg = false
+        #デバッグ用リール配列
+        @lille_array = [
+            [2,3],
+            [3,2],
+            [2,3]
+        ]
+###
+スロットのリールの並びや掛け金に対する当選額
+テンションによるリールの変化確率など
+ゲームバランスに作用する固定値の設定
+###
+class slotSetting extends appNode
+    constructor: () ->
+        super
+        #リールの並び
+        @lille_array = [
+            [1,2,3,4,2,3,5,2,1,3,4,5,2,5,7,1,2,3,4,5,1,7],
+            [3,5,2,5,4,2,3,4,7,2,1,5,4,3,5,2,3,7,1,4,5,3],
+            [2,4,1,5,1,4,2,7,2,4,3,1,7,2,3,7,1,5,3,2,4,5]
+        ]
+        #リールの目に対する当選額の倍率
+        @bairitu = {
+            2:10, 3:30, 4:50, 5:100, 6:100, 1:300, 7:600,
+            11:1000, 12:1000, 13:1000, 14:1000, 15:1000, 16:1000, 17:1000, 18:1000, 19:1000
+        }
+
 class mainScene extends appScene
     constructor:()->
         super
@@ -210,10 +338,14 @@ class mainScene extends appScene
     initial:()->
         @setGroup()
     setGroup:()->
+        @gp_stage_back = new stageBack()
+        @addChild(@gp_stage_back)
         @gp_slot = new gpSlot()
         @addChild(@gp_slot)
-        @gp_stage = new gpStage()
-        @addChild(@gp_stage)
+        @gp_stage_front = new stageFront()
+        @addChild(@gp_stage_front)
+        @gp_system = new gpSystem()
+        @addChild(@gp_system)
         @gp_slot.x = 150
         @gp_slot.y = 200
 class titleScene extends appScene
@@ -570,23 +702,23 @@ class Lille extends Slot
 class LeftLille extends Lille
     constructor: () ->
         super
-        @lilleArray = [1,2,3,4,2,3,5,2,1,3,4,5,2,5,7,1,2,3,4,5,1,7]
+        @lilleArray = game.slot_setting.lille_array[0]
         @eyeInit()
-        @x = -50
+        @x = -55
 
 class MiddleLille extends Lille
     constructor: () ->
         super
-        @lilleArray = [3,5,2,5,4,2,3,4,7,2,1,5,4,3,5,2,3,7,1,4,5,3]
+        @lilleArray = game.slot_setting.lille_array[1]
         @eyeInit()
-        @x = 120
+        @x = 110
 
 class RightLille extends Lille
     constructor: () ->
         super
-        @lilleArray = [2,4,1,5,1,4,2,7,2,4,3,1,7,2,3,7,1,5,3,2,4,5]
+        @lilleArray = game.slot_setting.lille_array[2]
         @eyeInit()
-        @x = 300
+        @x = 274
 class System extends appSprite
     constructor: (w, h) ->
         super w, h

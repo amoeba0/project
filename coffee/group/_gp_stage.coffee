@@ -5,6 +5,14 @@ class gpStage extends appGroup
         @itemFallSec = 5 #アイテムを降らせる周期（秒）
         @catchItems = [] #キャッチアイテムのコンストラクタを格納
         @nowCatchItemsNum = 0
+
+###
+ステージ前面
+プレイヤーや落下アイテムがある
+###
+class stageFront extends gpStage
+    constructor: () ->
+        super
         @initial()
     initial:()->
         @setPlayer()
@@ -24,8 +32,19 @@ class gpStage extends appGroup
     キャッチアイテムをランダムな位置から降らせる
     ###
     _catchFall:()->
-        @catchItems.push(new MacaroonCatch())
-        @addChild(@catchItems[@nowCatchItemsNum])
-        @catchItems[@nowCatchItemsNum].setPosition(1)
-        @nowCatchItemsNum += 1
-        game.main_scene.gp_slot.slotStart()
+        if (game.money >= game.bet)
+            @catchItems.push(new MacaroonCatch())
+            @addChild(@catchItems[@nowCatchItemsNum])
+            @catchItems[@nowCatchItemsNum].setPosition(1)
+            @nowCatchItemsNum += 1
+            game.money -= game.bet
+            game.main_scene.gp_system.money_text.setValue()
+            game.main_scene.gp_slot.slotStart()
+
+###
+ステージ背面
+コインがある
+###
+class stageBack extends gpStage
+    constructor: () ->
+        super

@@ -1,4 +1,4 @@
-var Bear, Button, Catch, Character, Floor, Frame, Guest, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, Panorama, Param, Player, RightLille, Slot, System, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, catchAndSlotGame, gameCycle, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, objectCtrl, slotCtrl, text, titleScene,
+var Bear, Button, Catch, Character, Debug, Floor, Frame, Guest, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, Panorama, Param, Player, RightLille, Slot, System, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -139,6 +139,8 @@ LoveliveGame = (function(_super) {
 
   function LoveliveGame() {
     LoveliveGame.__super__.constructor.call(this, this.width, this.height);
+    this.slot_setting = new slotSetting();
+    this.debug = new Debug();
     this.width = 640;
     this.height = 960;
     this.fps = 24;
@@ -151,11 +153,24 @@ LoveliveGame = (function(_super) {
     };
     this.keybind(90, 'z');
     this.preloadAll();
+    this.money_init = 100;
+    this.money = 0;
+    this.bet = 1;
   }
 
   LoveliveGame.prototype.onload = function() {
+    this.gameInit();
     this.main_scene = new mainScene();
     return this.pushScene(this.main_scene);
+  };
+
+
+  /*
+  ゲーム開始時の初期数値調整
+   */
+
+  LoveliveGame.prototype.gameInit = function() {
+    return this.money = this.money_init;
   };
 
   LoveliveGame.prototype.onenterframe = function(e) {
@@ -215,6 +230,7 @@ gpSlot = (function(_super) {
 
   function gpSlot() {
     gpSlot.__super__.constructor.apply(this, arguments);
+    this.debugSlot();
     this.underFrame = new UnderFrame();
     this.addChild(this.underFrame);
     this.isStopping = false;
@@ -237,14 +253,29 @@ gpSlot = (function(_super) {
     if (this.isStopping === true) {
       if (this.age === this.stopStartAge) {
         this.left_lille.isRotation = false;
+        this.setIntervalFrame();
       }
       if (this.age === this.stopStartAge + this.stopIntervalFrame) {
         this.middle_lille.isRotation = false;
+        this.setIntervalFrame();
       }
       if (this.age === this.stopStartAge + this.stopIntervalFrame * 2) {
         this.right_lille.isRotation = false;
-        return this.isStopping = false;
+        this.isStopping = false;
+        return this.slotHitTest();
       }
+    }
+  };
+
+
+  /*
+  スロットの当選判定
+   */
+
+  gpSlot.prototype.slotHitTest = function() {
+    var _ref;
+    if ((this.left_lille.lilleArray[this.left_lille.nowEye] === (_ref = this.middle_lille.lilleArray[this.middle_lille.nowEye]) && _ref === this.right_lille.lilleArray[this.right_lille.nowEye])) {
+      return console.log('atari');
     }
   };
 
@@ -279,10 +310,30 @@ gpSlot = (function(_super) {
    */
 
   gpSlot.prototype.slotStop = function() {
-    this.stopIntervalFrame = this.stopIntervalFrameInit + this.age % 3;
+    this.setIntervalFrame();
     this.stopStartAge = this.age;
     this.isStopping = true;
     return this.slotStopping();
+  };
+
+
+  /*
+  スロットマシン止まる間隔を決める
+   */
+
+  gpSlot.prototype.setIntervalFrame = function() {
+    return this.stopIntervalFrame = this.stopIntervalFrameInit + Math.floor(Math.random() * 2);
+  };
+
+
+  /*
+  デバッグ用スロットにすりかえる
+   */
+
+  gpSlot.prototype.debugSlot = function() {
+    if (game.debug.lille_flg === true) {
+      return game.slot_setting.lille_array = game.debug.lille_array;
+    }
   };
 
   return gpSlot;
@@ -298,18 +349,35 @@ gpStage = (function(_super) {
     this.itemFallSec = 5;
     this.catchItems = [];
     this.nowCatchItemsNum = 0;
+  }
+
+  return gpStage;
+
+})(appGroup);
+
+
+/*
+ステージ前面
+プレイヤーや落下アイテムがある
+ */
+
+stageFront = (function(_super) {
+  __extends(stageFront, _super);
+
+  function stageFront() {
+    stageFront.__super__.constructor.apply(this, arguments);
     this.initial();
   }
 
-  gpStage.prototype.initial = function() {
+  stageFront.prototype.initial = function() {
     return this.setPlayer();
   };
 
-  gpStage.prototype.onenterframe = function() {
+  stageFront.prototype.onenterframe = function() {
     return this._stageCycle();
   };
 
-  gpStage.prototype.setPlayer = function() {
+  stageFront.prototype.setPlayer = function() {
     this.player = new Bear();
     this.player.y = this.floor;
     return this.addChild(this.player);
@@ -320,7 +388,7 @@ gpStage = (function(_super) {
   一定周期でステージに発生するイベント
    */
 
-  gpStage.prototype._stageCycle = function() {
+  stageFront.prototype._stageCycle = function() {
     if (this.age % (game.fps * this.itemFallSec) === 0) {
       return this._catchFall();
     }
@@ -331,23 +399,48 @@ gpStage = (function(_super) {
   キャッチアイテムをランダムな位置から降らせる
    */
 
-  gpStage.prototype._catchFall = function() {
-    this.catchItems.push(new MacaroonCatch());
-    this.addChild(this.catchItems[this.nowCatchItemsNum]);
-    this.catchItems[this.nowCatchItemsNum].setPosition(1);
-    this.nowCatchItemsNum += 1;
-    return game.main_scene.gp_slot.slotStart();
+  stageFront.prototype._catchFall = function() {
+    if (game.money >= game.bet) {
+      this.catchItems.push(new MacaroonCatch());
+      this.addChild(this.catchItems[this.nowCatchItemsNum]);
+      this.catchItems[this.nowCatchItemsNum].setPosition(1);
+      this.nowCatchItemsNum += 1;
+      game.money -= game.bet;
+      game.main_scene.gp_system.money_text.setValue();
+      return game.main_scene.gp_slot.slotStart();
+    }
   };
 
-  return gpStage;
+  return stageFront;
 
-})(appGroup);
+})(gpStage);
+
+
+/*
+ステージ背面
+コインがある
+ */
+
+stageBack = (function(_super) {
+  __extends(stageBack, _super);
+
+  function stageBack() {
+    stageBack.__super__.constructor.apply(this, arguments);
+  }
+
+  return stageBack;
+
+})(gpStage);
 
 gpSystem = (function(_super) {
   __extends(gpSystem, _super);
 
   function gpSystem() {
     gpSystem.__super__.constructor.apply(this, arguments);
+    this.money_text = new moneyText();
+    this.addChild(this.money_text);
+    this.bet_text = new betText();
+    this.addChild(this.bet_text);
   }
 
   return gpSystem;
@@ -365,36 +458,127 @@ text = (function(_super) {
 
 })(appLabel);
 
-gameCycle = (function(_super) {
-  __extends(gameCycle, _super);
 
-  function gameCycle() {
-    gameCycle.__super__.constructor.apply(this, arguments);
+/*
+所持金
+ */
+
+moneyText = (function(_super) {
+  __extends(moneyText, _super);
+
+  function moneyText() {
+    moneyText.__super__.constructor.apply(this, arguments);
+    this.text = 0;
+    this.color = 'black';
+    this.font_size = 30;
+    this.font = this.font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
+    this.x = 0;
+    this.y = 10;
+    this.zandaka_text = '残高';
+    this.yen_text = '円';
+    this.setValue();
   }
 
-  return gameCycle;
+
+  /*
+  所持金の文字列を設定する
+  @param number val 所持金
+   */
+
+  moneyText.prototype.setValue = function() {
+    this.text = this.zandaka_text + game.money + this.yen_text;
+    return this.setXposition();
+  };
+
+
+  /*
+  X座標の位置を設定
+   */
+
+  moneyText.prototype.setXposition = function() {
+    return this.x = game.width - this._boundWidth - 10;
+  };
+
+  return moneyText;
+
+})(text);
+
+betText = (function(_super) {
+  __extends(betText, _super);
+
+  function betText() {
+    betText.__super__.constructor.apply(this, arguments);
+    this.text = 0;
+    this.color = 'black';
+    this.font_size = 30;
+    this.font = this.font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
+    this.x = 10;
+    this.y = 10;
+    this.kakekin_text = '掛金';
+    this.yen_text = '円';
+    this.setValue();
+  }
+
+  betText.prototype.setValue = function() {
+    return this.text = this.kakekin_text + game.bet + this.yen_text;
+  };
+
+  return betText;
+
+})(text);
+
+
+/*
+デバッグ用設定
+ */
+
+Debug = (function(_super) {
+  __extends(Debug, _super);
+
+  function Debug() {
+    Debug.__super__.constructor.apply(this, arguments);
+    this.lille_flg = false;
+    this.lille_array = [[2, 3], [3, 2], [2, 3]];
+  }
+
+  return Debug;
 
 })(appNode);
 
-objectCtrl = (function(_super) {
-  __extends(objectCtrl, _super);
 
-  function objectCtrl() {
-    objectCtrl.__super__.constructor.apply(this, arguments);
+/*
+スロットのリールの並びや掛け金に対する当選額
+テンションによるリールの変化確率など
+ゲームバランスに作用する固定値の設定
+ */
+
+slotSetting = (function(_super) {
+  __extends(slotSetting, _super);
+
+  function slotSetting() {
+    slotSetting.__super__.constructor.apply(this, arguments);
+    this.lille_array = [[1, 2, 3, 4, 2, 3, 5, 2, 1, 3, 4, 5, 2, 5, 7, 1, 2, 3, 4, 5, 1, 7], [3, 5, 2, 5, 4, 2, 3, 4, 7, 2, 1, 5, 4, 3, 5, 2, 3, 7, 1, 4, 5, 3], [2, 4, 1, 5, 1, 4, 2, 7, 2, 4, 3, 1, 7, 2, 3, 7, 1, 5, 3, 2, 4, 5]];
+    this.bairitu = {
+      2: 10,
+      3: 30,
+      4: 50,
+      5: 100,
+      6: 100,
+      1: 300,
+      7: 600,
+      11: 1000,
+      12: 1000,
+      13: 1000,
+      14: 1000,
+      15: 1000,
+      16: 1000,
+      17: 1000,
+      18: 1000,
+      19: 1000
+    };
   }
 
-  return objectCtrl;
-
-})(appNode);
-
-slotCtrl = (function(_super) {
-  __extends(slotCtrl, _super);
-
-  function slotCtrl() {
-    slotCtrl.__super__.constructor.apply(this, arguments);
-  }
-
-  return slotCtrl;
+  return slotSetting;
 
 })(appNode);
 
@@ -412,10 +596,14 @@ mainScene = (function(_super) {
   };
 
   mainScene.prototype.setGroup = function() {
+    this.gp_stage_back = new stageBack();
+    this.addChild(this.gp_stage_back);
     this.gp_slot = new gpSlot();
     this.addChild(this.gp_slot);
-    this.gp_stage = new gpStage();
-    this.addChild(this.gp_stage);
+    this.gp_stage_front = new stageFront();
+    this.addChild(this.gp_stage_front);
+    this.gp_system = new gpSystem();
+    this.addChild(this.gp_system);
     this.gp_slot.x = 150;
     return this.gp_slot.y = 200;
   };
@@ -1042,9 +1230,9 @@ LeftLille = (function(_super) {
 
   function LeftLille() {
     LeftLille.__super__.constructor.apply(this, arguments);
-    this.lilleArray = [1, 2, 3, 4, 2, 3, 5, 2, 1, 3, 4, 5, 2, 5, 7, 1, 2, 3, 4, 5, 1, 7];
+    this.lilleArray = game.slot_setting.lille_array[0];
     this.eyeInit();
-    this.x = -50;
+    this.x = -55;
   }
 
   return LeftLille;
@@ -1056,9 +1244,9 @@ MiddleLille = (function(_super) {
 
   function MiddleLille() {
     MiddleLille.__super__.constructor.apply(this, arguments);
-    this.lilleArray = [3, 5, 2, 5, 4, 2, 3, 4, 7, 2, 1, 5, 4, 3, 5, 2, 3, 7, 1, 4, 5, 3];
+    this.lilleArray = game.slot_setting.lille_array[1];
     this.eyeInit();
-    this.x = 120;
+    this.x = 110;
   }
 
   return MiddleLille;
@@ -1070,9 +1258,9 @@ RightLille = (function(_super) {
 
   function RightLille() {
     RightLille.__super__.constructor.apply(this, arguments);
-    this.lilleArray = [2, 4, 1, 5, 1, 4, 2, 7, 2, 4, 3, 1, 7, 2, 3, 7, 1, 5, 3, 2, 4, 5];
+    this.lilleArray = game.slot_setting.lille_array[2];
     this.eyeInit();
-    this.x = 300;
+    this.x = 274;
   }
 
   return RightLille;

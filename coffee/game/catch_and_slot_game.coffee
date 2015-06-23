@@ -5,6 +5,8 @@ class catchAndSlotGame extends appGame
 class LoveliveGame extends catchAndSlotGame
     constructor:()->
         super @width, @height
+        @slot_setting = new slotSetting()
+        @debug = new Debug()
         @width = 640
         @height = 960
         @fps = 24
@@ -17,9 +19,21 @@ class LoveliveGame extends catchAndSlotGame
         @keybind(90, 'z')
         @preloadAll()
 
+        #ゲーム中どこからでもアクセスのある数値
+        @money_init = 100 #ゲーム開始時の所持金
+        @money = 0 #現在の所持金
+        @bet = 1 #現在の掛け金
+
     onload:() ->
+        @gameInit()
         @main_scene = new mainScene()
         @pushScene(@main_scene)
+
+    ###
+    ゲーム開始時の初期数値調整
+    ###
+    gameInit:() ->
+        @money = @money_init
 
     onenterframe: (e) ->
         @buttonPush()
