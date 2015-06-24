@@ -34,6 +34,20 @@ class appGame extends Game
             for val in @soundList
                 tmp.push "sounds/"+val+".mp3"
         @preload(tmp)
+
+    ###
+    数値から右から数えた特定の桁を取り出して数値で返す
+    @param number num   数値
+    @param number digit 右から数えた桁数、例：1の位は１、10の位は２、１００の位は３
+    @return number
+    ###
+    getDigitNum:(num, digit)->
+        tmp_num = num + ''
+        split_num = tmp_num.length - digit
+        split = tmp_num.substring(split_num, split_num + 1)
+        result = Number(split)
+        return result
+
 class appGroup extends Group
     constructor: () ->
         super
@@ -73,9 +87,9 @@ class LoveliveGame extends catchAndSlotGame
         @preloadAll()
 
         #ゲーム中どこからでもアクセスのある数値
-        @money_init = 100 #ゲーム開始時の所持金
+        @money_init = 10000 #ゲーム開始時の所持金
         @money = 0 #現在の所持金
-        @bet = 1 #現在の掛け金
+        @bet = 55 #現在の掛け金
 
     onload:() ->
         @gameInit()
@@ -153,6 +167,7 @@ class gpSlot extends appGroup
     slotHitTest: () ->
         if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
             prize_money = @_calcPrizeMoney()
+            game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
 
     ###
     スロットの当選金額を計算
@@ -161,7 +176,6 @@ class gpSlot extends appGroup
         ret_money = 0
         eye = @middle_lille.lilleArray[@middle_lille.nowEye]
         ret_money = game.bet * game.slot_setting.bairitu[eye]
-        console.log(ret_money)
         return ret_money
 
     ###
@@ -207,9 +221,6 @@ class gpStage extends appGroup
     constructor: () ->
         super
         @floor = 900 #床の位置
-        @itemFallSec = 5 #アイテムを降らせる周期（秒）
-        @catchItems = [] #キャッチアイテムのコンストラクタを格納
-        @nowCatchItemsNum = 0
 
 ###
 ステージ前面
@@ -218,6 +229,9 @@ class gpStage extends appGroup
 class stageFront extends gpStage
     constructor: () ->
         super
+        @itemFallSec = 5 #アイテムを降らせる周期（秒）
+        @catchItems = [] #キャッチアイテムのコンストラクタを格納
+        @nowCatchItemsNum = 0
         @initial()
     initial:()->
         @setPlayer()
@@ -255,6 +269,69 @@ class stageFront extends gpStage
 class stageBack extends gpStage
     constructor: () ->
         super
+        @prizeMoneyItemsConstructor = [] #スロット当選金のコンストラクタを格納
+        @prizeMoneyItemsNum = {1:0,10:0,100:0,1000:0} #当選金を降らせる各コイン数の内訳
+        @nowPrizeMoneyItemsNum = 0
+        @prizeMoneyFallIntervalFrm = 6 #スロットの当選金を降らせる間隔（フレーム）
+        @prizeMoneyFallPeriodSec = 5 #スロットの当選金額が振っている時間（秒）
+        @isFallPrizeMoney = false #スロットの当選金が振っている間はtrue
+    ###
+    スロットの当選金額を降らせる
+    @param value number 金額
+    ###
+    fallPrizeMoneyStart:(value) ->
+        @_calcPrizeMoneyItemsNum(value)
+        @_setPrizeMoneyItemsConstructor()
+        console.log(@prizeMoneyItemsConstructor)
+
+    ###
+    当選金の内訳のコイン枚数を計算する
+    @param value number 金額
+    ###
+    _calcPrizeMoneyItemsNum:(value)->
+        if value <= 20 #全部1円
+            @prizeMoneyItemsNum[1] = value
+            @prizeMoneyItemsNum[10] = 0
+            @prizeMoneyItemsNum[100] = 0
+            @prizeMoneyItemsNum[1000] = 0
+        else if value < 100 #1円と10円と端数
+            @prizeMoneyItemsNum[1] = game.getDigitNum(value, 1) + 10
+            @prizeMoneyItemsNum[10] = game.getDigitNum(value, 2) - 1
+            @prizeMoneyItemsNum[100] = 0
+            @prizeMoneyItemsNum[1000] = 0
+        else if value < 1000 #10円と100円と端数
+            @prizeMoneyItemsNum[1] = game.getDigitNum(value, 1)
+            @prizeMoneyItemsNum[10] = game.getDigitNum(value, 2) + 10
+            @prizeMoneyItemsNum[100] = game.getDigitNum(value, 3) - 1
+            @prizeMoneyItemsNum[1000] = 0
+        else if value < 10000 #1000円と100円と端数
+            @prizeMoneyItemsNum[1] = game.getDigitNum(value, 1)
+            @prizeMoneyItemsNum[10] = game.getDigitNum(value, 2)
+            @prizeMoneyItemsNum[100] = game.getDigitNum(value, 3) + 10
+            @prizeMoneyItemsNum[1000] = game.getDigitNum(value, 4) - 1
+        else #全部1000円と端数
+            @prizeMoneyItemsNum[1] = game.getDigitNum(value, 1)
+            @prizeMoneyItemsNum[10] = game.getDigitNum(value, 2)
+            @prizeMoneyItemsNum[100] = game.getDigitNum(value, 3)
+            @prizeMoneyItemsNum[1000] = Math.floor(value/1000)
+
+    ###
+    当選金コインのコンストラクタを設置
+    ###
+    _setPrizeMoneyItemsConstructor:()->
+        @prizeMoneyItemsConstructor = []
+        if @prizeMoneyItemsNum[1] > 0
+            for i in [1..@prizeMoneyItemsNum[1]]
+                @prizeMoneyItemsConstructor.push(new OneHomingMoney)
+        if @prizeMoneyItemsNum[10] > 0
+            for i in [1..@prizeMoneyItemsNum[10]]
+                @prizeMoneyItemsConstructor.push(new TenHomingMoney)
+        if @prizeMoneyItemsNum[100] > 0
+            for i in [1..@prizeMoneyItemsNum[100]]
+                @prizeMoneyItemsConstructor.push(new HundredHomingMoney)
+        if @prizeMoneyItemsNum[1000] > 0
+            for i in [1..@prizeMoneyItemsNum[1000]]
+                @prizeMoneyItemsConstructor.push(new ThousandHomingMoney)
 class gpSystem extends appGroup
     constructor: () ->
         super
@@ -315,16 +392,16 @@ class Debug extends appNode
     constructor: () ->
         super
         #デバッグ用リールにすりかえる
-        @lille_flg = false
+        @lille_flg = true
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = false
+        @item_flg = true
         #アイテムが降ってくる頻度を上げる
-        @item_fall_early_flg = false
+        @item_fall_early_flg = true
         #デバッグ用リール配列
         @lille_array = [
-            [1,7],
-            [7,1],
-            [1,7]
+            [2,3],
+            [3,2],
+            [2,3]
         ]
 ###
 スロットのリールの並びや掛け金に対する当選額
@@ -704,31 +781,47 @@ class Money extends Item
             game.main_scene.gp_system.money_text.setValue()
 
 ###
-安い
+ホーミングする
 ###
-class CheapMoney extends Money
+class HomingMoney extends Money
+    constructor: (w, h) ->
+        super w, h
+
+###
+1円
+###
+class OneHomingMoney extends HomingMoney
+    constructor: (w, h) ->
+        super w, h
+        @price = 1
+        @frame = 2
+
+###
+10円
+###
+class TenHomingMoney extends HomingMoney
     constructor: (w, h) ->
         super w, h
         @price = 10
-        @frame = 3
+        @frame = 7
 
 ###
-普通
+100円
 ###
-class NormalMoney extends Money
+class HundredHomingMoney extends HomingMoney
     constructor: (w, h) ->
         super w, h
         @price = 100
-        @frame = 4
+        @frame = 5
 
 ###
-高い
+1000円
 ###
-class ExpensiveMoney extends Money
+class ThousandHomingMoney extends HomingMoney
     constructor: (w, h) ->
         super w, h
         @price = 1000
-        @frame = 5
+        @frame = 4
 class Slot extends appSprite
     constructor: (w, h) ->
         super w, h

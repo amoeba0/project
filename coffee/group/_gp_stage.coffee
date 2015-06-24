@@ -2,9 +2,6 @@ class gpStage extends appGroup
     constructor: () ->
         super
         @floor = 900 #床の位置
-        @itemFallSec = 5 #アイテムを降らせる周期（秒）
-        @catchItems = [] #キャッチアイテムのコンストラクタを格納
-        @nowCatchItemsNum = 0
 
 ###
 ステージ前面
@@ -13,6 +10,9 @@ class gpStage extends appGroup
 class stageFront extends gpStage
     constructor: () ->
         super
+        @itemFallSec = 5 #アイテムを降らせる周期（秒）
+        @catchItems = [] #キャッチアイテムのコンストラクタを格納
+        @nowCatchItemsNum = 0
         @initial()
     initial:()->
         @setPlayer()
@@ -50,3 +50,66 @@ class stageFront extends gpStage
 class stageBack extends gpStage
     constructor: () ->
         super
+        @prizeMoneyItemsConstructor = [] #スロット当選金のコンストラクタを格納
+        @prizeMoneyItemsNum = {1:0,10:0,100:0,1000:0} #当選金を降らせる各コイン数の内訳
+        @nowPrizeMoneyItemsNum = 0
+        @prizeMoneyFallIntervalFrm = 6 #スロットの当選金を降らせる間隔（フレーム）
+        @prizeMoneyFallPeriodSec = 5 #スロットの当選金額が振っている時間（秒）
+        @isFallPrizeMoney = false #スロットの当選金が振っている間はtrue
+    ###
+    スロットの当選金額を降らせる
+    @param value number 金額
+    ###
+    fallPrizeMoneyStart:(value) ->
+        @_calcPrizeMoneyItemsNum(value)
+        @_setPrizeMoneyItemsConstructor()
+        console.log(@prizeMoneyItemsConstructor)
+
+    ###
+    当選金の内訳のコイン枚数を計算する
+    @param value number 金額
+    ###
+    _calcPrizeMoneyItemsNum:(value)->
+        if value <= 20 #全部1円
+            @prizeMoneyItemsNum[1] = value
+            @prizeMoneyItemsNum[10] = 0
+            @prizeMoneyItemsNum[100] = 0
+            @prizeMoneyItemsNum[1000] = 0
+        else if value < 100 #1円と10円と端数
+            @prizeMoneyItemsNum[1] = game.getDigitNum(value, 1) + 10
+            @prizeMoneyItemsNum[10] = game.getDigitNum(value, 2) - 1
+            @prizeMoneyItemsNum[100] = 0
+            @prizeMoneyItemsNum[1000] = 0
+        else if value < 1000 #10円と100円と端数
+            @prizeMoneyItemsNum[1] = game.getDigitNum(value, 1)
+            @prizeMoneyItemsNum[10] = game.getDigitNum(value, 2) + 10
+            @prizeMoneyItemsNum[100] = game.getDigitNum(value, 3) - 1
+            @prizeMoneyItemsNum[1000] = 0
+        else if value < 10000 #1000円と100円と端数
+            @prizeMoneyItemsNum[1] = game.getDigitNum(value, 1)
+            @prizeMoneyItemsNum[10] = game.getDigitNum(value, 2)
+            @prizeMoneyItemsNum[100] = game.getDigitNum(value, 3) + 10
+            @prizeMoneyItemsNum[1000] = game.getDigitNum(value, 4) - 1
+        else #全部1000円と端数
+            @prizeMoneyItemsNum[1] = game.getDigitNum(value, 1)
+            @prizeMoneyItemsNum[10] = game.getDigitNum(value, 2)
+            @prizeMoneyItemsNum[100] = game.getDigitNum(value, 3)
+            @prizeMoneyItemsNum[1000] = Math.floor(value/1000)
+
+    ###
+    当選金コインのコンストラクタを設置
+    ###
+    _setPrizeMoneyItemsConstructor:()->
+        @prizeMoneyItemsConstructor = []
+        if @prizeMoneyItemsNum[1] > 0
+            for i in [1..@prizeMoneyItemsNum[1]]
+                @prizeMoneyItemsConstructor.push(new OneHomingMoney)
+        if @prizeMoneyItemsNum[10] > 0
+            for i in [1..@prizeMoneyItemsNum[10]]
+                @prizeMoneyItemsConstructor.push(new TenHomingMoney)
+        if @prizeMoneyItemsNum[100] > 0
+            for i in [1..@prizeMoneyItemsNum[100]]
+                @prizeMoneyItemsConstructor.push(new HundredHomingMoney)
+        if @prizeMoneyItemsNum[1000] > 0
+            for i in [1..@prizeMoneyItemsNum[1000]]
+                @prizeMoneyItemsConstructor.push(new ThousandHomingMoney)

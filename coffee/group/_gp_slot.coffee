@@ -34,6 +34,7 @@ class gpSlot extends appGroup
     slotHitTest: () ->
         if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
             prize_money = @_calcPrizeMoney()
+            game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
 
     ###
     スロットの当選金額を計算
@@ -42,7 +43,6 @@ class gpSlot extends appGroup
         ret_money = 0
         eye = @middle_lille.lilleArray[@middle_lille.nowEye]
         ret_money = game.bet * game.slot_setting.bairitu[eye]
-        console.log(ret_money)
         return ret_money
 
     ###

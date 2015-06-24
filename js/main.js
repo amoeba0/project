@@ -1,4 +1,4 @@
-var Bear, Button, Catch, Character, CheapMoney, Debug, ExpensiveMoney, Floor, Frame, Guest, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, NormalMoney, Panorama, Param, Player, RightLille, Slot, System, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
+var Bear, Button, Catch, Character, Debug, Floor, Frame, Guest, HomingMoney, HundredHomingMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneHomingMoney, Panorama, Param, Player, RightLille, Slot, System, TenHomingMoney, ThousandHomingMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -60,6 +60,23 @@ appGame = (function(_super) {
       }
     }
     return this.preload(tmp);
+  };
+
+
+  /*
+  数値から右から数えた特定の桁を取り出して数値で返す
+  @param number num   数値
+  @param number digit 右から数えた桁数、例：1の位は１、10の位は２、１００の位は３
+  @return number
+   */
+
+  appGame.prototype.getDigitNum = function(num, digit) {
+    var result, split, split_num, tmp_num;
+    tmp_num = num + '';
+    split_num = tmp_num.length - digit;
+    split = tmp_num.substring(split_num, split_num + 1);
+    result = Number(split);
+    return result;
   };
 
   return appGame;
@@ -153,9 +170,9 @@ LoveliveGame = (function(_super) {
     };
     this.keybind(90, 'z');
     this.preloadAll();
-    this.money_init = 100;
+    this.money_init = 10000;
     this.money = 0;
-    this.bet = 1;
+    this.bet = 55;
   }
 
   LoveliveGame.prototype.onload = function() {
@@ -275,7 +292,8 @@ gpSlot = (function(_super) {
   gpSlot.prototype.slotHitTest = function() {
     var prize_money, _ref;
     if ((this.left_lille.lilleArray[this.left_lille.nowEye] === (_ref = this.middle_lille.lilleArray[this.middle_lille.nowEye]) && _ref === this.right_lille.lilleArray[this.right_lille.nowEye])) {
-      return prize_money = this._calcPrizeMoney();
+      prize_money = this._calcPrizeMoney();
+      return game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money);
     }
   };
 
@@ -289,7 +307,6 @@ gpSlot = (function(_super) {
     ret_money = 0;
     eye = this.middle_lille.lilleArray[this.middle_lille.nowEye];
     ret_money = game.bet * game.slot_setting.bairitu[eye];
-    console.log(ret_money);
     return ret_money;
   };
 
@@ -360,9 +377,6 @@ gpStage = (function(_super) {
   function gpStage() {
     gpStage.__super__.constructor.apply(this, arguments);
     this.floor = 900;
-    this.itemFallSec = 5;
-    this.catchItems = [];
-    this.nowCatchItemsNum = 0;
   }
 
   return gpStage;
@@ -380,6 +394,9 @@ stageFront = (function(_super) {
 
   function stageFront() {
     stageFront.__super__.constructor.apply(this, arguments);
+    this.itemFallSec = 5;
+    this.catchItems = [];
+    this.nowCatchItemsNum = 0;
     this.initial();
   }
 
@@ -443,7 +460,97 @@ stageBack = (function(_super) {
 
   function stageBack() {
     stageBack.__super__.constructor.apply(this, arguments);
+    this.prizeMoneyItemsConstructor = [];
+    this.prizeMoneyItemsNum = {
+      1: 0,
+      10: 0,
+      100: 0,
+      1000: 0
+    };
+    this.nowPrizeMoneyItemsNum = 0;
+    this.prizeMoneyFallIntervalFrm = 6;
+    this.prizeMoneyFallPeriodSec = 5;
+    this.isFallPrizeMoney = false;
   }
+
+
+  /*
+  スロットの当選金額を降らせる
+  @param value number 金額
+   */
+
+  stageBack.prototype.fallPrizeMoneyStart = function(value) {
+    this._calcPrizeMoneyItemsNum(value);
+    this._setPrizeMoneyItemsConstructor();
+    return console.log(this.prizeMoneyItemsConstructor);
+  };
+
+
+  /*
+  当選金の内訳のコイン枚数を計算する
+  @param value number 金額
+   */
+
+  stageBack.prototype._calcPrizeMoneyItemsNum = function(value) {
+    if (value <= 20) {
+      this.prizeMoneyItemsNum[1] = value;
+      this.prizeMoneyItemsNum[10] = 0;
+      this.prizeMoneyItemsNum[100] = 0;
+      return this.prizeMoneyItemsNum[1000] = 0;
+    } else if (value < 100) {
+      this.prizeMoneyItemsNum[1] = game.getDigitNum(value, 1) + 10;
+      this.prizeMoneyItemsNum[10] = game.getDigitNum(value, 2) - 1;
+      this.prizeMoneyItemsNum[100] = 0;
+      return this.prizeMoneyItemsNum[1000] = 0;
+    } else if (value < 1000) {
+      this.prizeMoneyItemsNum[1] = game.getDigitNum(value, 1);
+      this.prizeMoneyItemsNum[10] = game.getDigitNum(value, 2) + 10;
+      this.prizeMoneyItemsNum[100] = game.getDigitNum(value, 3) - 1;
+      return this.prizeMoneyItemsNum[1000] = 0;
+    } else if (value < 10000) {
+      this.prizeMoneyItemsNum[1] = game.getDigitNum(value, 1);
+      this.prizeMoneyItemsNum[10] = game.getDigitNum(value, 2);
+      this.prizeMoneyItemsNum[100] = game.getDigitNum(value, 3) + 10;
+      return this.prizeMoneyItemsNum[1000] = game.getDigitNum(value, 4) - 1;
+    } else {
+      this.prizeMoneyItemsNum[1] = game.getDigitNum(value, 1);
+      this.prizeMoneyItemsNum[10] = game.getDigitNum(value, 2);
+      this.prizeMoneyItemsNum[100] = game.getDigitNum(value, 3);
+      return this.prizeMoneyItemsNum[1000] = Math.floor(value / 1000);
+    }
+  };
+
+
+  /*
+  当選金コインのコンストラクタを設置
+   */
+
+  stageBack.prototype._setPrizeMoneyItemsConstructor = function() {
+    var i, _i, _j, _k, _l, _ref, _ref1, _ref2, _ref3, _results;
+    this.prizeMoneyItemsConstructor = [];
+    if (this.prizeMoneyItemsNum[1] > 0) {
+      for (i = _i = 1, _ref = this.prizeMoneyItemsNum[1]; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+        this.prizeMoneyItemsConstructor.push(new OneHomingMoney);
+      }
+    }
+    if (this.prizeMoneyItemsNum[10] > 0) {
+      for (i = _j = 1, _ref1 = this.prizeMoneyItemsNum[10]; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
+        this.prizeMoneyItemsConstructor.push(new TenHomingMoney);
+      }
+    }
+    if (this.prizeMoneyItemsNum[100] > 0) {
+      for (i = _k = 1, _ref2 = this.prizeMoneyItemsNum[100]; 1 <= _ref2 ? _k <= _ref2 : _k >= _ref2; i = 1 <= _ref2 ? ++_k : --_k) {
+        this.prizeMoneyItemsConstructor.push(new HundredHomingMoney);
+      }
+    }
+    if (this.prizeMoneyItemsNum[1000] > 0) {
+      _results = [];
+      for (i = _l = 1, _ref3 = this.prizeMoneyItemsNum[1000]; 1 <= _ref3 ? _l <= _ref3 : _l >= _ref3; i = 1 <= _ref3 ? ++_l : --_l) {
+        _results.push(this.prizeMoneyItemsConstructor.push(new ThousandHomingMoney));
+      }
+      return _results;
+    }
+  };
 
   return stageBack;
 
@@ -554,10 +661,10 @@ Debug = (function(_super) {
 
   function Debug() {
     Debug.__super__.constructor.apply(this, arguments);
-    this.lille_flg = false;
-    this.item_flg = false;
-    this.item_fall_early_flg = false;
-    this.lille_array = [[1, 7], [7, 1], [1, 7]];
+    this.lille_flg = true;
+    this.item_flg = true;
+    this.item_fall_early_flg = true;
+    this.lille_array = [[2, 3], [3, 2], [2, 3]];
   }
 
   return Debug;
@@ -1196,57 +1303,91 @@ Money = (function(_super) {
 
 
 /*
-安い
+ホーミングする
  */
 
-CheapMoney = (function(_super) {
-  __extends(CheapMoney, _super);
+HomingMoney = (function(_super) {
+  __extends(HomingMoney, _super);
 
-  function CheapMoney(w, h) {
-    CheapMoney.__super__.constructor.call(this, w, h);
+  function HomingMoney(w, h) {
+    HomingMoney.__super__.constructor.call(this, w, h);
+  }
+
+  return HomingMoney;
+
+})(Money);
+
+
+/*
+1円
+ */
+
+OneHomingMoney = (function(_super) {
+  __extends(OneHomingMoney, _super);
+
+  function OneHomingMoney(w, h) {
+    OneHomingMoney.__super__.constructor.call(this, w, h);
+    this.price = 1;
+    this.frame = 2;
+  }
+
+  return OneHomingMoney;
+
+})(HomingMoney);
+
+
+/*
+10円
+ */
+
+TenHomingMoney = (function(_super) {
+  __extends(TenHomingMoney, _super);
+
+  function TenHomingMoney(w, h) {
+    TenHomingMoney.__super__.constructor.call(this, w, h);
     this.price = 10;
-    this.frame = 3;
+    this.frame = 7;
   }
 
-  return CheapMoney;
+  return TenHomingMoney;
 
-})(Money);
+})(HomingMoney);
 
 
 /*
-普通
+100円
  */
 
-NormalMoney = (function(_super) {
-  __extends(NormalMoney, _super);
+HundredHomingMoney = (function(_super) {
+  __extends(HundredHomingMoney, _super);
 
-  function NormalMoney(w, h) {
-    NormalMoney.__super__.constructor.call(this, w, h);
+  function HundredHomingMoney(w, h) {
+    HundredHomingMoney.__super__.constructor.call(this, w, h);
     this.price = 100;
-    this.frame = 4;
-  }
-
-  return NormalMoney;
-
-})(Money);
-
-
-/*
-高い
- */
-
-ExpensiveMoney = (function(_super) {
-  __extends(ExpensiveMoney, _super);
-
-  function ExpensiveMoney(w, h) {
-    ExpensiveMoney.__super__.constructor.call(this, w, h);
-    this.price = 1000;
     this.frame = 5;
   }
 
-  return ExpensiveMoney;
+  return HundredHomingMoney;
 
-})(Money);
+})(HomingMoney);
+
+
+/*
+1000円
+ */
+
+ThousandHomingMoney = (function(_super) {
+  __extends(ThousandHomingMoney, _super);
+
+  function ThousandHomingMoney(w, h) {
+    ThousandHomingMoney.__super__.constructor.call(this, w, h);
+    this.price = 1000;
+    this.frame = 4;
+  }
+
+  return ThousandHomingMoney;
+
+})(HomingMoney);
 
 Slot = (function(_super) {
   __extends(Slot, _super);

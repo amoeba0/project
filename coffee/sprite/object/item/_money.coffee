@@ -24,28 +24,44 @@ class Money extends Item
             game.main_scene.gp_system.money_text.setValue()
 
 ###
-安い
+ホーミングする
 ###
-class CheapMoney extends Money
+class HomingMoney extends Money
+    constructor: (w, h) ->
+        super w, h
+
+###
+1円
+###
+class OneHomingMoney extends HomingMoney
+    constructor: (w, h) ->
+        super w, h
+        @price = 1
+        @frame = 2
+
+###
+10円
+###
+class TenHomingMoney extends HomingMoney
     constructor: (w, h) ->
         super w, h
         @price = 10
-        @frame = 3
+        @frame = 7
 
 ###
-普通
+100円
 ###
-class NormalMoney extends Money
+class HundredHomingMoney extends HomingMoney
     constructor: (w, h) ->
         super w, h
         @price = 100
-        @frame = 4
+        @frame = 5
 
 ###
-高い
+1000円
 ###
-class ExpensiveMoney extends Money
+class ThousandHomingMoney extends HomingMoney
     constructor: (w, h) ->
         super w, h
         @price = 1000
-        @frame = 5
+        @frame = 4
