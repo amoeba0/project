@@ -3,14 +3,17 @@
 ###
 class Money extends Item
     constructor: (w, h) ->
-        super w, h
-        @price = 1 #単価
         super 48, 48
+        @scaleX = 0.5
+        @scaleY = 0.5
+        @price = 1 #単価
+        @gravity = 2
         @image = game.imageload("icon1")
 
     onenterframe: (e) ->
         @vy += @gravity
         @y += @vy
+        @x += @vx
         @hitPlayer()
         @removeOnFloor()
 
@@ -18,10 +21,14 @@ class Money extends Item
     プレイヤーに当たった時
     ###
     hitPlayer:()->
-        if @parentNode.player.intersect(@)
+        if game.main_scene.gp_stage_front.player.intersect(@)
             @parentNode.removeChild(@)
             game.money += @price
             game.main_scene.gp_system.money_text.setValue()
+
+    setPosition:()->
+        @y = @h * -1
+        @x = Math.floor((game.width - @w) * Math.random())
 
 ###
 ホーミングする
@@ -29,7 +36,9 @@ class Money extends Item
 class HomingMoney extends Money
     constructor: (w, h) ->
         super w, h
-
+        @addEventListener('enterframe', ()->
+            @vx = Math.round( (game.main_scene.gp_stage_front.player.x - @x) / ((game.main_scene.gp_stage_front.player.y - @y) / @vy) )
+        )
 ###
 1円
 ###

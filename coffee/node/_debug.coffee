@@ -12,7 +12,7 @@ class Debug extends appNode
         @item_fall_early_flg = true
         #デバッグ用リール配列
         @lille_array = [
-            [2,3],
-            [3,2],
-            [2,3]
+            [7,1],
+            [1,7],
+            [7,1]
         ]

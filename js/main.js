@@ -460,7 +460,7 @@ stageBack = (function(_super) {
 
   function stageBack() {
     stageBack.__super__.constructor.apply(this, arguments);
-    this.prizeMoneyItemsConstructor = [];
+    this.prizeMoneyItemsInstance = [];
     this.prizeMoneyItemsNum = {
       1: 0,
       10: 0,
@@ -468,21 +468,44 @@ stageBack = (function(_super) {
       1000: 0
     };
     this.nowPrizeMoneyItemsNum = 0;
-    this.prizeMoneyFallIntervalFrm = 6;
+    this.prizeMoneyFallIntervalFrm = 4;
     this.prizeMoneyFallPeriodSec = 5;
     this.isFallPrizeMoney = false;
   }
 
+  stageBack.prototype.onenterframe = function() {
+    return this._moneyFall();
+  };
+
 
   /*
-  スロットの当選金額を降らせる
+  スロットの当選金を降らせる
   @param value number 金額
    */
 
   stageBack.prototype.fallPrizeMoneyStart = function(value) {
     this._calcPrizeMoneyItemsNum(value);
-    this._setPrizeMoneyItemsConstructor();
-    return console.log(this.prizeMoneyItemsConstructor);
+    this._setPrizeMoneyItemsInstance();
+    this.prizeMoneyFallPeriodSec = Math.ceil(this.prizeMoneyItemsInstance.length * this.prizeMoneyFallIntervalFrm);
+    console.log(this.prizeMoneyFallPeriodSec);
+    return this.isFallPrizeMoney = true;
+  };
+
+
+  /*
+  スロットの当選金を降らせる
+   */
+
+  stageBack.prototype._moneyFall = function() {
+    if (this.isFallPrizeMoney === true && this.age % this.prizeMoneyFallIntervalFrm === 0) {
+      this.addChild(this.prizeMoneyItemsInstance[this.nowPrizeMoneyItemsNum]);
+      this.prizeMoneyItemsInstance[this.nowPrizeMoneyItemsNum].setPosition();
+      this.nowPrizeMoneyItemsNum += 1;
+      if (this.nowPrizeMoneyItemsNum === this.prizeMoneyItemsInstance.length) {
+        this.nowPrizeMoneyItemsNum = 0;
+        return this.isFallPrizeMoney = false;
+      }
+    }
   };
 
 
@@ -522,31 +545,31 @@ stageBack = (function(_super) {
 
 
   /*
-  当選金コインのコンストラクタを設置
+  当選金コインのインスタンスを設置
    */
 
-  stageBack.prototype._setPrizeMoneyItemsConstructor = function() {
+  stageBack.prototype._setPrizeMoneyItemsInstance = function() {
     var i, _i, _j, _k, _l, _ref, _ref1, _ref2, _ref3, _results;
-    this.prizeMoneyItemsConstructor = [];
+    this.prizeMoneyItemsInstance = [];
     if (this.prizeMoneyItemsNum[1] > 0) {
       for (i = _i = 1, _ref = this.prizeMoneyItemsNum[1]; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
-        this.prizeMoneyItemsConstructor.push(new OneHomingMoney);
+        this.prizeMoneyItemsInstance.push(new OneHomingMoney);
       }
     }
     if (this.prizeMoneyItemsNum[10] > 0) {
       for (i = _j = 1, _ref1 = this.prizeMoneyItemsNum[10]; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
-        this.prizeMoneyItemsConstructor.push(new TenHomingMoney);
+        this.prizeMoneyItemsInstance.push(new TenHomingMoney);
       }
     }
     if (this.prizeMoneyItemsNum[100] > 0) {
       for (i = _k = 1, _ref2 = this.prizeMoneyItemsNum[100]; 1 <= _ref2 ? _k <= _ref2 : _k >= _ref2; i = 1 <= _ref2 ? ++_k : --_k) {
-        this.prizeMoneyItemsConstructor.push(new HundredHomingMoney);
+        this.prizeMoneyItemsInstance.push(new HundredHomingMoney);
       }
     }
     if (this.prizeMoneyItemsNum[1000] > 0) {
       _results = [];
       for (i = _l = 1, _ref3 = this.prizeMoneyItemsNum[1000]; 1 <= _ref3 ? _l <= _ref3 : _l >= _ref3; i = 1 <= _ref3 ? ++_l : --_l) {
-        _results.push(this.prizeMoneyItemsConstructor.push(new ThousandHomingMoney));
+        _results.push(this.prizeMoneyItemsInstance.push(new ThousandHomingMoney));
       }
       return _results;
     }
@@ -664,7 +687,7 @@ Debug = (function(_super) {
     this.lille_flg = true;
     this.item_flg = true;
     this.item_fall_early_flg = true;
-    this.lille_array = [[2, 3], [3, 2], [2, 3]];
+    this.lille_array = [[7, 1], [1, 7], [7, 1]];
   }
 
   return Debug;
@@ -1271,15 +1294,18 @@ Money = (function(_super) {
   __extends(Money, _super);
 
   function Money(w, h) {
-    Money.__super__.constructor.call(this, w, h);
-    this.price = 1;
     Money.__super__.constructor.call(this, 48, 48);
+    this.scaleX = 0.5;
+    this.scaleY = 0.5;
+    this.price = 1;
+    this.gravity = 2;
     this.image = game.imageload("icon1");
   }
 
   Money.prototype.onenterframe = function(e) {
     this.vy += this.gravity;
     this.y += this.vy;
+    this.x += this.vx;
     this.hitPlayer();
     return this.removeOnFloor();
   };
@@ -1290,11 +1316,16 @@ Money = (function(_super) {
    */
 
   Money.prototype.hitPlayer = function() {
-    if (this.parentNode.player.intersect(this)) {
+    if (game.main_scene.gp_stage_front.player.intersect(this)) {
       this.parentNode.removeChild(this);
       game.money += this.price;
       return game.main_scene.gp_system.money_text.setValue();
     }
+  };
+
+  Money.prototype.setPosition = function() {
+    this.y = this.h * -1;
+    return this.x = Math.floor((game.width - this.w) * Math.random());
   };
 
   return Money;
@@ -1311,6 +1342,9 @@ HomingMoney = (function(_super) {
 
   function HomingMoney(w, h) {
     HomingMoney.__super__.constructor.call(this, w, h);
+    this.addEventListener('enterframe', function() {
+      return this.vx = Math.round((game.main_scene.gp_stage_front.player.x - this.x) / ((game.main_scene.gp_stage_front.player.y - this.y) / this.vy));
+    });
   }
 
   return HomingMoney;
