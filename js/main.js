@@ -1,4 +1,4 @@
-var Bear, Button, Catch, Character, Debug, Floor, Frame, Guest, HomingMoney, HundredHomingMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneHomingMoney, Panorama, Param, Player, RightLille, Slot, System, TenHomingMoney, ThousandHomingMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
+var Bear, Button, Catch, Character, Debug, Floor, Frame, Guest, HomingMoney, HundredHomingMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneHomingMoney, Panorama, Param, Player, RightLille, Slot, System, TenHomingMoney, TensionGauge, TensionGaugeBack, ThousandHomingMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, comboText, comboUnitText, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -161,18 +161,23 @@ LoveliveGame = (function(_super) {
     this.width = 640;
     this.height = 960;
     this.fps = 24;
-    this.imgList = ['chara1', 'icon1', 'lille', 'under_frame'];
+    this.imgList = ['chun', 'sweets', 'icon1', 'lille', 'under_frame'];
     this.sondList = [];
     this.keyList = {
       'left': false,
       'right': false,
-      'jump': false
+      'jump': false,
+      'up': false,
+      'down': false
     };
     this.keybind(90, 'z');
     this.preloadAll();
-    this.money_init = 10000;
+    this.money_init = 1000;
     this.money = 0;
-    this.bet = 55;
+    this.bet = 10;
+    this.combo = 0;
+    this.tension = 0;
+    this.item_kind = 0;
   }
 
   LoveliveGame.prototype.onload = function() {
@@ -216,6 +221,24 @@ LoveliveGame = (function(_super) {
         this.keyList.right = false;
       }
     }
+    if (this.input.up === true) {
+      if (this.keyList.up === false) {
+        this.keyList.up = true;
+      }
+    } else {
+      if (this.keyList.up === true) {
+        this.keyList.up = false;
+      }
+    }
+    if (this.input.down === true) {
+      if (this.keyList.down === false) {
+        this.keyList.down = true;
+      }
+    } else {
+      if (this.keyList.down === true) {
+        this.keyList.down = false;
+      }
+    }
     if (this.input.z === true) {
       if (this.keyList.jump === false) {
         return this.keyList.jump = true;
@@ -225,6 +248,56 @@ LoveliveGame = (function(_super) {
         return this.keyList.jump = false;
       }
     }
+  };
+
+
+  /*
+  テンションゲージを増減する
+  @param number val 増減値
+   */
+
+  LoveliveGame.prototype._tensionSetValue = function(val) {
+    this.tension += val;
+    if (this.tension < 0) {
+      this.tension = 0;
+    } else if (this.tension > this.slot_setting.tension_max) {
+      this.tension = this.slot_setting.tension_max;
+    }
+    return this.main_scene.gp_system.tension_gauge.setValue();
+  };
+
+
+  /*
+  アイテムを取った時にテンションゲージを増減する
+   */
+
+  LoveliveGame.prototype.tensionSetValueItemCatch = function() {
+    var val;
+    val = this.slot_setting.setTensionItemCatch();
+    return this._tensionSetValue(val);
+  };
+
+
+  /*
+  アイテムを落とした時にテンションゲージを増減する
+   */
+
+  LoveliveGame.prototype.tensionSetValueItemFall = function() {
+    var val;
+    val = this.slot_setting.setTensionItemFall();
+    return this._tensionSetValue(val);
+  };
+
+
+  /*
+  スロットが当たった時にテンションゲージを増減する
+  @param number prize_money 当選金額
+   */
+
+  LoveliveGame.prototype.tensionSetValueSlotHit = function(prize_money) {
+    var val;
+    val = this.slot_setting.setTensionSlotHit(prize_money);
+    return this._tensionSetValue(val);
   };
 
   return LoveliveGame;
@@ -293,7 +366,8 @@ gpSlot = (function(_super) {
     var prize_money, _ref;
     if ((this.left_lille.lilleArray[this.left_lille.nowEye] === (_ref = this.middle_lille.lilleArray[this.middle_lille.nowEye]) && _ref === this.right_lille.lilleArray[this.right_lille.nowEye])) {
       prize_money = this._calcPrizeMoney();
-      return game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money);
+      game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money);
+      return game.tensionSetValueSlotHit(prize_money);
     }
   };
 
@@ -440,6 +514,9 @@ stageFront = (function(_super) {
       this.catchItems[this.nowCatchItemsNum].setPosition(1);
       this.nowCatchItemsNum += 1;
       game.money -= game.bet;
+      if (game.bet > game.money) {
+        game.bet = game.money;
+      }
       game.main_scene.gp_system.money_text.setValue();
       return game.main_scene.gp_slot.slotStart();
     }
@@ -588,7 +665,95 @@ gpSystem = (function(_super) {
     this.addChild(this.money_text);
     this.bet_text = new betText();
     this.addChild(this.bet_text);
+    this.combo_unit_text = new comboUnitText();
+    this.addChild(this.combo_unit_text);
+    this.combo_text = new comboText();
+    this.addChild(this.combo_text);
+    this.tension_gauge_back = new TensionGaugeBack();
+    this.addChild(this.tension_gauge_back);
+    this.tension_gauge = new TensionGauge();
+    this.addChild(this.tension_gauge);
+    this.keyList = {
+      'up': false,
+      'down': false
+    };
   }
+
+  gpSystem.prototype.onenterframe = function(e) {
+    return this._betSetting();
+  };
+
+
+  /*
+  キーの上下を押して掛け金を設定する
+   */
+
+  gpSystem.prototype._betSetting = function() {
+    if (game.keyList['up'] === true) {
+      if (this.keyList['up'] === false) {
+        console.log('up');
+        this._getBetSettingValue(true);
+        this.keyList['up'] = true;
+      }
+    } else {
+      if (this.keyList['up'] === true) {
+        this.keyList['up'] = false;
+      }
+    }
+    if (game.keyList['down'] === true) {
+      if (this.keyList['down'] === false) {
+        console.log('down');
+        this._getBetSettingValue(false);
+        return this.keyList['down'] = true;
+      }
+    } else {
+      if (this.keyList['down'] === true) {
+        return this.keyList['down'] = false;
+      }
+    }
+  };
+
+  gpSystem.prototype._getBetSettingValue = function(up) {
+    var bet, val;
+    val = 1;
+    bet = game.bet;
+    if (up === true) {
+      if (bet < 10) {
+        val = 1;
+      } else if (bet < 100) {
+        val = 10;
+      } else if (bet < 1000) {
+        val = 100;
+      } else if (bet < 10000) {
+        val = 1000;
+      } else if (bet < 100000) {
+        val = 10000;
+      } else {
+        val = 100000;
+      }
+    } else {
+      if (bet <= 10) {
+        val = -1;
+      } else if (bet <= 100) {
+        val = -10;
+      } else if (bet <= 1000) {
+        val = -100;
+      } else if (bet <= 10000) {
+        val = -1000;
+      } else if (bet <= 100000) {
+        val = -10000;
+      } else {
+        val = -100000;
+      }
+    }
+    game.bet += val;
+    if (game.bet < 1) {
+      game.bet = 1;
+    } else if (game.bet > game.money) {
+      game.bet = game.money;
+    }
+    return this.bet_text.setValue();
+  };
 
   return gpSystem;
 
@@ -674,6 +839,51 @@ betText = (function(_super) {
 
 })(text);
 
+comboText = (function(_super) {
+  __extends(comboText, _super);
+
+  function comboText() {
+    comboText.__super__.constructor.apply(this, arguments);
+    this.text = 0;
+    this.color = 'black';
+    this.font_size = 50;
+    this.font = this.font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
+    this.x = 260;
+    this.y = 100;
+  }
+
+  comboText.prototype.setValue = function() {
+    this.text = game.combo;
+    return this.setXposition();
+  };
+
+  comboText.prototype.setXposition = function() {
+    var unit;
+    unit = game.main_scene.gp_system.combo_unit_text;
+    this.x = game.width / 2 - (this._boundWidth + unit._boundWidth + 6) / 2;
+    return unit.x = this.x + this._boundWidth + 6;
+  };
+
+  return comboText;
+
+})(text);
+
+comboUnitText = (function(_super) {
+  __extends(comboUnitText, _super);
+
+  function comboUnitText() {
+    comboUnitText.__super__.constructor.apply(this, arguments);
+    this.text = 'combo';
+    this.color = 'black';
+    this.font = "30px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
+    this.x = 290;
+    this.y = 120;
+  }
+
+  return comboUnitText;
+
+})(text);
+
 
 /*
 デバッグ用設定
@@ -684,10 +894,25 @@ Debug = (function(_super) {
 
   function Debug() {
     Debug.__super__.constructor.apply(this, arguments);
-    this.lille_flg = true;
-    this.item_flg = true;
-    this.item_fall_early_flg = true;
+    this.all_debug_flg = false;
+    this.lille_flg = false;
+    this.item_flg = false;
+    this.item_fall_early_flg = false;
+    this.fix_tention_item_catch_flg = false;
+    this.fix_tention_item_fall_flg = false;
+    this.fix_tention_slot_hit_flg = false;
     this.lille_array = [[7, 1], [1, 7], [7, 1]];
+    this.fix_tention_item_catch_val = 50;
+    this.fix_tention_item_fall_val = -1;
+    this.fix_tention_slot_hit_flg = 200;
+    if (this.all_debug_flg === true) {
+      this.lille_flg = true;
+      this.item_flg = true;
+      this.item_fall_early_flg = true;
+      this.fix_tention_item_catch_flg = true;
+      this.fix_tention_item_fall_flg = true;
+      this.fix_tention_slot_hit_flg = true;
+    }
   }
 
   return Debug;
@@ -725,7 +950,144 @@ slotSetting = (function(_super) {
       18: 1000,
       19: 1000
     };
+    this.tension_max = 500;
   }
+
+
+  /*
+  アイテムを取った時のテンションゲージの増減値を決める
+   */
+
+  slotSetting.prototype.setTensionItemCatch = function() {
+    var val;
+    val = (this.tension_max - game.tension) * 0.01 * (game.item_kind + 1);
+    if (val >= 1) {
+      val = Math.round(val);
+    } else {
+      val = 1;
+    }
+    if (game.debug.fix_tention_item_catch_flg === true) {
+      val = game.debug.fix_tention_item_catch_val;
+    }
+    return val;
+  };
+
+
+  /*
+  アイテムを落とした時のテンションゲージの増減値を決める
+   */
+
+  slotSetting.prototype.setTensionItemFall = function() {
+    var bet_rate, correct, val;
+    bet_rate = game.bet / game.money;
+    if (game.money < 100) {
+      correct = 0.2;
+    } else if (game.money < 1000) {
+      correct = 0.4;
+    } else if (game.money < 10000) {
+      correct = 0.6;
+    } else if (game.money < 100000) {
+      correct = 0.8;
+    } else {
+      correct = 1;
+    }
+    val = bet_rate * correct * this.tension_max;
+    if (val > this.tension_max) {
+      val = this.tension_max;
+    } else if (val < this.tension_max * 0.05) {
+      val = this.tension_max * 0.05;
+    }
+    val = Math.round(val);
+    val *= -1;
+    if (game.debug.fix_tention_item_fall_flg === true) {
+      val = game.debug.fix_tention_item_fall_val;
+    }
+    return val;
+  };
+
+
+  /*
+  スロットが当たったのテンションゲージの増減値を決める
+  @param number prize_money 当選金額
+   */
+
+  slotSetting.prototype.setTensionSlotHit = function(prize_money) {
+    var correct, hit_rate, val;
+    hit_rate = prize_money / game.money;
+    if (game.money < 100) {
+      correct = 0.02;
+    } else if (game.money < 1000) {
+      correct = 0.04;
+    } else if (game.money < 10000) {
+      correct = 0.06;
+    } else if (game.money < 100000) {
+      correct = 0.08;
+    } else {
+      correct = 0.1;
+    }
+    val = hit_rate * correct * this.tension_max;
+    if (val > this.tension_max * 0.5) {
+      val = this.tension_max * 0.5;
+    } else if (val < this.tension_max * 0.1) {
+      val = this.tension_max * 0.1;
+    }
+    val = Math.round(val);
+    if (game.debug.fix_tention_slot_hit_flg === true) {
+      val = game.debug.fix_tention_slot_hit_flg;
+    }
+    return val;
+  };
+
+
+  /*
+  落下するアイテムの種類を決める
+  @return 0から4のどれか
+   */
+
+  slotSetting.prototype.getCatchItemFrame = function() {
+    var rate, rate_0, rate_1, rate_2, rate_3, val;
+    val = 0;
+    rate = Math.round(Math.random() * 100);
+    if (game.bet < 100) {
+      rate_0 = 60;
+      rate_1 = 80;
+      rate_2 = 90;
+      rate_3 = 95;
+    } else if (game.bet < 1000) {
+      rate_0 = 20;
+      rate_1 = 60;
+      rate_2 = 80;
+      rate_3 = 90;
+    } else if (game.bet < 10000) {
+      rate_0 = 10;
+      rate_1 = 30;
+      rate_2 = 60;
+      rate_3 = 80;
+    } else if (game.bet < 100000) {
+      rate_0 = 5;
+      rate_1 = 20;
+      rate_2 = 40;
+      rate_3 = 70;
+    } else {
+      rate_0 = 2;
+      rate_1 = 10;
+      rate_2 = 30;
+      rate_3 = 50;
+    }
+    if (rate < rate_0) {
+      val = 0;
+    } else if (rate < rate_1) {
+      val = 1;
+    } else if (rate < rate_2) {
+      val = 2;
+    } else if (rate < rate_3) {
+      val = 3;
+    } else {
+      val = 4;
+    }
+    game.item_kind = val;
+    return val;
+  };
 
   return slotSetting;
 
@@ -1055,6 +1417,8 @@ Character = (function(_super) {
           return this.frame = 2;
         }
       }
+    } else {
+      return this.frame = 3;
     }
   };
 
@@ -1170,8 +1534,8 @@ Bear = (function(_super) {
   __extends(Bear, _super);
 
   function Bear() {
-    Bear.__super__.constructor.call(this, 96, 96);
-    this.image = game.imageload("chara1");
+    Bear.__super__.constructor.call(this, 90, 87);
+    this.image = game.imageload("chun");
     this.x = 0;
     this.y = 0;
   }
@@ -1188,17 +1552,6 @@ Item = (function(_super) {
     this.vx = 0;
     this.vy = 0;
   }
-
-
-  /*
-  地面に落ちたら消す
-   */
-
-  Item.prototype.removeOnFloor = function() {
-    if (this.y > game.height + this.h) {
-      return this.parentNode.removeChild(this);
-    }
-  };
 
   return Item;
 
@@ -1231,8 +1584,24 @@ Catch = (function(_super) {
   Catch.prototype.hitPlayer = function() {
     if (this.parentNode.player.intersect(this)) {
       this.parentNode.removeChild(this);
-      console.log('hit!');
-      return game.main_scene.gp_slot.slotStop();
+      game.combo += 1;
+      game.main_scene.gp_system.combo_text.setValue();
+      game.main_scene.gp_slot.slotStop();
+      return game.tensionSetValueItemCatch();
+    }
+  };
+
+
+  /*
+  地面に落ちたら消す
+   */
+
+  Catch.prototype.removeOnFloor = function() {
+    if (this.y > game.height + this.h) {
+      this.parentNode.removeChild(this);
+      game.combo = 0;
+      game.main_scene.gp_system.combo_text.setValue();
+      return game.tensionSetValueItemFall();
     }
   };
 
@@ -1244,6 +1613,7 @@ Catch = (function(_super) {
   Catch.prototype.setPosition = function(gravity) {
     this.y = this.h * -1;
     this.x = this._setPositoinX();
+    this.frame = game.slot_setting.getCatchItemFrame();
     return this.gravity = gravity;
   };
 
@@ -1276,9 +1646,11 @@ MacaroonCatch = (function(_super) {
   __extends(MacaroonCatch, _super);
 
   function MacaroonCatch(w, h) {
-    MacaroonCatch.__super__.constructor.call(this, 48, 48);
-    this.image = game.imageload("icon1");
+    MacaroonCatch.__super__.constructor.call(this, 50, 50);
+    this.image = game.imageload("sweets");
     this.frame = 1;
+    this.scaleX = 1.5;
+    this.scaleY = 1.5;
   }
 
   return MacaroonCatch;
@@ -1320,6 +1692,17 @@ Money = (function(_super) {
       this.parentNode.removeChild(this);
       game.money += this.price;
       return game.main_scene.gp_system.money_text.setValue();
+    }
+  };
+
+
+  /*
+  地面に落ちたら消す
+   */
+
+  Money.prototype.removeOnFloor = function() {
+    if (this.y > game.height + this.h) {
+      return this.parentNode.removeChild(this);
     }
   };
 
@@ -1589,8 +1972,67 @@ Param = (function(_super) {
     Param.__super__.constructor.call(this, w, h);
   }
 
+  Param.prototype.drawRect = function(color) {
+    var surface;
+    surface = new Surface(this.w, this.h);
+    surface.context.fillStyle = color;
+    surface.context.fillRect(0, 0, this.w, this.h, 10);
+    surface.context.fill();
+    return surface;
+  };
+
   return Param;
 
 })(System);
+
+TensionGaugeBack = (function(_super) {
+  __extends(TensionGaugeBack, _super);
+
+  function TensionGaugeBack(w, h) {
+    TensionGaugeBack.__super__.constructor.call(this, 610, 25);
+    this.image = this.drawRect('#FFFFFF');
+    this.x = 15;
+    this.y = 75;
+  }
+
+  return TensionGaugeBack;
+
+})(Param);
+
+TensionGauge = (function(_super) {
+  __extends(TensionGauge, _super);
+
+  function TensionGauge(w, h) {
+    TensionGauge.__super__.constructor.call(this, 600, 15);
+    this.image = this.drawRect('#6EB7DB');
+    this.x = 20;
+    this.y = 80;
+    this.setValue();
+  }
+
+  TensionGauge.prototype.setValue = function() {
+    var tension;
+    tension = 0;
+    if (game.tension !== 0) {
+      tension = game.tension / game.slot_setting.tension_max;
+    }
+    this.scaleX = tension;
+    this.x = 20 - ((this.w - tension * this.w) / 2);
+    if (tension < 0.25) {
+      return this.image = this.drawRect('#6EB7DB');
+    } else if (tension < 0.5) {
+      return this.image = this.drawRect('#B2CF3E');
+    } else if (tension < 0.75) {
+      return this.image = this.drawRect('#F3C759');
+    } else if (tension < 1) {
+      return this.image = this.drawRect('#EDA184');
+    } else {
+      return this.image = this.drawRect('#F4D2DE');
+    }
+  };
+
+  return TensionGauge;
+
+})(Param);
 
 //# sourceMappingURL=main.js.map

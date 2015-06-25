@@ -15,14 +15,28 @@ class Catch extends Item
     hitPlayer:()->
         if @parentNode.player.intersect(@)
             @parentNode.removeChild(@)
-            console.log('hit!')
+            game.combo += 1
+            game.main_scene.gp_system.combo_text.setValue()
             game.main_scene.gp_slot.slotStop()
+            game.tensionSetValueItemCatch()
+
+    ###
+    地面に落ちたら消す
+    ###
+    removeOnFloor:()->
+        if @y > game.height + @h
+            @parentNode.removeChild(@)
+            game.combo = 0
+            game.main_scene.gp_system.combo_text.setValue()
+            game.tensionSetValueItemFall()
+
     ###
     座標と落下速度の設定
     ###
     setPosition:(gravity)->
         @y = @h * -1
         @x = @_setPositoinX()
+        @frame = game.slot_setting.getCatchItemFrame()
         @gravity = gravity
 
     ###
@@ -41,6 +55,8 @@ class Catch extends Item
 ###
 class MacaroonCatch extends Catch
     constructor: (w, h) ->
-        super 48, 48
-        @image = game.imageload("icon1")
+        super 50, 50
+        @image = game.imageload("sweets")
         @frame = 1
+        @scaleX = 1.5
+        @scaleY = 1.5

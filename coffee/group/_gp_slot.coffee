@@ -35,6 +35,7 @@ class gpSlot extends appGroup
         if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
             prize_money = @_calcPrizeMoney()
             game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
+            game.tensionSetValueSlotHit(prize_money)
 
     ###
     スロットの当選金額を計算

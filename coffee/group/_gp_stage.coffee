@@ -40,6 +40,8 @@ class stageFront extends gpStage
             @catchItems[@nowCatchItemsNum].setPosition(1)
             @nowCatchItemsNum += 1
             game.money -= game.bet
+            if game.bet > game.money
+                game.bet = game.money
             game.main_scene.gp_system.money_text.setValue()
             game.main_scene.gp_slot.slotStart()
 

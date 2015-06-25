@@ -26,6 +26,13 @@ class Money extends Item
             game.money += @price
             game.main_scene.gp_system.money_text.setValue()
 
+    ###
+    地面に落ちたら消す
+    ###
+    removeOnFloor:()->
+        if @y > game.height + @h
+            @parentNode.removeChild(@)
+
     setPosition:()->
         @y = @h * -1
         @x = Math.floor((game.width - @w) * Math.random())

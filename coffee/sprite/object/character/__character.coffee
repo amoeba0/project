@@ -164,3 +164,5 @@ class Character extends appObject
                     @frame = 1
                 else
                     @frame = 2
+        else
+            @frame = 3
