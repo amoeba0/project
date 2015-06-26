@@ -84,6 +84,7 @@ class LoveliveGame extends catchAndSlotGame
     @param number val 増減値
     ###
     _tensionSetValue:(val)->
+        @slot_setting.changeLilleForTension(@tension, val)
         @tension += val
         if @tension < 0
             @tension = 0

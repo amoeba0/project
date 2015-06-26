@@ -106,8 +106,6 @@ class stageBack extends gpStage
         if @prizeMoneyFallPeriodSec > stage.itemFallSecInit
             stage.setItemFallFrm(@prizeMoneyFallPeriodSec)
         @isFallPrizeMoney = true
-        console.log(@oneSetMoney)
-        console.log(@prizeMoneyFallPeriodSec)
 
     ###
     スロットの当選金を降らせる
