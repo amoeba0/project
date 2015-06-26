@@ -106,8 +106,6 @@ class stageBack extends gpStage
         if @prizeMoneyFallPeriodSec > stage.itemFallSecInit
             stage.setItemFallFrm(@prizeMoneyFallPeriodSec)
         @isFallPrizeMoney = true
-        console.log(@oneSetMoney)
-        console.log(@prizeMoneyFallPeriodSec)
 
     ###
     スロットの当選金を降らせる
@@ -115,6 +113,7 @@ class stageBack extends gpStage
     _moneyFall:()->
         if @isFallPrizeMoney is true && @age % @prizeMoneyFallIntervalFrm is 0
             for i in [1..@oneSetMoney]
+                # TODO バグあり
                 @addChild(@prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum])
                 @prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum].setPosition()
                 @nowPrizeMoneyItemsNum += 1
