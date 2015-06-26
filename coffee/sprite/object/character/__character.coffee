@@ -113,7 +113,7 @@ class Character extends appObject
     ###地面にめり込んでる時trueを返す###
     _crossFloor:()->
         flg = false
-        if @vy > 0 && @y + @h > @parentNode.floor
+        if @vy > 0 && @y + @h > game.main_scene.gp_stage_front.floor
             flg = true
         return flg
 
@@ -139,7 +139,7 @@ class Character extends appObject
         @y += velocityY
         if @isAir is true && @_crossFloor() is true
             @vy = 0
-            @y = @parentNode.floor - @h
+            @y = game.main_scene.gp_stage_front.floor - @h
             @isAir = false
 
     ###

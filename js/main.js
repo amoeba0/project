@@ -738,12 +738,14 @@ stageBack = (function(_super) {
     this.returnMoneyItemsNum = this._calcMoneyItemsNum(val, false);
     this.returnMoneyItemsInstance = this._setMoneyItemsInstance(this.returnMoneyItemsNum, false);
     stage = game.main_scene.gp_stage_front;
-    return this.returnMoneyFallIntervalFrm = Math.round(stage.itemFallSecInit * game.fps / this.returnMoneyItemsInstance.length);
+    this.returnMoneyFallIntervalFrm = Math.round(stage.itemFallSecInit * game.fps / this.returnMoneyItemsInstance.length);
+    return this.nowReturnMoneyItemsNum = 0;
   };
 
   stageBack.prototype._returnMoneyFall = function() {
     if (this.isFallPrizeMoney === false && this.returnMoneyItemsInstance.length > 0 && this.age % this.returnMoneyFallIntervalFrm === 0) {
       if (this.nowReturnMoneyItemsNum === this.returnMoneyItemsInstance.length) {
+        this.returnMoneyItemsInstance = [];
         return this.nowReturnMoneyItemsNum = 0;
       } else {
         this.addChild(this.returnMoneyItemsInstance[this.nowReturnMoneyItemsNum]);
@@ -1451,7 +1453,7 @@ Character = (function(_super) {
   Character.prototype._crossFloor = function() {
     var flg;
     flg = false;
-    if (this.vy > 0 && this.y + this.h > this.parentNode.floor) {
+    if (this.vy > 0 && this.y + this.h > game.main_scene.gp_stage_front.floor) {
       flg = true;
     }
     return flg;
@@ -1484,7 +1486,7 @@ Character = (function(_super) {
     this.y += velocityY;
     if (this.isAir === true && this._crossFloor() === true) {
       this.vy = 0;
-      this.y = this.parentNode.floor - this.h;
+      this.y = game.main_scene.gp_stage_front.floor - this.h;
       return this.isAir = false;
     }
   };

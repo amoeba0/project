@@ -192,10 +192,12 @@ class stageBack extends gpStage
         @returnMoneyItemsInstance = @_setMoneyItemsInstance(@returnMoneyItemsNum, false)
         stage = game.main_scene.gp_stage_front
         @returnMoneyFallIntervalFrm = Math.round(stage.itemFallSecInit * game.fps / @returnMoneyItemsInstance.length)
+        @nowReturnMoneyItemsNum = 0
 
     _returnMoneyFall:()->
         if @isFallPrizeMoney is false && @returnMoneyItemsInstance.length > 0 && @age % @returnMoneyFallIntervalFrm is 0
             if @nowReturnMoneyItemsNum is @returnMoneyItemsInstance.length
+                @returnMoneyItemsInstance = []
                 @nowReturnMoneyItemsNum = 0
             else
                 @addChild(@returnMoneyItemsInstance[@nowReturnMoneyItemsNum])
