@@ -173,6 +173,13 @@ class LoveliveGame extends catchAndSlotGame
         @_tensionSetValue(val)
 
     ###
+    はずれのアイテムを取った時にテンションゲージを増減する
+    ###
+    tensionSetValueMissItemCatch:()->
+        val = @slot_setting.setTensionMissItemCatch()
+        @_tensionSetValue(val)
+
+    ###
     スロットが当たった時にテンションゲージを増減する
     @param number prize_money 当選金額
     ###
@@ -380,6 +387,10 @@ class stageFront extends gpStage
         @itemFallFrm = 0 #アイテムを降らせる周期（フレーム）
         @catchItems = [] #キャッチアイテムのインスタンスを格納
         @nowCatchItemsNum = 0
+        @missItemFallSycle = 4 #ハズレアイテムを取る周期
+        @missItemFallSycleNow = 0
+        @catchMissItems = []
+        @nowCatchMissItemsNum = 0
         @initial()
     initial:()->
         @setPlayer()
@@ -410,15 +421,19 @@ class stageFront extends gpStage
     _stageCycle:()->
         if @age % @itemFallFrm is 0
             @_catchFall()
+            @missItemFallSycleNow += 1
             game.main_scene.gp_stage_back.returnMoneyFallStart()
             if @itemFallSec != @itemFallSecInit
                 @setItemFallFrm(@itemFallSecInit)
+        if @missItemFallSycleNow is @missItemFallSycle && @age % @itemFallFrm is @itemFallFrm / 2
+            @_missCatchFall()
+            @missItemFallSycleNow = 0
 
     ###
     キャッチアイテムをランダムな位置から降らせる
     ###
     _catchFall:()->
-        if (game.money >= game.bet)
+        if game.money >= game.bet
             @catchItems.push(new MacaroonCatch())
             @addChild(@catchItems[@nowCatchItemsNum])
             @catchItems[@nowCatchItemsNum].setPosition()
@@ -428,6 +443,15 @@ class stageFront extends gpStage
                 game.bet = game.money
             game.main_scene.gp_system.money_text.setValue()
             game.main_scene.gp_slot.slotStart()
+
+    _missCatchFall:()->
+        if game.money >= game.bet
+            console.log('miss')
+            @catchMissItems.push(new OnionCatch())
+            @addChild(@catchMissItems[@nowCatchMissItemsNum])
+            @catchMissItems[@nowCatchMissItemsNum].setPosition()
+            @nowCatchMissItemsNum += 1
+
 
 ###
 ステージ背面
@@ -812,8 +836,8 @@ class slotSetting extends appNode
         ]
         #リールの目に対する当選額の倍率
         @bairitu = {
-            2:10, 3:30, 4:50, 5:100, 6:100, 1:300, 7:600,
-            11:1000, 12:1000, 13:1000, 14:1000, 15:1000, 16:1000, 17:1000, 18:1000, 19:1000
+            2:10, 3:20, 4:30, 5:50, 6:50, 1:150, 7:300,
+            11:500, 12:500, 13:500, 14:500, 15:500, 16:500, 17:500, 18:500, 19:500
         }
         #テンションの最大値
         @tension_max = 500
@@ -821,7 +845,7 @@ class slotSetting extends appNode
         @prev_muse_num = 0
 
     setGravity:()->
-        return Math.floor((game.tension / @tension_max) * 1.5) + 0.5
+        return Math.floor((game.tension / @tension_max) * 1.2) + 0.7
 
 
     ###
@@ -869,7 +893,9 @@ class slotSetting extends appNode
     アイテムを取った時のテンションゲージの増減値を決める
     ###
     setTensionItemCatch:()->
-        val = (@tension_max - game.tension) * 0.01 * (game.item_kind + 1)
+        val = (@tension_max - game.tension) * 0.005 * (game.item_kind + 1)
+        if game.main_scene.gp_stage_front.player.isAir is true
+            val *= 1.5
         if val >= 1
             val = Math.round(val)
         else
@@ -881,27 +907,18 @@ class slotSetting extends appNode
     アイテムを落とした時のテンションゲージの増減値を決める
     ###
     setTensionItemFall:()->
-        bet_rate = game.bet / game.money
-        if game.money < 100
-            correct = 0.2
-        else if game.money < 1000
-            correct = 0.4
-        else if game.money < 10000
-            correct = 0.6
-        else if game.money < 100000
-            correct = 0.8
-        else
-            correct = 1
-        val = bet_rate * correct * @tension_max
-        if val > @tension_max
-            val = @tension_max
-        else if val < @tension_max * 0.05
-            val = @tension_max * 0.05
-        val = Math.round(val)
+        val = game.tension * 0.2
+        if val < @tension_max * 0.1
+            val = @tension_max * 0.1
         val *= -1
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
         return val
+
+    setTensionMissItemCatch:()->
+        val = @tension_max * 0.2 * -1
+        return val
+
     ###
     スロットが当たったのテンションゲージの増減値を決める
     @param number prize_money 当選金額
@@ -930,21 +947,29 @@ class slotSetting extends appNode
 
     ###
     テンションの状態でスロットの内容を変更する
+    ミスアイテムの頻度を決める
     @param number tension 変化前のテンション
     @param number val     テンションの増減値
     ###
     changeLilleForTension:(tension, val)->
         slot = game.main_scene.gp_slot
+        stage = game.main_scene.gp_stage_front
         before = tension
         after = tension + val
         tension_33 = Math.floor(@tension_max * 0.33)
         tension_66 = Math.floor(@tension_max * 0.66)
         if before > tension_33 && after < tension_33
             slot.slotLilleChange(@lille_array, false)
+            stage.missItemFallSycle = 4
+            stage.missItemFallSycleNow = 0
         if before < tension_66 && after > tension_66
             slot.slotLilleChange(@lille_array_2, false)
+            stage.missItemFallSycle = 2
+            stage.missItemFallSycleNow = 0
         if (before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)
             slot.slotLilleChange(@lille_array_1, false)
+            stage.missItemFallSycle = 1
+            stage.missItemFallSycleNow = 0
         if before > 0 && after <= 0
             slot.slotLilleChange(@lille_array, true)
 
@@ -1312,14 +1337,14 @@ class Catch extends Item
     ###
     setPosition:()->
         @y = @h * -1
-        @x = @_setPositoinX()
+        @x = @setPositoinX()
         @frame = game.slot_setting.getCatchItemFrame()
         @gravity = game.slot_setting.setGravity()
 
     ###
     X座標の位置の設定
     ###
-    _setPositoinX:()->
+    setPositoinX:()->
         ret_x = 0
         if game.debug.item_flg
             ret_x = game.main_scene.gp_stage_front.player.x
@@ -1337,6 +1362,25 @@ class MacaroonCatch extends Catch
         @frame = 1
         @scaleX = 1.5
         @scaleY = 1.5
+
+class OnionCatch extends Catch
+    constructor: (w, h) ->
+        super 50, 50
+        @image = game.imageload("sweets")
+        @frame = 5
+        @scaleX = 1.5
+        @scaleY = 1.5
+    hitPlayer:()->
+        if game.main_scene.gp_stage_front.player.intersect(@)
+            game.main_scene.gp_stage_front.removeChild(@)
+            game.tensionSetValueMissItemCatch()
+    removeOnFloor:()->
+        if @y > game.height + @h
+            game.main_scene.gp_stage_front.removeChild(@)
+    setPosition:()->
+        @y = @h * -1
+        @x = @setPositoinX()
+        @gravity = game.slot_setting.setGravity()
 ###
 降ってくるお金
 @param boolean isHoming trueならコインがホーミングする

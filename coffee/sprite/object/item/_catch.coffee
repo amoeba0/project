@@ -35,14 +35,14 @@ class Catch extends Item
     ###
     setPosition:()->
         @y = @h * -1
-        @x = @_setPositoinX()
+        @x = @setPositoinX()
         @frame = game.slot_setting.getCatchItemFrame()
         @gravity = game.slot_setting.setGravity()
 
     ###
     X座標の位置の設定
     ###
-    _setPositoinX:()->
+    setPositoinX:()->
         ret_x = 0
         if game.debug.item_flg
             ret_x = game.main_scene.gp_stage_front.player.x
@@ -60,3 +60,22 @@ class MacaroonCatch extends Catch
         @frame = 1
         @scaleX = 1.5
         @scaleY = 1.5
+
+class OnionCatch extends Catch
+    constructor: (w, h) ->
+        super 50, 50
+        @image = game.imageload("sweets")
+        @frame = 5
+        @scaleX = 1.5
+        @scaleY = 1.5
+    hitPlayer:()->
+        if game.main_scene.gp_stage_front.player.intersect(@)
+            game.main_scene.gp_stage_front.removeChild(@)
+            game.tensionSetValueMissItemCatch()
+    removeOnFloor:()->
+        if @y > game.height + @h
+            game.main_scene.gp_stage_front.removeChild(@)
+    setPosition:()->
+        @y = @h * -1
+        @x = @setPositoinX()
+        @gravity = game.slot_setting.setGravity()

@@ -106,6 +106,13 @@ class LoveliveGame extends catchAndSlotGame
         @_tensionSetValue(val)
 
     ###
+    はずれのアイテムを取った時にテンションゲージを増減する
+    ###
+    tensionSetValueMissItemCatch:()->
+        val = @slot_setting.setTensionMissItemCatch()
+        @_tensionSetValue(val)
+
+    ###
     スロットが当たった時にテンションゲージを増減する
     @param number prize_money 当選金額
     ###

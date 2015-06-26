@@ -15,6 +15,10 @@ class stageFront extends gpStage
         @itemFallFrm = 0 #アイテムを降らせる周期（フレーム）
         @catchItems = [] #キャッチアイテムのインスタンスを格納
         @nowCatchItemsNum = 0
+        @missItemFallSycle = 4 #ハズレアイテムを取る周期
+        @missItemFallSycleNow = 0
+        @catchMissItems = []
+        @nowCatchMissItemsNum = 0
         @initial()
     initial:()->
         @setPlayer()
@@ -45,15 +49,19 @@ class stageFront extends gpStage
     _stageCycle:()->
         if @age % @itemFallFrm is 0
             @_catchFall()
+            @missItemFallSycleNow += 1
             game.main_scene.gp_stage_back.returnMoneyFallStart()
             if @itemFallSec != @itemFallSecInit
                 @setItemFallFrm(@itemFallSecInit)
+        if @missItemFallSycleNow is @missItemFallSycle && @age % @itemFallFrm is @itemFallFrm / 2
+            @_missCatchFall()
+            @missItemFallSycleNow = 0
 
     ###
     キャッチアイテムをランダムな位置から降らせる
     ###
     _catchFall:()->
-        if (game.money >= game.bet)
+        if game.money >= game.bet
             @catchItems.push(new MacaroonCatch())
             @addChild(@catchItems[@nowCatchItemsNum])
             @catchItems[@nowCatchItemsNum].setPosition()
@@ -63,6 +71,15 @@ class stageFront extends gpStage
                 game.bet = game.money
             game.main_scene.gp_system.money_text.setValue()
             game.main_scene.gp_slot.slotStart()
+
+    _missCatchFall:()->
+        if game.money >= game.bet
+            console.log('miss')
+            @catchMissItems.push(new OnionCatch())
+            @addChild(@catchMissItems[@nowCatchMissItemsNum])
+            @catchMissItems[@nowCatchMissItemsNum].setPosition()
+            @nowCatchMissItemsNum += 1
+
 
 ###
 ステージ背面

@@ -1,4 +1,4 @@
-var Bear, Button, Catch, Character, Debug, Floor, Frame, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, comboText, comboUnitText, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
+var Bear, Button, Catch, Character, Debug, Floor, Frame, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, comboText, comboUnitText, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -286,6 +286,17 @@ LoveliveGame = (function(_super) {
   LoveliveGame.prototype.tensionSetValueItemFall = function() {
     var val;
     val = this.slot_setting.setTensionItemFall();
+    return this._tensionSetValue(val);
+  };
+
+
+  /*
+  はずれのアイテムを取った時にテンションゲージを増減する
+   */
+
+  LoveliveGame.prototype.tensionSetValueMissItemCatch = function() {
+    var val;
+    val = this.slot_setting.setTensionMissItemCatch();
     return this._tensionSetValue(val);
   };
 
@@ -609,6 +620,10 @@ stageFront = (function(_super) {
     this.itemFallFrm = 0;
     this.catchItems = [];
     this.nowCatchItemsNum = 0;
+    this.missItemFallSycle = 4;
+    this.missItemFallSycleNow = 0;
+    this.catchMissItems = [];
+    this.nowCatchMissItemsNum = 0;
     this.initial();
   }
 
@@ -658,10 +673,15 @@ stageFront = (function(_super) {
   stageFront.prototype._stageCycle = function() {
     if (this.age % this.itemFallFrm === 0) {
       this._catchFall();
+      this.missItemFallSycleNow += 1;
       game.main_scene.gp_stage_back.returnMoneyFallStart();
       if (this.itemFallSec !== this.itemFallSecInit) {
-        return this.setItemFallFrm(this.itemFallSecInit);
+        this.setItemFallFrm(this.itemFallSecInit);
       }
+    }
+    if (this.missItemFallSycleNow === this.missItemFallSycle && this.age % this.itemFallFrm === this.itemFallFrm / 2) {
+      this._missCatchFall();
+      return this.missItemFallSycleNow = 0;
     }
   };
 
@@ -682,6 +702,16 @@ stageFront = (function(_super) {
       }
       game.main_scene.gp_system.money_text.setValue();
       return game.main_scene.gp_slot.slotStart();
+    }
+  };
+
+  stageFront.prototype._missCatchFall = function() {
+    if (game.money >= game.bet) {
+      console.log('miss');
+      this.catchMissItems.push(new OnionCatch());
+      this.addChild(this.catchMissItems[this.nowCatchMissItemsNum]);
+      this.catchMissItems[this.nowCatchMissItemsNum].setPosition();
+      return this.nowCatchMissItemsNum += 1;
     }
   };
 
@@ -1221,28 +1251,28 @@ slotSetting = (function(_super) {
     this.lille_array_2 = [[1, 5, 7, 4, 2, 3, 5, 4, 1, 7, 4, 5, 2, 5, 7, 1, 4, 1, 4, 7, 1, 7], [7, 5, 2, 5, 7, 2, 5, 1, 7, 2, 1, 5, 1, 3, 5, 7, 3, 7, 1, 4, 5, 1], [1, 4, 1, 7, 1, 4, 2, 7, 5, 7, 3, 1, 7, 2, 4, 7, 1, 5, 7, 2, 4, 1]];
     this.bairitu = {
       2: 10,
-      3: 30,
-      4: 50,
-      5: 100,
-      6: 100,
-      1: 300,
-      7: 600,
-      11: 1000,
-      12: 1000,
-      13: 1000,
-      14: 1000,
-      15: 1000,
-      16: 1000,
-      17: 1000,
-      18: 1000,
-      19: 1000
+      3: 20,
+      4: 30,
+      5: 50,
+      6: 50,
+      1: 150,
+      7: 300,
+      11: 500,
+      12: 500,
+      13: 500,
+      14: 500,
+      15: 500,
+      16: 500,
+      17: 500,
+      18: 500,
+      19: 500
     };
     this.tension_max = 500;
     this.prev_muse_num = 0;
   }
 
   slotSetting.prototype.setGravity = function() {
-    return Math.floor((game.tension / this.tension_max) * 1.5) + 0.5;
+    return Math.floor((game.tension / this.tension_max) * 1.2) + 0.7;
   };
 
 
@@ -1312,7 +1342,10 @@ slotSetting = (function(_super) {
 
   slotSetting.prototype.setTensionItemCatch = function() {
     var val;
-    val = (this.tension_max - game.tension) * 0.01 * (game.item_kind + 1);
+    val = (this.tension_max - game.tension) * 0.005 * (game.item_kind + 1);
+    if (game.main_scene.gp_stage_front.player.isAir === true) {
+      val *= 1.5;
+    }
     if (val >= 1) {
       val = Math.round(val);
     } else {
@@ -1330,30 +1363,21 @@ slotSetting = (function(_super) {
    */
 
   slotSetting.prototype.setTensionItemFall = function() {
-    var bet_rate, correct, val;
-    bet_rate = game.bet / game.money;
-    if (game.money < 100) {
-      correct = 0.2;
-    } else if (game.money < 1000) {
-      correct = 0.4;
-    } else if (game.money < 10000) {
-      correct = 0.6;
-    } else if (game.money < 100000) {
-      correct = 0.8;
-    } else {
-      correct = 1;
+    var val;
+    val = game.tension * 0.2;
+    if (val < this.tension_max * 0.1) {
+      val = this.tension_max * 0.1;
     }
-    val = bet_rate * correct * this.tension_max;
-    if (val > this.tension_max) {
-      val = this.tension_max;
-    } else if (val < this.tension_max * 0.05) {
-      val = this.tension_max * 0.05;
-    }
-    val = Math.round(val);
     val *= -1;
     if (game.debug.fix_tention_item_fall_flg === true) {
       val = game.debug.fix_tention_item_fall_val;
     }
+    return val;
+  };
+
+  slotSetting.prototype.setTensionMissItemCatch = function() {
+    var val;
+    val = this.tension_max * 0.2 * -1;
     return val;
   };
 
@@ -1393,25 +1417,33 @@ slotSetting = (function(_super) {
 
   /*
   テンションの状態でスロットの内容を変更する
+  ミスアイテムの頻度を決める
   @param number tension 変化前のテンション
   @param number val     テンションの増減値
    */
 
   slotSetting.prototype.changeLilleForTension = function(tension, val) {
-    var after, before, slot, tension_33, tension_66;
+    var after, before, slot, stage, tension_33, tension_66;
     slot = game.main_scene.gp_slot;
+    stage = game.main_scene.gp_stage_front;
     before = tension;
     after = tension + val;
     tension_33 = Math.floor(this.tension_max * 0.33);
     tension_66 = Math.floor(this.tension_max * 0.66);
     if (before > tension_33 && after < tension_33) {
       slot.slotLilleChange(this.lille_array, false);
+      stage.missItemFallSycle = 4;
+      stage.missItemFallSycleNow = 0;
     }
     if (before < tension_66 && after > tension_66) {
       slot.slotLilleChange(this.lille_array_2, false);
+      stage.missItemFallSycle = 2;
+      stage.missItemFallSycleNow = 0;
     }
     if ((before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)) {
       slot.slotLilleChange(this.lille_array_1, false);
+      stage.missItemFallSycle = 1;
+      stage.missItemFallSycleNow = 0;
     }
     if (before > 0 && after <= 0) {
       return slot.slotLilleChange(this.lille_array, true);
@@ -1992,7 +2024,7 @@ Catch = (function(_super) {
 
   Catch.prototype.setPosition = function() {
     this.y = this.h * -1;
-    this.x = this._setPositoinX();
+    this.x = this.setPositoinX();
     this.frame = game.slot_setting.getCatchItemFrame();
     return this.gravity = game.slot_setting.setGravity();
   };
@@ -2002,7 +2034,7 @@ Catch = (function(_super) {
   X座標の位置の設定
    */
 
-  Catch.prototype._setPositoinX = function() {
+  Catch.prototype.setPositoinX = function() {
     var ret_x;
     ret_x = 0;
     if (game.debug.item_flg) {
@@ -2034,6 +2066,40 @@ MacaroonCatch = (function(_super) {
   }
 
   return MacaroonCatch;
+
+})(Catch);
+
+OnionCatch = (function(_super) {
+  __extends(OnionCatch, _super);
+
+  function OnionCatch(w, h) {
+    OnionCatch.__super__.constructor.call(this, 50, 50);
+    this.image = game.imageload("sweets");
+    this.frame = 5;
+    this.scaleX = 1.5;
+    this.scaleY = 1.5;
+  }
+
+  OnionCatch.prototype.hitPlayer = function() {
+    if (game.main_scene.gp_stage_front.player.intersect(this)) {
+      game.main_scene.gp_stage_front.removeChild(this);
+      return game.tensionSetValueMissItemCatch();
+    }
+  };
+
+  OnionCatch.prototype.removeOnFloor = function() {
+    if (this.y > game.height + this.h) {
+      return game.main_scene.gp_stage_front.removeChild(this);
+    }
+  };
+
+  OnionCatch.prototype.setPosition = function() {
+    this.y = this.h * -1;
+    this.x = this.setPositoinX();
+    return this.gravity = game.slot_setting.setGravity();
+  };
+
+  return OnionCatch;
 
 })(Catch);
 
