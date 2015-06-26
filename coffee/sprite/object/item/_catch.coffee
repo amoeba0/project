@@ -33,11 +33,11 @@ class Catch extends Item
     ###
     座標と落下速度の設定
     ###
-    setPosition:(gravity)->
+    setPosition:()->
         @y = @h * -1
         @x = @_setPositoinX()
         @frame = game.slot_setting.getCatchItemFrame()
-        @gravity = gravity
+        @gravity = 1
 
     ###
     X座標の位置の設定

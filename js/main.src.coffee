@@ -87,7 +87,7 @@ class LoveliveGame extends catchAndSlotGame
         @preloadAll()
 
         #ゲーム中どこからでもアクセスのある数値
-        @money_init = 1000 #ゲーム開始時の所持金
+        @money_init = 10000 #ゲーム開始時の所持金
         @money = 0 #現在の所持金
         @bet = 10 #現在の掛け金
         @combo = 0 #現在のコンボ
@@ -282,11 +282,14 @@ class stageFront extends gpStage
     constructor: () ->
         super
         @itemFallSec = 5 #アイテムを降らせる周期（秒）
+        @itemFallSecInit = 5
+        @itemFallFrm = 0 #アイテムを降らせる周期（フレーム）
         @catchItems = [] #キャッチアイテムのインスタンスを格納
         @nowCatchItemsNum = 0
         @initial()
     initial:()->
         @setPlayer()
+        @setItemFallSecInit()
     onenterframe: () ->
         @_stageCycle()
     setPlayer:()->
@@ -294,13 +297,29 @@ class stageFront extends gpStage
         @player.y = @floor
         @addChild(@player)
     ###
+    アイテムを降らせる間隔を初期化
+    ###
+    setItemFallSecInit:()->
+        if game.debug.item_fall_early_flg is true
+            @itemFallSecInit = 3
+        @setItemFallFrm(@itemFallSecInit)
+    ###
+    アイテムを降らせる間隔（フレーム）を設定、再設定
+    ###
+    setItemFallFrm:(sec)->
+        @itemFallSec = sec
+        @itemFallFrm = game.fps * sec
+        @age = 0
+    ###
     一定周期でステージに発生するイベント
     ###
     _stageCycle:()->
-        if game.debug.item_fall_early_flg is true
-            @itemFallSec = 3
-        if @age % (game.fps * @itemFallSec) is 0
+        if @age % @itemFallFrm is 0
             @_catchFall()
+            game.main_scene.gp_stage_back.returnMoneyFallStart()
+            if @itemFallSec != @itemFallSecInit
+                @setItemFallFrm(@itemFallSecInit)
+
     ###
     キャッチアイテムをランダムな位置から降らせる
     ###
@@ -308,7 +327,7 @@ class stageFront extends gpStage
         if (game.money >= game.bet)
             @catchItems.push(new MacaroonCatch())
             @addChild(@catchItems[@nowCatchItemsNum])
-            @catchItems[@nowCatchItemsNum].setPosition(1)
+            @catchItems[@nowCatchItemsNum].setPosition()
             @nowCatchItemsNum += 1
             game.money -= game.bet
             if game.bet > game.money
@@ -329,17 +348,25 @@ class stageBack extends gpStage
         @prizeMoneyFallIntervalFrm = 4 #スロットの当選金を降らせる間隔（フレーム）
         @prizeMoneyFallPeriodSec = 5 #スロットの当選金額が振っている時間（秒）
         @isFallPrizeMoney = false #スロットの当選金が振っている間はtrue
+
+        @returnMoneyItemsInstance = [] #掛け金の戻り分のインスタンスを格納
+        @returnMoneyItemsNum = {1:0,10:0,100:0,1000:0} #掛け金の戻り分を降らせる各コイン数の内訳
+        @nowReturnMoneyItemsNum = 0
+        @returnMoneyFallIntervalFrm = 4 #掛け金の戻り分を降らせる間隔（フレーム）
     onenterframe: () ->
         @_moneyFall()
+        @_returnMoneyFall()
     ###
     スロットの当選金を降らせる
     @param value number 金額
     ###
     fallPrizeMoneyStart:(value) ->
-        @_calcPrizeMoneyItemsNum(value)
-        @_setPrizeMoneyItemsInstance()
-        @prizeMoneyFallPeriodSec = Math.ceil(@prizeMoneyItemsInstance.length * @prizeMoneyFallIntervalFrm)
-        console.log(@prizeMoneyFallPeriodSec)
+        stage = game.main_scene.gp_stage_front
+        @prizeMoneyItemsNum = @_calcMoneyItemsNum(value, true)
+        @prizeMoneyItemsInstance = @_setMoneyItemsInstance(@prizeMoneyItemsNum, true)
+        @prizeMoneyFallPeriodSec = Math.ceil(@prizeMoneyItemsInstance.length * @prizeMoneyFallIntervalFrm / game.fps) + stage.itemFallSecInit
+        if @prizeMoneyFallPeriodSec > stage.itemFallSecInit
+            stage.setItemFallFrm(@prizeMoneyFallPeriodSec)
         @isFallPrizeMoney = true
 
     ###
@@ -355,52 +382,96 @@ class stageBack extends gpStage
                 @isFallPrizeMoney = false
     ###
     当選金の内訳のコイン枚数を計算する
-    @param value number 金額
+    @param value   number 金額
+    @prize boolean true:当選金額
     ###
-    _calcPrizeMoneyItemsNum:(value)->
+    _calcMoneyItemsNum:(value, prize)->
+        ret_data = {1:0,10:0,100:0,1000:0}
         if value <= 20 #全部1円
-            @prizeMoneyItemsNum[1] = value
-            @prizeMoneyItemsNum[10] = 0
-            @prizeMoneyItemsNum[100] = 0
-            @prizeMoneyItemsNum[1000] = 0
+            ret_data[1] = value
+            ret_data[10] = 0
+            ret_data[100] = 0
+            ret_data[1000] = 0
         else if value < 100 #1円と10円と端数
-            @prizeMoneyItemsNum[1] = game.getDigitNum(value, 1) + 10
-            @prizeMoneyItemsNum[10] = game.getDigitNum(value, 2) - 1
-            @prizeMoneyItemsNum[100] = 0
-            @prizeMoneyItemsNum[1000] = 0
+            ret_data[1] = game.getDigitNum(value, 1)
+            ret_data[10] = game.getDigitNum(value, 2)
+            ret_data[100] = 0
+            ret_data[1000] = 0
+            if prize is true
+                ret_data[1] += 10
+                ret_data[10] -= 1
         else if value < 1000 #10円と100円と端数
-            @prizeMoneyItemsNum[1] = game.getDigitNum(value, 1)
-            @prizeMoneyItemsNum[10] = game.getDigitNum(value, 2) + 10
-            @prizeMoneyItemsNum[100] = game.getDigitNum(value, 3) - 1
-            @prizeMoneyItemsNum[1000] = 0
+            ret_data[1] = game.getDigitNum(value, 1)
+            ret_data[10] = game.getDigitNum(value, 2)
+            ret_data[100] = game.getDigitNum(value, 3)
+            ret_data[1000] = 0
+            if prize is true
+                ret_data[10] += 10
+                ret_data[100] -= 1
         else if value < 10000 #1000円と100円と端数
-            @prizeMoneyItemsNum[1] = game.getDigitNum(value, 1)
-            @prizeMoneyItemsNum[10] = game.getDigitNum(value, 2)
-            @prizeMoneyItemsNum[100] = game.getDigitNum(value, 3) + 10
-            @prizeMoneyItemsNum[1000] = game.getDigitNum(value, 4) - 1
+            ret_data[1] = game.getDigitNum(value, 1)
+            ret_data[10] = game.getDigitNum(value, 2)
+            ret_data[100] = game.getDigitNum(value, 3)
+            ret_data[1000] = game.getDigitNum(value, 4)
+            if prize is true
+                ret_data[100] += 10
+                ret_data[1000] -= 1
         else #全部1000円と端数
-            @prizeMoneyItemsNum[1] = game.getDigitNum(value, 1)
-            @prizeMoneyItemsNum[10] = game.getDigitNum(value, 2)
-            @prizeMoneyItemsNum[100] = game.getDigitNum(value, 3)
-            @prizeMoneyItemsNum[1000] = Math.floor(value/1000)
+            ret_data[1] = game.getDigitNum(value, 1)
+            ret_data[10] = game.getDigitNum(value, 2)
+            ret_data[100] = game.getDigitNum(value, 3)
+            ret_data[1000] = Math.floor(value/1000)
+        return ret_data
 
     ###
     当選金コインのインスタンスを設置
+    @param number  itemsNum コイン数の内訳
+    @param boolean isHoming trueならコインがホーミングする
+    @return array
     ###
-    _setPrizeMoneyItemsInstance:()->
-        @prizeMoneyItemsInstance = []
-        if @prizeMoneyItemsNum[1] > 0
-            for i in [1..@prizeMoneyItemsNum[1]]
-                @prizeMoneyItemsInstance.push(new OneHomingMoney)
-        if @prizeMoneyItemsNum[10] > 0
-            for i in [1..@prizeMoneyItemsNum[10]]
-                @prizeMoneyItemsInstance.push(new TenHomingMoney)
-        if @prizeMoneyItemsNum[100] > 0
-            for i in [1..@prizeMoneyItemsNum[100]]
-                @prizeMoneyItemsInstance.push(new HundredHomingMoney)
-        if @prizeMoneyItemsNum[1000] > 0
-            for i in [1..@prizeMoneyItemsNum[1000]]
-                @prizeMoneyItemsInstance.push(new ThousandHomingMoney)
+    _setMoneyItemsInstance:(itemsNum, isHoming)->
+        ret_data = []
+        if itemsNum[1] > 0
+            for i in [1..itemsNum[1]]
+                ret_data.push(new OneMoney(isHoming))
+        if itemsNum[10] > 0
+            for i in [1..itemsNum[10]]
+                ret_data.push(new TenMoney(isHoming))
+        if itemsNum[100] > 0
+            for i in [1..itemsNum[100]]
+                ret_data.push(new HundredMoney(isHoming))
+        if itemsNum[1000] > 0
+            for i in [1..itemsNum[1000]]
+                ret_data.push(new ThousandMoney(isHoming))
+        return ret_data
+
+    ###
+    掛け金の戻り分を降らせる
+    ###
+    returnMoneyFallStart:()->
+        val = Math.floor(game.bet * game.combo * 0.01)
+        if val < 10
+        else if val < 100
+            val = Math.floor(val / 10) * 10
+        else if val < 1000
+            val = Math.floor(val / 100) * 100
+        else if val < 10000
+            val = Math.floor(val / 100) * 1000
+        else
+            val = Math.floor(val / 1000) * 10000
+        @returnMoneyItemsNum = @_calcMoneyItemsNum(val, false)
+        @returnMoneyItemsInstance = @_setMoneyItemsInstance(@returnMoneyItemsNum, false)
+        stage = game.main_scene.gp_stage_front
+        @returnMoneyFallIntervalFrm = Math.round(stage.itemFallSecInit * game.fps / @returnMoneyItemsInstance.length)
+
+    _returnMoneyFall:()->
+        if @isFallPrizeMoney is false && @returnMoneyItemsInstance.length > 0 && @age % @returnMoneyFallIntervalFrm is 0
+            if @nowReturnMoneyItemsNum is @returnMoneyItemsInstance.length
+                @nowReturnMoneyItemsNum = 0
+            else
+                @addChild(@returnMoneyItemsInstance[@nowReturnMoneyItemsNum])
+                @returnMoneyItemsInstance[@nowReturnMoneyItemsNum].setPosition()
+                @nowReturnMoneyItemsNum += 1
 class gpSystem extends appGroup
     constructor: () ->
         super
@@ -425,7 +496,6 @@ class gpSystem extends appGroup
     _betSetting: ()->
         if game.keyList['up'] is true
             if @keyList['up'] is false
-                console.log('up')
                 @_getBetSettingValue(true)
                 @keyList['up'] = true
         else
@@ -433,7 +503,6 @@ class gpSystem extends appGroup
                 @keyList['up'] = false
         if game.keyList['down'] is true
             if @keyList['down'] is false
-                console.log('down')
                 @_getBetSettingValue(false)
                 @keyList['down'] = true
         else
@@ -558,9 +627,9 @@ class Debug extends appNode
         @all_debug_flg = false
 
         #デバッグ用リールにすりかえる
-        @lille_flg = false
+        @lille_flg = true
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = false
+        @item_flg = true
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する
@@ -571,9 +640,9 @@ class Debug extends appNode
         @fix_tention_slot_hit_flg = false
         #デバッグ用リール配列
         @lille_array = [
-            [7,1],
-            [1,7],
-            [7,1]
+            [2,3],
+            [2],
+            [2]
         ]
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
@@ -1038,11 +1107,11 @@ class Catch extends Item
     ###
     座標と落下速度の設定
     ###
-    setPosition:(gravity)->
+    setPosition:()->
         @y = @h * -1
         @x = @_setPositoinX()
         @frame = game.slot_setting.getCatchItemFrame()
-        @gravity = gravity
+        @gravity = 1
 
     ###
     X座標の位置の設定
@@ -1067,23 +1136,31 @@ class MacaroonCatch extends Catch
         @scaleY = 1.5
 ###
 降ってくるお金
+@param boolean isHoming trueならコインがホーミングする
 ###
 class Money extends Item
-    constructor: (w, h) ->
+    constructor: (isHoming) ->
         super 48, 48
         @scaleX = 0.5
         @scaleY = 0.5
         @price = 1 #単価
-        @gravity = 2
         @image = game.imageload("icon1")
+        @isHoming = isHoming
+        @_setGravity()
 
     onenterframe: (e) ->
+        @homing()
         @vy += @gravity
         @y += @vy
         @x += @vx
         @hitPlayer()
         @removeOnFloor()
 
+    _setGravity:()->
+        if @isHoming is true
+            @gravity = 2
+        else
+            @gravity = 1
     ###
     プレイヤーに当たった時
     ###
@@ -1104,48 +1181,50 @@ class Money extends Item
         @y = @h * -1
         @x = Math.floor((game.width - @w) * Math.random())
 
-###
-ホーミングする
-###
-class HomingMoney extends Money
-    constructor: (w, h) ->
-        super w, h
-        @addEventListener('enterframe', ()->
+    ###
+    ホーミングする
+    ###
+    homing:()->
+        if @isHoming is true
             @vx = Math.round( (game.main_scene.gp_stage_front.player.x - @x) / ((game.main_scene.gp_stage_front.player.y - @y) / @vy) )
-        )
+
 ###
 1円
+@param boolean isHoming trueならコインがホーミングする
 ###
-class OneHomingMoney extends HomingMoney
-    constructor: (w, h) ->
-        super w, h
+class OneMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming
         @price = 1
         @frame = 2
 
 ###
 10円
+@param boolean isHoming trueならコインがホーミングする
 ###
-class TenHomingMoney extends HomingMoney
-    constructor: (w, h) ->
-        super w, h
+class TenMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming
         @price = 10
         @frame = 7
 
 ###
 100円
+@param boolean isHoming trueならコインがホーミングする
 ###
-class HundredHomingMoney extends HomingMoney
-    constructor: (w, h) ->
-        super w, h
+class HundredMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming
         @price = 100
         @frame = 5
 
 ###
 1000円
+@param boolean isHoming trueならコインがホーミングする
 ###
-class ThousandHomingMoney extends HomingMoney
-    constructor: (w, h) ->
-        super w, h
+class ThousandMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming
         @price = 1000
         @frame = 4
 class Slot extends appSprite

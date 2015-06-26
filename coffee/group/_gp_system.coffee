@@ -22,7 +22,6 @@ class gpSystem extends appGroup
     _betSetting: ()->
         if game.keyList['up'] is true
             if @keyList['up'] is false
-                console.log('up')
                 @_getBetSettingValue(true)
                 @keyList['up'] = true
         else
@@ -30,7 +29,6 @@ class gpSystem extends appGroup
                 @keyList['up'] = false
         if game.keyList['down'] is true
             if @keyList['down'] is false
-                console.log('down')
                 @_getBetSettingValue(false)
                 @keyList['down'] = true
         else

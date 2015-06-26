@@ -1,22 +1,30 @@
 ###
 降ってくるお金
+@param boolean isHoming trueならコインがホーミングする
 ###
 class Money extends Item
-    constructor: (w, h) ->
+    constructor: (isHoming) ->
         super 48, 48
         @scaleX = 0.5
         @scaleY = 0.5
         @price = 1 #単価
-        @gravity = 2
         @image = game.imageload("icon1")
+        @isHoming = isHoming
+        @_setGravity()
 
     onenterframe: (e) ->
+        @homing()
         @vy += @gravity
         @y += @vy
         @x += @vx
         @hitPlayer()
         @removeOnFloor()
 
+    _setGravity:()->
+        if @isHoming is true
+            @gravity = 2
+        else
+            @gravity = 1
     ###
     プレイヤーに当たった時
     ###
@@ -37,47 +45,49 @@ class Money extends Item
         @y = @h * -1
         @x = Math.floor((game.width - @w) * Math.random())
 
-###
-ホーミングする
-###
-class HomingMoney extends Money
-    constructor: (w, h) ->
-        super w, h
-        @addEventListener('enterframe', ()->
+    ###
+    ホーミングする
+    ###
+    homing:()->
+        if @isHoming is true
             @vx = Math.round( (game.main_scene.gp_stage_front.player.x - @x) / ((game.main_scene.gp_stage_front.player.y - @y) / @vy) )
-        )
+
 ###
 1円
+@param boolean isHoming trueならコインがホーミングする
 ###
-class OneHomingMoney extends HomingMoney
-    constructor: (w, h) ->
-        super w, h
+class OneMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming
         @price = 1
         @frame = 2
 
 ###
 10円
+@param boolean isHoming trueならコインがホーミングする
 ###
-class TenHomingMoney extends HomingMoney
-    constructor: (w, h) ->
-        super w, h
+class TenMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming
         @price = 10
         @frame = 7
 
 ###
 100円
+@param boolean isHoming trueならコインがホーミングする
 ###
-class HundredHomingMoney extends HomingMoney
-    constructor: (w, h) ->
-        super w, h
+class HundredMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming
         @price = 100
         @frame = 5
 
 ###
 1000円
+@param boolean isHoming trueならコインがホーミングする
 ###
-class ThousandHomingMoney extends HomingMoney
-    constructor: (w, h) ->
-        super w, h
+class ThousandMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming
         @price = 1000
         @frame = 4

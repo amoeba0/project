@@ -1,4 +1,4 @@
-var Bear, Button, Catch, Character, Debug, Floor, Frame, Guest, HomingMoney, HundredHomingMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneHomingMoney, Panorama, Param, Player, RightLille, Slot, System, TenHomingMoney, TensionGauge, TensionGaugeBack, ThousandHomingMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, comboText, comboUnitText, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
+var Bear, Button, Catch, Character, Debug, Floor, Frame, Guest, HundredMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, comboText, comboUnitText, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -172,7 +172,7 @@ LoveliveGame = (function(_super) {
     };
     this.keybind(90, 'z');
     this.preloadAll();
-    this.money_init = 1000;
+    this.money_init = 10000;
     this.money = 0;
     this.bet = 10;
     this.combo = 0;
@@ -469,13 +469,16 @@ stageFront = (function(_super) {
   function stageFront() {
     stageFront.__super__.constructor.apply(this, arguments);
     this.itemFallSec = 5;
+    this.itemFallSecInit = 5;
+    this.itemFallFrm = 0;
     this.catchItems = [];
     this.nowCatchItemsNum = 0;
     this.initial();
   }
 
   stageFront.prototype.initial = function() {
-    return this.setPlayer();
+    this.setPlayer();
+    return this.setItemFallSecInit();
   };
 
   stageFront.prototype.onenterframe = function() {
@@ -490,15 +493,39 @@ stageFront = (function(_super) {
 
 
   /*
+  アイテムを降らせる間隔を初期化
+   */
+
+  stageFront.prototype.setItemFallSecInit = function() {
+    if (game.debug.item_fall_early_flg === true) {
+      this.itemFallSecInit = 3;
+    }
+    return this.setItemFallFrm(this.itemFallSecInit);
+  };
+
+
+  /*
+  アイテムを降らせる間隔（フレーム）を設定、再設定
+   */
+
+  stageFront.prototype.setItemFallFrm = function(sec) {
+    this.itemFallSec = sec;
+    this.itemFallFrm = game.fps * sec;
+    return this.age = 0;
+  };
+
+
+  /*
   一定周期でステージに発生するイベント
    */
 
   stageFront.prototype._stageCycle = function() {
-    if (game.debug.item_fall_early_flg === true) {
-      this.itemFallSec = 3;
-    }
-    if (this.age % (game.fps * this.itemFallSec) === 0) {
-      return this._catchFall();
+    if (this.age % this.itemFallFrm === 0) {
+      this._catchFall();
+      game.main_scene.gp_stage_back.returnMoneyFallStart();
+      if (this.itemFallSec !== this.itemFallSecInit) {
+        return this.setItemFallFrm(this.itemFallSecInit);
+      }
     }
   };
 
@@ -511,7 +538,7 @@ stageFront = (function(_super) {
     if (game.money >= game.bet) {
       this.catchItems.push(new MacaroonCatch());
       this.addChild(this.catchItems[this.nowCatchItemsNum]);
-      this.catchItems[this.nowCatchItemsNum].setPosition(1);
+      this.catchItems[this.nowCatchItemsNum].setPosition();
       this.nowCatchItemsNum += 1;
       game.money -= game.bet;
       if (game.bet > game.money) {
@@ -548,10 +575,20 @@ stageBack = (function(_super) {
     this.prizeMoneyFallIntervalFrm = 4;
     this.prizeMoneyFallPeriodSec = 5;
     this.isFallPrizeMoney = false;
+    this.returnMoneyItemsInstance = [];
+    this.returnMoneyItemsNum = {
+      1: 0,
+      10: 0,
+      100: 0,
+      1000: 0
+    };
+    this.nowReturnMoneyItemsNum = 0;
+    this.returnMoneyFallIntervalFrm = 4;
   }
 
   stageBack.prototype.onenterframe = function() {
-    return this._moneyFall();
+    this._moneyFall();
+    return this._returnMoneyFall();
   };
 
 
@@ -561,10 +598,14 @@ stageBack = (function(_super) {
    */
 
   stageBack.prototype.fallPrizeMoneyStart = function(value) {
-    this._calcPrizeMoneyItemsNum(value);
-    this._setPrizeMoneyItemsInstance();
-    this.prizeMoneyFallPeriodSec = Math.ceil(this.prizeMoneyItemsInstance.length * this.prizeMoneyFallIntervalFrm);
-    console.log(this.prizeMoneyFallPeriodSec);
+    var stage;
+    stage = game.main_scene.gp_stage_front;
+    this.prizeMoneyItemsNum = this._calcMoneyItemsNum(value, true);
+    this.prizeMoneyItemsInstance = this._setMoneyItemsInstance(this.prizeMoneyItemsNum, true);
+    this.prizeMoneyFallPeriodSec = Math.ceil(this.prizeMoneyItemsInstance.length * this.prizeMoneyFallIntervalFrm / game.fps) + stage.itemFallSecInit;
+    if (this.prizeMoneyFallPeriodSec > stage.itemFallSecInit) {
+      stage.setItemFallFrm(this.prizeMoneyFallPeriodSec);
+    }
     return this.isFallPrizeMoney = true;
   };
 
@@ -588,67 +629,127 @@ stageBack = (function(_super) {
 
   /*
   当選金の内訳のコイン枚数を計算する
-  @param value number 金額
+  @param value   number 金額
+  @prize boolean true:当選金額
    */
 
-  stageBack.prototype._calcPrizeMoneyItemsNum = function(value) {
+  stageBack.prototype._calcMoneyItemsNum = function(value, prize) {
+    var ret_data;
+    ret_data = {
+      1: 0,
+      10: 0,
+      100: 0,
+      1000: 0
+    };
     if (value <= 20) {
-      this.prizeMoneyItemsNum[1] = value;
-      this.prizeMoneyItemsNum[10] = 0;
-      this.prizeMoneyItemsNum[100] = 0;
-      return this.prizeMoneyItemsNum[1000] = 0;
+      ret_data[1] = value;
+      ret_data[10] = 0;
+      ret_data[100] = 0;
+      ret_data[1000] = 0;
     } else if (value < 100) {
-      this.prizeMoneyItemsNum[1] = game.getDigitNum(value, 1) + 10;
-      this.prizeMoneyItemsNum[10] = game.getDigitNum(value, 2) - 1;
-      this.prizeMoneyItemsNum[100] = 0;
-      return this.prizeMoneyItemsNum[1000] = 0;
+      ret_data[1] = game.getDigitNum(value, 1);
+      ret_data[10] = game.getDigitNum(value, 2);
+      ret_data[100] = 0;
+      ret_data[1000] = 0;
+      if (prize === true) {
+        ret_data[1] += 10;
+        ret_data[10] -= 1;
+      }
     } else if (value < 1000) {
-      this.prizeMoneyItemsNum[1] = game.getDigitNum(value, 1);
-      this.prizeMoneyItemsNum[10] = game.getDigitNum(value, 2) + 10;
-      this.prizeMoneyItemsNum[100] = game.getDigitNum(value, 3) - 1;
-      return this.prizeMoneyItemsNum[1000] = 0;
+      ret_data[1] = game.getDigitNum(value, 1);
+      ret_data[10] = game.getDigitNum(value, 2);
+      ret_data[100] = game.getDigitNum(value, 3);
+      ret_data[1000] = 0;
+      if (prize === true) {
+        ret_data[10] += 10;
+        ret_data[100] -= 1;
+      }
     } else if (value < 10000) {
-      this.prizeMoneyItemsNum[1] = game.getDigitNum(value, 1);
-      this.prizeMoneyItemsNum[10] = game.getDigitNum(value, 2);
-      this.prizeMoneyItemsNum[100] = game.getDigitNum(value, 3) + 10;
-      return this.prizeMoneyItemsNum[1000] = game.getDigitNum(value, 4) - 1;
+      ret_data[1] = game.getDigitNum(value, 1);
+      ret_data[10] = game.getDigitNum(value, 2);
+      ret_data[100] = game.getDigitNum(value, 3);
+      ret_data[1000] = game.getDigitNum(value, 4);
+      if (prize === true) {
+        ret_data[100] += 10;
+        ret_data[1000] -= 1;
+      }
     } else {
-      this.prizeMoneyItemsNum[1] = game.getDigitNum(value, 1);
-      this.prizeMoneyItemsNum[10] = game.getDigitNum(value, 2);
-      this.prizeMoneyItemsNum[100] = game.getDigitNum(value, 3);
-      return this.prizeMoneyItemsNum[1000] = Math.floor(value / 1000);
+      ret_data[1] = game.getDigitNum(value, 1);
+      ret_data[10] = game.getDigitNum(value, 2);
+      ret_data[100] = game.getDigitNum(value, 3);
+      ret_data[1000] = Math.floor(value / 1000);
     }
+    return ret_data;
   };
 
 
   /*
   当選金コインのインスタンスを設置
+  @param number  itemsNum コイン数の内訳
+  @param boolean isHoming trueならコインがホーミングする
+  @return array
    */
 
-  stageBack.prototype._setPrizeMoneyItemsInstance = function() {
-    var i, _i, _j, _k, _l, _ref, _ref1, _ref2, _ref3, _results;
-    this.prizeMoneyItemsInstance = [];
-    if (this.prizeMoneyItemsNum[1] > 0) {
-      for (i = _i = 1, _ref = this.prizeMoneyItemsNum[1]; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
-        this.prizeMoneyItemsInstance.push(new OneHomingMoney);
+  stageBack.prototype._setMoneyItemsInstance = function(itemsNum, isHoming) {
+    var i, ret_data, _i, _j, _k, _l, _ref, _ref1, _ref2, _ref3;
+    ret_data = [];
+    if (itemsNum[1] > 0) {
+      for (i = _i = 1, _ref = itemsNum[1]; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+        ret_data.push(new OneMoney(isHoming));
       }
     }
-    if (this.prizeMoneyItemsNum[10] > 0) {
-      for (i = _j = 1, _ref1 = this.prizeMoneyItemsNum[10]; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
-        this.prizeMoneyItemsInstance.push(new TenHomingMoney);
+    if (itemsNum[10] > 0) {
+      for (i = _j = 1, _ref1 = itemsNum[10]; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
+        ret_data.push(new TenMoney(isHoming));
       }
     }
-    if (this.prizeMoneyItemsNum[100] > 0) {
-      for (i = _k = 1, _ref2 = this.prizeMoneyItemsNum[100]; 1 <= _ref2 ? _k <= _ref2 : _k >= _ref2; i = 1 <= _ref2 ? ++_k : --_k) {
-        this.prizeMoneyItemsInstance.push(new HundredHomingMoney);
+    if (itemsNum[100] > 0) {
+      for (i = _k = 1, _ref2 = itemsNum[100]; 1 <= _ref2 ? _k <= _ref2 : _k >= _ref2; i = 1 <= _ref2 ? ++_k : --_k) {
+        ret_data.push(new HundredMoney(isHoming));
       }
     }
-    if (this.prizeMoneyItemsNum[1000] > 0) {
-      _results = [];
-      for (i = _l = 1, _ref3 = this.prizeMoneyItemsNum[1000]; 1 <= _ref3 ? _l <= _ref3 : _l >= _ref3; i = 1 <= _ref3 ? ++_l : --_l) {
-        _results.push(this.prizeMoneyItemsInstance.push(new ThousandHomingMoney));
+    if (itemsNum[1000] > 0) {
+      for (i = _l = 1, _ref3 = itemsNum[1000]; 1 <= _ref3 ? _l <= _ref3 : _l >= _ref3; i = 1 <= _ref3 ? ++_l : --_l) {
+        ret_data.push(new ThousandMoney(isHoming));
       }
-      return _results;
+    }
+    return ret_data;
+  };
+
+
+  /*
+  掛け金の戻り分を降らせる
+   */
+
+  stageBack.prototype.returnMoneyFallStart = function() {
+    var stage, val;
+    val = Math.floor(game.bet * game.combo * 0.01);
+    if (val < 10) {
+
+    } else if (val < 100) {
+      val = Math.floor(val / 10) * 10;
+    } else if (val < 1000) {
+      val = Math.floor(val / 100) * 100;
+    } else if (val < 10000) {
+      val = Math.floor(val / 100) * 1000;
+    } else {
+      val = Math.floor(val / 1000) * 10000;
+    }
+    this.returnMoneyItemsNum = this._calcMoneyItemsNum(val, false);
+    this.returnMoneyItemsInstance = this._setMoneyItemsInstance(this.returnMoneyItemsNum, false);
+    stage = game.main_scene.gp_stage_front;
+    return this.returnMoneyFallIntervalFrm = Math.round(stage.itemFallSecInit * game.fps / this.returnMoneyItemsInstance.length);
+  };
+
+  stageBack.prototype._returnMoneyFall = function() {
+    if (this.isFallPrizeMoney === false && this.returnMoneyItemsInstance.length > 0 && this.age % this.returnMoneyFallIntervalFrm === 0) {
+      if (this.nowReturnMoneyItemsNum === this.returnMoneyItemsInstance.length) {
+        return this.nowReturnMoneyItemsNum = 0;
+      } else {
+        this.addChild(this.returnMoneyItemsInstance[this.nowReturnMoneyItemsNum]);
+        this.returnMoneyItemsInstance[this.nowReturnMoneyItemsNum].setPosition();
+        return this.nowReturnMoneyItemsNum += 1;
+      }
     }
   };
 
@@ -691,7 +792,6 @@ gpSystem = (function(_super) {
   gpSystem.prototype._betSetting = function() {
     if (game.keyList['up'] === true) {
       if (this.keyList['up'] === false) {
-        console.log('up');
         this._getBetSettingValue(true);
         this.keyList['up'] = true;
       }
@@ -702,7 +802,6 @@ gpSystem = (function(_super) {
     }
     if (game.keyList['down'] === true) {
       if (this.keyList['down'] === false) {
-        console.log('down');
         this._getBetSettingValue(false);
         return this.keyList['down'] = true;
       }
@@ -895,13 +994,13 @@ Debug = (function(_super) {
   function Debug() {
     Debug.__super__.constructor.apply(this, arguments);
     this.all_debug_flg = false;
-    this.lille_flg = false;
-    this.item_flg = false;
+    this.lille_flg = true;
+    this.item_flg = true;
     this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
     this.fix_tention_item_fall_flg = false;
     this.fix_tention_slot_hit_flg = false;
-    this.lille_array = [[7, 1], [1, 7], [7, 1]];
+    this.lille_array = [[2, 3], [2], [2]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -1;
     this.fix_tention_slot_hit_flg = 200;
@@ -1610,11 +1709,11 @@ Catch = (function(_super) {
   座標と落下速度の設定
    */
 
-  Catch.prototype.setPosition = function(gravity) {
+  Catch.prototype.setPosition = function() {
     this.y = this.h * -1;
     this.x = this._setPositoinX();
     this.frame = game.slot_setting.getCatchItemFrame();
-    return this.gravity = gravity;
+    return this.gravity = 1;
   };
 
 
@@ -1660,26 +1759,37 @@ MacaroonCatch = (function(_super) {
 
 /*
 降ってくるお金
+@param boolean isHoming trueならコインがホーミングする
  */
 
 Money = (function(_super) {
   __extends(Money, _super);
 
-  function Money(w, h) {
+  function Money(isHoming) {
     Money.__super__.constructor.call(this, 48, 48);
     this.scaleX = 0.5;
     this.scaleY = 0.5;
     this.price = 1;
-    this.gravity = 2;
     this.image = game.imageload("icon1");
+    this.isHoming = isHoming;
+    this._setGravity();
   }
 
   Money.prototype.onenterframe = function(e) {
+    this.homing();
     this.vy += this.gravity;
     this.y += this.vy;
     this.x += this.vx;
     this.hitPlayer();
     return this.removeOnFloor();
+  };
+
+  Money.prototype._setGravity = function() {
+    if (this.isHoming === true) {
+      return this.gravity = 2;
+    } else {
+      return this.gravity = 1;
+    }
   };
 
 
@@ -1711,100 +1821,96 @@ Money = (function(_super) {
     return this.x = Math.floor((game.width - this.w) * Math.random());
   };
 
+
+  /*
+  ホーミングする
+   */
+
+  Money.prototype.homing = function() {
+    if (this.isHoming === true) {
+      return this.vx = Math.round((game.main_scene.gp_stage_front.player.x - this.x) / ((game.main_scene.gp_stage_front.player.y - this.y) / this.vy));
+    }
+  };
+
   return Money;
 
 })(Item);
 
 
 /*
-ホーミングする
+1円
+@param boolean isHoming trueならコインがホーミングする
  */
 
-HomingMoney = (function(_super) {
-  __extends(HomingMoney, _super);
+OneMoney = (function(_super) {
+  __extends(OneMoney, _super);
 
-  function HomingMoney(w, h) {
-    HomingMoney.__super__.constructor.call(this, w, h);
-    this.addEventListener('enterframe', function() {
-      return this.vx = Math.round((game.main_scene.gp_stage_front.player.x - this.x) / ((game.main_scene.gp_stage_front.player.y - this.y) / this.vy));
-    });
+  function OneMoney(isHoming) {
+    OneMoney.__super__.constructor.call(this, isHoming);
+    this.price = 1;
+    this.frame = 2;
   }
 
-  return HomingMoney;
+  return OneMoney;
 
 })(Money);
 
 
 /*
-1円
- */
-
-OneHomingMoney = (function(_super) {
-  __extends(OneHomingMoney, _super);
-
-  function OneHomingMoney(w, h) {
-    OneHomingMoney.__super__.constructor.call(this, w, h);
-    this.price = 1;
-    this.frame = 2;
-  }
-
-  return OneHomingMoney;
-
-})(HomingMoney);
-
-
-/*
 10円
+@param boolean isHoming trueならコインがホーミングする
  */
 
-TenHomingMoney = (function(_super) {
-  __extends(TenHomingMoney, _super);
+TenMoney = (function(_super) {
+  __extends(TenMoney, _super);
 
-  function TenHomingMoney(w, h) {
-    TenHomingMoney.__super__.constructor.call(this, w, h);
+  function TenMoney(isHoming) {
+    TenMoney.__super__.constructor.call(this, isHoming);
     this.price = 10;
     this.frame = 7;
   }
 
-  return TenHomingMoney;
+  return TenMoney;
 
-})(HomingMoney);
+})(Money);
 
 
 /*
 100円
+@param boolean isHoming trueならコインがホーミングする
  */
 
-HundredHomingMoney = (function(_super) {
-  __extends(HundredHomingMoney, _super);
+HundredMoney = (function(_super) {
+  __extends(HundredMoney, _super);
 
-  function HundredHomingMoney(w, h) {
-    HundredHomingMoney.__super__.constructor.call(this, w, h);
+  function HundredMoney(isHoming) {
+    HundredMoney.__super__.constructor.call(this, isHoming);
     this.price = 100;
     this.frame = 5;
   }
 
-  return HundredHomingMoney;
+  return HundredMoney;
 
-})(HomingMoney);
+})(Money);
 
 
 /*
 1000円
+@param boolean isHoming trueならコインがホーミングする
  */
 
-ThousandHomingMoney = (function(_super) {
-  __extends(ThousandHomingMoney, _super);
+ThousandMoney = (function(_super) {
+  __extends(ThousandMoney, _super);
 
-  function ThousandHomingMoney(w, h) {
-    ThousandHomingMoney.__super__.constructor.call(this, w, h);
+  function ThousandMoney(isHoming) {
+    ThousandMoney.__super__.constructor.call(this, isHoming);
     this.price = 1000;
     this.frame = 4;
   }
 
-  return ThousandHomingMoney;
+  return ThousandMoney;
 
-})(HomingMoney);
+})(Money);
 
 Slot = (function(_super) {
   __extends(Slot, _super);
