@@ -69,6 +69,4 @@ class gpSystem extends appGroup
             game.bet = 1
         else if game.bet > game.money
             game.bet = game.money
-        else if game.bet > 10000000
-            game.bet = 10000000
         @bet_text.setValue()
