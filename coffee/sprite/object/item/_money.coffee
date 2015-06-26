@@ -7,7 +7,10 @@ class Money extends Item
         super 48, 48
         @scaleX = 0.5
         @scaleY = 0.5
+        @vx = 0
+        @vy = 0
         @price = 1 #単価
+        @gravity = 0.5
         @image = game.imageload("icon1")
         @isHoming = isHoming
         @_setGravity()
@@ -23,14 +26,12 @@ class Money extends Item
     _setGravity:()->
         if @isHoming is true
             @gravity = 2
-        else
-            @gravity = 1
     ###
     プレイヤーに当たった時
     ###
     hitPlayer:()->
         if game.main_scene.gp_stage_front.player.intersect(@)
-            @parentNode.removeChild(@)
+            game.main_scene.gp_stage_back.removeChild(@)
             game.money += @price
             game.main_scene.gp_system.money_text.setValue()
 
@@ -39,7 +40,7 @@ class Money extends Item
     ###
     removeOnFloor:()->
         if @y > game.height + @h
-            @parentNode.removeChild(@)
+            game.main_scene.gp_stage_back.removeChild(@)
 
     setPosition:()->
         @y = @h * -1

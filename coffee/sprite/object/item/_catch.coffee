@@ -13,8 +13,8 @@ class Catch extends Item
     プレイヤーに当たった時
     ###
     hitPlayer:()->
-        if @parentNode.player.intersect(@)
-            @parentNode.removeChild(@)
+        if game.main_scene.gp_stage_front.player.intersect(@)
+            game.main_scene.gp_stage_front.removeChild(@)
             game.combo += 1
             game.main_scene.gp_system.combo_text.setValue()
             game.main_scene.gp_slot.slotStop()
@@ -25,7 +25,7 @@ class Catch extends Item
     ###
     removeOnFloor:()->
         if @y > game.height + @h
-            @parentNode.removeChild(@)
+            game.main_scene.gp_stage_front.removeChild(@)
             game.combo = 0
             game.main_scene.gp_system.combo_text.setValue()
             game.tensionSetValueItemFall()
@@ -45,7 +45,7 @@ class Catch extends Item
     _setPositoinX:()->
         ret_x = 0
         if game.debug.item_flg
-            ret_x = @parentNode.player.x
+            ret_x = game.main_scene.gp_stage_front.player.x
         else
             ret_x = Math.floor((game.width - @w) * Math.random())
         return ret_x

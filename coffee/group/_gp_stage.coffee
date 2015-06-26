@@ -178,7 +178,7 @@ class stageBack extends gpStage
     掛け金の戻り分を降らせる
     ###
     returnMoneyFallStart:()->
-        val = Math.floor(game.bet * game.combo * 0.01)
+        val = game.slot_setting.getReturnMoneyFallValue()
         if val < 10
         else if val < 100
             val = Math.floor(val / 10) * 10

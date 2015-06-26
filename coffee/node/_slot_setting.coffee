@@ -20,6 +20,9 @@ class slotSetting extends appNode
         #テンションの最大値
         @tension_max = 500
 
+    getReturnMoneyFallValue:()->
+        return Math.floor(game.bet * game.combo * 0.02)
+
     ###
     アイテムを取った時のテンションゲージの増減値を決める
     ###

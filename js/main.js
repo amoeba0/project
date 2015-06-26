@@ -723,7 +723,7 @@ stageBack = (function(_super) {
 
   stageBack.prototype.returnMoneyFallStart = function() {
     var stage, val;
-    val = Math.floor(game.bet * game.combo * 0.01);
+    val = game.slot_setting.getReturnMoneyFallValue();
     if (val < 10) {
 
     } else if (val < 100) {
@@ -1051,6 +1051,10 @@ slotSetting = (function(_super) {
     };
     this.tension_max = 500;
   }
+
+  slotSetting.prototype.getReturnMoneyFallValue = function() {
+    return Math.floor(game.bet * game.combo * 0.02);
+  };
 
 
   /*
@@ -1681,8 +1685,8 @@ Catch = (function(_super) {
    */
 
   Catch.prototype.hitPlayer = function() {
-    if (this.parentNode.player.intersect(this)) {
-      this.parentNode.removeChild(this);
+    if (game.main_scene.gp_stage_front.player.intersect(this)) {
+      game.main_scene.gp_stage_front.removeChild(this);
       game.combo += 1;
       game.main_scene.gp_system.combo_text.setValue();
       game.main_scene.gp_slot.slotStop();
@@ -1697,7 +1701,7 @@ Catch = (function(_super) {
 
   Catch.prototype.removeOnFloor = function() {
     if (this.y > game.height + this.h) {
-      this.parentNode.removeChild(this);
+      game.main_scene.gp_stage_front.removeChild(this);
       game.combo = 0;
       game.main_scene.gp_system.combo_text.setValue();
       return game.tensionSetValueItemFall();
@@ -1725,7 +1729,7 @@ Catch = (function(_super) {
     var ret_x;
     ret_x = 0;
     if (game.debug.item_flg) {
-      ret_x = this.parentNode.player.x;
+      ret_x = game.main_scene.gp_stage_front.player.x;
     } else {
       ret_x = Math.floor((game.width - this.w) * Math.random());
     }
@@ -1769,7 +1773,10 @@ Money = (function(_super) {
     Money.__super__.constructor.call(this, 48, 48);
     this.scaleX = 0.5;
     this.scaleY = 0.5;
+    this.vx = 0;
+    this.vy = 0;
     this.price = 1;
+    this.gravity = 0.5;
     this.image = game.imageload("icon1");
     this.isHoming = isHoming;
     this._setGravity();
@@ -1787,8 +1794,6 @@ Money = (function(_super) {
   Money.prototype._setGravity = function() {
     if (this.isHoming === true) {
       return this.gravity = 2;
-    } else {
-      return this.gravity = 1;
     }
   };
 
@@ -1799,7 +1804,7 @@ Money = (function(_super) {
 
   Money.prototype.hitPlayer = function() {
     if (game.main_scene.gp_stage_front.player.intersect(this)) {
-      this.parentNode.removeChild(this);
+      game.main_scene.gp_stage_back.removeChild(this);
       game.money += this.price;
       return game.main_scene.gp_system.money_text.setValue();
     }
@@ -1812,7 +1817,7 @@ Money = (function(_super) {
 
   Money.prototype.removeOnFloor = function() {
     if (this.y > game.height + this.h) {
-      return this.parentNode.removeChild(this);
+      return game.main_scene.gp_stage_back.removeChild(this);
     }
   };
 

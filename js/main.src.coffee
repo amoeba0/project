@@ -449,7 +449,7 @@ class stageBack extends gpStage
     掛け金の戻り分を降らせる
     ###
     returnMoneyFallStart:()->
-        val = Math.floor(game.bet * game.combo * 0.01)
+        val = game.slot_setting.getReturnMoneyFallValue()
         if val < 10
         else if val < 100
             val = Math.floor(val / 10) * 10
@@ -679,6 +679,9 @@ class slotSetting extends appNode
         }
         #テンションの最大値
         @tension_max = 500
+
+    getReturnMoneyFallValue:()->
+        return Math.floor(game.bet * game.combo * 0.02)
 
     ###
     アイテムを取った時のテンションゲージの増減値を決める
@@ -1087,8 +1090,8 @@ class Catch extends Item
     プレイヤーに当たった時
     ###
     hitPlayer:()->
-        if @parentNode.player.intersect(@)
-            @parentNode.removeChild(@)
+        if game.main_scene.gp_stage_front.player.intersect(@)
+            game.main_scene.gp_stage_front.removeChild(@)
             game.combo += 1
             game.main_scene.gp_system.combo_text.setValue()
             game.main_scene.gp_slot.slotStop()
@@ -1099,7 +1102,7 @@ class Catch extends Item
     ###
     removeOnFloor:()->
         if @y > game.height + @h
-            @parentNode.removeChild(@)
+            game.main_scene.gp_stage_front.removeChild(@)
             game.combo = 0
             game.main_scene.gp_system.combo_text.setValue()
             game.tensionSetValueItemFall()
@@ -1119,7 +1122,7 @@ class Catch extends Item
     _setPositoinX:()->
         ret_x = 0
         if game.debug.item_flg
-            ret_x = @parentNode.player.x
+            ret_x = game.main_scene.gp_stage_front.player.x
         else
             ret_x = Math.floor((game.width - @w) * Math.random())
         return ret_x
@@ -1143,7 +1146,10 @@ class Money extends Item
         super 48, 48
         @scaleX = 0.5
         @scaleY = 0.5
+        @vx = 0
+        @vy = 0
         @price = 1 #単価
+        @gravity = 0.5
         @image = game.imageload("icon1")
         @isHoming = isHoming
         @_setGravity()
@@ -1159,14 +1165,12 @@ class Money extends Item
     _setGravity:()->
         if @isHoming is true
             @gravity = 2
-        else
-            @gravity = 1
     ###
     プレイヤーに当たった時
     ###
     hitPlayer:()->
         if game.main_scene.gp_stage_front.player.intersect(@)
-            @parentNode.removeChild(@)
+            game.main_scene.gp_stage_back.removeChild(@)
             game.money += @price
             game.main_scene.gp_system.money_text.setValue()
 
@@ -1175,7 +1179,7 @@ class Money extends Item
     ###
     removeOnFloor:()->
         if @y > game.height + @h
-            @parentNode.removeChild(@)
+            game.main_scene.gp_stage_back.removeChild(@)
 
     setPosition:()->
         @y = @h * -1
