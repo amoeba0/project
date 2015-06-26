@@ -72,14 +72,15 @@ class stageBack extends gpStage
     constructor: () ->
         super
         @prizeMoneyItemsInstance = [] #スロット当選金のインスタンスを格納
-        @prizeMoneyItemsNum = {1:0,10:0,100:0,1000:0} #当選金を降らせる各コイン数の内訳
+        @prizeMoneyItemsNum = {1:0,10:0,100:0,1000:0,10000:0,100000:0} #当選金を降らせる各コイン数の内訳
         @nowPrizeMoneyItemsNum = 0
         @prizeMoneyFallIntervalFrm = 4 #スロットの当選金を降らせる間隔（フレーム）
         @prizeMoneyFallPeriodSec = 5 #スロットの当選金額が振っている時間（秒）
         @isFallPrizeMoney = false #スロットの当選金が振っている間はtrue
+        @oneSetMoney = 1 #1フレームに設置するコインの数
 
         @returnMoneyItemsInstance = [] #掛け金の戻り分のインスタンスを格納
-        @returnMoneyItemsNum = {1:0,10:0,100:0,1000:0} #掛け金の戻り分を降らせる各コイン数の内訳
+        @returnMoneyItemsNum = {1:0,10:0,100:0,1000:0,10000:0,100000:0} #掛け金の戻り分を降らせる各コイン数の内訳
         @nowReturnMoneyItemsNum = 0
         @returnMoneyFallIntervalFrm = 4 #掛け金の戻り分を降らせる間隔（フレーム）
     onenterframe: () ->
@@ -91,65 +92,84 @@ class stageBack extends gpStage
     ###
     fallPrizeMoneyStart:(value) ->
         stage = game.main_scene.gp_stage_front
+        if value < 1000000
+            @prizeMoneyFallIntervalFrm = 4
+        else if value < 10000000
+            @prizeMoneyFallIntervalFrm = 2
+        else
+            @prizeMoneyFallIntervalFrm = 1
         @prizeMoneyItemsNum = @_calcMoneyItemsNum(value, true)
         @prizeMoneyItemsInstance = @_setMoneyItemsInstance(@prizeMoneyItemsNum, true)
-        @prizeMoneyFallPeriodSec = Math.ceil(@prizeMoneyItemsInstance.length * @prizeMoneyFallIntervalFrm / game.fps) + stage.itemFallSecInit
+        if @prizeMoneyItemsNum[100000] > 1000
+            @oneSetMoney = Math.floor(@prizeMoneyItemsNum[100000] / 1000)
+        @prizeMoneyFallPeriodSec = Math.ceil((@prizeMoneyItemsInstance.length / @oneSetMoney) * @prizeMoneyFallIntervalFrm / game.fps) + stage.itemFallSecInit
         if @prizeMoneyFallPeriodSec > stage.itemFallSecInit
             stage.setItemFallFrm(@prizeMoneyFallPeriodSec)
         @isFallPrizeMoney = true
+        console.log(@oneSetMoney)
+        console.log(@prizeMoneyFallPeriodSec)
 
     ###
     スロットの当選金を降らせる
     ###
     _moneyFall:()->
         if @isFallPrizeMoney is true && @age % @prizeMoneyFallIntervalFrm is 0
-            @addChild(@prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum])
-            @prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum].setPosition()
-            @nowPrizeMoneyItemsNum += 1
-            if @nowPrizeMoneyItemsNum is @prizeMoneyItemsInstance.length
-                @nowPrizeMoneyItemsNum = 0
-                @isFallPrizeMoney = false
+            for i in [1..@oneSetMoney]
+                @addChild(@prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum])
+                @prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum].setPosition()
+                @nowPrizeMoneyItemsNum += 1
+                if @nowPrizeMoneyItemsNum is @prizeMoneyItemsInstance.length
+                    @nowPrizeMoneyItemsNum = 0
+                    @isFallPrizeMoney = false
     ###
     当選金の内訳のコイン枚数を計算する
     @param value   number 金額
     @prize boolean true:当選金額
     ###
     _calcMoneyItemsNum:(value, prize)->
-        ret_data = {1:0,10:0,100:0,1000:0}
+        ret_data = {1:0,10:0,100:0,1000:0,10000:0,100000:0}
         if value <= 20 #全部1円
             ret_data[1] = value
             ret_data[10] = 0
             ret_data[100] = 0
             ret_data[1000] = 0
+            ret_data[10000] = 0
+            ret_data[100000] = 0
         else if value < 100 #1円と10円と端数
-            ret_data[1] = game.getDigitNum(value, 1)
-            ret_data[10] = game.getDigitNum(value, 2)
+            ret_data[1] = game.getDigitNum(value, 1) + 10
+            ret_data[10] = game.getDigitNum(value, 2) - 1
             ret_data[100] = 0
             ret_data[1000] = 0
-            if prize is true
-                ret_data[1] += 10
-                ret_data[10] -= 1
+            ret_data[10000] = 0
+            ret_data[100000] = 0
         else if value < 1000 #10円と100円と端数
+            ret_data[1] = game.getDigitNum(value, 1)
+            ret_data[10] = game.getDigitNum(value, 2) + 10
+            ret_data[100] = game.getDigitNum(value, 3) - 1
+            ret_data[1000] = 0
+            ret_data[10000] = 0
+            ret_data[100000] = 0
+        else if value < 10000 #1000円と100円と端数
+            ret_data[1] = game.getDigitNum(value, 1)
+            ret_data[10] = game.getDigitNum(value, 2)
+            ret_data[100] = game.getDigitNum(value, 3) + 10
+            ret_data[1000] = game.getDigitNum(value, 4) - 1
+            ret_data[10000] = 0
+            ret_data[100000] = 0
+        else if value < 100000
             ret_data[1] = game.getDigitNum(value, 1)
             ret_data[10] = game.getDigitNum(value, 2)
             ret_data[100] = game.getDigitNum(value, 3)
-            ret_data[1000] = 0
-            if prize is true
-                ret_data[10] += 10
-                ret_data[100] -= 1
-        else if value < 10000 #1000円と100円と端数
+            ret_data[1000] = game.getDigitNum(value, 4) + 10
+            ret_data[10000] = game.getDigitNum(value, 5) - 1
+            ret_data[100000] = 0
+        else
             ret_data[1] = game.getDigitNum(value, 1)
             ret_data[10] = game.getDigitNum(value, 2)
             ret_data[100] = game.getDigitNum(value, 3)
             ret_data[1000] = game.getDigitNum(value, 4)
-            if prize is true
-                ret_data[100] += 10
-                ret_data[1000] -= 1
-        else #全部1000円と端数
-            ret_data[1] = game.getDigitNum(value, 1)
-            ret_data[10] = game.getDigitNum(value, 2)
-            ret_data[100] = game.getDigitNum(value, 3)
-            ret_data[1000] = Math.floor(value/1000)
+            ret_data[10000] = game.getDigitNum(value, 5)
+            ret_data[100000] = Math.floor(value/100000)
         return ret_data
 
     ###
@@ -172,10 +192,16 @@ class stageBack extends gpStage
         if itemsNum[1000] > 0
             for i in [1..itemsNum[1000]]
                 ret_data.push(new ThousandMoney(isHoming))
+        if itemsNum[10000] > 0
+            for i in [1..itemsNum[10000]]
+                ret_data.push(new TenThousandMoney(isHoming))
+        if itemsNum[100000] > 0
+            for i in [1..itemsNum[100000]]
+                ret_data.push(new HundredThousandMoney(isHoming))
         return ret_data
 
     ###
-    掛け金の戻り分を降らせる
+    掛け金の戻り分を降らせる、開始
     ###
     returnMoneyFallStart:()->
         val = game.slot_setting.getReturnMoneyFallValue()
@@ -185,15 +211,20 @@ class stageBack extends gpStage
         else if val < 1000
             val = Math.floor(val / 100) * 100
         else if val < 10000
-            val = Math.floor(val / 100) * 1000
+            val = Math.floor(val / 1000) * 1000
+        else if val < 100000
+            val = Math.floor(val / 10000) * 10000
         else
-            val = Math.floor(val / 1000) * 10000
+            val = Math.floor(val / 100000) * 100000
         @returnMoneyItemsNum = @_calcMoneyItemsNum(val, false)
         @returnMoneyItemsInstance = @_setMoneyItemsInstance(@returnMoneyItemsNum, false)
         stage = game.main_scene.gp_stage_front
         @returnMoneyFallIntervalFrm = Math.round(stage.itemFallSecInit * game.fps / @returnMoneyItemsInstance.length)
         @nowReturnMoneyItemsNum = 0
 
+    ###
+    掛け金の戻り分を降らせる
+    ###
     _returnMoneyFall:()->
         if @isFallPrizeMoney is false && @returnMoneyItemsInstance.length > 0 && @age % @returnMoneyFallIntervalFrm is 0
             if @nowReturnMoneyItemsNum is @returnMoneyItemsInstance.length

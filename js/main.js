@@ -1,4 +1,4 @@
-var Bear, Button, Catch, Character, Debug, Floor, Frame, Guest, HundredMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, comboText, comboUnitText, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
+var Bear, Button, Catch, Character, Debug, Floor, Frame, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, comboText, comboUnitText, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -172,9 +172,9 @@ LoveliveGame = (function(_super) {
     };
     this.keybind(90, 'z');
     this.preloadAll();
-    this.money_init = 10000;
+    this.money_init = 100;
     this.money = 0;
-    this.bet = 10;
+    this.bet = 1;
     this.combo = 0;
     this.tension = 0;
     this.item_kind = 0;
@@ -381,6 +381,9 @@ gpSlot = (function(_super) {
     ret_money = 0;
     eye = this.middle_lille.lilleArray[this.middle_lille.nowEye];
     ret_money = game.bet * game.slot_setting.bairitu[eye];
+    if (ret_money > 10000000000) {
+      ret_money = 10000000000;
+    }
     return ret_money;
   };
 
@@ -569,18 +572,23 @@ stageBack = (function(_super) {
       1: 0,
       10: 0,
       100: 0,
-      1000: 0
+      1000: 0,
+      10000: 0,
+      100000: 0
     };
     this.nowPrizeMoneyItemsNum = 0;
     this.prizeMoneyFallIntervalFrm = 4;
     this.prizeMoneyFallPeriodSec = 5;
     this.isFallPrizeMoney = false;
+    this.oneSetMoney = 1;
     this.returnMoneyItemsInstance = [];
     this.returnMoneyItemsNum = {
       1: 0,
       10: 0,
       100: 0,
-      1000: 0
+      1000: 0,
+      10000: 0,
+      100000: 0
     };
     this.nowReturnMoneyItemsNum = 0;
     this.returnMoneyFallIntervalFrm = 4;
@@ -600,13 +608,25 @@ stageBack = (function(_super) {
   stageBack.prototype.fallPrizeMoneyStart = function(value) {
     var stage;
     stage = game.main_scene.gp_stage_front;
+    if (value < 1000000) {
+      this.prizeMoneyFallIntervalFrm = 4;
+    } else if (value < 10000000) {
+      this.prizeMoneyFallIntervalFrm = 2;
+    } else {
+      this.prizeMoneyFallIntervalFrm = 1;
+    }
     this.prizeMoneyItemsNum = this._calcMoneyItemsNum(value, true);
     this.prizeMoneyItemsInstance = this._setMoneyItemsInstance(this.prizeMoneyItemsNum, true);
-    this.prizeMoneyFallPeriodSec = Math.ceil(this.prizeMoneyItemsInstance.length * this.prizeMoneyFallIntervalFrm / game.fps) + stage.itemFallSecInit;
+    if (this.prizeMoneyItemsNum[100000] > 1000) {
+      this.oneSetMoney = Math.floor(this.prizeMoneyItemsNum[100000] / 1000);
+    }
+    this.prizeMoneyFallPeriodSec = Math.ceil((this.prizeMoneyItemsInstance.length / this.oneSetMoney) * this.prizeMoneyFallIntervalFrm / game.fps) + stage.itemFallSecInit;
     if (this.prizeMoneyFallPeriodSec > stage.itemFallSecInit) {
       stage.setItemFallFrm(this.prizeMoneyFallPeriodSec);
     }
-    return this.isFallPrizeMoney = true;
+    this.isFallPrizeMoney = true;
+    console.log(this.oneSetMoney);
+    return console.log(this.prizeMoneyFallPeriodSec);
   };
 
 
@@ -615,14 +635,21 @@ stageBack = (function(_super) {
    */
 
   stageBack.prototype._moneyFall = function() {
+    var i, _i, _ref, _results;
     if (this.isFallPrizeMoney === true && this.age % this.prizeMoneyFallIntervalFrm === 0) {
-      this.addChild(this.prizeMoneyItemsInstance[this.nowPrizeMoneyItemsNum]);
-      this.prizeMoneyItemsInstance[this.nowPrizeMoneyItemsNum].setPosition();
-      this.nowPrizeMoneyItemsNum += 1;
-      if (this.nowPrizeMoneyItemsNum === this.prizeMoneyItemsInstance.length) {
-        this.nowPrizeMoneyItemsNum = 0;
-        return this.isFallPrizeMoney = false;
+      _results = [];
+      for (i = _i = 1, _ref = this.oneSetMoney; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+        this.addChild(this.prizeMoneyItemsInstance[this.nowPrizeMoneyItemsNum]);
+        this.prizeMoneyItemsInstance[this.nowPrizeMoneyItemsNum].setPosition();
+        this.nowPrizeMoneyItemsNum += 1;
+        if (this.nowPrizeMoneyItemsNum === this.prizeMoneyItemsInstance.length) {
+          this.nowPrizeMoneyItemsNum = 0;
+          _results.push(this.isFallPrizeMoney = false);
+        } else {
+          _results.push(void 0);
+        }
       }
+      return _results;
     }
   };
 
@@ -639,45 +666,52 @@ stageBack = (function(_super) {
       1: 0,
       10: 0,
       100: 0,
-      1000: 0
+      1000: 0,
+      10000: 0,
+      100000: 0
     };
     if (value <= 20) {
       ret_data[1] = value;
       ret_data[10] = 0;
       ret_data[100] = 0;
       ret_data[1000] = 0;
+      ret_data[10000] = 0;
+      ret_data[100000] = 0;
     } else if (value < 100) {
-      ret_data[1] = game.getDigitNum(value, 1);
-      ret_data[10] = game.getDigitNum(value, 2);
+      ret_data[1] = game.getDigitNum(value, 1) + 10;
+      ret_data[10] = game.getDigitNum(value, 2) - 1;
       ret_data[100] = 0;
       ret_data[1000] = 0;
-      if (prize === true) {
-        ret_data[1] += 10;
-        ret_data[10] -= 1;
-      }
+      ret_data[10000] = 0;
+      ret_data[100000] = 0;
     } else if (value < 1000) {
       ret_data[1] = game.getDigitNum(value, 1);
-      ret_data[10] = game.getDigitNum(value, 2);
-      ret_data[100] = game.getDigitNum(value, 3);
+      ret_data[10] = game.getDigitNum(value, 2) + 10;
+      ret_data[100] = game.getDigitNum(value, 3) - 1;
       ret_data[1000] = 0;
-      if (prize === true) {
-        ret_data[10] += 10;
-        ret_data[100] -= 1;
-      }
+      ret_data[10000] = 0;
+      ret_data[100000] = 0;
     } else if (value < 10000) {
       ret_data[1] = game.getDigitNum(value, 1);
       ret_data[10] = game.getDigitNum(value, 2);
+      ret_data[100] = game.getDigitNum(value, 3) + 10;
+      ret_data[1000] = game.getDigitNum(value, 4) - 1;
+      ret_data[10000] = 0;
+      ret_data[100000] = 0;
+    } else if (value < 100000) {
+      ret_data[1] = game.getDigitNum(value, 1);
+      ret_data[10] = game.getDigitNum(value, 2);
       ret_data[100] = game.getDigitNum(value, 3);
-      ret_data[1000] = game.getDigitNum(value, 4);
-      if (prize === true) {
-        ret_data[100] += 10;
-        ret_data[1000] -= 1;
-      }
+      ret_data[1000] = game.getDigitNum(value, 4) + 10;
+      ret_data[10000] = game.getDigitNum(value, 5) - 1;
+      ret_data[100000] = 0;
     } else {
       ret_data[1] = game.getDigitNum(value, 1);
       ret_data[10] = game.getDigitNum(value, 2);
       ret_data[100] = game.getDigitNum(value, 3);
-      ret_data[1000] = Math.floor(value / 1000);
+      ret_data[1000] = game.getDigitNum(value, 4);
+      ret_data[10000] = game.getDigitNum(value, 5);
+      ret_data[100000] = Math.floor(value / 100000);
     }
     return ret_data;
   };
@@ -691,7 +725,7 @@ stageBack = (function(_super) {
    */
 
   stageBack.prototype._setMoneyItemsInstance = function(itemsNum, isHoming) {
-    var i, ret_data, _i, _j, _k, _l, _ref, _ref1, _ref2, _ref3;
+    var i, ret_data, _i, _j, _k, _l, _m, _n, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
     ret_data = [];
     if (itemsNum[1] > 0) {
       for (i = _i = 1, _ref = itemsNum[1]; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
@@ -713,12 +747,22 @@ stageBack = (function(_super) {
         ret_data.push(new ThousandMoney(isHoming));
       }
     }
+    if (itemsNum[10000] > 0) {
+      for (i = _m = 1, _ref4 = itemsNum[10000]; 1 <= _ref4 ? _m <= _ref4 : _m >= _ref4; i = 1 <= _ref4 ? ++_m : --_m) {
+        ret_data.push(new TenThousandMoney(isHoming));
+      }
+    }
+    if (itemsNum[100000] > 0) {
+      for (i = _n = 1, _ref5 = itemsNum[100000]; 1 <= _ref5 ? _n <= _ref5 : _n >= _ref5; i = 1 <= _ref5 ? ++_n : --_n) {
+        ret_data.push(new HundredThousandMoney(isHoming));
+      }
+    }
     return ret_data;
   };
 
 
   /*
-  掛け金の戻り分を降らせる
+  掛け金の戻り分を降らせる、開始
    */
 
   stageBack.prototype.returnMoneyFallStart = function() {
@@ -731,9 +775,11 @@ stageBack = (function(_super) {
     } else if (val < 1000) {
       val = Math.floor(val / 100) * 100;
     } else if (val < 10000) {
-      val = Math.floor(val / 100) * 1000;
+      val = Math.floor(val / 1000) * 1000;
+    } else if (val < 100000) {
+      val = Math.floor(val / 10000) * 10000;
     } else {
-      val = Math.floor(val / 1000) * 10000;
+      val = Math.floor(val / 100000) * 100000;
     }
     this.returnMoneyItemsNum = this._calcMoneyItemsNum(val, false);
     this.returnMoneyItemsInstance = this._setMoneyItemsInstance(this.returnMoneyItemsNum, false);
@@ -741,6 +787,11 @@ stageBack = (function(_super) {
     this.returnMoneyFallIntervalFrm = Math.round(stage.itemFallSecInit * game.fps / this.returnMoneyItemsInstance.length);
     return this.nowReturnMoneyItemsNum = 0;
   };
+
+
+  /*
+  掛け金の戻り分を降らせる
+   */
 
   stageBack.prototype._returnMoneyFall = function() {
     if (this.isFallPrizeMoney === false && this.returnMoneyItemsInstance.length > 0 && this.age % this.returnMoneyFallIntervalFrm === 0) {
@@ -1002,7 +1053,7 @@ Debug = (function(_super) {
     this.fix_tention_item_catch_flg = false;
     this.fix_tention_item_fall_flg = false;
     this.fix_tention_slot_hit_flg = false;
-    this.lille_array = [[2, 3], [2], [2]];
+    this.lille_array = [[7, 3], [7], [7]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -1;
     this.fix_tention_slot_hit_flg = 200;
@@ -1855,7 +1906,7 @@ OneMoney = (function(_super) {
   function OneMoney(isHoming) {
     OneMoney.__super__.constructor.call(this, isHoming);
     this.price = 1;
-    this.frame = 2;
+    this.frame = 7;
   }
 
   return OneMoney;
@@ -1912,10 +1963,48 @@ ThousandMoney = (function(_super) {
   function ThousandMoney(isHoming) {
     ThousandMoney.__super__.constructor.call(this, isHoming);
     this.price = 1000;
-    this.frame = 4;
+    this.frame = 5;
   }
 
   return ThousandMoney;
+
+})(Money);
+
+
+/*
+一万円
+@param boolean isHoming trueならコインがホーミングする
+ */
+
+TenThousandMoney = (function(_super) {
+  __extends(TenThousandMoney, _super);
+
+  function TenThousandMoney(isHoming) {
+    TenThousandMoney.__super__.constructor.call(this, isHoming);
+    this.price = 10000;
+    this.frame = 4;
+  }
+
+  return TenThousandMoney;
+
+})(Money);
+
+
+/*
+10万円
+@param boolean isHoming trueならコインがホーミングする
+ */
+
+HundredThousandMoney = (function(_super) {
+  __extends(HundredThousandMoney, _super);
+
+  function HundredThousandMoney(isHoming) {
+    HundredThousandMoney.__super__.constructor.call(this, isHoming);
+    this.price = 100000;
+    this.frame = 4;
+  }
+
+  return HundredThousandMoney;
 
 })(Money);
 

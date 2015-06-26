@@ -20,9 +20,9 @@ class LoveliveGame extends catchAndSlotGame
         @preloadAll()
 
         #ゲーム中どこからでもアクセスのある数値
-        @money_init = 10000 #ゲーム開始時の所持金
+        @money_init = 100 #ゲーム開始時の所持金
         @money = 0 #現在の所持金
-        @bet = 10 #現在の掛け金
+        @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
         @tension = 0 #現在のテンション(500がマックス)
         @item_kind = 0 #落下アイテムの種類（フレーム）

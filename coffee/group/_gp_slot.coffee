@@ -44,6 +44,8 @@ class gpSlot extends appGroup
         ret_money = 0
         eye = @middle_lille.lilleArray[@middle_lille.nowEye]
         ret_money = game.bet * game.slot_setting.bairitu[eye]
+        if ret_money > 10000000000
+            ret_money = 10000000000
         return ret_money
 
     ###

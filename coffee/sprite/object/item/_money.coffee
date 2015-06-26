@@ -61,7 +61,7 @@ class OneMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 1
-        @frame = 2
+        @frame = 7
 
 ###
 10円
@@ -91,4 +91,24 @@ class ThousandMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 1000
+        @frame = 5
+
+###
+一万円
+@param boolean isHoming trueならコインがホーミングする
+###
+class TenThousandMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming
+        @price = 10000
+        @frame = 4
+
+###
+10万円
+@param boolean isHoming trueならコインがホーミングする
+###
+class HundredThousandMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming
+        @price = 100000
         @frame = 4
