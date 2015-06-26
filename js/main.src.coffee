@@ -151,6 +151,7 @@ class LoveliveGame extends catchAndSlotGame
     @param number val 増減値
     ###
     _tensionSetValue:(val)->
+        @slot_setting.changeLilleForTension(@tension, val)
         @tension += val
         if @tension < 0
             @tension = 0
@@ -192,6 +193,7 @@ class gpSlot extends appGroup
         @stopIntervalFrame = 9 #スロットが連続で止まる間隔（フレーム）
         @slotIntervalFrameRandom = 0
         @stopStartAge = 0 #スロットの停止が開始したフレーム
+        @leftSlotEye = 0 #左のスロットが当たった目
         @slotSet()
     onenterframe: (e) ->
         @slotStopping()
@@ -203,14 +205,41 @@ class gpSlot extends appGroup
         if @isStopping is true
             if @age is @stopStartAge
                 @left_lille.isRotation = false
+                @saveLeftSlotEye()
                 @setIntervalFrame()
             if @age is @stopStartAge + @stopIntervalFrame + @slotIntervalFrameRandom
                 @middle_lille.isRotation = false
+                @forceHit(@middle_lille)
                 @setIntervalFrame()
             if @age is @stopStartAge + @stopIntervalFrame * 2 + @slotIntervalFrameRandom
                 @right_lille.isRotation = false
+                @forceHit(@right_lille)
                 @isStopping = false
                 @slotHitTest()
+
+    ###
+    左のスロットが当たった目を記憶する
+    ###
+    saveLeftSlotEye:()->
+        @leftSlotEye = @left_lille.lilleArray[@left_lille.nowEye]
+
+    ###
+    確率でスロットを強制的に当たりにする
+    ###
+    forceHit:(target)->
+        if game.slot_setting.getIsForceSlotHit() is true
+            tmp_eye = @_searchEye(target)
+            if tmp_eye != 0
+                target.nowEye = tmp_eye
+                target.frameChange()
+
+    _searchEye:(target)->
+        result = 0
+        for key, val of target.lilleArray
+            if result is 0 && val is @leftSlotEye
+                result = key
+        return result
+
 
     ###
     スロットの当選判定
@@ -220,6 +249,11 @@ class gpSlot extends appGroup
             prize_money = @_calcPrizeMoney()
             game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
             game.tensionSetValueSlotHit(prize_money)
+        else
+            if game.slot_setting.isAddMuse() is true
+                member = game.slot_setting.setMuseMember()
+                num = game.slot_setting.setMuseNum()
+                @slotAddMuse(member, num)
 
     ###
     スロットの当選金額を計算
@@ -242,6 +276,64 @@ class gpSlot extends appGroup
         @addChild(@middle_lille)
         @right_lille = new RightLille()
         @addChild(@right_lille)
+
+    ###
+    リールを指定のリールに変更する
+    @param array   lille     リール
+    @param boolean isMuseDel μ’sは削除する
+    ###
+    slotLilleChange:(lille, isMuseDel)->
+        @left_lille.lilleArray = @_slotLilleChangeUnit(@left_lille, lille[0], isMuseDel)
+        @middle_lille.lilleArray = @_slotLilleChangeUnit(@middle_lille, lille[1], isMuseDel)
+        @right_lille.lilleArray = @_slotLilleChangeUnit(@right_lille, lille[2], isMuseDel)
+
+    ###
+    リールを指定のリールに変更する（単体）
+    リールにμ’sの誰かがいればそのまま残す
+    @param array target 変更対象
+    @param array change 変更後
+    ###
+    _slotLilleChangeUnit:(target, change, isMuseDel)->
+        arr = []
+        if isMuseDel is false
+            for key, val of target.lilleArray
+                if val > 10
+                    arr.push(key)
+            if arr.length > 0
+                for key, val of arr
+                    change[key] = target.lilleArray[key]
+        return change
+
+
+    ###
+    リールにμ’sの誰かを挿入
+    スロットが止まってハズレだったときに確率で実行
+    @param number num メンバーの指定
+    @param number cnt 人数の指定
+    ###
+    slotAddMuse:(num, cnt)->
+        @left_lille.lilleArray = @_slotAddMuseUnit(num, cnt, @left_lille)
+        @middle_lille.lilleArray = @_slotAddMuseUnit(num, cnt, @middle_lille)
+        @right_lille.lilleArray = @_slotAddMuseUnit(num, cnt, @right_lille)
+
+    ###
+    リールにμ’sの誰かを挿入(単体)
+    @param number num   メンバーの指定
+    @param number cnt   人数の指定
+    @param array  lille リール
+    ###
+    _slotAddMuseUnit:(num, cnt, lille)->
+        arr = []
+        for i in [1..cnt]
+            for key, val of lille.lilleArray
+                if val < 10
+                    arr.push(key)
+            if arr.length > 0
+                random_key = Math.floor(arr.length * Math.random())
+                add_num = arr[random_key]
+                lille.lilleArray[add_num] = num
+        return lille.lilleArray
+
     ###
     スロットマシンの回転を始める
     ###
@@ -379,8 +471,6 @@ class stageBack extends gpStage
         if @prizeMoneyFallPeriodSec > stage.itemFallSecInit
             stage.setItemFallFrm(@prizeMoneyFallPeriodSec)
         @isFallPrizeMoney = true
-        console.log(@oneSetMoney)
-        console.log(@prizeMoneyFallPeriodSec)
 
     ###
     スロットの当選金を降らせる
@@ -388,6 +478,7 @@ class stageBack extends gpStage
     _moneyFall:()->
         if @isFallPrizeMoney is true && @age % @prizeMoneyFallIntervalFrm is 0
             for i in [1..@oneSetMoney]
+                # TODO バグあり
                 @addChild(@prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum])
                 @prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum].setPosition()
                 @nowPrizeMoneyItemsNum += 1
@@ -578,6 +669,8 @@ class gpSystem extends appGroup
             game.bet = 1
         else if game.bet > game.money
             game.bet = game.money
+        else if game.bet > 10000000
+            game.bet = 10000000
         @bet_text.setValue()
 
 class text extends appLabel
@@ -662,9 +755,9 @@ class Debug extends appNode
         @all_debug_flg = false
 
         #デバッグ用リールにすりかえる
-        @lille_flg = true
+        @lille_flg = false
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = true
+        @item_flg = false
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する
@@ -682,7 +775,7 @@ class Debug extends appNode
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
         #アイテムを落とした時のテンション増減固定値
-        @fix_tention_item_fall_val = -1
+        @fix_tention_item_fall_val = -50
         #スロットが当たった時のテンション増減固定値
         @fix_tention_slot_hit_flg = 200
 
@@ -703,9 +796,19 @@ class slotSetting extends appNode
         super
         #リールの並び
         @lille_array = [
-            [1,2,3,4,2,3,5,2,1,3,4,5,2,5,7,1,2,3,4,5,1,7],
+            [3,2,3,4,2,3,5,2,4,3,4,5,2,5,7,1,2,3,4,5,2,3],
             [3,5,2,5,4,2,3,4,7,2,1,5,4,3,5,2,3,7,1,4,5,3],
-            [2,4,1,5,1,4,2,7,2,4,3,1,7,2,3,7,1,5,3,2,4,5]
+            [2,4,1,5,1,4,2,7,2,4,3,1,7,2,3,2,3,5,3,2,4,5]
+        ]
+        @lille_array_1 = [
+            [1,5,3,4,2,3,5,4,1,3,4,5,2,5,7,1,4,5,4,5,1,7],
+            [4,5,2,5,4,2,5,4,7,2,1,5,4,3,5,4,3,7,1,4,5,3],
+            [5,4,1,5,1,4,2,7,5,4,3,1,7,2,4,7,1,5,3,2,4,5]
+        ]
+        @lille_array_2 = [
+            [1,5,7,4,2,3,5,4,1,7,4,5,2,5,7,1,4,1,4,7,1,7],
+            [7,5,2,5,7,2,5,1,7,2,1,5,1,3,5,7,3,7,1,4,5,1],
+            [1,4,1,7,1,4,2,7,5,7,3,1,7,2,4,7,1,5,7,2,4,1]
         ]
         #リールの目に対する当選額の倍率
         @bairitu = {
@@ -714,6 +817,50 @@ class slotSetting extends appNode
         }
         #テンションの最大値
         @tension_max = 500
+        #前回入ったμ’sメンバー
+        @prev_muse_num = 0
+
+    setGravity:()->
+        return Math.floor((game.tension / @tension_max) * 1.5) + 0.5
+
+
+    ###
+    テンションからスロットにμ’sが入るかどうかを返す
+    @return boolean
+    ###
+    isAddMuse:()->
+        result = false
+        rate = Math.floor((game.tension / @tension_max) * 30)
+        random = Math.floor(Math.random() * 100)
+        if random < rate
+            result = true
+        return result
+
+    ###
+    挿入するμ’sメンバーを決める
+    ###
+    setMuseMember:()->
+        result = Math.round(Math.random() * 8) + 11
+        @prev_muse_num = result
+        return result
+
+    ###
+    挿入するμ’sメンバーの人数を決める
+    ###
+    setMuseNum:()->
+        num = Math.floor(game.combo / 100) + 1
+        return num
+
+    ###
+    スロットを強制的に当たりにする確率を決める
+    ###
+    getIsForceSlotHit:()->
+        result = false
+        rate = Math.floor((game.tension / @tension_max) * 20)
+        random = Math.floor(Math.random() * 100)
+        if random < rate
+            result = true
+        return result
 
     getReturnMoneyFallValue:()->
         return Math.floor(game.bet * game.combo * 0.02)
@@ -729,7 +876,6 @@ class slotSetting extends appNode
             val = 1
         if game.debug.fix_tention_item_catch_flg is true
             val = game.debug.fix_tention_item_catch_val
-        #console.log(val)
         return val
     ###
     アイテムを落とした時のテンションゲージの増減値を決める
@@ -755,7 +901,6 @@ class slotSetting extends appNode
         val *= -1
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
-        #console.log(val)
         return val
     ###
     スロットが当たったのテンションゲージの増減値を決める
@@ -781,8 +926,28 @@ class slotSetting extends appNode
         val = Math.round(val)
         if game.debug.fix_tention_slot_hit_flg is true
             val = game.debug.fix_tention_slot_hit_flg
-        #console.log(val)
         return val
+
+    ###
+    テンションの状態でスロットの内容を変更する
+    @param number tension 変化前のテンション
+    @param number val     テンションの増減値
+    ###
+    changeLilleForTension:(tension, val)->
+        slot = game.main_scene.gp_slot
+        before = tension
+        after = tension + val
+        tension_33 = Math.floor(@tension_max * 0.33)
+        tension_66 = Math.floor(@tension_max * 0.66)
+        if before > tension_33 && after < tension_33
+            slot.slotLilleChange(@lille_array, false)
+        if before < tension_66 && after > tension_66
+            slot.slotLilleChange(@lille_array_2, false)
+        if (before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)
+            slot.slotLilleChange(@lille_array_1, false)
+        if before > 0 && after <= 0
+            slot.slotLilleChange(@lille_array, true)
+
 
     ###
     落下するアイテムの種類を決める
@@ -1149,7 +1314,7 @@ class Catch extends Item
         @y = @h * -1
         @x = @_setPositoinX()
         @frame = game.slot_setting.getCatchItemFrame()
-        @gravity = 1
+        @gravity = game.slot_setting.setGravity()
 
     ###
     X座標の位置の設定
@@ -1320,6 +1485,9 @@ class Lille extends Slot
         @nowEye += 1
         if @lilleArray[@nowEye] is undefined
             @nowEye = 0
+        @frameChange()
+
+    frameChange:()->
         @frame = @lilleArray[@nowEye]
 
     rotationStop: ()->

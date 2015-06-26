@@ -37,7 +37,7 @@ class Catch extends Item
         @y = @h * -1
         @x = @_setPositoinX()
         @frame = game.slot_setting.getCatchItemFrame()
-        @gravity = 1
+        @gravity = game.slot_setting.setGravity()
 
     ###
     X座標の位置の設定

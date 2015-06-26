@@ -15,6 +15,9 @@ class Lille extends Slot
         @nowEye += 1
         if @lilleArray[@nowEye] is undefined
             @nowEye = 0
+        @frameChange()
+
+    frameChange:()->
         @frame = @lilleArray[@nowEye]
 
     rotationStop: ()->
