@@ -7,37 +7,49 @@ class slotSetting extends appNode
     constructor: () ->
         super
         #リールの並び
-        @lille_array = [
-            [3,2,3,4,2,3,5,2,4,3,4,5,2,5,7,1,2,3,4,5,2,3],
-            [3,5,2,5,4,2,3,4,7,2,1,5,4,3,5,2,3,7,1,4,5,3],
-            [2,4,1,5,1,4,2,7,2,4,3,1,7,2,3,2,3,5,3,2,4,5]
+        @lille_array_0 = [
+            [3,2,3,4,2,3,5,2,4,3,4,5,2,5,2,1,2,3,4,5,2,3],
+            [3,5,2,5,4,2,3,4,3,2,1,5,4,3,5,2,3,4,1,4,5,3],
+            [2,4,1,5,1,4,2,3,2,4,3,1,3,2,3,2,3,5,3,2,4,5]
         ]
         @lille_array_1 = [
-            [1,5,3,4,2,3,5,4,1,3,4,5,2,5,7,1,4,5,4,5,1,7],
-            [4,5,2,5,4,2,5,4,7,2,1,5,4,3,5,4,3,7,1,4,5,3],
-            [5,4,1,5,1,4,2,7,5,4,3,1,7,2,4,7,1,5,3,2,4,5]
+            [1,5,3,4,2,3,5,4,1,3,4,5,4,5,4,1,4,5,4,5,1,4],
+            [4,5,2,5,4,2,5,4,4,2,1,5,4,3,5,4,3,5,1,4,5,3],
+            [5,4,1,5,1,4,2,4,5,4,3,1,5,2,4,5,1,5,3,2,4,5]
         ]
         @lille_array_2 = [
-            [1,5,7,4,2,3,5,4,1,7,4,5,2,5,7,1,4,1,4,7,1,7],
-            [7,5,2,5,7,2,5,1,7,2,1,5,1,3,5,7,3,7,1,4,5,1],
-            [1,4,1,7,1,4,2,7,5,7,3,1,7,2,4,7,1,5,7,2,4,1]
+            [1,5,1,4,2,3,1,4,1,5,4,1,2,5,4,1,4,1,4,5,1,4],
+            [1,5,2,1,4,2,5,1,5,2,1,5,1,3,1,5,3,4,1,4,5,1],
+            [1,4,1,5,1,4,2,1,5,1,3,1,5,2,4,5,1,5,1,3,4,1]
         ]
         #リールの目に対する当選額の倍率
         @bairitu = {
-            2:10, 3:20, 4:30, 5:50, 6:50, 1:150, 7:300,
-            11:500, 12:500, 13:500, 14:500, 15:500, 16:500, 17:500, 18:500, 19:500
+            2:20, 3:40, 4:60, 5:80, 6:80, 1:100, 7:150,
+            11:200, 12:200, 13:200, 14:200, 15:200, 16:200, 17:200, 18:200, 19:200
         }
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
         11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
         direction:キャラクターの向き、left or right
+        カットインの画像サイズ、頭の位置で760px
         ###
         @muse_material_list = {
             12:{
                 'cut_in':[
                     {'name':'12_0', 'width':680, 'height':970, 'direction':'left'}
                 ],
-                'bgm':[],
+                'bgm':[
+                    {'name':'', 'time':10}
+                ],
+                'voice':[]
+            },
+            15:{
+                'cut_in':[
+                    {'name':'15_0', 'width':670, 'height':760, 'direction':'right'}
+                ],
+                'bgm':[
+                    {'name':'', 'time':10}
+                ],
                 'voice':[]
             }
         }
@@ -49,7 +61,10 @@ class slotSetting extends appNode
         @prev_muse = []
 
     setGravity:()->
-        return Math.floor((game.tension / @tension_max) * 1.2) + 0.7
+        val = Math.floor((game.tension / @tension_max) * 1.2) + 0.7
+        if game.fever is true
+            val = 1.6
+        return val
 
 
     ###
@@ -58,22 +73,34 @@ class slotSetting extends appNode
     ###
     isAddMuse:()->
         result = false
-        rate = Math.floor((game.tension / @tension_max) * 30)
+        rate = Math.floor((game.tension / @tension_max) * 15) + 5
         random = Math.floor(Math.random() * 100)
         if random < rate
             result = true
         if game.debug.force_insert_muse is true
             result = true
+        if game.fever is true
+            result = false
         return result
 
     ###
     挿入するμ’sメンバーを決める
+    過去に挿入されたメンバーは挿入しない
     ###
     setMuseMember:()->
-        member = Math.round(Math.random() * 8) + 11
-        member = 12
+        full = [11,12,13,14,15,16,17,18,19]
+        remain = []
+        if @prev_muse.length >= 9
+            @prev_muse = []
+        for key, val of full
+            if @prev_muse.indexOf(val) is -1
+                remain.push(full[key])
+        random = Math.floor(Math.random() * remain.length)
+        member = remain[random]
+        member = 15
         @now_muse_num = member
-        @prev_muse.push(member)
+        if @prev_muse.indexOf(member) is -1
+            @prev_muse.push(member)
 
     ###
     挿入するμ’sメンバーの人数を決める
@@ -83,15 +110,18 @@ class slotSetting extends appNode
         return num
 
     ###
-    スロットを強制的に当たりにする確率を決める
+    スロットを強制的に当たりにするかどうかを決める
+    @return boolean true:当たり
     ###
     getIsForceSlotHit:()->
         result = false
-        rate = Math.floor((game.tension / @tension_max) * 20)
-        if game.main_scene.gp_slot.leftSlotEye > 10
-            rate *= 2
+        rate = Math.floor(game.combo * 0.2)
+        if rate > 100
+            rate = 100
         random = Math.floor(Math.random() * 100)
         if random < rate
+            result = true
+        if game.fever is true
             result = true
         return result
 
@@ -111,6 +141,8 @@ class slotSetting extends appNode
             val = 1
         if game.debug.fix_tention_item_catch_flg is true
             val = game.debug.fix_tention_item_catch_val
+        if game.fever is true
+            val = 0
         return val
     ###
     アイテムを落とした時のテンションゲージの増減値を決める
@@ -128,8 +160,9 @@ class slotSetting extends appNode
     ###
     スロットが当たったのテンションゲージの増減値を決める
     @param number prize_money 当選金額
+    @param number hit_eye     当たった目の番号
     ###
-    setTensionSlotHit:(prize_money)->
+    setTensionSlotHit:(prize_money, hit_eye)->
         hit_rate = prize_money / game.money
         if game.money < 100
             correct = 0.02
@@ -149,6 +182,10 @@ class slotSetting extends appNode
         val = Math.round(val)
         if game.debug.fix_tention_slot_hit_flg is true
             val = game.debug.fix_tention_slot_hit_flg
+        if hit_eye > 10
+            val = @tension_max
+        if game.fever is true
+            val = 0
         return val
 
     ###
@@ -164,21 +201,20 @@ class slotSetting extends appNode
         after = tension + val
         tension_33 = Math.floor(@tension_max * 0.33)
         tension_66 = Math.floor(@tension_max * 0.66)
-        if before > tension_33 && after < tension_33
-            slot.slotLilleChange(@lille_array, false)
+        if before > 0 && after <= 0
+            slot.slotLilleChange(@lille_array_0, true)
+        else if before > tension_33 && after < tension_33
+            slot.slotLilleChange(@lille_array_0, false)
             stage.missItemFallSycle = 4
             stage.missItemFallSycleNow = 0
-        if before < tension_66 && after > tension_66
+        else if before < tension_66 && after > tension_66
             slot.slotLilleChange(@lille_array_2, false)
             stage.missItemFallSycle = 2
             stage.missItemFallSycleNow = 0
-        if (before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)
+        else if (before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)
             slot.slotLilleChange(@lille_array_1, false)
             stage.missItemFallSycle = 1
             stage.missItemFallSycleNow = 0
-        if before > 0 && after <= 0
-            slot.slotLilleChange(@lille_array, true)
-
 
     ###
     落下するアイテムの種類を決める

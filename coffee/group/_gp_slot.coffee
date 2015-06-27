@@ -1,7 +1,6 @@
 class gpSlot extends appGroup
     constructor: () ->
         super
-        @debugSlot()
         @underFrame = new UnderFrame()
         @addChild(@underFrame)
         @isStopping = false #スロット停止中
@@ -9,7 +8,9 @@ class gpSlot extends appGroup
         @slotIntervalFrameRandom = 0
         @stopStartAge = 0 #スロットの停止が開始したフレーム
         @leftSlotEye = 0 #左のスロットが当たった目
+        @feverSec = 0 #フィーバーの時間
         @slotSet()
+        @debugSlot()
     onenterframe: (e) ->
         @slotStopping()
 
@@ -61,14 +62,36 @@ class gpSlot extends appGroup
     ###
     slotHitTest: () ->
         if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
+            hit_eye = @left_lille.lilleArray[@left_lille.nowEye]
             prize_money = @_calcPrizeMoney()
             game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
-            game.tensionSetValueSlotHit(prize_money)
+            game.tensionSetValueSlotHit(prize_money, hit_eye)
+            @_feverStart(hit_eye)
         else
             if game.slot_setting.isAddMuse() is true
                 member = game.slot_setting.now_muse_num
-                num = game.slot_setting.setMuseNum()
-                @slotAddMuse(member, num)
+                @slotAddMuse(member, 1)
+
+    ###
+    フィーバーを開始する
+    ###
+    _feverStart:(hit_eye)->
+        if hit_eye > 10 && game.fever is false
+            game.fever = true
+            game.slot_setting.setMuseMember()
+            game.musePreLoad()
+            @_feverBgmStart(hit_eye)
+
+    ###
+    フィーバー中のBGMを開始する
+    ###
+    _feverBgmStart:(hit_eye)->
+        bgms = game.slot_setting.muse_material_list[hit_eye]['bgm']
+        random = Math.floor(Math.random() * bgms.length)
+        bgm = bgms[random]
+        @feverSec = bgm['time']
+        game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (@feverSec * game.fps)) / 100
+        game.fever_down_tension *= -1
 
     ###
     スロットの当選金額を計算
@@ -107,8 +130,10 @@ class gpSlot extends appGroup
     リールにμ’sの誰かがいればそのまま残す
     @param array target 変更対象
     @param array change 変更後
+    @param boolean isMuseDel μ’sは削除する
     ###
     _slotLilleChangeUnit:(target, change, isMuseDel)->
+        console.log(isMuseDel)
         arr = []
         if isMuseDel is false
             for key, val of target.lilleArray
@@ -117,6 +142,7 @@ class gpSlot extends appGroup
             if arr.length > 0
                 for key, val of arr
                     change[key] = target.lilleArray[key]
+        console.log(change)
         return change
 
 
@@ -178,4 +204,6 @@ class gpSlot extends appGroup
     ###
     debugSlot:() ->
         if game.debug.lille_flg is true
-            game.slot_setting.lille_array = game.debug.lille_array
+            @left_lille.lilleArray = game.debug.lille_array[0]
+            @middle_lille.lilleArray = game.debug.lille_array[1]
+            @right_lille.lilleArray = game.debug.lille_array[2]

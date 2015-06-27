@@ -33,20 +33,20 @@ class Lille extends Slot
 class LeftLille extends Lille
     constructor: () ->
         super
-        @lilleArray = game.slot_setting.lille_array[0]
+        @lilleArray = game.slot_setting.lille_array_0[0]
         @eyeInit()
         @x = -55
 
 class MiddleLille extends Lille
     constructor: () ->
         super
-        @lilleArray = game.slot_setting.lille_array[1]
+        @lilleArray = game.slot_setting.lille_array_0[1]
         @eyeInit()
         @x = 110
 
 class RightLille extends Lille
     constructor: () ->
         super
-        @lilleArray = game.slot_setting.lille_array[2]
+        @lilleArray = game.slot_setting.lille_array_0[2]
         @eyeInit()
         @x = 274

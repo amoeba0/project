@@ -28,6 +28,8 @@ class LoveliveGame extends catchAndSlotGame
         @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
         @tension = 0 #現在のテンション(500がマックス)
+        @fever = false #trueならフィーバー中
+        @fever_down_tension = 0
         @item_kind = 0 #落下アイテムの種類（フレーム）
 
     onload:() ->
@@ -52,6 +54,7 @@ class LoveliveGame extends catchAndSlotGame
 
     onenterframe: (e) ->
         @buttonPush()
+        @tensionSetValueFever()
 
     ###ボタン操作、物理キーとソフトキー両方に対応###
     buttonPush:()->
@@ -125,9 +128,20 @@ class LoveliveGame extends catchAndSlotGame
         @_tensionSetValue(val)
 
     ###
+    フィーバー中に一定時間でテンションが下がる
+    テンションが0になったらフィーバーを解く
+    ###
+    tensionSetValueFever:()->
+        if @fever is true
+            @_tensionSetValue(@fever_down_tension)
+            if @tension <= 0
+                @fever = false
+
+    ###
     スロットが当たった時にテンションゲージを増減する
     @param number prize_money 当選金額
+    @param number hit_eye     当たった目の番号
     ###
-    tensionSetValueSlotHit:(prize_money)->
-        val = @slot_setting.setTensionSlotHit(prize_money)
+    tensionSetValueSlotHit:(prize_money, hit_eye)->
+        val = @slot_setting.setTensionSlotHit(prize_money, hit_eye)
         @_tensionSetValue(val)

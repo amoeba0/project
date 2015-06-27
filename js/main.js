@@ -179,6 +179,8 @@ LoveliveGame = (function(_super) {
     this.bet = 1;
     this.combo = 0;
     this.tension = 0;
+    this.fever = false;
+    this.fever_down_tension = 0;
     this.item_kind = 0;
   }
 
@@ -217,7 +219,8 @@ LoveliveGame = (function(_super) {
   };
 
   LoveliveGame.prototype.onenterframe = function(e) {
-    return this.buttonPush();
+    this.buttonPush();
+    return this.tensionSetValueFever();
   };
 
 
@@ -323,13 +326,29 @@ LoveliveGame = (function(_super) {
 
 
   /*
-  スロットが当たった時にテンションゲージを増減する
-  @param number prize_money 当選金額
+  フィーバー中に一定時間でテンションが下がる
+  テンションが0になったらフィーバーを解く
    */
 
-  LoveliveGame.prototype.tensionSetValueSlotHit = function(prize_money) {
+  LoveliveGame.prototype.tensionSetValueFever = function() {
+    if (this.fever === true) {
+      this._tensionSetValue(this.fever_down_tension);
+      if (this.tension <= 0) {
+        return this.fever = false;
+      }
+    }
+  };
+
+
+  /*
+  スロットが当たった時にテンションゲージを増減する
+  @param number prize_money 当選金額
+  @param number hit_eye     当たった目の番号
+   */
+
+  LoveliveGame.prototype.tensionSetValueSlotHit = function(prize_money, hit_eye) {
     var val;
-    val = this.slot_setting.setTensionSlotHit(prize_money);
+    val = this.slot_setting.setTensionSlotHit(prize_money, hit_eye);
     return this._tensionSetValue(val);
   };
 
@@ -377,7 +396,6 @@ gpSlot = (function(_super) {
 
   function gpSlot() {
     gpSlot.__super__.constructor.apply(this, arguments);
-    this.debugSlot();
     this.underFrame = new UnderFrame();
     this.addChild(this.underFrame);
     this.isStopping = false;
@@ -385,7 +403,9 @@ gpSlot = (function(_super) {
     this.slotIntervalFrameRandom = 0;
     this.stopStartAge = 0;
     this.leftSlotEye = 0;
+    this.feverSec = 0;
     this.slotSet();
+    this.debugSlot();
   }
 
   gpSlot.prototype.onenterframe = function(e) {
@@ -462,18 +482,48 @@ gpSlot = (function(_super) {
    */
 
   gpSlot.prototype.slotHitTest = function() {
-    var member, num, prize_money, _ref;
+    var hit_eye, member, prize_money, _ref;
     if ((this.left_lille.lilleArray[this.left_lille.nowEye] === (_ref = this.middle_lille.lilleArray[this.middle_lille.nowEye]) && _ref === this.right_lille.lilleArray[this.right_lille.nowEye])) {
+      hit_eye = this.left_lille.lilleArray[this.left_lille.nowEye];
       prize_money = this._calcPrizeMoney();
       game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money);
-      return game.tensionSetValueSlotHit(prize_money);
+      game.tensionSetValueSlotHit(prize_money, hit_eye);
+      return this._feverStart(hit_eye);
     } else {
       if (game.slot_setting.isAddMuse() === true) {
         member = game.slot_setting.now_muse_num;
-        num = game.slot_setting.setMuseNum();
-        return this.slotAddMuse(member, num);
+        return this.slotAddMuse(member, 1);
       }
     }
+  };
+
+
+  /*
+  フィーバーを開始する
+   */
+
+  gpSlot.prototype._feverStart = function(hit_eye) {
+    if (hit_eye > 10 && game.fever === false) {
+      game.fever = true;
+      game.slot_setting.setMuseMember();
+      game.musePreLoad();
+      return this._feverBgmStart(hit_eye);
+    }
+  };
+
+
+  /*
+  フィーバー中のBGMを開始する
+   */
+
+  gpSlot.prototype._feverBgmStart = function(hit_eye) {
+    var bgm, bgms, random;
+    bgms = game.slot_setting.muse_material_list[hit_eye]['bgm'];
+    random = Math.floor(Math.random() * bgms.length);
+    bgm = bgms[random];
+    this.feverSec = bgm['time'];
+    game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (this.feverSec * game.fps)) / 100;
+    return game.fever_down_tension *= -1;
   };
 
 
@@ -525,10 +575,12 @@ gpSlot = (function(_super) {
   リールにμ’sの誰かがいればそのまま残す
   @param array target 変更対象
   @param array change 変更後
+  @param boolean isMuseDel μ’sは削除する
    */
 
   gpSlot.prototype._slotLilleChangeUnit = function(target, change, isMuseDel) {
     var arr, key, val, _ref;
+    console.log(isMuseDel);
     arr = [];
     if (isMuseDel === false) {
       _ref = target.lilleArray;
@@ -545,6 +597,7 @@ gpSlot = (function(_super) {
         }
       }
     }
+    console.log(change);
     return change;
   };
 
@@ -630,7 +683,9 @@ gpSlot = (function(_super) {
 
   gpSlot.prototype.debugSlot = function() {
     if (game.debug.lille_flg === true) {
-      return game.slot_setting.lille_array = game.debug.lille_array;
+      this.left_lille.lilleArray = game.debug.lille_array[0];
+      this.middle_lille.lilleArray = game.debug.lille_array[1];
+      return this.right_lille.lilleArray = game.debug.lille_array[2];
     }
   };
 
@@ -1255,14 +1310,14 @@ Debug = (function(_super) {
   function Debug() {
     Debug.__super__.constructor.apply(this, arguments);
     this.all_debug_flg = false;
-    this.lille_flg = false;
-    this.item_flg = false;
+    this.lille_flg = true;
+    this.item_flg = true;
     this.item_fall_early_flg = false;
-    this.fix_tention_item_catch_flg = false;
+    this.fix_tention_item_catch_flg = true;
     this.fix_tention_item_fall_flg = false;
     this.fix_tention_slot_hit_flg = false;
     this.force_insert_muse = false;
-    this.lille_array = [[7, 3], [7], [7]];
+    this.lille_array = [[15], [15], [15]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -50;
     this.fix_tention_slot_hit_flg = 200;
@@ -1293,32 +1348,33 @@ slotSetting = (function(_super) {
 
   function slotSetting() {
     slotSetting.__super__.constructor.apply(this, arguments);
-    this.lille_array = [[3, 2, 3, 4, 2, 3, 5, 2, 4, 3, 4, 5, 2, 5, 7, 1, 2, 3, 4, 5, 2, 3], [3, 5, 2, 5, 4, 2, 3, 4, 7, 2, 1, 5, 4, 3, 5, 2, 3, 7, 1, 4, 5, 3], [2, 4, 1, 5, 1, 4, 2, 7, 2, 4, 3, 1, 7, 2, 3, 2, 3, 5, 3, 2, 4, 5]];
-    this.lille_array_1 = [[1, 5, 3, 4, 2, 3, 5, 4, 1, 3, 4, 5, 2, 5, 7, 1, 4, 5, 4, 5, 1, 7], [4, 5, 2, 5, 4, 2, 5, 4, 7, 2, 1, 5, 4, 3, 5, 4, 3, 7, 1, 4, 5, 3], [5, 4, 1, 5, 1, 4, 2, 7, 5, 4, 3, 1, 7, 2, 4, 7, 1, 5, 3, 2, 4, 5]];
-    this.lille_array_2 = [[1, 5, 7, 4, 2, 3, 5, 4, 1, 7, 4, 5, 2, 5, 7, 1, 4, 1, 4, 7, 1, 7], [7, 5, 2, 5, 7, 2, 5, 1, 7, 2, 1, 5, 1, 3, 5, 7, 3, 7, 1, 4, 5, 1], [1, 4, 1, 7, 1, 4, 2, 7, 5, 7, 3, 1, 7, 2, 4, 7, 1, 5, 7, 2, 4, 1]];
+    this.lille_array_0 = [[3, 2, 3, 4, 2, 3, 5, 2, 4, 3, 4, 5, 2, 5, 2, 1, 2, 3, 4, 5, 2, 3], [3, 5, 2, 5, 4, 2, 3, 4, 3, 2, 1, 5, 4, 3, 5, 2, 3, 4, 1, 4, 5, 3], [2, 4, 1, 5, 1, 4, 2, 3, 2, 4, 3, 1, 3, 2, 3, 2, 3, 5, 3, 2, 4, 5]];
+    this.lille_array_1 = [[1, 5, 3, 4, 2, 3, 5, 4, 1, 3, 4, 5, 4, 5, 4, 1, 4, 5, 4, 5, 1, 4], [4, 5, 2, 5, 4, 2, 5, 4, 4, 2, 1, 5, 4, 3, 5, 4, 3, 5, 1, 4, 5, 3], [5, 4, 1, 5, 1, 4, 2, 4, 5, 4, 3, 1, 5, 2, 4, 5, 1, 5, 3, 2, 4, 5]];
+    this.lille_array_2 = [[1, 5, 1, 4, 2, 3, 1, 4, 1, 5, 4, 1, 2, 5, 4, 1, 4, 1, 4, 5, 1, 4], [1, 5, 2, 1, 4, 2, 5, 1, 5, 2, 1, 5, 1, 3, 1, 5, 3, 4, 1, 4, 5, 1], [1, 4, 1, 5, 1, 4, 2, 1, 5, 1, 3, 1, 5, 2, 4, 5, 1, 5, 1, 3, 4, 1]];
     this.bairitu = {
-      2: 10,
-      3: 20,
-      4: 30,
-      5: 50,
-      6: 50,
-      1: 150,
-      7: 300,
-      11: 500,
-      12: 500,
-      13: 500,
-      14: 500,
-      15: 500,
-      16: 500,
-      17: 500,
-      18: 500,
-      19: 500
+      2: 20,
+      3: 40,
+      4: 60,
+      5: 80,
+      6: 80,
+      1: 100,
+      7: 150,
+      11: 200,
+      12: 200,
+      13: 200,
+      14: 200,
+      15: 200,
+      16: 200,
+      17: 200,
+      18: 200,
+      19: 200
     };
 
     /*
     カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
     11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
     direction:キャラクターの向き、left or right
+    カットインの画像サイズ、頭の位置で760px
      */
     this.muse_material_list = {
       12: {
@@ -1330,7 +1386,29 @@ slotSetting = (function(_super) {
             'direction': 'left'
           }
         ],
-        'bgm': [],
+        'bgm': [
+          {
+            'name': '',
+            'time': 10
+          }
+        ],
+        'voice': []
+      },
+      15: {
+        'cut_in': [
+          {
+            'name': '15_0',
+            'width': 670,
+            'height': 760,
+            'direction': 'right'
+          }
+        ],
+        'bgm': [
+          {
+            'name': '',
+            'time': 10
+          }
+        ],
         'voice': []
       }
     };
@@ -1340,7 +1418,12 @@ slotSetting = (function(_super) {
   }
 
   slotSetting.prototype.setGravity = function() {
-    return Math.floor((game.tension / this.tension_max) * 1.2) + 0.7;
+    var val;
+    val = Math.floor((game.tension / this.tension_max) * 1.2) + 0.7;
+    if (game.fever === true) {
+      val = 1.6;
+    }
+    return val;
   };
 
 
@@ -1352,7 +1435,7 @@ slotSetting = (function(_super) {
   slotSetting.prototype.isAddMuse = function() {
     var random, rate, result;
     result = false;
-    rate = Math.floor((game.tension / this.tension_max) * 30);
+    rate = Math.floor((game.tension / this.tension_max) * 15) + 5;
     random = Math.floor(Math.random() * 100);
     if (random < rate) {
       result = true;
@@ -1360,20 +1443,38 @@ slotSetting = (function(_super) {
     if (game.debug.force_insert_muse === true) {
       result = true;
     }
+    if (game.fever === true) {
+      result = false;
+    }
     return result;
   };
 
 
   /*
   挿入するμ’sメンバーを決める
+  過去に挿入されたメンバーは挿入しない
    */
 
   slotSetting.prototype.setMuseMember = function() {
-    var member;
-    member = Math.round(Math.random() * 8) + 11;
-    member = 12;
+    var full, key, member, random, remain, val;
+    full = [11, 12, 13, 14, 15, 16, 17, 18, 19];
+    remain = [];
+    if (this.prev_muse.length >= 9) {
+      this.prev_muse = [];
+    }
+    for (key in full) {
+      val = full[key];
+      if (this.prev_muse.indexOf(val) === -1) {
+        remain.push(full[key]);
+      }
+    }
+    random = Math.floor(Math.random() * remain.length);
+    member = remain[random];
+    member = 15;
     this.now_muse_num = member;
-    return this.prev_muse.push(member);
+    if (this.prev_muse.indexOf(member) === -1) {
+      return this.prev_muse.push(member);
+    }
   };
 
 
@@ -1389,18 +1490,22 @@ slotSetting = (function(_super) {
 
 
   /*
-  スロットを強制的に当たりにする確率を決める
+  スロットを強制的に当たりにするかどうかを決める
+  @return boolean true:当たり
    */
 
   slotSetting.prototype.getIsForceSlotHit = function() {
     var random, rate, result;
     result = false;
-    rate = Math.floor((game.tension / this.tension_max) * 20);
-    if (game.main_scene.gp_slot.leftSlotEye > 10) {
-      rate *= 2;
+    rate = Math.floor(game.combo * 0.2);
+    if (rate > 100) {
+      rate = 100;
     }
     random = Math.floor(Math.random() * 100);
     if (random < rate) {
+      result = true;
+    }
+    if (game.fever === true) {
       result = true;
     }
     return result;
@@ -1429,6 +1534,9 @@ slotSetting = (function(_super) {
     if (game.debug.fix_tention_item_catch_flg === true) {
       val = game.debug.fix_tention_item_catch_val;
     }
+    if (game.fever === true) {
+      val = 0;
+    }
     return val;
   };
 
@@ -1454,9 +1562,10 @@ slotSetting = (function(_super) {
   /*
   スロットが当たったのテンションゲージの増減値を決める
   @param number prize_money 当選金額
+  @param number hit_eye     当たった目の番号
    */
 
-  slotSetting.prototype.setTensionSlotHit = function(prize_money) {
+  slotSetting.prototype.setTensionSlotHit = function(prize_money, hit_eye) {
     var correct, hit_rate, val;
     hit_rate = prize_money / game.money;
     if (game.money < 100) {
@@ -1480,6 +1589,12 @@ slotSetting = (function(_super) {
     if (game.debug.fix_tention_slot_hit_flg === true) {
       val = game.debug.fix_tention_slot_hit_flg;
     }
+    if (hit_eye > 10) {
+      val = this.tension_max;
+    }
+    if (game.fever === true) {
+      val = 0;
+    }
     return val;
   };
 
@@ -1499,23 +1614,20 @@ slotSetting = (function(_super) {
     after = tension + val;
     tension_33 = Math.floor(this.tension_max * 0.33);
     tension_66 = Math.floor(this.tension_max * 0.66);
-    if (before > tension_33 && after < tension_33) {
-      slot.slotLilleChange(this.lille_array, false);
+    if (before > 0 && after <= 0) {
+      return slot.slotLilleChange(this.lille_array_0, true);
+    } else if (before > tension_33 && after < tension_33) {
+      slot.slotLilleChange(this.lille_array_0, false);
       stage.missItemFallSycle = 4;
-      stage.missItemFallSycleNow = 0;
-    }
-    if (before < tension_66 && after > tension_66) {
+      return stage.missItemFallSycleNow = 0;
+    } else if (before < tension_66 && after > tension_66) {
       slot.slotLilleChange(this.lille_array_2, false);
       stage.missItemFallSycle = 2;
-      stage.missItemFallSycleNow = 0;
-    }
-    if ((before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)) {
+      return stage.missItemFallSycleNow = 0;
+    } else if ((before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)) {
       slot.slotLilleChange(this.lille_array_1, false);
       stage.missItemFallSycle = 1;
-      stage.missItemFallSycleNow = 0;
-    }
-    if (before > 0 && after <= 0) {
-      return slot.slotLilleChange(this.lille_array, true);
+      return stage.missItemFallSycleNow = 0;
     }
   };
 
@@ -2620,7 +2732,7 @@ LeftLille = (function(_super) {
 
   function LeftLille() {
     LeftLille.__super__.constructor.apply(this, arguments);
-    this.lilleArray = game.slot_setting.lille_array[0];
+    this.lilleArray = game.slot_setting.lille_array_0[0];
     this.eyeInit();
     this.x = -55;
   }
@@ -2634,7 +2746,7 @@ MiddleLille = (function(_super) {
 
   function MiddleLille() {
     MiddleLille.__super__.constructor.apply(this, arguments);
-    this.lilleArray = game.slot_setting.lille_array[1];
+    this.lilleArray = game.slot_setting.lille_array_0[1];
     this.eyeInit();
     this.x = 110;
   }
@@ -2648,7 +2760,7 @@ RightLille = (function(_super) {
 
   function RightLille() {
     RightLille.__super__.constructor.apply(this, arguments);
-    this.lilleArray = game.slot_setting.lille_array[2];
+    this.lilleArray = game.slot_setting.lille_array_0[2];
     this.eyeInit();
     this.x = 274;
   }
