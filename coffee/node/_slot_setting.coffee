@@ -39,7 +39,7 @@ class slotSetting extends appNode
                     {'name':'12_0', 'width':680, 'height':970, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':10}
+                    {'name':'', 'time':30}
                 ],
                 'voice':[]
             },
@@ -48,7 +48,7 @@ class slotSetting extends appNode
                     {'name':'15_0', 'width':670, 'height':760, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':10}
+                    {'name':'', 'time':30}
                 ],
                 'voice':[]
             }
@@ -87,7 +87,7 @@ class slotSetting extends appNode
     挿入するμ’sメンバーを決める
     過去に挿入されたメンバーは挿入しない
     ###
-    setMuseMember:()->
+    setMuseMember:(force)->
         full = [11,12,13,14,15,16,17,18,19]
         remain = []
         if @prev_muse.length >= 9
@@ -97,7 +97,7 @@ class slotSetting extends appNode
                 remain.push(full[key])
         random = Math.floor(Math.random() * remain.length)
         member = remain[random]
-        member = 15
+        #member = 15
         @now_muse_num = member
         if @prev_muse.indexOf(member) is -1
             @prev_muse.push(member)

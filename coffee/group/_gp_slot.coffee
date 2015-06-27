@@ -133,17 +133,18 @@ class gpSlot extends appGroup
     @param boolean isMuseDel μ’sは削除する
     ###
     _slotLilleChangeUnit:(target, change, isMuseDel)->
-        console.log(isMuseDel)
         arr = []
+        return_arr = []
+        for key, val of change
+            return_arr.push(val)
         if isMuseDel is false
             for key, val of target.lilleArray
                 if val > 10
                     arr.push(key)
             if arr.length > 0
-                for key, val of arr
-                    change[key] = target.lilleArray[key]
-        console.log(change)
-        return change
+                for arr_key, arr_val of arr
+                    return_arr[arr_key] = target.lilleArray[arr_key]
+        return return_arr
 
 
     ###

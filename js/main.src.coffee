@@ -72,8 +72,8 @@ class catchAndSlotGame extends appGame
 class LoveliveGame extends catchAndSlotGame
     constructor:()->
         super @width, @height
-        @slot_setting = new slotSetting()
         @debug = new Debug()
+        @slot_setting = new slotSetting()
         @width = 640
         @height = 960
         @fps = 24
@@ -363,17 +363,18 @@ class gpSlot extends appGroup
     @param boolean isMuseDel μ’sは削除する
     ###
     _slotLilleChangeUnit:(target, change, isMuseDel)->
-        console.log(isMuseDel)
         arr = []
+        return_arr = []
+        for key, val of change
+            return_arr.push(val)
         if isMuseDel is false
             for key, val of target.lilleArray
                 if val > 10
                     arr.push(key)
             if arr.length > 0
-                for key, val of arr
-                    change[key] = target.lilleArray[key]
-        console.log(change)
-        return change
+                for arr_key, arr_val of arr
+                    return_arr[arr_key] = target.lilleArray[arr_key]
+        return return_arr
 
 
     ###
@@ -845,13 +846,13 @@ class Debug extends appNode
         @all_debug_flg = false
 
         #デバッグ用リールにすりかえる
-        @lille_flg = true
+        @lille_flg = false
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = true
+        @item_flg = false
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する
-        @fix_tention_item_catch_flg = true
+        @fix_tention_item_catch_flg = false
         #アイテムを落とした時のテンション増減値を固定する
         @fix_tention_item_fall_flg = false
         #スロットが当たった時のテンション増減値を固定する
@@ -920,7 +921,7 @@ class slotSetting extends appNode
                     {'name':'12_0', 'width':680, 'height':970, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':10}
+                    {'name':'', 'time':30}
                 ],
                 'voice':[]
             },
@@ -929,7 +930,7 @@ class slotSetting extends appNode
                     {'name':'15_0', 'width':670, 'height':760, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':10}
+                    {'name':'', 'time':30}
                 ],
                 'voice':[]
             }
@@ -968,7 +969,7 @@ class slotSetting extends appNode
     挿入するμ’sメンバーを決める
     過去に挿入されたメンバーは挿入しない
     ###
-    setMuseMember:()->
+    setMuseMember:(force)->
         full = [11,12,13,14,15,16,17,18,19]
         remain = []
         if @prev_muse.length >= 9
@@ -978,7 +979,7 @@ class slotSetting extends appNode
                 remain.push(full[key])
         random = Math.floor(Math.random() * remain.length)
         member = remain[random]
-        member = 15
+        #member = 15
         @now_muse_num = member
         if @prev_muse.indexOf(member) is -1
             @prev_muse.push(member)

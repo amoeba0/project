@@ -156,8 +156,8 @@ LoveliveGame = (function(_super) {
 
   function LoveliveGame() {
     LoveliveGame.__super__.constructor.call(this, this.width, this.height);
-    this.slot_setting = new slotSetting();
     this.debug = new Debug();
+    this.slot_setting = new slotSetting();
     this.width = 640;
     this.height = 960;
     this.fps = 24;
@@ -579,9 +579,13 @@ gpSlot = (function(_super) {
    */
 
   gpSlot.prototype._slotLilleChangeUnit = function(target, change, isMuseDel) {
-    var arr, key, val, _ref;
-    console.log(isMuseDel);
+    var arr, arr_key, arr_val, key, return_arr, val, _ref;
     arr = [];
+    return_arr = [];
+    for (key in change) {
+      val = change[key];
+      return_arr.push(val);
+    }
     if (isMuseDel === false) {
       _ref = target.lilleArray;
       for (key in _ref) {
@@ -591,14 +595,13 @@ gpSlot = (function(_super) {
         }
       }
       if (arr.length > 0) {
-        for (key in arr) {
-          val = arr[key];
-          change[key] = target.lilleArray[key];
+        for (arr_key in arr) {
+          arr_val = arr[arr_key];
+          return_arr[arr_key] = target.lilleArray[arr_key];
         }
       }
     }
-    console.log(change);
-    return change;
+    return return_arr;
   };
 
 
@@ -1310,10 +1313,10 @@ Debug = (function(_super) {
   function Debug() {
     Debug.__super__.constructor.apply(this, arguments);
     this.all_debug_flg = false;
-    this.lille_flg = true;
-    this.item_flg = true;
+    this.lille_flg = false;
+    this.item_flg = false;
     this.item_fall_early_flg = false;
-    this.fix_tention_item_catch_flg = true;
+    this.fix_tention_item_catch_flg = false;
     this.fix_tention_item_fall_flg = false;
     this.fix_tention_slot_hit_flg = false;
     this.force_insert_muse = false;
@@ -1389,7 +1392,7 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': '',
-            'time': 10
+            'time': 30
           }
         ],
         'voice': []
@@ -1406,7 +1409,7 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': '',
-            'time': 10
+            'time': 30
           }
         ],
         'voice': []
@@ -1455,7 +1458,7 @@ slotSetting = (function(_super) {
   過去に挿入されたメンバーは挿入しない
    */
 
-  slotSetting.prototype.setMuseMember = function() {
+  slotSetting.prototype.setMuseMember = function(force) {
     var full, key, member, random, remain, val;
     full = [11, 12, 13, 14, 15, 16, 17, 18, 19];
     remain = [];
@@ -1470,7 +1473,6 @@ slotSetting = (function(_super) {
     }
     random = Math.floor(Math.random() * remain.length);
     member = remain[random];
-    member = 15;
     this.now_muse_num = member;
     if (this.prev_muse.indexOf(member) === -1) {
       return this.prev_muse.push(member);

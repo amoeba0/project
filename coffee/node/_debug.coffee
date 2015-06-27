@@ -9,13 +9,13 @@ class Debug extends appNode
         @all_debug_flg = false
 
         #デバッグ用リールにすりかえる
-        @lille_flg = true
+        @lille_flg = false
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = true
+        @item_flg = false
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する
-        @fix_tention_item_catch_flg = true
+        @fix_tention_item_catch_flg = false
         #アイテムを落とした時のテンション増減値を固定する
         @fix_tention_item_fall_flg = false
         #スロットが当たった時のテンション増減値を固定する

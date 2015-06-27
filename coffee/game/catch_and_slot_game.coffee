@@ -5,8 +5,8 @@ class catchAndSlotGame extends appGame
 class LoveliveGame extends catchAndSlotGame
     constructor:()->
         super @width, @height
-        @slot_setting = new slotSetting()
         @debug = new Debug()
+        @slot_setting = new slotSetting()
         @width = 640
         @height = 960
         @fps = 24
