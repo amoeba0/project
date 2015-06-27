@@ -805,7 +805,7 @@ class Debug extends appNode
         #デバッグ用リールにすりかえる
         @lille_flg = false
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = true
+        @item_flg = false
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する
@@ -815,7 +815,7 @@ class Debug extends appNode
         #スロットが当たった時のテンション増減値を固定する
         @fix_tention_slot_hit_flg = false
         #スロットに必ずμ’ｓが追加される
-        @force_insert_muse = true
+        @force_insert_muse = false
         #デバッグ用リール配列
         @lille_array = [
             [7,3],
@@ -868,12 +868,13 @@ class slotSetting extends appNode
         }
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
-        11:高坂穂乃果、12:南ことり、13：園田海未
+        11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
+        direction:キャラクターの向き、left or right
         ###
         @muse_material_list = {
             12:{
                 'cut_in':[
-                    {'name':'12_0', 'width':680, 'height':970}
+                    {'name':'12_0', 'width':680, 'height':970, 'direction':'left'}
                 ],
                 'bgm':[],
                 'voice':[]
@@ -1121,8 +1122,12 @@ class cutIn extends effect
         @_setInit()
 
     onenterframe: (e) ->
+        if @age - @set_age is @fast
+            @vx = @_setVxSlow()
+        if @age - @set_age is @slow
+            @vx = @_setVxFast()
         @x += @vx
-        if @x < -@w
+        if (@cut_in['direction'] is 'left' && @x < -@w) || (@cut_in['direction'] is 'left' is 'right' && @x > game.width)
             game.main_scene.gp_effect.removeChild(@)
     
     _callCutIn:()->
@@ -1134,10 +1139,28 @@ class cutIn extends effect
 
     _setInit:()->
         @image = game.imageload('cut_in/'+@cut_in['name'])
-        @x = game.width
+        if @cut_in['direction'] is 'left'
+            @x = game.width
+        else 
+            @x = -@w
         @y = game.height - @h
-        @vx = Math.round((game.width + @w) / (3 * game.fps)) * -1
+        @vx = @_setVxFast()
         game.main_scene.gp_stage_front.setItemFallFrm(7)
+        @set_age = @age
+        @fast = 0.5 * game.fps
+        @slow = 2 * game.fps + @fast
+
+    _setVxFast:()->
+        val = Math.round(((game.width + @w) / 2) / (0.5 * game.fps))
+        if @cut_in['direction'] is 'left'
+            val *= -1
+        return val
+
+    _setVxSlow:()->
+        val = Math.round((game.width / 4) / (2 * game.fps))
+        if @cut_in['direction'] is 'left'
+            val *= -1
+        return val
 class appObject extends appSprite
     ###
     制約

@@ -8,8 +8,12 @@ class cutIn extends effect
         @_setInit()
 
     onenterframe: (e) ->
+        if @age - @set_age is @fast
+            @vx = @_setVxSlow()
+        if @age - @set_age is @slow
+            @vx = @_setVxFast()
         @x += @vx
-        if @x < -@w
+        if (@cut_in['direction'] is 'left' && @x < -@w) || (@cut_in['direction'] is 'left' is 'right' && @x > game.width)
             game.main_scene.gp_effect.removeChild(@)
     
     _callCutIn:()->
@@ -21,7 +25,25 @@ class cutIn extends effect
 
     _setInit:()->
         @image = game.imageload('cut_in/'+@cut_in['name'])
-        @x = game.width
+        if @cut_in['direction'] is 'left'
+            @x = game.width
+        else 
+            @x = -@w
         @y = game.height - @h
-        @vx = Math.round((game.width + @w) / (3 * game.fps)) * -1
+        @vx = @_setVxFast()
         game.main_scene.gp_stage_front.setItemFallFrm(7)
+        @set_age = @age
+        @fast = 0.5 * game.fps
+        @slow = 2 * game.fps + @fast
+
+    _setVxFast:()->
+        val = Math.round(((game.width + @w) / 2) / (0.5 * game.fps))
+        if @cut_in['direction'] is 'left'
+            val *= -1
+        return val
+
+    _setVxSlow:()->
+        val = Math.round((game.width / 4) / (2 * game.fps))
+        if @cut_in['direction'] is 'left'
+            val *= -1
+        return val

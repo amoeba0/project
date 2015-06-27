@@ -29,12 +29,13 @@ class slotSetting extends appNode
         }
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
-        11:高坂穂乃果、12:南ことり、13：園田海未
+        11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
+        direction:キャラクターの向き、left or right
         ###
         @muse_material_list = {
             12:{
                 'cut_in':[
-                    {'name':'12_0', 'width':680, 'height':970}
+                    {'name':'12_0', 'width':680, 'height':970, 'direction':'left'}
                 ],
                 'bgm':[],
                 'voice':[]

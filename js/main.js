@@ -1256,12 +1256,12 @@ Debug = (function(_super) {
     Debug.__super__.constructor.apply(this, arguments);
     this.all_debug_flg = false;
     this.lille_flg = false;
-    this.item_flg = true;
+    this.item_flg = false;
     this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
     this.fix_tention_item_fall_flg = false;
     this.fix_tention_slot_hit_flg = false;
-    this.force_insert_muse = true;
+    this.force_insert_muse = false;
     this.lille_array = [[7, 3], [7], [7]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -50;
@@ -1317,7 +1317,8 @@ slotSetting = (function(_super) {
 
     /*
     カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
-    11:高坂穂乃果、12:南ことり、13：園田海未
+    11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
+    direction:キャラクターの向き、left or right
      */
     this.muse_material_list = {
       12: {
@@ -1325,7 +1326,8 @@ slotSetting = (function(_super) {
           {
             'name': '12_0',
             'width': 680,
-            'height': 970
+            'height': 970,
+            'direction': 'left'
           }
         ],
         'bgm': [],
@@ -1706,8 +1708,14 @@ cutIn = (function(_super) {
   }
 
   cutIn.prototype.onenterframe = function(e) {
+    if (this.age - this.set_age === this.fast) {
+      this.vx = this._setVxSlow();
+    }
+    if (this.age - this.set_age === this.slow) {
+      this.vx = this._setVxFast();
+    }
     this.x += this.vx;
-    if (this.x < -this.w) {
+    if ((this.cut_in['direction'] === 'left' && this.x < -this.w) || ((this.cut_in['direction'] === 'left' && 'left' === 'right') && this.x > game.width)) {
       return game.main_scene.gp_effect.removeChild(this);
     }
   };
@@ -1723,10 +1731,35 @@ cutIn = (function(_super) {
 
   cutIn.prototype._setInit = function() {
     this.image = game.imageload('cut_in/' + this.cut_in['name']);
-    this.x = game.width;
+    if (this.cut_in['direction'] === 'left') {
+      this.x = game.width;
+    } else {
+      this.x = -this.w;
+    }
     this.y = game.height - this.h;
-    this.vx = Math.round((game.width + this.w) / (3 * game.fps)) * -1;
-    return game.main_scene.gp_stage_front.setItemFallFrm(7);
+    this.vx = this._setVxFast();
+    game.main_scene.gp_stage_front.setItemFallFrm(7);
+    this.set_age = this.age;
+    this.fast = 0.5 * game.fps;
+    return this.slow = 2 * game.fps + this.fast;
+  };
+
+  cutIn.prototype._setVxFast = function() {
+    var val;
+    val = Math.round(((game.width + this.w) / 2) / (0.5 * game.fps));
+    if (this.cut_in['direction'] === 'left') {
+      val *= -1;
+    }
+    return val;
+  };
+
+  cutIn.prototype._setVxSlow = function() {
+    var val;
+    val = Math.round((game.width / 4) / (2 * game.fps));
+    if (this.cut_in['direction'] === 'left') {
+      val *= -1;
+    }
+    return val;
   };
 
   return cutIn;
