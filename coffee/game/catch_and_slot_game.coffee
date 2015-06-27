@@ -11,13 +11,16 @@ class LoveliveGame extends catchAndSlotGame
         @height = 960
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets','icon1', 'lille', 'under_frame']
+        @imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin']
         #音声リスト
         @sondList = []
         #キーのリスト、物理キーとソフトキー両方に対応
         @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false}
         @keybind(90, 'z')
         @preloadAll()
+        #一人目のμ’ｓメンバーを決めて素材をロードする
+        @slot_setting.setMuseMember()
+        @musePreLoad()
 
         #ゲーム中どこからでもアクセスのある数値
         @money_init = 100 #ゲーム開始時の所持金
@@ -31,6 +34,15 @@ class LoveliveGame extends catchAndSlotGame
         @gameInit()
         @main_scene = new mainScene()
         @pushScene(@main_scene)
+
+    ###
+    スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
+    ###
+    musePreLoad:()->
+        muse_num = @slot_setting.now_muse_num
+        if @slot_setting.muse_material_list[muse_num] != undefined
+            for key, val of @slot_setting.muse_material_list[muse_num]['cut_in']
+                @load('images/cut_in/'+val.name + '.png')
 
     ###
     ゲーム開始時の初期数値調整
@@ -109,7 +121,7 @@ class LoveliveGame extends catchAndSlotGame
     はずれのアイテムを取った時にテンションゲージを増減する
     ###
     tensionSetValueMissItemCatch:()->
-        val = @slot_setting.setTensionMissItemCatch()
+        val = @slot_setting.setTensionItemFall()
         @_tensionSetValue(val)
 
     ###

@@ -27,10 +27,25 @@ class slotSetting extends appNode
             2:10, 3:20, 4:30, 5:50, 6:50, 1:150, 7:300,
             11:500, 12:500, 13:500, 14:500, 15:500, 16:500, 17:500, 18:500, 19:500
         }
+        ###
+        カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
+        11:高坂穂乃果、12:南ことり、13：園田海未
+        ###
+        @muse_material_list = {
+            12:{
+                'cut_in':[
+                    {'name':'12_0', 'width':680, 'height':970}
+                ],
+                'bgm':[],
+                'voice':[]
+            }
+        }
         #テンションの最大値
         @tension_max = 500
-        #前回入ったμ’sメンバー
-        @prev_muse_num = 0
+        #現在スロットに入るμ’ｓ番号
+        @now_muse_num = 0
+        #過去にスロットに入ったμ’ｓ番号
+        @prev_muse = []
 
     setGravity:()->
         return Math.floor((game.tension / @tension_max) * 1.2) + 0.7
@@ -46,15 +61,18 @@ class slotSetting extends appNode
         random = Math.floor(Math.random() * 100)
         if random < rate
             result = true
+        if game.debug.force_insert_muse is true
+            result = true
         return result
 
     ###
     挿入するμ’sメンバーを決める
     ###
     setMuseMember:()->
-        result = Math.round(Math.random() * 8) + 11
-        @prev_muse_num = result
-        return result
+        member = Math.round(Math.random() * 8) + 11
+        member = 12
+        @now_muse_num = member
+        @prev_muse.push(member)
 
     ###
     挿入するμ’sメンバーの人数を決める
@@ -69,13 +87,15 @@ class slotSetting extends appNode
     getIsForceSlotHit:()->
         result = false
         rate = Math.floor((game.tension / @tension_max) * 20)
+        if game.main_scene.gp_slot.leftSlotEye > 10
+            rate *= 2
         random = Math.floor(Math.random() * 100)
         if random < rate
             result = true
         return result
 
     getReturnMoneyFallValue:()->
-        return Math.floor(game.bet * game.combo * 0.02)
+        return Math.floor(game.bet * game.combo * 0.05)
 
     ###
     アイテムを取った時のテンションゲージの増減値を決める
@@ -101,10 +121,7 @@ class slotSetting extends appNode
         val *= -1
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
-        return val
-
-    setTensionMissItemCatch:()->
-        val = @tension_max * 0.2 * -1
+        #スロットにμ’ｓがいれば1つ消す
         return val
 
     ###

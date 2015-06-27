@@ -78,13 +78,16 @@ class LoveliveGame extends catchAndSlotGame
         @height = 960
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets','icon1', 'lille', 'under_frame']
+        @imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin']
         #音声リスト
         @sondList = []
         #キーのリスト、物理キーとソフトキー両方に対応
         @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false}
         @keybind(90, 'z')
         @preloadAll()
+        #一人目のμ’ｓメンバーを決めて素材をロードする
+        @slot_setting.setMuseMember()
+        @musePreLoad()
 
         #ゲーム中どこからでもアクセスのある数値
         @money_init = 100 #ゲーム開始時の所持金
@@ -98,6 +101,15 @@ class LoveliveGame extends catchAndSlotGame
         @gameInit()
         @main_scene = new mainScene()
         @pushScene(@main_scene)
+
+    ###
+    スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
+    ###
+    musePreLoad:()->
+        muse_num = @slot_setting.now_muse_num
+        if @slot_setting.muse_material_list[muse_num] != undefined
+            for key, val of @slot_setting.muse_material_list[muse_num]['cut_in']
+                @load('images/cut_in/'+val.name + '.png')
 
     ###
     ゲーム開始時の初期数値調整
@@ -176,7 +188,7 @@ class LoveliveGame extends catchAndSlotGame
     はずれのアイテムを取った時にテンションゲージを増減する
     ###
     tensionSetValueMissItemCatch:()->
-        val = @slot_setting.setTensionMissItemCatch()
+        val = @slot_setting.setTensionItemFall()
         @_tensionSetValue(val)
 
     ###
@@ -187,9 +199,21 @@ class LoveliveGame extends catchAndSlotGame
         val = @slot_setting.setTensionSlotHit(prize_money)
         @_tensionSetValue(val)
 
+class gpEffect extends appGroup
+    constructor: () ->
+        super
+    cutInSet:()->
+        setting = game.slot_setting
+        if setting.muse_material_list[setting.now_muse_num] != undefined
+            @cut_in = new cutIn()
+            @addChild(@cut_in)
 class gpPanorama extends appGroup
     constructor: () ->
         super
+        @back_panorama = new BackPanorama()
+        @addChild(@back_panorama)
+        @front_panorama = new FrontPanorama()
+        @addChild(@front_panorama)
 class gpSlot extends appGroup
     constructor: () ->
         super
@@ -258,7 +282,7 @@ class gpSlot extends appGroup
             game.tensionSetValueSlotHit(prize_money)
         else
             if game.slot_setting.isAddMuse() is true
-                member = game.slot_setting.setMuseMember()
+                member = game.slot_setting.now_muse_num
                 num = game.slot_setting.setMuseNum()
                 @slotAddMuse(member, num)
 
@@ -322,6 +346,7 @@ class gpSlot extends appGroup
         @left_lille.lilleArray = @_slotAddMuseUnit(num, cnt, @left_lille)
         @middle_lille.lilleArray = @_slotAddMuseUnit(num, cnt, @middle_lille)
         @right_lille.lilleArray = @_slotAddMuseUnit(num, cnt, @right_lille)
+        game.main_scene.gp_effect.cutInSet()
 
     ###
     リールにμ’sの誰かを挿入(単体)
@@ -446,7 +471,6 @@ class stageFront extends gpStage
 
     _missCatchFall:()->
         if game.money >= game.bet
-            console.log('miss')
             @catchMissItems.push(new OnionCatch())
             @addChild(@catchMissItems[@nowCatchMissItemsNum])
             @catchMissItems[@nowCatchMissItemsNum].setPosition()
@@ -781,7 +805,7 @@ class Debug extends appNode
         #デバッグ用リールにすりかえる
         @lille_flg = false
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = false
+        @item_flg = true
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する
@@ -790,6 +814,8 @@ class Debug extends appNode
         @fix_tention_item_fall_flg = false
         #スロットが当たった時のテンション増減値を固定する
         @fix_tention_slot_hit_flg = false
+        #スロットに必ずμ’ｓが追加される
+        @force_insert_muse = true
         #デバッグ用リール配列
         @lille_array = [
             [7,3],
@@ -810,6 +836,7 @@ class Debug extends appNode
             @fix_tention_item_catch_flg = true
             @fix_tention_item_fall_flg = true
             @fix_tention_slot_hit_flg = true
+            @force_insert_muse = true
 ###
 スロットのリールの並びや掛け金に対する当選額
 テンションによるリールの変化確率など
@@ -839,10 +866,25 @@ class slotSetting extends appNode
             2:10, 3:20, 4:30, 5:50, 6:50, 1:150, 7:300,
             11:500, 12:500, 13:500, 14:500, 15:500, 16:500, 17:500, 18:500, 19:500
         }
+        ###
+        カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
+        11:高坂穂乃果、12:南ことり、13：園田海未
+        ###
+        @muse_material_list = {
+            12:{
+                'cut_in':[
+                    {'name':'12_0', 'width':680, 'height':970}
+                ],
+                'bgm':[],
+                'voice':[]
+            }
+        }
         #テンションの最大値
         @tension_max = 500
-        #前回入ったμ’sメンバー
-        @prev_muse_num = 0
+        #現在スロットに入るμ’ｓ番号
+        @now_muse_num = 0
+        #過去にスロットに入ったμ’ｓ番号
+        @prev_muse = []
 
     setGravity:()->
         return Math.floor((game.tension / @tension_max) * 1.2) + 0.7
@@ -858,15 +900,18 @@ class slotSetting extends appNode
         random = Math.floor(Math.random() * 100)
         if random < rate
             result = true
+        if game.debug.force_insert_muse is true
+            result = true
         return result
 
     ###
     挿入するμ’sメンバーを決める
     ###
     setMuseMember:()->
-        result = Math.round(Math.random() * 8) + 11
-        @prev_muse_num = result
-        return result
+        member = Math.round(Math.random() * 8) + 11
+        member = 12
+        @now_muse_num = member
+        @prev_muse.push(member)
 
     ###
     挿入するμ’sメンバーの人数を決める
@@ -881,13 +926,15 @@ class slotSetting extends appNode
     getIsForceSlotHit:()->
         result = false
         rate = Math.floor((game.tension / @tension_max) * 20)
+        if game.main_scene.gp_slot.leftSlotEye > 10
+            rate *= 2
         random = Math.floor(Math.random() * 100)
         if random < rate
             result = true
         return result
 
     getReturnMoneyFallValue:()->
-        return Math.floor(game.bet * game.combo * 0.02)
+        return Math.floor(game.bet * game.combo * 0.05)
 
     ###
     アイテムを取った時のテンションゲージの増減値を決める
@@ -913,10 +960,7 @@ class slotSetting extends appNode
         val *= -1
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
-        return val
-
-    setTensionMissItemCatch:()->
-        val = @tension_max * 0.2 * -1
+        #スロットにμ’ｓがいれば1つ消す
         return val
 
     ###
@@ -1021,15 +1065,19 @@ class slotSetting extends appNode
 class mainScene extends appScene
     constructor:()->
         super
-        @backgroundColor = 'rgb(153,204,255)';
+        @backgroundColor = '#93F0FF'
         @initial()
     initial:()->
         @setGroup()
     setGroup:()->
+        @gp_panorama = new gpPanorama()
+        @addChild(@gp_panorama)
         @gp_stage_back = new stageBack()
         @addChild(@gp_stage_back)
         @gp_slot = new gpSlot()
         @addChild(@gp_slot)
+        @gp_effect = new gpEffect()
+        @addChild(@gp_effect)
         @gp_stage_front = new stageFront()
         @addChild(@gp_stage_front)
         @gp_system = new gpSystem()
@@ -1048,6 +1096,48 @@ class Floor extends backGround
 class Panorama extends backGround
     constructor: (w, h) ->
         super w, h
+class BackPanorama extends Panorama
+    constructor: (w, h) ->
+        super game.width, game.height
+        @image = game.imageload("sky")
+class FrontPanorama extends Panorama
+    constructor: (w, h) ->
+        super game.width, 400
+        @image = game.imageload("okujou")
+        @setPosition()
+    setPosition:()->
+        @x = 0
+        @y = 560
+class effect extends appSprite
+    constructor: (w, h) ->
+        super w, h
+###
+カットインの画像サイズ、頭の位置で760px
+###
+class cutIn extends effect
+    constructor: () ->
+        @_callCutIn()
+        super @cut_in['width'], @cut_in['height']
+        @_setInit()
+
+    onenterframe: (e) ->
+        @x += @vx
+        if @x < -@w
+            game.main_scene.gp_effect.removeChild(@)
+    
+    _callCutIn:()->
+        setting = game.slot_setting
+        muse_num = setting.now_muse_num
+        cut_in_list = setting.muse_material_list[muse_num]['cut_in']
+        cut_in_random = Math.floor(Math.random() * cut_in_list.length)
+        @cut_in = cut_in_list[cut_in_random]
+
+    _setInit:()->
+        @image = game.imageload('cut_in/'+@cut_in['name'])
+        @x = game.width
+        @y = game.height - @h
+        @vx = Math.round((game.width + @w) / (3 * game.fps)) * -1
+        game.main_scene.gp_stage_front.setItemFallFrm(7)
 class appObject extends appSprite
     ###
     制約
@@ -1387,19 +1477,19 @@ class OnionCatch extends Catch
 ###
 class Money extends Item
     constructor: (isHoming) ->
-        super 48, 48
-        @scaleX = 0.5
-        @scaleY = 0.5
+        super 35, 40
         @vx = 0
         @vy = 0
+        @frame_init = 0
         @price = 1 #単価
         @gravity = 0.5
-        @image = game.imageload("icon1")
+        @image = game.imageload("coin")
         @isHoming = isHoming
         @_setGravity()
 
     onenterframe: (e) ->
         @homing()
+        @_animation()
         @vy += @gravity
         @y += @vy
         @x += @vx
@@ -1436,6 +1526,30 @@ class Money extends Item
         if @isHoming is true
             @vx = Math.round( (game.main_scene.gp_stage_front.player.x - @x) / ((game.main_scene.gp_stage_front.player.y - @y) / @vy) )
 
+    _animation:()->
+        tmp_frm = @age % 24
+        switch tmp_frm
+            when 0
+                @scaleX *= -1
+                @frame = @frame_init
+            when 3
+                @frame = @frame_init + 1
+            when 6
+                @frame = @frame_init + 2
+            when 9
+                @frame = @frame_init + 3
+            when 12
+                @scaleX *= -1
+                @frame = @frame_init + 3
+            when 15
+                @frame = @frame_init + 2
+            when 18
+                @frame = @frame_init + 1
+            when 21
+                @frame = @frame_init
+
+
+
 ###
 1円
 @param boolean isHoming trueならコインがホーミングする
@@ -1444,7 +1558,8 @@ class OneMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 1
-        @frame = 7
+        @frame = 0
+        @frame_init = 0
 
 ###
 10円
@@ -1454,7 +1569,8 @@ class TenMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 10
-        @frame = 7
+        @frame = 0
+        @frame_init = 0
 
 ###
 100円
@@ -1464,7 +1580,8 @@ class HundredMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 100
-        @frame = 5
+        @frame = 4
+        @frame_init = 4
 
 ###
 1000円
@@ -1474,7 +1591,8 @@ class ThousandMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 1000
-        @frame = 5
+        @frame = 4
+        @frame_init = 4
 
 ###
 一万円
@@ -1484,7 +1602,8 @@ class TenThousandMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 10000
-        @frame = 4
+        @frame = 8
+        @frame_init = 8
 
 ###
 10万円
@@ -1494,7 +1613,8 @@ class HundredThousandMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 100000
-        @frame = 4
+        @frame = 8
+        @frame_init = 8
 class Slot extends appSprite
     constructor: (w, h) ->
         super w, h

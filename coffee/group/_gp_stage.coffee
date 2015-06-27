@@ -74,7 +74,6 @@ class stageFront extends gpStage
 
     _missCatchFall:()->
         if game.money >= game.bet
-            console.log('miss')
             @catchMissItems.push(new OnionCatch())
             @addChild(@catchMissItems[@nowCatchMissItemsNum])
             @catchMissItems[@nowCatchMissItemsNum].setPosition()

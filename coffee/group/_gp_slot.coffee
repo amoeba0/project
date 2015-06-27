@@ -66,7 +66,7 @@ class gpSlot extends appGroup
             game.tensionSetValueSlotHit(prize_money)
         else
             if game.slot_setting.isAddMuse() is true
-                member = game.slot_setting.setMuseMember()
+                member = game.slot_setting.now_muse_num
                 num = game.slot_setting.setMuseNum()
                 @slotAddMuse(member, num)
 
@@ -130,6 +130,7 @@ class gpSlot extends appGroup
         @left_lille.lilleArray = @_slotAddMuseUnit(num, cnt, @left_lille)
         @middle_lille.lilleArray = @_slotAddMuseUnit(num, cnt, @middle_lille)
         @right_lille.lilleArray = @_slotAddMuseUnit(num, cnt, @right_lille)
+        game.main_scene.gp_effect.cutInSet()
 
     ###
     リールにμ’sの誰かを挿入(単体)

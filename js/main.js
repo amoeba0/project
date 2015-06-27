@@ -1,4 +1,4 @@
-var Bear, Button, Catch, Character, Debug, Floor, Frame, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, comboText, comboUnitText, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, comboText, comboUnitText, cutIn, effect, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -161,7 +161,7 @@ LoveliveGame = (function(_super) {
     this.width = 640;
     this.height = 960;
     this.fps = 24;
-    this.imgList = ['chun', 'sweets', 'icon1', 'lille', 'under_frame'];
+    this.imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin'];
     this.sondList = [];
     this.keyList = {
       'left': false,
@@ -172,6 +172,8 @@ LoveliveGame = (function(_super) {
     };
     this.keybind(90, 'z');
     this.preloadAll();
+    this.slot_setting.setMuseMember();
+    this.musePreLoad();
     this.money_init = 100;
     this.money = 0;
     this.bet = 1;
@@ -184,6 +186,25 @@ LoveliveGame = (function(_super) {
     this.gameInit();
     this.main_scene = new mainScene();
     return this.pushScene(this.main_scene);
+  };
+
+
+  /*
+  スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
+   */
+
+  LoveliveGame.prototype.musePreLoad = function() {
+    var key, muse_num, val, _ref, _results;
+    muse_num = this.slot_setting.now_muse_num;
+    if (this.slot_setting.muse_material_list[muse_num] !== void 0) {
+      _ref = this.slot_setting.muse_material_list[muse_num]['cut_in'];
+      _results = [];
+      for (key in _ref) {
+        val = _ref[key];
+        _results.push(this.load('images/cut_in/' + val.name + '.png'));
+      }
+      return _results;
+    }
   };
 
 
@@ -296,7 +317,7 @@ LoveliveGame = (function(_super) {
 
   LoveliveGame.prototype.tensionSetValueMissItemCatch = function() {
     var val;
-    val = this.slot_setting.setTensionMissItemCatch();
+    val = this.slot_setting.setTensionItemFall();
     return this._tensionSetValue(val);
   };
 
@@ -316,11 +337,35 @@ LoveliveGame = (function(_super) {
 
 })(catchAndSlotGame);
 
+gpEffect = (function(_super) {
+  __extends(gpEffect, _super);
+
+  function gpEffect() {
+    gpEffect.__super__.constructor.apply(this, arguments);
+  }
+
+  gpEffect.prototype.cutInSet = function() {
+    var setting;
+    setting = game.slot_setting;
+    if (setting.muse_material_list[setting.now_muse_num] !== void 0) {
+      this.cut_in = new cutIn();
+      return this.addChild(this.cut_in);
+    }
+  };
+
+  return gpEffect;
+
+})(appGroup);
+
 gpPanorama = (function(_super) {
   __extends(gpPanorama, _super);
 
   function gpPanorama() {
     gpPanorama.__super__.constructor.apply(this, arguments);
+    this.back_panorama = new BackPanorama();
+    this.addChild(this.back_panorama);
+    this.front_panorama = new FrontPanorama();
+    this.addChild(this.front_panorama);
   }
 
   return gpPanorama;
@@ -424,7 +469,7 @@ gpSlot = (function(_super) {
       return game.tensionSetValueSlotHit(prize_money);
     } else {
       if (game.slot_setting.isAddMuse() === true) {
-        member = game.slot_setting.setMuseMember();
+        member = game.slot_setting.now_muse_num;
         num = game.slot_setting.setMuseNum();
         return this.slotAddMuse(member, num);
       }
@@ -514,7 +559,8 @@ gpSlot = (function(_super) {
   gpSlot.prototype.slotAddMuse = function(num, cnt) {
     this.left_lille.lilleArray = this._slotAddMuseUnit(num, cnt, this.left_lille);
     this.middle_lille.lilleArray = this._slotAddMuseUnit(num, cnt, this.middle_lille);
-    return this.right_lille.lilleArray = this._slotAddMuseUnit(num, cnt, this.right_lille);
+    this.right_lille.lilleArray = this._slotAddMuseUnit(num, cnt, this.right_lille);
+    return game.main_scene.gp_effect.cutInSet();
   };
 
 
@@ -707,7 +753,6 @@ stageFront = (function(_super) {
 
   stageFront.prototype._missCatchFall = function() {
     if (game.money >= game.bet) {
-      console.log('miss');
       this.catchMissItems.push(new OnionCatch());
       this.addChild(this.catchMissItems[this.nowCatchMissItemsNum]);
       this.catchMissItems[this.nowCatchMissItemsNum].setPosition();
@@ -1211,11 +1256,12 @@ Debug = (function(_super) {
     Debug.__super__.constructor.apply(this, arguments);
     this.all_debug_flg = false;
     this.lille_flg = false;
-    this.item_flg = false;
+    this.item_flg = true;
     this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
     this.fix_tention_item_fall_flg = false;
     this.fix_tention_slot_hit_flg = false;
+    this.force_insert_muse = true;
     this.lille_array = [[7, 3], [7], [7]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -50;
@@ -1227,6 +1273,7 @@ Debug = (function(_super) {
       this.fix_tention_item_catch_flg = true;
       this.fix_tention_item_fall_flg = true;
       this.fix_tention_slot_hit_flg = true;
+      this.force_insert_muse = true;
     }
   }
 
@@ -1267,8 +1314,27 @@ slotSetting = (function(_super) {
       18: 500,
       19: 500
     };
+
+    /*
+    カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
+    11:高坂穂乃果、12:南ことり、13：園田海未
+     */
+    this.muse_material_list = {
+      12: {
+        'cut_in': [
+          {
+            'name': '12_0',
+            'width': 680,
+            'height': 970
+          }
+        ],
+        'bgm': [],
+        'voice': []
+      }
+    };
     this.tension_max = 500;
-    this.prev_muse_num = 0;
+    this.now_muse_num = 0;
+    this.prev_muse = [];
   }
 
   slotSetting.prototype.setGravity = function() {
@@ -1289,6 +1355,9 @@ slotSetting = (function(_super) {
     if (random < rate) {
       result = true;
     }
+    if (game.debug.force_insert_muse === true) {
+      result = true;
+    }
     return result;
   };
 
@@ -1298,10 +1367,11 @@ slotSetting = (function(_super) {
    */
 
   slotSetting.prototype.setMuseMember = function() {
-    var result;
-    result = Math.round(Math.random() * 8) + 11;
-    this.prev_muse_num = result;
-    return result;
+    var member;
+    member = Math.round(Math.random() * 8) + 11;
+    member = 12;
+    this.now_muse_num = member;
+    return this.prev_muse.push(member);
   };
 
 
@@ -1324,6 +1394,9 @@ slotSetting = (function(_super) {
     var random, rate, result;
     result = false;
     rate = Math.floor((game.tension / this.tension_max) * 20);
+    if (game.main_scene.gp_slot.leftSlotEye > 10) {
+      rate *= 2;
+    }
     random = Math.floor(Math.random() * 100);
     if (random < rate) {
       result = true;
@@ -1332,7 +1405,7 @@ slotSetting = (function(_super) {
   };
 
   slotSetting.prototype.getReturnMoneyFallValue = function() {
-    return Math.floor(game.bet * game.combo * 0.02);
+    return Math.floor(game.bet * game.combo * 0.05);
   };
 
 
@@ -1372,12 +1445,6 @@ slotSetting = (function(_super) {
     if (game.debug.fix_tention_item_fall_flg === true) {
       val = game.debug.fix_tention_item_fall_val;
     }
-    return val;
-  };
-
-  slotSetting.prototype.setTensionMissItemCatch = function() {
-    var val;
-    val = this.tension_max * 0.2 * -1;
     return val;
   };
 
@@ -1510,7 +1577,7 @@ mainScene = (function(_super) {
 
   function mainScene() {
     mainScene.__super__.constructor.apply(this, arguments);
-    this.backgroundColor = 'rgb(153,204,255)';
+    this.backgroundColor = '#93F0FF';
     this.initial();
   }
 
@@ -1519,10 +1586,14 @@ mainScene = (function(_super) {
   };
 
   mainScene.prototype.setGroup = function() {
+    this.gp_panorama = new gpPanorama();
+    this.addChild(this.gp_panorama);
     this.gp_stage_back = new stageBack();
     this.addChild(this.gp_stage_back);
     this.gp_slot = new gpSlot();
     this.addChild(this.gp_slot);
+    this.gp_effect = new gpEffect();
+    this.addChild(this.gp_effect);
     this.gp_stage_front = new stageFront();
     this.addChild(this.gp_stage_front);
     this.gp_system = new gpSystem();
@@ -1578,6 +1649,89 @@ Panorama = (function(_super) {
   return Panorama;
 
 })(backGround);
+
+BackPanorama = (function(_super) {
+  __extends(BackPanorama, _super);
+
+  function BackPanorama(w, h) {
+    BackPanorama.__super__.constructor.call(this, game.width, game.height);
+    this.image = game.imageload("sky");
+  }
+
+  return BackPanorama;
+
+})(Panorama);
+
+FrontPanorama = (function(_super) {
+  __extends(FrontPanorama, _super);
+
+  function FrontPanorama(w, h) {
+    FrontPanorama.__super__.constructor.call(this, game.width, 400);
+    this.image = game.imageload("okujou");
+    this.setPosition();
+  }
+
+  FrontPanorama.prototype.setPosition = function() {
+    this.x = 0;
+    return this.y = 560;
+  };
+
+  return FrontPanorama;
+
+})(Panorama);
+
+effect = (function(_super) {
+  __extends(effect, _super);
+
+  function effect(w, h) {
+    effect.__super__.constructor.call(this, w, h);
+  }
+
+  return effect;
+
+})(appSprite);
+
+
+/*
+カットインの画像サイズ、頭の位置で760px
+ */
+
+cutIn = (function(_super) {
+  __extends(cutIn, _super);
+
+  function cutIn() {
+    this._callCutIn();
+    cutIn.__super__.constructor.call(this, this.cut_in['width'], this.cut_in['height']);
+    this._setInit();
+  }
+
+  cutIn.prototype.onenterframe = function(e) {
+    this.x += this.vx;
+    if (this.x < -this.w) {
+      return game.main_scene.gp_effect.removeChild(this);
+    }
+  };
+
+  cutIn.prototype._callCutIn = function() {
+    var cut_in_list, cut_in_random, muse_num, setting;
+    setting = game.slot_setting;
+    muse_num = setting.now_muse_num;
+    cut_in_list = setting.muse_material_list[muse_num]['cut_in'];
+    cut_in_random = Math.floor(Math.random() * cut_in_list.length);
+    return this.cut_in = cut_in_list[cut_in_random];
+  };
+
+  cutIn.prototype._setInit = function() {
+    this.image = game.imageload('cut_in/' + this.cut_in['name']);
+    this.x = game.width;
+    this.y = game.height - this.h;
+    this.vx = Math.round((game.width + this.w) / (3 * game.fps)) * -1;
+    return game.main_scene.gp_stage_front.setItemFallFrm(7);
+  };
+
+  return cutIn;
+
+})(effect);
 
 appObject = (function(_super) {
   __extends(appObject, _super);
@@ -2113,20 +2267,20 @@ Money = (function(_super) {
   __extends(Money, _super);
 
   function Money(isHoming) {
-    Money.__super__.constructor.call(this, 48, 48);
-    this.scaleX = 0.5;
-    this.scaleY = 0.5;
+    Money.__super__.constructor.call(this, 35, 40);
     this.vx = 0;
     this.vy = 0;
+    this.frame_init = 0;
     this.price = 1;
     this.gravity = 0.5;
-    this.image = game.imageload("icon1");
+    this.image = game.imageload("coin");
     this.isHoming = isHoming;
     this._setGravity();
   }
 
   Money.prototype.onenterframe = function(e) {
     this.homing();
+    this._animation();
     this.vy += this.gravity;
     this.y += this.vy;
     this.x += this.vx;
@@ -2180,6 +2334,31 @@ Money = (function(_super) {
     }
   };
 
+  Money.prototype._animation = function() {
+    var tmp_frm;
+    tmp_frm = this.age % 24;
+    switch (tmp_frm) {
+      case 0:
+        this.scaleX *= -1;
+        return this.frame = this.frame_init;
+      case 3:
+        return this.frame = this.frame_init + 1;
+      case 6:
+        return this.frame = this.frame_init + 2;
+      case 9:
+        return this.frame = this.frame_init + 3;
+      case 12:
+        this.scaleX *= -1;
+        return this.frame = this.frame_init + 3;
+      case 15:
+        return this.frame = this.frame_init + 2;
+      case 18:
+        return this.frame = this.frame_init + 1;
+      case 21:
+        return this.frame = this.frame_init;
+    }
+  };
+
   return Money;
 
 })(Item);
@@ -2196,7 +2375,8 @@ OneMoney = (function(_super) {
   function OneMoney(isHoming) {
     OneMoney.__super__.constructor.call(this, isHoming);
     this.price = 1;
-    this.frame = 7;
+    this.frame = 0;
+    this.frame_init = 0;
   }
 
   return OneMoney;
@@ -2215,7 +2395,8 @@ TenMoney = (function(_super) {
   function TenMoney(isHoming) {
     TenMoney.__super__.constructor.call(this, isHoming);
     this.price = 10;
-    this.frame = 7;
+    this.frame = 0;
+    this.frame_init = 0;
   }
 
   return TenMoney;
@@ -2234,7 +2415,8 @@ HundredMoney = (function(_super) {
   function HundredMoney(isHoming) {
     HundredMoney.__super__.constructor.call(this, isHoming);
     this.price = 100;
-    this.frame = 5;
+    this.frame = 4;
+    this.frame_init = 4;
   }
 
   return HundredMoney;
@@ -2253,7 +2435,8 @@ ThousandMoney = (function(_super) {
   function ThousandMoney(isHoming) {
     ThousandMoney.__super__.constructor.call(this, isHoming);
     this.price = 1000;
-    this.frame = 5;
+    this.frame = 4;
+    this.frame_init = 4;
   }
 
   return ThousandMoney;
@@ -2272,7 +2455,8 @@ TenThousandMoney = (function(_super) {
   function TenThousandMoney(isHoming) {
     TenThousandMoney.__super__.constructor.call(this, isHoming);
     this.price = 10000;
-    this.frame = 4;
+    this.frame = 8;
+    this.frame_init = 8;
   }
 
   return TenThousandMoney;
@@ -2291,7 +2475,8 @@ HundredThousandMoney = (function(_super) {
   function HundredThousandMoney(isHoming) {
     HundredThousandMoney.__super__.constructor.call(this, isHoming);
     this.price = 100000;
-    this.frame = 4;
+    this.frame = 8;
+    this.frame_init = 8;
   }
 
   return HundredThousandMoney;

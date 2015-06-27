@@ -4,19 +4,19 @@
 ###
 class Money extends Item
     constructor: (isHoming) ->
-        super 48, 48
-        @scaleX = 0.5
-        @scaleY = 0.5
+        super 35, 40
         @vx = 0
         @vy = 0
+        @frame_init = 0
         @price = 1 #単価
         @gravity = 0.5
-        @image = game.imageload("icon1")
+        @image = game.imageload("coin")
         @isHoming = isHoming
         @_setGravity()
 
     onenterframe: (e) ->
         @homing()
+        @_animation()
         @vy += @gravity
         @y += @vy
         @x += @vx
@@ -53,6 +53,30 @@ class Money extends Item
         if @isHoming is true
             @vx = Math.round( (game.main_scene.gp_stage_front.player.x - @x) / ((game.main_scene.gp_stage_front.player.y - @y) / @vy) )
 
+    _animation:()->
+        tmp_frm = @age % 24
+        switch tmp_frm
+            when 0
+                @scaleX *= -1
+                @frame = @frame_init
+            when 3
+                @frame = @frame_init + 1
+            when 6
+                @frame = @frame_init + 2
+            when 9
+                @frame = @frame_init + 3
+            when 12
+                @scaleX *= -1
+                @frame = @frame_init + 3
+            when 15
+                @frame = @frame_init + 2
+            when 18
+                @frame = @frame_init + 1
+            when 21
+                @frame = @frame_init
+
+
+
 ###
 1円
 @param boolean isHoming trueならコインがホーミングする
@@ -61,7 +85,8 @@ class OneMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 1
-        @frame = 7
+        @frame = 0
+        @frame_init = 0
 
 ###
 10円
@@ -71,7 +96,8 @@ class TenMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 10
-        @frame = 7
+        @frame = 0
+        @frame_init = 0
 
 ###
 100円
@@ -81,7 +107,8 @@ class HundredMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 100
-        @frame = 5
+        @frame = 4
+        @frame_init = 4
 
 ###
 1000円
@@ -91,7 +118,8 @@ class ThousandMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 1000
-        @frame = 5
+        @frame = 4
+        @frame_init = 4
 
 ###
 一万円
@@ -101,7 +129,8 @@ class TenThousandMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 10000
-        @frame = 4
+        @frame = 8
+        @frame_init = 8
 
 ###
 10万円
@@ -111,4 +140,5 @@ class HundredThousandMoney extends Money
     constructor: (isHoming) ->
         super isHoming
         @price = 100000
-        @frame = 4
+        @frame = 8
+        @frame_init = 8
