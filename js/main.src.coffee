@@ -221,6 +221,7 @@ class gpEffect extends appGroup
         if setting.muse_material_list[setting.now_muse_num] != undefined
             @cut_in = new cutIn()
             @addChild(@cut_in)
+            game.main_scene.gp_stage_front.missItemFallSycleNow = 0
 class gpPanorama extends appGroup
     constructor: () ->
         super
@@ -906,8 +907,8 @@ class slotSetting extends appNode
         ]
         #リールの目に対する当選額の倍率
         @bairitu = {
-            2:20, 3:40, 4:60, 5:80, 6:80, 1:100, 7:150,
-            11:200, 12:200, 13:200, 14:200, 15:200, 16:200, 17:200, 18:200, 19:200
+            2:20, 3:30, 4:40, 5:50, 6:60, 1:70, 7:80,
+            11:100, 12:100, 13:100, 14:100, 15:100, 16:100, 17:100, 18:100, 19:100
         }
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
@@ -916,6 +917,15 @@ class slotSetting extends appNode
         カットインの画像サイズ、頭の位置で760px
         ###
         @muse_material_list = {
+            11:{
+                'cut_in':[
+                    {'name':'11_0', 'width':528, 'height':760, 'direction':'left'}
+                ],
+                'bgm':[
+                    {'name':'', 'time':30}
+                ],
+                'voice':[]
+            },
             12:{
                 'cut_in':[
                     {'name':'12_0', 'width':680, 'height':970, 'direction':'left'}
@@ -925,9 +935,64 @@ class slotSetting extends appNode
                 ],
                 'voice':[]
             },
+            13:{
+                'cut_in':[
+                    {'name':'13_0', 'width':760, 'height':845, 'direction':'left'}
+                ],
+                'bgm':[
+                    {'name':'', 'time':30}
+                ],
+                'voice':[]
+            },
+            14:{
+                'cut_in':[
+                    {'name':'14_0', 'width':634, 'height':864, 'direction':'left'}
+                ],
+                'bgm':[
+                    {'name':'', 'time':30}
+                ],
+                'voice':[]
+            },
             15:{
                 'cut_in':[
-                    {'name':'15_0', 'width':670, 'height':760, 'direction':'right'}
+                    {'name':'15_0', 'width':670, 'height':760, 'direction':'right'},
+                    {'name':'15_1', 'width':801, 'height':850, 'direction':'left'}
+                ],
+                'bgm':[
+                    {'name':'', 'time':30}
+                ],
+                'voice':[]
+            },
+            16:{
+                'cut_in':[
+                    {'name':'16_0', 'width':584, 'height':760, 'direction':'right'}
+                ],
+                'bgm':[
+                    {'name':'', 'time':30}
+                ],
+                'voice':[]
+            },
+            17:{
+                'cut_in':[
+                    {'name':'17_0', 'width':620, 'height':940, 'direction':'left'}
+                ],
+                'bgm':[
+                    {'name':'', 'time':30}
+                ],
+                'voice':[]
+            },
+            18:{
+                'cut_in':[
+                    {'name':'18_0', 'width':799, 'height':808, 'direction':'right'}
+                ],
+                'bgm':[
+                    {'name':'', 'time':30}
+                ],
+                'voice':[]
+            },
+            19:{
+                'cut_in':[
+                    {'name':'19_0', 'width':613, 'height':760, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -979,7 +1044,7 @@ class slotSetting extends appNode
                 remain.push(full[key])
         random = Math.floor(Math.random() * remain.length)
         member = remain[random]
-        #member = 15
+        #member = 19
         @now_muse_num = member
         if @prev_muse.indexOf(member) is -1
             @prev_muse.push(member)

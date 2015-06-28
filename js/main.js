@@ -368,7 +368,8 @@ gpEffect = (function(_super) {
     setting = game.slot_setting;
     if (setting.muse_material_list[setting.now_muse_num] !== void 0) {
       this.cut_in = new cutIn();
-      return this.addChild(this.cut_in);
+      this.addChild(this.cut_in);
+      return game.main_scene.gp_stage_front.missItemFallSycleNow = 0;
     }
   };
 
@@ -1356,21 +1357,21 @@ slotSetting = (function(_super) {
     this.lille_array_2 = [[1, 5, 1, 4, 2, 3, 1, 4, 1, 5, 4, 1, 2, 5, 4, 1, 4, 1, 4, 5, 1, 4], [1, 5, 2, 1, 4, 2, 5, 1, 5, 2, 1, 5, 1, 3, 1, 5, 3, 4, 1, 4, 5, 1], [1, 4, 1, 5, 1, 4, 2, 1, 5, 1, 3, 1, 5, 2, 4, 5, 1, 5, 1, 3, 4, 1]];
     this.bairitu = {
       2: 20,
-      3: 40,
-      4: 60,
-      5: 80,
-      6: 80,
-      1: 100,
-      7: 150,
-      11: 200,
-      12: 200,
-      13: 200,
-      14: 200,
-      15: 200,
-      16: 200,
-      17: 200,
-      18: 200,
-      19: 200
+      3: 30,
+      4: 40,
+      5: 50,
+      6: 60,
+      1: 70,
+      7: 80,
+      11: 100,
+      12: 100,
+      13: 100,
+      14: 100,
+      15: 100,
+      16: 100,
+      17: 100,
+      18: 100,
+      19: 100
     };
 
     /*
@@ -1380,12 +1381,63 @@ slotSetting = (function(_super) {
     カットインの画像サイズ、頭の位置で760px
      */
     this.muse_material_list = {
+      11: {
+        'cut_in': [
+          {
+            'name': '11_0',
+            'width': 528,
+            'height': 760,
+            'direction': 'left'
+          }
+        ],
+        'bgm': [
+          {
+            'name': '',
+            'time': 30
+          }
+        ],
+        'voice': []
+      },
       12: {
         'cut_in': [
           {
             'name': '12_0',
             'width': 680,
             'height': 970,
+            'direction': 'left'
+          }
+        ],
+        'bgm': [
+          {
+            'name': '',
+            'time': 30
+          }
+        ],
+        'voice': []
+      },
+      13: {
+        'cut_in': [
+          {
+            'name': '13_0',
+            'width': 760,
+            'height': 845,
+            'direction': 'left'
+          }
+        ],
+        'bgm': [
+          {
+            'name': '',
+            'time': 30
+          }
+        ],
+        'voice': []
+      },
+      14: {
+        'cut_in': [
+          {
+            'name': '14_0',
+            'width': 634,
+            'height': 864,
             'direction': 'left'
           }
         ],
@@ -1404,6 +1456,79 @@ slotSetting = (function(_super) {
             'width': 670,
             'height': 760,
             'direction': 'right'
+          }, {
+            'name': '15_1',
+            'width': 801,
+            'height': 850,
+            'direction': 'left'
+          }
+        ],
+        'bgm': [
+          {
+            'name': '',
+            'time': 30
+          }
+        ],
+        'voice': []
+      },
+      16: {
+        'cut_in': [
+          {
+            'name': '16_0',
+            'width': 584,
+            'height': 760,
+            'direction': 'right'
+          }
+        ],
+        'bgm': [
+          {
+            'name': '',
+            'time': 30
+          }
+        ],
+        'voice': []
+      },
+      17: {
+        'cut_in': [
+          {
+            'name': '17_0',
+            'width': 620,
+            'height': 940,
+            'direction': 'left'
+          }
+        ],
+        'bgm': [
+          {
+            'name': '',
+            'time': 30
+          }
+        ],
+        'voice': []
+      },
+      18: {
+        'cut_in': [
+          {
+            'name': '18_0',
+            'width': 799,
+            'height': 808,
+            'direction': 'right'
+          }
+        ],
+        'bgm': [
+          {
+            'name': '',
+            'time': 30
+          }
+        ],
+        'voice': []
+      },
+      19: {
+        'cut_in': [
+          {
+            'name': '19_0',
+            'width': 613,
+            'height': 760,
+            'direction': 'left'
           }
         ],
         'bgm': [
