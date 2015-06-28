@@ -22,6 +22,7 @@ class cutIn extends effect
         cut_in_list = setting.muse_material_list[muse_num]['cut_in']
         cut_in_random = Math.floor(Math.random() * cut_in_list.length)
         @cut_in = cut_in_list[cut_in_random]
+        @voices = setting.muse_material_list[muse_num]['voice']
 
     _setInit:()->
         @image = game.imageload('cut_in/'+@cut_in['name'])
@@ -31,10 +32,11 @@ class cutIn extends effect
             @x = -@w
         @y = game.height - @h
         @vx = @_setVxFast()
-        game.main_scene.gp_stage_front.setItemFallFrm(7)
+        game.main_scene.gp_stage_front.setItemFallFrm(6)
         @set_age = @age
         @fast = 0.5 * game.fps
         @slow = 2 * game.fps + @fast
+        @voice = @_setVoice()
 
     _setVxFast:()->
         val = Math.round(((game.width + @w) / 2) / (0.5 * game.fps))
@@ -43,7 +45,17 @@ class cutIn extends effect
         return val
 
     _setVxSlow:()->
+        if @voice != false
+            game.sePlay(@voice)
         val = Math.round((game.width / 4) / (2 * game.fps))
         if @cut_in['direction'] is 'left'
             val *= -1
         return val
+
+    _setVoice:()->
+        if @voices.length > 0
+            random = Math.floor(Math.random() * @voices.length)
+            voice = game.soundload('voice/'+@voices[random])
+        else
+            voice = game.soundload('clear')
+        return voice

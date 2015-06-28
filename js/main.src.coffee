@@ -23,6 +23,27 @@ class appGame extends Game
         return @assets["sounds/"+sound+".mp3"]
 
     ###
+    効果音を鳴らす
+    ###
+    sePlay:(se)->
+        se.clone().play()
+
+    ###
+    BGMをならす
+    ###
+    bgmPlay:(bgm, bgm_loop)->
+        bgm.play()
+        if bgm_loop is true
+            bgm._element.loop = true
+            #bgm.src.loop = true
+
+    ###
+    BGMを止める
+    ###
+    bgmStop:(bgm)->
+        bgm.stop()
+
+    ###
         素材をすべて読み込む
     ###
     preloadAll:()->
@@ -80,7 +101,7 @@ class LoveliveGame extends catchAndSlotGame
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin']
         #音声リスト
-        @sondList = []
+        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'zenkai_no_lovelive']
         #キーのリスト、物理キーとソフトキー両方に対応
         @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false}
         @keybind(90, 'z')
@@ -110,8 +131,12 @@ class LoveliveGame extends catchAndSlotGame
     musePreLoad:()->
         muse_num = @slot_setting.now_muse_num
         if @slot_setting.muse_material_list[muse_num] != undefined
-            for key, val of @slot_setting.muse_material_list[muse_num]['cut_in']
+            material = @slot_setting.muse_material_list[muse_num]
+            for key, val of material['cut_in']
                 @load('images/cut_in/'+val.name + '.png')
+            if material['voice'].length > 0
+                for key, val of material['voice']
+                    @load('sounds/voice/'+val+'.mp3')
 
     ###
     ゲーム開始時の初期数値調整
@@ -202,6 +227,7 @@ class LoveliveGame extends catchAndSlotGame
         if @fever is true
             @_tensionSetValue(@fever_down_tension)
             if @tension <= 0
+                @bgmStop(@main_scene.gp_slot.fever_bgm)
                 @fever = false
 
     ###
@@ -234,6 +260,9 @@ class gpSlot extends appGroup
         super
         @underFrame = new UnderFrame()
         @addChild(@underFrame)
+        @lille_stop_se = game.soundload('dicision')
+        @slot_hit_se = game.soundload('start')
+        @fever_bgm = game.soundload('zenkai_no_lovelive')
         @isStopping = false #スロット停止中
         @stopIntervalFrame = 9 #スロットが連続で止まる間隔（フレーム）
         @slotIntervalFrameRandom = 0
@@ -251,14 +280,17 @@ class gpSlot extends appGroup
     slotStopping: ()->
         if @isStopping is true
             if @age is @stopStartAge
+                game.sePlay(@lille_stop_se)
                 @left_lille.isRotation = false
                 @saveLeftSlotEye()
                 @setIntervalFrame()
             if @age is @stopStartAge + @stopIntervalFrame + @slotIntervalFrameRandom
+                game.sePlay(@lille_stop_se)
                 @middle_lille.isRotation = false
                 @forceHit(@middle_lille)
                 @setIntervalFrame()
             if @age is @stopStartAge + @stopIntervalFrame * 2 + @slotIntervalFrameRandom
+                game.sePlay(@lille_stop_se)
                 @right_lille.isRotation = false
                 @forceHit(@right_lille)
                 @isStopping = false
@@ -293,6 +325,7 @@ class gpSlot extends appGroup
     ###
     slotHitTest: () ->
         if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
+            game.sePlay(@slot_hit_se)
             hit_eye = @left_lille.lilleArray[@left_lille.nowEye]
             prize_money = @_calcPrizeMoney()
             game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
@@ -308,6 +341,7 @@ class gpSlot extends appGroup
     ###
     _feverStart:(hit_eye)->
         if hit_eye > 10 && game.fever is false
+            game.bgmPlay(@fever_bgm, false)
             game.fever = true
             game.slot_setting.setMuseMember()
             game.musePreLoad()
@@ -727,6 +761,10 @@ class gpSystem extends appGroup
             if @keyList['down'] is true
                 @keyList['down'] = false
 
+    ###
+    掛け金の変更
+    TODO フィーバー中は変更できないようにする
+    ###
     _getBetSettingValue:(up)->
         val = 1
         bet = game.bet
@@ -862,7 +900,7 @@ class Debug extends appNode
         @force_insert_muse = false
         #デバッグ用リール配列
         @lille_array = [
-            [15],
+            [15, 16],
             [15],
             [15]
         ]
@@ -961,7 +999,7 @@ class slotSetting extends appNode
                 'bgm':[
                     {'name':'', 'time':30}
                 ],
-                'voice':[]
+                'voice':['15_0', '15_1']
             },
             16:{
                 'cut_in':[
@@ -1044,7 +1082,7 @@ class slotSetting extends appNode
                 remain.push(full[key])
         random = Math.floor(Math.random() * remain.length)
         member = remain[random]
-        #member = 19
+        #member = 15
         @now_muse_num = member
         if @prev_muse.indexOf(member) is -1
             @prev_muse.push(member)
@@ -1280,6 +1318,7 @@ class cutIn extends effect
         cut_in_list = setting.muse_material_list[muse_num]['cut_in']
         cut_in_random = Math.floor(Math.random() * cut_in_list.length)
         @cut_in = cut_in_list[cut_in_random]
+        @voices = setting.muse_material_list[muse_num]['voice']
 
     _setInit:()->
         @image = game.imageload('cut_in/'+@cut_in['name'])
@@ -1289,10 +1328,11 @@ class cutIn extends effect
             @x = -@w
         @y = game.height - @h
         @vx = @_setVxFast()
-        game.main_scene.gp_stage_front.setItemFallFrm(7)
+        game.main_scene.gp_stage_front.setItemFallFrm(6)
         @set_age = @age
         @fast = 0.5 * game.fps
         @slow = 2 * game.fps + @fast
+        @voice = @_setVoice()
 
     _setVxFast:()->
         val = Math.round(((game.width + @w) / 2) / (0.5 * game.fps))
@@ -1301,10 +1341,20 @@ class cutIn extends effect
         return val
 
     _setVxSlow:()->
+        if @voice != false
+            game.sePlay(@voice)
         val = Math.round((game.width / 4) / (2 * game.fps))
         if @cut_in['direction'] is 'left'
             val *= -1
         return val
+
+    _setVoice:()->
+        if @voices.length > 0
+            random = Math.floor(Math.random() * @voices.length)
+            voice = game.soundload('voice/'+@voices[random])
+        else
+            voice = game.soundload('clear')
+        return voice
 class appObject extends appSprite
     ###
     制約
@@ -1319,6 +1369,7 @@ class Character extends appObject
         super w, h
         # キャラクターの動作を操作するフラグ
         @moveFlg = {'left':false, 'right':false, 'jump':false}
+        @jump_se = game.soundload('jump')
         @isAir = true; #空中判定
         @vx = 0 #x軸速度
         @vy = 0 #y軸速度
@@ -1349,9 +1400,12 @@ class Character extends appObject
     _separateFloor:()->
         vy = 0
         if @moveFlg.jump is true
+            @jumpSound()
             vy -= @my
             @isAir = true
         return vy
+
+    jumpSound:()->
 
     ###
     地面にいるときの横向きの速度を決める
@@ -1546,6 +1600,9 @@ class Player extends Character
             flg = false
         return flg
 
+    jumpSound:()->
+        game.sePlay(@jump_se)
+
 class Bear extends Player
     constructor: () ->
         super 90, 87
@@ -1563,6 +1620,7 @@ class Item extends appObject
 class Catch extends Item
     constructor: (w, h) ->
         super w, h
+        @miss_se = game.soundload('cancel')
     onenterframe: (e) ->
         @vy += @gravity
         @y += @vy
@@ -1584,6 +1642,7 @@ class Catch extends Item
     ###
     removeOnFloor:()->
         if @y > game.height + @h
+            game.sePlay(@miss_se)
             game.main_scene.gp_stage_front.removeChild(@)
             game.combo = 0
             game.main_scene.gp_system.combo_text.setValue()
@@ -1629,6 +1688,7 @@ class OnionCatch extends Catch
         @scaleY = 1.5
     hitPlayer:()->
         if game.main_scene.gp_stage_front.player.intersect(@)
+            game.sePlay(@miss_se)
             game.main_scene.gp_stage_front.removeChild(@)
             game.tensionSetValueMissItemCatch()
     removeOnFloor:()->
@@ -1651,6 +1711,7 @@ class Money extends Item
         @price = 1 #単価
         @gravity = 0.5
         @image = game.imageload("coin")
+        @catch_se = game.soundload("medal")
         @isHoming = isHoming
         @_setGravity()
 
@@ -1671,6 +1732,7 @@ class Money extends Item
     ###
     hitPlayer:()->
         if game.main_scene.gp_stage_front.player.intersect(@)
+            game.sePlay(@catch_se)
             game.main_scene.gp_stage_back.removeChild(@)
             game.money += @price
             game.main_scene.gp_system.money_text.setValue()
@@ -1803,12 +1865,14 @@ class Lille extends Slot
     constructor: (w, h) ->
         super 110, 110
         @image = game.imageload("lille")
+        @lotate_se = game.soundload('select')
         @lilleArray = [] #リールの並び
         @isRotation = false #trueならリールが回転中
         @nowEye = 0 #リールの現在の目
     onenterframe: (e) ->
         if @isRotation is true
             @eyeIncriment()
+            @soundLotateSe()
     ###
     回転中にリールの目を１つ進める
     ###
@@ -1817,6 +1881,8 @@ class Lille extends Slot
         if @lilleArray[@nowEye] is undefined
             @nowEye = 0
         @frameChange()
+
+    soundLotateSe:()->
 
     frameChange:()->
         @frame = @lilleArray[@nowEye]
@@ -1851,6 +1917,9 @@ class RightLille extends Lille
         @lilleArray = game.slot_setting.lille_array_0[2]
         @eyeInit()
         @x = 274
+    soundLotateSe:()->
+        if @age % 2 is 0
+            game.sePlay(@lotate_se)
 class System extends appSprite
     constructor: (w, h) ->
         super w, h

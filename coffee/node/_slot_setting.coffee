@@ -78,7 +78,7 @@ class slotSetting extends appNode
                 'bgm':[
                     {'name':'', 'time':30}
                 ],
-                'voice':[]
+                'voice':['15_0', '15_1']
             },
             16:{
                 'cut_in':[
@@ -161,7 +161,7 @@ class slotSetting extends appNode
                 remain.push(full[key])
         random = Math.floor(Math.random() * remain.length)
         member = remain[random]
-        #member = 19
+        #member = 15
         @now_muse_num = member
         if @prev_muse.indexOf(member) is -1
             @prev_muse.push(member)

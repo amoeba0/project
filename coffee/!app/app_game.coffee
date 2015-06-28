@@ -18,6 +18,27 @@ class appGame extends Game
         return @assets["sounds/"+sound+".mp3"]
 
     ###
+    効果音を鳴らす
+    ###
+    sePlay:(se)->
+        se.clone().play()
+
+    ###
+    BGMをならす
+    ###
+    bgmPlay:(bgm, bgm_loop)->
+        bgm.play()
+        if bgm_loop is true
+            bgm._element.loop = true
+            #bgm.src.loop = true
+
+    ###
+    BGMを止める
+    ###
+    bgmStop:(bgm)->
+        bgm.stop()
+
+    ###
         素材をすべて読み込む
     ###
     preloadAll:()->

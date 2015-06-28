@@ -11,6 +11,7 @@ class Money extends Item
         @price = 1 #単価
         @gravity = 0.5
         @image = game.imageload("coin")
+        @catch_se = game.soundload("medal")
         @isHoming = isHoming
         @_setGravity()
 
@@ -31,6 +32,7 @@ class Money extends Item
     ###
     hitPlayer:()->
         if game.main_scene.gp_stage_front.player.intersect(@)
+            game.sePlay(@catch_se)
             game.main_scene.gp_stage_back.removeChild(@)
             game.money += @price
             game.main_scene.gp_system.money_text.setValue()

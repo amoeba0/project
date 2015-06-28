@@ -13,7 +13,7 @@ class LoveliveGame extends catchAndSlotGame
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin']
         #音声リスト
-        @sondList = []
+        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'zenkai_no_lovelive']
         #キーのリスト、物理キーとソフトキー両方に対応
         @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false}
         @keybind(90, 'z')
@@ -43,8 +43,12 @@ class LoveliveGame extends catchAndSlotGame
     musePreLoad:()->
         muse_num = @slot_setting.now_muse_num
         if @slot_setting.muse_material_list[muse_num] != undefined
-            for key, val of @slot_setting.muse_material_list[muse_num]['cut_in']
+            material = @slot_setting.muse_material_list[muse_num]
+            for key, val of material['cut_in']
                 @load('images/cut_in/'+val.name + '.png')
+            if material['voice'].length > 0
+                for key, val of material['voice']
+                    @load('sounds/voice/'+val+'.mp3')
 
     ###
     ゲーム開始時の初期数値調整
@@ -135,6 +139,7 @@ class LoveliveGame extends catchAndSlotGame
         if @fever is true
             @_tensionSetValue(@fever_down_tension)
             if @tension <= 0
+                @bgmStop(@main_scene.gp_slot.fever_bgm)
                 @fever = false
 
     ###

@@ -4,6 +4,7 @@
 class Catch extends Item
     constructor: (w, h) ->
         super w, h
+        @miss_se = game.soundload('cancel')
     onenterframe: (e) ->
         @vy += @gravity
         @y += @vy
@@ -25,6 +26,7 @@ class Catch extends Item
     ###
     removeOnFloor:()->
         if @y > game.height + @h
+            game.sePlay(@miss_se)
             game.main_scene.gp_stage_front.removeChild(@)
             game.combo = 0
             game.main_scene.gp_system.combo_text.setValue()
@@ -70,6 +72,7 @@ class OnionCatch extends Catch
         @scaleY = 1.5
     hitPlayer:()->
         if game.main_scene.gp_stage_front.player.intersect(@)
+            game.sePlay(@miss_se)
             game.main_scene.gp_stage_front.removeChild(@)
             game.tensionSetValueMissItemCatch()
     removeOnFloor:()->

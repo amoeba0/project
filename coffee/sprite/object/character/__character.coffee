@@ -3,6 +3,7 @@ class Character extends appObject
         super w, h
         # キャラクターの動作を操作するフラグ
         @moveFlg = {'left':false, 'right':false, 'jump':false}
+        @jump_se = game.soundload('jump')
         @isAir = true; #空中判定
         @vx = 0 #x軸速度
         @vy = 0 #y軸速度
@@ -33,9 +34,12 @@ class Character extends appObject
     _separateFloor:()->
         vy = 0
         if @moveFlg.jump is true
+            @jumpSound()
             vy -= @my
             @isAir = true
         return vy
+
+    jumpSound:()->
 
     ###
     地面にいるときの横向きの速度を決める

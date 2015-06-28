@@ -58,6 +58,9 @@ class Player extends Character
             flg = false
         return flg
 
+    jumpSound:()->
+        game.sePlay(@jump_se)
+
 class Bear extends Player
     constructor: () ->
         super 90, 87

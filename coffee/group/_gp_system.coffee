@@ -35,6 +35,10 @@ class gpSystem extends appGroup
             if @keyList['down'] is true
                 @keyList['down'] = false
 
+    ###
+    掛け金の変更
+    TODO フィーバー中は変更できないようにする
+    ###
     _getBetSettingValue:(up)->
         val = 1
         bet = game.bet

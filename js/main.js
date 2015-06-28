@@ -39,6 +39,36 @@ appGame = (function(_super) {
 
 
   /*
+  効果音を鳴らす
+   */
+
+  appGame.prototype.sePlay = function(se) {
+    return se.clone().play();
+  };
+
+
+  /*
+  BGMをならす
+   */
+
+  appGame.prototype.bgmPlay = function(bgm, bgm_loop) {
+    bgm.play();
+    if (bgm_loop === true) {
+      return bgm._element.loop = true;
+    }
+  };
+
+
+  /*
+  BGMを止める
+   */
+
+  appGame.prototype.bgmStop = function(bgm) {
+    return bgm.stop();
+  };
+
+
+  /*
       素材をすべて読み込む
    */
 
@@ -162,7 +192,7 @@ LoveliveGame = (function(_super) {
     this.height = 960;
     this.fps = 24;
     this.imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin'];
-    this.sondList = [];
+    this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'zenkai_no_lovelive'];
     this.keyList = {
       'left': false,
       'right': false,
@@ -196,16 +226,24 @@ LoveliveGame = (function(_super) {
    */
 
   LoveliveGame.prototype.musePreLoad = function() {
-    var key, muse_num, val, _ref, _results;
+    var key, material, muse_num, val, _ref, _ref1, _results;
     muse_num = this.slot_setting.now_muse_num;
     if (this.slot_setting.muse_material_list[muse_num] !== void 0) {
-      _ref = this.slot_setting.muse_material_list[muse_num]['cut_in'];
-      _results = [];
+      material = this.slot_setting.muse_material_list[muse_num];
+      _ref = material['cut_in'];
       for (key in _ref) {
         val = _ref[key];
-        _results.push(this.load('images/cut_in/' + val.name + '.png'));
+        this.load('images/cut_in/' + val.name + '.png');
       }
-      return _results;
+      if (material['voice'].length > 0) {
+        _ref1 = material['voice'];
+        _results = [];
+        for (key in _ref1) {
+          val = _ref1[key];
+          _results.push(this.load('sounds/voice/' + val + '.mp3'));
+        }
+        return _results;
+      }
     }
   };
 
@@ -334,6 +372,7 @@ LoveliveGame = (function(_super) {
     if (this.fever === true) {
       this._tensionSetValue(this.fever_down_tension);
       if (this.tension <= 0) {
+        this.bgmStop(this.main_scene.gp_slot.fever_bgm);
         return this.fever = false;
       }
     }
@@ -399,6 +438,9 @@ gpSlot = (function(_super) {
     gpSlot.__super__.constructor.apply(this, arguments);
     this.underFrame = new UnderFrame();
     this.addChild(this.underFrame);
+    this.lille_stop_se = game.soundload('dicision');
+    this.slot_hit_se = game.soundload('start');
+    this.fever_bgm = game.soundload('zenkai_no_lovelive');
     this.isStopping = false;
     this.stopIntervalFrame = 9;
     this.slotIntervalFrameRandom = 0;
@@ -421,16 +463,19 @@ gpSlot = (function(_super) {
   gpSlot.prototype.slotStopping = function() {
     if (this.isStopping === true) {
       if (this.age === this.stopStartAge) {
+        game.sePlay(this.lille_stop_se);
         this.left_lille.isRotation = false;
         this.saveLeftSlotEye();
         this.setIntervalFrame();
       }
       if (this.age === this.stopStartAge + this.stopIntervalFrame + this.slotIntervalFrameRandom) {
+        game.sePlay(this.lille_stop_se);
         this.middle_lille.isRotation = false;
         this.forceHit(this.middle_lille);
         this.setIntervalFrame();
       }
       if (this.age === this.stopStartAge + this.stopIntervalFrame * 2 + this.slotIntervalFrameRandom) {
+        game.sePlay(this.lille_stop_se);
         this.right_lille.isRotation = false;
         this.forceHit(this.right_lille);
         this.isStopping = false;
@@ -485,6 +530,7 @@ gpSlot = (function(_super) {
   gpSlot.prototype.slotHitTest = function() {
     var hit_eye, member, prize_money, _ref;
     if ((this.left_lille.lilleArray[this.left_lille.nowEye] === (_ref = this.middle_lille.lilleArray[this.middle_lille.nowEye]) && _ref === this.right_lille.lilleArray[this.right_lille.nowEye])) {
+      game.sePlay(this.slot_hit_se);
       hit_eye = this.left_lille.lilleArray[this.left_lille.nowEye];
       prize_money = this._calcPrizeMoney();
       game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money);
@@ -505,6 +551,7 @@ gpSlot = (function(_super) {
 
   gpSlot.prototype._feverStart = function(hit_eye) {
     if (hit_eye > 10 && game.fever === false) {
+      game.bgmPlay(this.fever_bgm, false);
       game.fever = true;
       game.slot_setting.setMuseMember();
       game.musePreLoad();
@@ -1130,6 +1177,12 @@ gpSystem = (function(_super) {
     }
   };
 
+
+  /*
+  掛け金の変更
+  TODO フィーバー中は変更できないようにする
+   */
+
   gpSystem.prototype._getBetSettingValue = function(up) {
     var bet, val;
     val = 1;
@@ -1321,7 +1374,7 @@ Debug = (function(_super) {
     this.fix_tention_item_fall_flg = false;
     this.fix_tention_slot_hit_flg = false;
     this.force_insert_muse = false;
-    this.lille_array = [[15], [15], [15]];
+    this.lille_array = [[15, 16], [15], [15]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -50;
     this.fix_tention_slot_hit_flg = 200;
@@ -1469,7 +1522,7 @@ slotSetting = (function(_super) {
             'time': 30
           }
         ],
-        'voice': []
+        'voice': ['15_0', '15_1']
       },
       16: {
         'cut_in': [
@@ -1965,7 +2018,8 @@ cutIn = (function(_super) {
     muse_num = setting.now_muse_num;
     cut_in_list = setting.muse_material_list[muse_num]['cut_in'];
     cut_in_random = Math.floor(Math.random() * cut_in_list.length);
-    return this.cut_in = cut_in_list[cut_in_random];
+    this.cut_in = cut_in_list[cut_in_random];
+    return this.voices = setting.muse_material_list[muse_num]['voice'];
   };
 
   cutIn.prototype._setInit = function() {
@@ -1977,10 +2031,11 @@ cutIn = (function(_super) {
     }
     this.y = game.height - this.h;
     this.vx = this._setVxFast();
-    game.main_scene.gp_stage_front.setItemFallFrm(7);
+    game.main_scene.gp_stage_front.setItemFallFrm(6);
     this.set_age = this.age;
     this.fast = 0.5 * game.fps;
-    return this.slow = 2 * game.fps + this.fast;
+    this.slow = 2 * game.fps + this.fast;
+    return this.voice = this._setVoice();
   };
 
   cutIn.prototype._setVxFast = function() {
@@ -1994,11 +2049,25 @@ cutIn = (function(_super) {
 
   cutIn.prototype._setVxSlow = function() {
     var val;
+    if (this.voice !== false) {
+      game.sePlay(this.voice);
+    }
     val = Math.round((game.width / 4) / (2 * game.fps));
     if (this.cut_in['direction'] === 'left') {
       val *= -1;
     }
     return val;
+  };
+
+  cutIn.prototype._setVoice = function() {
+    var random, voice;
+    if (this.voices.length > 0) {
+      random = Math.floor(Math.random() * this.voices.length);
+      voice = game.soundload('voice/' + this.voices[random]);
+    } else {
+      voice = game.soundload('clear');
+    }
+    return voice;
   };
 
   return cutIn;
@@ -2034,6 +2103,7 @@ Character = (function(_super) {
       'right': false,
       'jump': false
     };
+    this.jump_se = game.soundload('jump');
     this.isAir = true;
     this.vx = 0;
     this.vy = 0;
@@ -2075,11 +2145,14 @@ Character = (function(_super) {
     var vy;
     vy = 0;
     if (this.moveFlg.jump === true) {
+      this.jumpSound();
       vy -= this.my;
       this.isAir = true;
     }
     return vy;
   };
+
+  Character.prototype.jumpSound = function() {};
 
 
   /*
@@ -2364,6 +2437,10 @@ Player = (function(_super) {
     return flg;
   };
 
+  Player.prototype.jumpSound = function() {
+    return game.sePlay(this.jump_se);
+  };
+
   return Player;
 
 })(Character);
@@ -2405,6 +2482,7 @@ Catch = (function(_super) {
 
   function Catch(w, h) {
     Catch.__super__.constructor.call(this, w, h);
+    this.miss_se = game.soundload('cancel');
   }
 
   Catch.prototype.onenterframe = function(e) {
@@ -2436,6 +2514,7 @@ Catch = (function(_super) {
 
   Catch.prototype.removeOnFloor = function() {
     if (this.y > game.height + this.h) {
+      game.sePlay(this.miss_se);
       game.main_scene.gp_stage_front.removeChild(this);
       game.combo = 0;
       game.main_scene.gp_system.combo_text.setValue();
@@ -2508,6 +2587,7 @@ OnionCatch = (function(_super) {
 
   OnionCatch.prototype.hitPlayer = function() {
     if (game.main_scene.gp_stage_front.player.intersect(this)) {
+      game.sePlay(this.miss_se);
       game.main_scene.gp_stage_front.removeChild(this);
       return game.tensionSetValueMissItemCatch();
     }
@@ -2546,6 +2626,7 @@ Money = (function(_super) {
     this.price = 1;
     this.gravity = 0.5;
     this.image = game.imageload("coin");
+    this.catch_se = game.soundload("medal");
     this.isHoming = isHoming;
     this._setGravity();
   }
@@ -2573,6 +2654,7 @@ Money = (function(_super) {
 
   Money.prototype.hitPlayer = function() {
     if (game.main_scene.gp_stage_front.player.intersect(this)) {
+      game.sePlay(this.catch_se);
       game.main_scene.gp_stage_back.removeChild(this);
       game.money += this.price;
       return game.main_scene.gp_system.money_text.setValue();
@@ -2808,6 +2890,7 @@ Lille = (function(_super) {
   function Lille(w, h) {
     Lille.__super__.constructor.call(this, 110, 110);
     this.image = game.imageload("lille");
+    this.lotate_se = game.soundload('select');
     this.lilleArray = [];
     this.isRotation = false;
     this.nowEye = 0;
@@ -2815,7 +2898,8 @@ Lille = (function(_super) {
 
   Lille.prototype.onenterframe = function(e) {
     if (this.isRotation === true) {
-      return this.eyeIncriment();
+      this.eyeIncriment();
+      return this.soundLotateSe();
     }
   };
 
@@ -2831,6 +2915,8 @@ Lille = (function(_super) {
     }
     return this.frameChange();
   };
+
+  Lille.prototype.soundLotateSe = function() {};
 
   Lille.prototype.frameChange = function() {
     return this.frame = this.lilleArray[this.nowEye];
@@ -2891,6 +2977,12 @@ RightLille = (function(_super) {
     this.eyeInit();
     this.x = 274;
   }
+
+  RightLille.prototype.soundLotateSe = function() {
+    if (this.age % 2 === 0) {
+      return game.sePlay(this.lotate_se);
+    }
+  };
 
   return RightLille;
 

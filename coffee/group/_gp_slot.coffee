@@ -3,6 +3,9 @@ class gpSlot extends appGroup
         super
         @underFrame = new UnderFrame()
         @addChild(@underFrame)
+        @lille_stop_se = game.soundload('dicision')
+        @slot_hit_se = game.soundload('start')
+        @fever_bgm = game.soundload('zenkai_no_lovelive')
         @isStopping = false #スロット停止中
         @stopIntervalFrame = 9 #スロットが連続で止まる間隔（フレーム）
         @slotIntervalFrameRandom = 0
@@ -20,14 +23,17 @@ class gpSlot extends appGroup
     slotStopping: ()->
         if @isStopping is true
             if @age is @stopStartAge
+                game.sePlay(@lille_stop_se)
                 @left_lille.isRotation = false
                 @saveLeftSlotEye()
                 @setIntervalFrame()
             if @age is @stopStartAge + @stopIntervalFrame + @slotIntervalFrameRandom
+                game.sePlay(@lille_stop_se)
                 @middle_lille.isRotation = false
                 @forceHit(@middle_lille)
                 @setIntervalFrame()
             if @age is @stopStartAge + @stopIntervalFrame * 2 + @slotIntervalFrameRandom
+                game.sePlay(@lille_stop_se)
                 @right_lille.isRotation = false
                 @forceHit(@right_lille)
                 @isStopping = false
@@ -62,6 +68,7 @@ class gpSlot extends appGroup
     ###
     slotHitTest: () ->
         if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
+            game.sePlay(@slot_hit_se)
             hit_eye = @left_lille.lilleArray[@left_lille.nowEye]
             prize_money = @_calcPrizeMoney()
             game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
@@ -77,6 +84,7 @@ class gpSlot extends appGroup
     ###
     _feverStart:(hit_eye)->
         if hit_eye > 10 && game.fever is false
+            game.bgmPlay(@fever_bgm, false)
             game.fever = true
             game.slot_setting.setMuseMember()
             game.musePreLoad()
