@@ -7,21 +7,21 @@ class Player extends Character
     ###キーを押した時の動作###
     keyMove:()->
         # 左
-        if game.keyList.left is true
+        if game.main_scene.keyList.left is true
             if @moveFlg.left is false
                 @moveFlg.left = true
         else
             if @moveFlg.left is true
                 @moveFlg.left = false
         # 右
-        if game.keyList.right is true
+        if game.main_scene.keyList.right is true
             if @moveFlg.right is false
                 @moveFlg.right = true
         else
             if @moveFlg.right is true
                 @moveFlg.right = false
         # ジャンプ
-        if game.keyList.jump is true
+        if game.main_scene.keyList.jump is true
             if @moveFlg.jump is false
                 @moveFlg.jump = true
         else

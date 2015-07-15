@@ -2,6 +2,7 @@ class appGame extends Game
     constructor:(w, h)->
         super w, h
         #ミュート（消音）フラグ
+        @scale = 1
         @mute = false
         @imgList = []
         @soundList = []

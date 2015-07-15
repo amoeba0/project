@@ -7,6 +7,7 @@ class appGame extends Game
     constructor:(w, h)->
         super w, h
         #ミュート（消音）フラグ
+        @scale = 1
         @mute = false
         @imgList = []
         @soundList = []
@@ -98,12 +99,12 @@ class LoveliveGame extends catchAndSlotGame
         @width = 640
         @height = 960
         @fps = 24
+        @scale = 0.7
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'zenkai_no_lovelive']
-        #キーのリスト、物理キーとソフトキー両方に対応
-        @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false}
+
         @keybind(90, 'z')
         @preloadAll()
         #一人目のμ’ｓメンバーを決めて素材をロードする
@@ -124,6 +125,7 @@ class LoveliveGame extends catchAndSlotGame
         @gameInit()
         @main_scene = new mainScene()
         @pushScene(@main_scene)
+        @pause_scene = new pauseScene()
 
     ###
     スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
@@ -144,53 +146,11 @@ class LoveliveGame extends catchAndSlotGame
     gameInit:() ->
         @money = @money_init
 
-    onenterframe: (e) ->
-        @buttonPush()
-        @tensionSetValueFever()
-
-    ###ボタン操作、物理キーとソフトキー両方に対応###
-    buttonPush:()->
-        # 左
-        if @input.left is true
-            if @keyList.left is false
-                @keyList.left = true
-        else
-            if @keyList.left is true
-                @keyList.left = false
-        # 右
-        if @input.right is true
-            if @keyList.right is false
-                @keyList.right = true
-        else
-            if @keyList.right is true
-                @keyList.right = false
-        # 上
-        if @input.up is true
-            if @keyList.up is false
-                @keyList.up = true
-        else
-            if @keyList.up is true
-                @keyList.up = false
-        # 下
-        if @input.down is true
-            if @keyList.down is false
-                @keyList.down = true
-        else
-            if @keyList.down is true
-                @keyList.down = false
-        # ジャンプ
-        if @input.z is true
-            if @keyList.jump is false
-                @keyList.jump = true
-        else
-            if @keyList.jump is true
-                @keyList.jump = false
-
     ###
     テンションゲージを増減する
     @param number val 増減値
     ###
-    _tensionSetValue:(val)->
+    tensionSetValue:(val)->
         @slot_setting.changeLilleForTension(@tension, val)
         @tension += val
         if @tension < 0
@@ -204,31 +164,20 @@ class LoveliveGame extends catchAndSlotGame
     ###
     tensionSetValueItemCatch:()->
         val = @slot_setting.setTensionItemCatch()
-        @_tensionSetValue(val)
+        @tensionSetValue(val)
     ###
     アイテムを落とした時にテンションゲージを増減する
     ###
     tensionSetValueItemFall:()->
         val = @slot_setting.setTensionItemFall()
-        @_tensionSetValue(val)
+        @tensionSetValue(val)
 
     ###
     はずれのアイテムを取った時にテンションゲージを増減する
     ###
     tensionSetValueMissItemCatch:()->
         val = @slot_setting.setTensionItemFall()
-        @_tensionSetValue(val)
-
-    ###
-    フィーバー中に一定時間でテンションが下がる
-    テンションが0になったらフィーバーを解く
-    ###
-    tensionSetValueFever:()->
-        if @fever is true
-            @_tensionSetValue(@fever_down_tension)
-            if @tension <= 0
-                @bgmStop(@main_scene.gp_slot.fever_bgm)
-                @fever = false
+        @tensionSetValue(val)
 
     ###
     スロットが当たった時にテンションゲージを増減する
@@ -237,7 +186,7 @@ class LoveliveGame extends catchAndSlotGame
     ###
     tensionSetValueSlotHit:(prize_money, hit_eye)->
         val = @slot_setting.setTensionSlotHit(prize_money, hit_eye)
-        @_tensionSetValue(val)
+        @tensionSetValue(val)
 
 class gpEffect extends appGroup
     constructor: () ->
@@ -739,6 +688,8 @@ class gpSystem extends appGroup
         @addChild(@tension_gauge_back)
         @tension_gauge = new TensionGauge()
         @addChild(@tension_gauge)
+        @pause_button = new pauseButton()
+        @addChild(@pause_button)
         @keyList = {'up':false, 'down':false}
     onenterframe: (e) ->
         @_betSetting()
@@ -746,14 +697,14 @@ class gpSystem extends appGroup
     キーの上下を押して掛け金を設定する
     ###
     _betSetting: ()->
-        if game.keyList['up'] is true
+        if game.main_scene.keyList['up'] is true
             if @keyList['up'] is false
                 @_getBetSettingValue(true)
                 @keyList['up'] = true
         else
             if @keyList['up'] is true
                 @keyList['up'] = false
-        if game.keyList['down'] is true
+        if game.main_scene.keyList['down'] is true
             if @keyList['down'] is false
                 @_getBetSettingValue(false)
                 @keyList['down'] = true
@@ -1249,6 +1200,8 @@ class mainScene extends appScene
     constructor:()->
         super
         @backgroundColor = '#93F0FF'
+        #キーのリスト、物理キーとソフトキー両方に対応
+        @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false}
         @initial()
     initial:()->
         @setGroup()
@@ -1267,6 +1220,59 @@ class mainScene extends appScene
         @addChild(@gp_system)
         @gp_slot.x = 150
         @gp_slot.y = 200
+    onenterframe: (e) ->
+        @buttonPush()
+        @tensionSetValueFever()
+    ###ボタン操作、物理キーとソフトキー両方に対応###
+    buttonPush:()->
+        # 左
+        if game.input.left is true
+            if @keyList.left is false
+                @keyList.left = true
+        else
+            if @keyList.left is true
+                @keyList.left = false
+        # 右
+        if game.input.right is true
+            if @keyList.right is false
+                @keyList.right = true
+        else
+            if @keyList.right is true
+                @keyList.right = false
+        # 上
+        if game.input.up is true
+            if @keyList.up is false
+                @keyList.up = true
+        else
+            if @keyList.up is true
+                @keyList.up = false
+        # 下
+        if game.input.down is true
+            if @keyList.down is false
+                @keyList.down = true
+        else
+            if @keyList.down is true
+                @keyList.down = false
+        # ジャンプ
+        if game.input.z is true
+            if @keyList.jump is false
+                @keyList.jump = true
+        else
+            if @keyList.jump is true
+                @keyList.jump = false
+    ###
+    フィーバー中に一定時間でテンションが下がる
+    テンションが0になったらフィーバーを解く
+    ###
+    tensionSetValueFever:()->
+        if game.fever is true
+            game.tensionSetValue(@fever_down_tension)
+            if game.tension <= 0
+                game.bgmStop(@main_scene.gp_slot.fever_bgm)
+                game.fever = false
+class pauseScene extends appScene
+    constructor: () ->
+        super
 class titleScene extends appScene
     constructor: () ->
         super
@@ -1549,21 +1555,21 @@ class Player extends Character
     ###キーを押した時の動作###
     keyMove:()->
         # 左
-        if game.keyList.left is true
+        if game.main_scene.keyList.left is true
             if @moveFlg.left is false
                 @moveFlg.left = true
         else
             if @moveFlg.left is true
                 @moveFlg.left = false
         # 右
-        if game.keyList.right is true
+        if game.main_scene.keyList.right is true
             if @moveFlg.right is false
                 @moveFlg.right = true
         else
             if @moveFlg.right is true
                 @moveFlg.right = false
         # ジャンプ
-        if game.keyList.jump is true
+        if game.main_scene.keyList.jump is true
             if @moveFlg.jump is false
                 @moveFlg.jump = true
         else
@@ -1923,18 +1929,29 @@ class RightLille extends Lille
 class System extends appSprite
     constructor: (w, h) ->
         super w, h
-class Button extends System
-    constructor: (w, h) ->
-        super w, h
-class Param extends System
-    constructor: (w, h) ->
-        super w, h
     drawRect: (color) ->
         surface = new Surface(@w, @h)
         surface.context.fillStyle = color
         surface.context.fillRect(0, 0, @w, @h, 10)
         surface.context.fill()
         return surface
+class Button extends System
+    constructor: (w, h) ->
+        super w, h
+class pauseButton extends Button
+    constructor: () ->
+        super 40, 40
+        @image = @drawRect('#F9DFD5')
+        @x = 580
+        @y = 120
+    ontouchend: (e)->
+        game.pushScene(game.pause_scene)
+class Dialog extends System
+    constructor: (w, h) ->
+        super w, h
+class Param extends System
+    constructor: (w, h) ->
+        super w, h
 
 class TensionGaugeBack extends Param
     constructor: (w, h) ->

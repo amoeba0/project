@@ -13,6 +13,8 @@ class gpSystem extends appGroup
         @addChild(@tension_gauge_back)
         @tension_gauge = new TensionGauge()
         @addChild(@tension_gauge)
+        @pause_button = new pauseButton()
+        @addChild(@pause_button)
         @keyList = {'up':false, 'down':false}
     onenterframe: (e) ->
         @_betSetting()
@@ -20,14 +22,14 @@ class gpSystem extends appGroup
     キーの上下を押して掛け金を設定する
     ###
     _betSetting: ()->
-        if game.keyList['up'] is true
+        if game.main_scene.keyList['up'] is true
             if @keyList['up'] is false
                 @_getBetSettingValue(true)
                 @keyList['up'] = true
         else
             if @keyList['up'] is true
                 @keyList['up'] = false
-        if game.keyList['down'] is true
+        if game.main_scene.keyList['down'] is true
             if @keyList['down'] is false
                 @_getBetSettingValue(false)
                 @keyList['down'] = true

@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, comboText, comboUnitText, cutIn, effect, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, slotSetting, stageBack, stageFront, text, titleScene,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, comboText, comboUnitText, cutIn, effect, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, pauseButton, pauseScene, slotSetting, stageBack, stageFront, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -14,6 +14,7 @@ appGame = (function(_super) {
 
   function appGame(w, h) {
     appGame.__super__.constructor.call(this, w, h);
+    this.scale = 1;
     this.mute = false;
     this.imgList = [];
     this.soundList = [];
@@ -191,15 +192,9 @@ LoveliveGame = (function(_super) {
     this.width = 640;
     this.height = 960;
     this.fps = 24;
+    this.scale = 0.7;
     this.imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin'];
     this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'zenkai_no_lovelive'];
-    this.keyList = {
-      'left': false,
-      'right': false,
-      'jump': false,
-      'up': false,
-      'down': false
-    };
     this.keybind(90, 'z');
     this.preloadAll();
     this.slot_setting.setMuseMember();
@@ -217,7 +212,8 @@ LoveliveGame = (function(_super) {
   LoveliveGame.prototype.onload = function() {
     this.gameInit();
     this.main_scene = new mainScene();
-    return this.pushScene(this.main_scene);
+    this.pushScene(this.main_scene);
+    return this.pause_scene = new pauseScene();
   };
 
 
@@ -256,69 +252,13 @@ LoveliveGame = (function(_super) {
     return this.money = this.money_init;
   };
 
-  LoveliveGame.prototype.onenterframe = function(e) {
-    this.buttonPush();
-    return this.tensionSetValueFever();
-  };
-
-
-  /*ボタン操作、物理キーとソフトキー両方に対応 */
-
-  LoveliveGame.prototype.buttonPush = function() {
-    if (this.input.left === true) {
-      if (this.keyList.left === false) {
-        this.keyList.left = true;
-      }
-    } else {
-      if (this.keyList.left === true) {
-        this.keyList.left = false;
-      }
-    }
-    if (this.input.right === true) {
-      if (this.keyList.right === false) {
-        this.keyList.right = true;
-      }
-    } else {
-      if (this.keyList.right === true) {
-        this.keyList.right = false;
-      }
-    }
-    if (this.input.up === true) {
-      if (this.keyList.up === false) {
-        this.keyList.up = true;
-      }
-    } else {
-      if (this.keyList.up === true) {
-        this.keyList.up = false;
-      }
-    }
-    if (this.input.down === true) {
-      if (this.keyList.down === false) {
-        this.keyList.down = true;
-      }
-    } else {
-      if (this.keyList.down === true) {
-        this.keyList.down = false;
-      }
-    }
-    if (this.input.z === true) {
-      if (this.keyList.jump === false) {
-        return this.keyList.jump = true;
-      }
-    } else {
-      if (this.keyList.jump === true) {
-        return this.keyList.jump = false;
-      }
-    }
-  };
-
 
   /*
   テンションゲージを増減する
   @param number val 増減値
    */
 
-  LoveliveGame.prototype._tensionSetValue = function(val) {
+  LoveliveGame.prototype.tensionSetValue = function(val) {
     this.slot_setting.changeLilleForTension(this.tension, val);
     this.tension += val;
     if (this.tension < 0) {
@@ -337,7 +277,7 @@ LoveliveGame = (function(_super) {
   LoveliveGame.prototype.tensionSetValueItemCatch = function() {
     var val;
     val = this.slot_setting.setTensionItemCatch();
-    return this._tensionSetValue(val);
+    return this.tensionSetValue(val);
   };
 
 
@@ -348,7 +288,7 @@ LoveliveGame = (function(_super) {
   LoveliveGame.prototype.tensionSetValueItemFall = function() {
     var val;
     val = this.slot_setting.setTensionItemFall();
-    return this._tensionSetValue(val);
+    return this.tensionSetValue(val);
   };
 
 
@@ -359,23 +299,7 @@ LoveliveGame = (function(_super) {
   LoveliveGame.prototype.tensionSetValueMissItemCatch = function() {
     var val;
     val = this.slot_setting.setTensionItemFall();
-    return this._tensionSetValue(val);
-  };
-
-
-  /*
-  フィーバー中に一定時間でテンションが下がる
-  テンションが0になったらフィーバーを解く
-   */
-
-  LoveliveGame.prototype.tensionSetValueFever = function() {
-    if (this.fever === true) {
-      this._tensionSetValue(this.fever_down_tension);
-      if (this.tension <= 0) {
-        this.bgmStop(this.main_scene.gp_slot.fever_bgm);
-        return this.fever = false;
-      }
-    }
+    return this.tensionSetValue(val);
   };
 
 
@@ -388,7 +312,7 @@ LoveliveGame = (function(_super) {
   LoveliveGame.prototype.tensionSetValueSlotHit = function(prize_money, hit_eye) {
     var val;
     val = this.slot_setting.setTensionSlotHit(prize_money, hit_eye);
-    return this._tensionSetValue(val);
+    return this.tensionSetValue(val);
   };
 
   return LoveliveGame;
@@ -1139,6 +1063,8 @@ gpSystem = (function(_super) {
     this.addChild(this.tension_gauge_back);
     this.tension_gauge = new TensionGauge();
     this.addChild(this.tension_gauge);
+    this.pause_button = new pauseButton();
+    this.addChild(this.pause_button);
     this.keyList = {
       'up': false,
       'down': false
@@ -1155,7 +1081,7 @@ gpSystem = (function(_super) {
    */
 
   gpSystem.prototype._betSetting = function() {
-    if (game.keyList['up'] === true) {
+    if (game.main_scene.keyList['up'] === true) {
       if (this.keyList['up'] === false) {
         this._getBetSettingValue(true);
         this.keyList['up'] = true;
@@ -1165,7 +1091,7 @@ gpSystem = (function(_super) {
         this.keyList['up'] = false;
       }
     }
-    if (game.keyList['down'] === true) {
+    if (game.main_scene.keyList['down'] === true) {
       if (this.keyList['down'] === false) {
         this._getBetSettingValue(false);
         return this.keyList['down'] = true;
@@ -1872,6 +1798,13 @@ mainScene = (function(_super) {
   function mainScene() {
     mainScene.__super__.constructor.apply(this, arguments);
     this.backgroundColor = '#93F0FF';
+    this.keyList = {
+      'left': false,
+      'right': false,
+      'jump': false,
+      'up': false,
+      'down': false
+    };
     this.initial();
   }
 
@@ -1896,7 +1829,90 @@ mainScene = (function(_super) {
     return this.gp_slot.y = 200;
   };
 
+  mainScene.prototype.onenterframe = function(e) {
+    this.buttonPush();
+    return this.tensionSetValueFever();
+  };
+
+
+  /*ボタン操作、物理キーとソフトキー両方に対応 */
+
+  mainScene.prototype.buttonPush = function() {
+    if (game.input.left === true) {
+      if (this.keyList.left === false) {
+        this.keyList.left = true;
+      }
+    } else {
+      if (this.keyList.left === true) {
+        this.keyList.left = false;
+      }
+    }
+    if (game.input.right === true) {
+      if (this.keyList.right === false) {
+        this.keyList.right = true;
+      }
+    } else {
+      if (this.keyList.right === true) {
+        this.keyList.right = false;
+      }
+    }
+    if (game.input.up === true) {
+      if (this.keyList.up === false) {
+        this.keyList.up = true;
+      }
+    } else {
+      if (this.keyList.up === true) {
+        this.keyList.up = false;
+      }
+    }
+    if (game.input.down === true) {
+      if (this.keyList.down === false) {
+        this.keyList.down = true;
+      }
+    } else {
+      if (this.keyList.down === true) {
+        this.keyList.down = false;
+      }
+    }
+    if (game.input.z === true) {
+      if (this.keyList.jump === false) {
+        return this.keyList.jump = true;
+      }
+    } else {
+      if (this.keyList.jump === true) {
+        return this.keyList.jump = false;
+      }
+    }
+  };
+
+
+  /*
+  フィーバー中に一定時間でテンションが下がる
+  テンションが0になったらフィーバーを解く
+   */
+
+  mainScene.prototype.tensionSetValueFever = function() {
+    if (game.fever === true) {
+      game.tensionSetValue(this.fever_down_tension);
+      if (game.tension <= 0) {
+        game.bgmStop(this.main_scene.gp_slot.fever_bgm);
+        return game.fever = false;
+      }
+    }
+  };
+
   return mainScene;
+
+})(appScene);
+
+pauseScene = (function(_super) {
+  __extends(pauseScene, _super);
+
+  function pauseScene() {
+    pauseScene.__super__.constructor.apply(this, arguments);
+  }
+
+  return pauseScene;
 
 })(appScene);
 
@@ -2362,7 +2378,7 @@ Player = (function(_super) {
   /*キーを押した時の動作 */
 
   Player.prototype.keyMove = function() {
-    if (game.keyList.left === true) {
+    if (game.main_scene.keyList.left === true) {
       if (this.moveFlg.left === false) {
         this.moveFlg.left = true;
       }
@@ -2371,7 +2387,7 @@ Player = (function(_super) {
         this.moveFlg.left = false;
       }
     }
-    if (game.keyList.right === true) {
+    if (game.main_scene.keyList.right === true) {
       if (this.moveFlg.right === false) {
         this.moveFlg.right = true;
       }
@@ -2380,7 +2396,7 @@ Player = (function(_super) {
         this.moveFlg.right = false;
       }
     }
-    if (game.keyList.jump === true) {
+    if (game.main_scene.keyList.jump === true) {
       if (this.moveFlg.jump === false) {
         return this.moveFlg.jump = true;
       }
@@ -2995,6 +3011,15 @@ System = (function(_super) {
     System.__super__.constructor.call(this, w, h);
   }
 
+  System.prototype.drawRect = function(color) {
+    var surface;
+    surface = new Surface(this.w, this.h);
+    surface.context.fillStyle = color;
+    surface.context.fillRect(0, 0, this.w, this.h, 10);
+    surface.context.fill();
+    return surface;
+  };
+
   return System;
 
 })(appSprite);
@@ -3010,21 +3035,41 @@ Button = (function(_super) {
 
 })(System);
 
+pauseButton = (function(_super) {
+  __extends(pauseButton, _super);
+
+  function pauseButton() {
+    pauseButton.__super__.constructor.call(this, 40, 40);
+    this.image = this.drawRect('#F9DFD5');
+    this.x = 580;
+    this.y = 120;
+  }
+
+  pauseButton.prototype.ontouchend = function(e) {
+    return game.pushScene(game.pause_scene);
+  };
+
+  return pauseButton;
+
+})(Button);
+
+Dialog = (function(_super) {
+  __extends(Dialog, _super);
+
+  function Dialog(w, h) {
+    Dialog.__super__.constructor.call(this, w, h);
+  }
+
+  return Dialog;
+
+})(System);
+
 Param = (function(_super) {
   __extends(Param, _super);
 
   function Param(w, h) {
     Param.__super__.constructor.call(this, w, h);
   }
-
-  Param.prototype.drawRect = function(color) {
-    var surface;
-    surface = new Surface(this.w, this.h);
-    surface.context.fillStyle = color;
-    surface.context.fillRect(0, 0, this.w, this.h, 10);
-    surface.context.fill();
-    return surface;
-  };
 
   return Param;
 
