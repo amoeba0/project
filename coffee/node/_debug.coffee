@@ -8,10 +8,13 @@ class Debug extends appNode
         #全てのデバッグフラグをONにする
         @all_debug_flg = false
 
+        #開始後いきなりポーズ画面
+        @force_pause_flg = false
+
         #デバッグ用リールにすりかえる
-        @lille_flg = false
+        @lille_flg = true
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = false
+        @item_flg = true
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する
@@ -24,7 +27,7 @@ class Debug extends appNode
         @force_insert_muse = false
         #デバッグ用リール配列
         @lille_array = [
-            [15, 16],
+            [16, 15],
             [15],
             [15]
         ]

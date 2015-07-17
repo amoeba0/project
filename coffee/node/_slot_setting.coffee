@@ -31,12 +31,12 @@ class slotSetting extends appNode
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
         11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
         direction:キャラクターの向き、left or right
-        カットインの画像サイズ、頭の位置で760px
+        カットインの画像サイズ、頭の位置で570px
         ###
         @muse_material_list = {
             11:{
                 'cut_in':[
-                    {'name':'11_0', 'width':528, 'height':760, 'direction':'left'}
+                    {'name':'11_0', 'width':360, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -45,7 +45,7 @@ class slotSetting extends appNode
             },
             12:{
                 'cut_in':[
-                    {'name':'12_0', 'width':680, 'height':970, 'direction':'left'}
+                    {'name':'12_0', 'width':510, 'height':728, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -54,7 +54,7 @@ class slotSetting extends appNode
             },
             13:{
                 'cut_in':[
-                    {'name':'13_0', 'width':760, 'height':845, 'direction':'left'}
+                    {'name':'13_0', 'width':570, 'height':634, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -63,7 +63,7 @@ class slotSetting extends appNode
             },
             14:{
                 'cut_in':[
-                    {'name':'14_0', 'width':634, 'height':864, 'direction':'left'}
+                    {'name':'14_0', 'width':476, 'height':648, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -72,8 +72,8 @@ class slotSetting extends appNode
             },
             15:{
                 'cut_in':[
-                    {'name':'15_0', 'width':670, 'height':760, 'direction':'right'},
-                    {'name':'15_1', 'width':801, 'height':850, 'direction':'left'}
+                    {'name':'15_0', 'width':502, 'height':570, 'direction':'right'},
+                    {'name':'15_1', 'width':601, 'height':638, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -82,7 +82,7 @@ class slotSetting extends appNode
             },
             16:{
                 'cut_in':[
-                    {'name':'16_0', 'width':584, 'height':760, 'direction':'right'}
+                    {'name':'16_0', 'width':438, 'height':570, 'direction':'right'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -91,7 +91,7 @@ class slotSetting extends appNode
             },
             17:{
                 'cut_in':[
-                    {'name':'17_0', 'width':620, 'height':940, 'direction':'left'}
+                    {'name':'17_0', 'width':465, 'height':705, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -100,7 +100,7 @@ class slotSetting extends appNode
             },
             18:{
                 'cut_in':[
-                    {'name':'18_0', 'width':799, 'height':808, 'direction':'right'}
+                    {'name':'18_0', 'width':599, 'height':606, 'direction':'right'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -109,7 +109,7 @@ class slotSetting extends appNode
             },
             19:{
                 'cut_in':[
-                    {'name':'19_0', 'width':613, 'height':760, 'direction':'left'}
+                    {'name':'19_0', 'width':460, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -121,13 +121,14 @@ class slotSetting extends appNode
         @tension_max = 500
         #現在スロットに入るμ’ｓ番号
         @now_muse_num = 0
-        #過去にスロットに入ったμ’ｓ番号
-        @prev_muse = []
+
+        #セーブする変数
+        @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
 
     setGravity:()->
-        val = Math.floor((game.tension / @tension_max) * 1.2) + 0.7
+        val = Math.floor((game.tension / @tension_max) * 0.9) + 0.5
         if game.fever is true
-            val = 1.6
+            val = 1.2
         return val
 
 

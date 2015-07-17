@@ -5,5 +5,5 @@ class appObject extends appSprite
     ###
     constructor: (w, h) ->
         super w, h
-        @gravity = 1.6 #物体に働く重力
-        @friction = 2.3 #物体に働く摩擦
+        @gravity = 1.2 #物体に働く重力
+        @friction = 1.7 #物体に働く摩擦

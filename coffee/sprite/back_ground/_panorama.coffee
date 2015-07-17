@@ -7,9 +7,9 @@ class BackPanorama extends Panorama
         @image = game.imageload("sky")
 class FrontPanorama extends Panorama
     constructor: (w, h) ->
-        super game.width, 400
+        super game.width, 300
         @image = game.imageload("okujou")
         @setPosition()
     setPosition:()->
         @x = 0
-        @y = 560
+        @y = 420

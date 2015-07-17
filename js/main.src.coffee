@@ -96,10 +96,9 @@ class LoveliveGame extends catchAndSlotGame
         super @width, @height
         @debug = new Debug()
         @slot_setting = new slotSetting()
-        @width = 640
-        @height = 960
+        @width = 480
+        @height = 720
         @fps = 24
-        @scale = 0.7
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin']
         #音声リスト
@@ -113,19 +112,23 @@ class LoveliveGame extends catchAndSlotGame
 
         #ゲーム中どこからでもアクセスのある数値
         @money_init = 100 #ゲーム開始時の所持金
+        @fever = false #trueならフィーバー中
+        @fever_down_tension = 0
+        @item_kind = 0 #落下アイテムの種類（フレーム）
+
+        #セーブする変数(slot_settingにもあるので注意)
         @money = 0 #現在の所持金
         @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
         @tension = 0 #現在のテンション(500がマックス)
-        @fever = false #trueならフィーバー中
-        @fever_down_tension = 0
-        @item_kind = 0 #落下アイテムの種類（フレーム）
 
     onload:() ->
         @gameInit()
         @main_scene = new mainScene()
         @pushScene(@main_scene)
         @pause_scene = new pauseScene()
+        if @debug.force_pause_flg is true
+            @pushScene(@pause_scene)
 
     ###
     スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
@@ -425,7 +428,7 @@ class gpSlot extends appGroup
 class gpStage extends appGroup
     constructor: () ->
         super
-        @floor = 900 #床の位置
+        @floor = 675 #床の位置
 
 ###
 ステージ前面
@@ -754,6 +757,37 @@ class gpSystem extends appGroup
             game.bet = 10000000
         @bet_text.setValue()
 
+class gpMainMenu extends appGroup
+    constructor: () ->
+        super
+        @pause_back = new pauseBack()
+        @addChild(@pause_back)
+
+        @return_game_button = new returnGameButton()
+        @addChild(@return_game_button)
+        @return_game_text = new returnGameText()
+        @addChild(@return_game_text)
+
+        @save_game_button = new saveGameButton()
+        @addChild(@save_game_button)
+        @save_game_text = new saveGameText()
+        @addChild(@save_game_text)
+class gpSaveMenu extends appGroup
+    constructor: () ->
+        super
+        @dialog = new baseDialog()
+        @addChild(@dialog)
+
+        @ok_button = new saveOkButton()
+        @addChild(@ok_button)
+        @ok_text = new saveOkText()
+        @addChild(@ok_text)
+
+        @save_message = new messageText('保存しました。', 157, 262)
+        @addChild(@save_message)
+class gpTitleMenu extends appGroup
+    constructor: () ->
+        super
 class text extends appLabel
     constructor: () ->
         super
@@ -765,10 +799,10 @@ class moneyText extends text
         super
         @text = 0
         @color = 'black'
-        @font_size = 30
+        @font_size = 22
         @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
         @x = 0
-        @y = 10
+        @y = 7
         @zandaka_text = '残高'
         @yen_text = '円'
         @setValue()
@@ -783,17 +817,17 @@ class moneyText extends text
     X座標の位置を設定
     ###
     setXposition: () ->
-        @x = game.width - @_boundWidth - 10
+        @x = game.width - @_boundWidth - 7
 
 class betText extends text
     constructor: () ->
         super
         @text = 0
         @color = 'black'
-        @font_size = 30
+        @font_size = 22
         @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
-        @x = 10
-        @y = 10
+        @x = 7
+        @y = 7
         @kakekin_text = '掛金'
         @yen_text = '円'
         @setValue()
@@ -805,26 +839,77 @@ class comboText extends text
         super
         @text = 0
         @color = 'black'
-        @font_size = 50
+        @font_size = 37
         @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
-        @x = 260
-        @y = 100
+        @x = 195
+        @y = 75
     setValue: () ->
         @text = game.combo
         @setXposition()
     setXposition: () ->
         unit = game.main_scene.gp_system.combo_unit_text
-        @x = game.width / 2 - (@_boundWidth + unit._boundWidth + 6) / 2
-        unit.x = @x + @_boundWidth + 6
+        @x = game.width / 2 - (@_boundWidth + unit._boundWidth + 5) / 2
+        unit.x = @x + @_boundWidth + 5
 
 class comboUnitText extends text
     constructor: () ->
         super
         @text = 'combo'
         @color = 'black'
+        @font = "22px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = 217
+        @y = 90
+
+class pauseMenuText extends text
+    constructor: () ->
+        super
+        @color = 'black'
         @font = "30px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
-        @x = 290
-        @y = 120
+
+class returnGameText extends pauseMenuText
+    constructor: () ->
+        super
+        @text = 'ゲームに戻る'
+        @x = 150
+        @y = 155
+    ontouchend: ()->
+        button = game.pause_scene.gp_main_menu.return_game_button
+        button.touchendEvent()
+
+class saveGameText extends pauseMenuText
+    constructor: () ->
+        super
+        @text = 'ゲームを保存する'
+        @x = 120
+        @y = 305
+    ontouchend: ()->
+        button = game.pause_scene.gp_main_menu.save_game_button
+        button.touchendEvent()
+
+class baseOkText extends text
+    constructor:()->
+        super
+        @text = 'ＯＫ'
+        @color = 'white'
+        @font = "37px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+
+class saveOkText extends baseOkText
+    constructor:()->
+        super
+        @x = 191
+        @y = 412
+    ontouchend: ()->
+        button = game.pause_scene.gp_save_menu.ok_button
+        button.touchendEvent()
+
+class messageText extends text
+    constructor:(text, x, y)->
+        super
+        @text = text
+        @color = 'black'
+        @font = "22px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = x
+        @y = y
 ###
 デバッグ用設定
 ###
@@ -835,10 +920,13 @@ class Debug extends appNode
         #全てのデバッグフラグをONにする
         @all_debug_flg = false
 
+        #開始後いきなりポーズ画面
+        @force_pause_flg = false
+
         #デバッグ用リールにすりかえる
-        @lille_flg = false
+        @lille_flg = true
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = false
+        @item_flg = true
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する
@@ -851,7 +939,7 @@ class Debug extends appNode
         @force_insert_muse = false
         #デバッグ用リール配列
         @lille_array = [
-            [15, 16],
+            [16, 15],
             [15],
             [15]
         ]
@@ -903,12 +991,12 @@ class slotSetting extends appNode
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
         11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
         direction:キャラクターの向き、left or right
-        カットインの画像サイズ、頭の位置で760px
+        カットインの画像サイズ、頭の位置で570px
         ###
         @muse_material_list = {
             11:{
                 'cut_in':[
-                    {'name':'11_0', 'width':528, 'height':760, 'direction':'left'}
+                    {'name':'11_0', 'width':360, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -917,7 +1005,7 @@ class slotSetting extends appNode
             },
             12:{
                 'cut_in':[
-                    {'name':'12_0', 'width':680, 'height':970, 'direction':'left'}
+                    {'name':'12_0', 'width':510, 'height':728, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -926,7 +1014,7 @@ class slotSetting extends appNode
             },
             13:{
                 'cut_in':[
-                    {'name':'13_0', 'width':760, 'height':845, 'direction':'left'}
+                    {'name':'13_0', 'width':570, 'height':634, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -935,7 +1023,7 @@ class slotSetting extends appNode
             },
             14:{
                 'cut_in':[
-                    {'name':'14_0', 'width':634, 'height':864, 'direction':'left'}
+                    {'name':'14_0', 'width':476, 'height':648, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -944,8 +1032,8 @@ class slotSetting extends appNode
             },
             15:{
                 'cut_in':[
-                    {'name':'15_0', 'width':670, 'height':760, 'direction':'right'},
-                    {'name':'15_1', 'width':801, 'height':850, 'direction':'left'}
+                    {'name':'15_0', 'width':502, 'height':570, 'direction':'right'},
+                    {'name':'15_1', 'width':601, 'height':638, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -954,7 +1042,7 @@ class slotSetting extends appNode
             },
             16:{
                 'cut_in':[
-                    {'name':'16_0', 'width':584, 'height':760, 'direction':'right'}
+                    {'name':'16_0', 'width':438, 'height':570, 'direction':'right'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -963,7 +1051,7 @@ class slotSetting extends appNode
             },
             17:{
                 'cut_in':[
-                    {'name':'17_0', 'width':620, 'height':940, 'direction':'left'}
+                    {'name':'17_0', 'width':465, 'height':705, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -972,7 +1060,7 @@ class slotSetting extends appNode
             },
             18:{
                 'cut_in':[
-                    {'name':'18_0', 'width':799, 'height':808, 'direction':'right'}
+                    {'name':'18_0', 'width':599, 'height':606, 'direction':'right'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -981,7 +1069,7 @@ class slotSetting extends appNode
             },
             19:{
                 'cut_in':[
-                    {'name':'19_0', 'width':613, 'height':760, 'direction':'left'}
+                    {'name':'19_0', 'width':460, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'', 'time':30}
@@ -993,13 +1081,14 @@ class slotSetting extends appNode
         @tension_max = 500
         #現在スロットに入るμ’ｓ番号
         @now_muse_num = 0
-        #過去にスロットに入ったμ’ｓ番号
-        @prev_muse = []
+
+        #セーブする変数
+        @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
 
     setGravity:()->
-        val = Math.floor((game.tension / @tension_max) * 1.2) + 0.7
+        val = Math.floor((game.tension / @tension_max) * 0.9) + 0.5
         if game.fever is true
-            val = 1.6
+            val = 1.2
         return val
 
 
@@ -1218,8 +1307,8 @@ class mainScene extends appScene
         @addChild(@gp_stage_front)
         @gp_system = new gpSystem()
         @addChild(@gp_system)
-        @gp_slot.x = 150
-        @gp_slot.y = 200
+        @gp_slot.x = 112
+        @gp_slot.y = 150
     onenterframe: (e) ->
         @buttonPush()
         @tensionSetValueFever()
@@ -1266,13 +1355,34 @@ class mainScene extends appScene
     ###
     tensionSetValueFever:()->
         if game.fever is true
-            game.tensionSetValue(@fever_down_tension)
+            game.tensionSetValue(game.fever_down_tension)
             if game.tension <= 0
-                game.bgmStop(@main_scene.gp_slot.fever_bgm)
+                game.bgmStop(game.main_scene.gp_slot.fever_bgm)
                 game.fever = false
 class pauseScene extends appScene
     constructor: () ->
         super
+        @gp_main_menu = new gpMainMenu()
+        @gp_save_menu = new gpSaveMenu()
+        @addChild(@gp_main_menu)
+    setSaveMenu: () ->
+        @addChild(@gp_save_menu)
+        @_exeGameSave()
+    removeSaveMenu:()->
+        @removeChild(@gp_save_menu)
+    ###
+    データ保存の実行
+    ###
+    _exeGameSave:()->
+        saveData = {
+            'money'    : game.money,
+            'bet'      : game.bet,
+            'combo'    : game.combo,
+            'tension'  : game.tension,
+            'prev_muse': JSON.stringify(game.slot_setting.prev_muse)
+        }
+        for key, val of saveData
+            window.localStorage.setItem(key, val)
 class titleScene extends appScene
     constructor: () ->
         super
@@ -1291,12 +1401,12 @@ class BackPanorama extends Panorama
         @image = game.imageload("sky")
 class FrontPanorama extends Panorama
     constructor: (w, h) ->
-        super game.width, 400
+        super game.width, 300
         @image = game.imageload("okujou")
         @setPosition()
     setPosition:()->
         @x = 0
-        @y = 560
+        @y = 420
 class effect extends appSprite
     constructor: (w, h) ->
         super w, h
@@ -1368,8 +1478,8 @@ class appObject extends appSprite
     ###
     constructor: (w, h) ->
         super w, h
-        @gravity = 1.6 #物体に働く重力
-        @friction = 2.3 #物体に働く摩擦
+        @gravity = 1.2 #物体に働く重力
+        @friction = 1.7 #物体に働く摩擦
 class Character extends appObject
     constructor: (w, h) ->
         super w, h
@@ -1379,9 +1489,9 @@ class Character extends appObject
         @isAir = true; #空中判定
         @vx = 0 #x軸速度
         @vy = 0 #y軸速度
-        @ax = 4 #x軸加速度
-        @mx = 9 #x軸速度最大値
-        @my = 25 #y軸初速度
+        @ax = 3 #x軸加速度
+        @mx = 7 #x軸速度最大値
+        @my = 19 #y軸初速度
     onenterframe: (e) ->
         @charMove()
 
@@ -1611,7 +1721,7 @@ class Player extends Character
 
 class Bear extends Player
     constructor: () ->
-        super 90, 87
+        super 67, 65
         @image = game.imageload("chun")
         @x = 0
         @y = 0
@@ -1679,7 +1789,7 @@ class Catch extends Item
 ###
 class MacaroonCatch extends Catch
     constructor: (w, h) ->
-        super 50, 50
+        super 37, 37
         @image = game.imageload("sweets")
         @frame = 1
         @scaleX = 1.5
@@ -1687,7 +1797,7 @@ class MacaroonCatch extends Catch
 
 class OnionCatch extends Catch
     constructor: (w, h) ->
-        super 50, 50
+        super 37, 37
         @image = game.imageload("sweets")
         @frame = 5
         @scaleX = 1.5
@@ -1710,12 +1820,12 @@ class OnionCatch extends Catch
 ###
 class Money extends Item
     constructor: (isHoming) ->
-        super 35, 40
+        super 26, 30
         @vx = 0
         @vy = 0
         @frame_init = 0
         @price = 1 #単価
-        @gravity = 0.5
+        @gravity = 0.37
         @image = game.imageload("coin")
         @catch_se = game.soundload("medal")
         @isHoming = isHoming
@@ -1732,7 +1842,7 @@ class Money extends Item
 
     _setGravity:()->
         if @isHoming is true
-            @gravity = 2
+            @gravity = 1.5
     ###
     プレイヤーに当たった時
     ###
@@ -1861,7 +1971,7 @@ class Frame extends Slot
 
 class UnderFrame extends Frame
     constructor: (w,h) ->
-        super 330, 110
+        super 246, 82
         @image = game.imageload("under_frame")
 
 class UpperFrame extends Frame
@@ -1869,7 +1979,7 @@ class UpperFrame extends Frame
         super w, h
 class Lille extends Slot
     constructor: (w, h) ->
-        super 110, 110
+        super 82, 82
         @image = game.imageload("lille")
         @lotate_se = game.soundload('select')
         @lilleArray = [] #リールの並び
@@ -1908,64 +2018,150 @@ class LeftLille extends Lille
         super
         @lilleArray = game.slot_setting.lille_array_0[0]
         @eyeInit()
-        @x = -55
+        @x = -41
 
 class MiddleLille extends Lille
     constructor: () ->
         super
         @lilleArray = game.slot_setting.lille_array_0[1]
         @eyeInit()
-        @x = 110
+        @x = 82
 
 class RightLille extends Lille
     constructor: () ->
         super
         @lilleArray = game.slot_setting.lille_array_0[2]
         @eyeInit()
-        @x = 274
+        @x = 205
     soundLotateSe:()->
         if @age % 2 is 0
             game.sePlay(@lotate_se)
 class System extends appSprite
     constructor: (w, h) ->
         super w, h
+    ###
+    枠の無い長方形
+    @param color 色
+    ###
     drawRect: (color) ->
         surface = new Surface(@w, @h)
         surface.context.fillStyle = color
         surface.context.fillRect(0, 0, @w, @h, 10)
         surface.context.fill()
         return surface
+    ###
+    枠のある長方形
+    @param string strokeColor 枠の色
+    @param string fillColor   色
+    @param number thick       枠の太さ
+    ###
+    drawStrokeRect:(strokeColor, fillColor, thick)->
+        surface = new Surface(@w, @h)
+        surface.context.fillStyle = strokeColor
+        surface.context.fillRect(0, 0, @w, @h)
+        surface.context.fillStyle = fillColor
+        surface.context.fillRect(thick, thick, @w - (thick * 2), @h - (thick * 2))
+        return surface
 class Button extends System
     constructor: (w, h) ->
         super w, h
+    touchendEvent:() ->
+
+###
+ポーズボタン
+###
 class pauseButton extends Button
     constructor: () ->
-        super 40, 40
+        super 30, 30
         @image = @drawRect('#F9DFD5')
-        @x = 580
-        @y = 120
+        @x = 435
+        @y = 90
     ontouchend: (e)->
         game.pushScene(game.pause_scene)
+
+###
+ポーズメニューのボタン
+###
+class pauseMainMenuButton extends Button
+    constructor: () ->
+        super 300, 45
+        @image = @drawRect('#ffffff')
+        @x = 90
+        @y = 0
+    ontouchend: (e) ->
+        @touchendEvent()
+
+###
+ゲームへ戻る
+###
+class returnGameButton extends pauseMainMenuButton
+    constructor: () ->
+        super
+        @y = 150
+    touchendEvent:() ->
+        game.popScene(game.pause_scene)
+
+###
+ゲームを保存する
+###
+class saveGameButton extends pauseMainMenuButton
+    constructor: () ->
+        super
+        @y = 300
+    touchendEvent:() ->
+        game.pause_scene.setSaveMenu()
+
+class baseOkButton extends Button
+    constructor:()->
+        super 150, 45
+        @image = @drawStrokeRect('#cccccc', '#FF5495', 3)
+    ontouchend: (e) ->
+        @touchendEvent()
+
+class saveOkButton extends baseOkButton
+    constructor:()->
+        super
+        @x = 157
+        @y = 412
+    touchendEvent:() ->
+        game.pause_scene.removeSaveMenu()
 class Dialog extends System
     constructor: (w, h) ->
         super w, h
+    ###
+    ダイアログの描画
+    ###
+    drawDialog: () ->
+        return @drawStrokeRect('#aaaaaa', '#ffffff', 5)
+class pauseBack extends Dialog
+    constructor: (w, h) ->
+        super game.width, game.height
+        @image = @drawRect('#000000')
+        @opacity = 0.8
+class baseDialog extends Dialog
+    constructor: () ->
+        super 375, 375
+        @image = @drawDialog()
+        @x = 60
+        @y = 150
+
 class Param extends System
     constructor: (w, h) ->
         super w, h
 
 class TensionGaugeBack extends Param
     constructor: (w, h) ->
-        super 610, 25
+        super 457, 19
         @image = @drawRect('#FFFFFF')
-        @x = 15
-        @y = 75
+        @x = 11
+        @y = 56
 
 class TensionGauge extends Param
     constructor: (w, h) ->
-        super 600, 15
+        super 450, 11
         @image = @drawRect('#6EB7DB')
-        @x = 20
-        @y = 80
+        @x = 15
+        @y = 60
         @setValue()
 
     setValue:()->
@@ -1973,7 +2169,7 @@ class TensionGauge extends Param
         if game.tension != 0
             tension = game.tension / game.slot_setting.tension_max
         @scaleX = tension
-        @x = 20 - ((@w - tension * @w) / 2)
+        @x = 15 - ((@w - tension * @w) / 2)
         if tension < 0.25
             @image = @drawRect('#6EB7DB')
         else if tension < 0.5

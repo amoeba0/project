@@ -20,8 +20,8 @@ class mainScene extends appScene
         @addChild(@gp_stage_front)
         @gp_system = new gpSystem()
         @addChild(@gp_system)
-        @gp_slot.x = 150
-        @gp_slot.y = 200
+        @gp_slot.x = 112
+        @gp_slot.y = 150
     onenterframe: (e) ->
         @buttonPush()
         @tensionSetValueFever()
@@ -68,7 +68,7 @@ class mainScene extends appScene
     ###
     tensionSetValueFever:()->
         if game.fever is true
-            game.tensionSetValue(@fever_down_tension)
+            game.tensionSetValue(game.fever_down_tension)
             if game.tension <= 0
-                game.bgmStop(@main_scene.gp_slot.fever_bgm)
+                game.bgmStop(game.main_scene.gp_slot.fever_bgm)
                 game.fever = false

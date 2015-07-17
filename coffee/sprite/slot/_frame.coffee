@@ -4,7 +4,7 @@ class Frame extends Slot
 
 class UnderFrame extends Frame
     constructor: (w,h) ->
-        super 330, 110
+        super 246, 82
         @image = game.imageload("under_frame")
 
 class UpperFrame extends Frame

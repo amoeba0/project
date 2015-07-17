@@ -4,12 +4,12 @@
 ###
 class Money extends Item
     constructor: (isHoming) ->
-        super 35, 40
+        super 26, 30
         @vx = 0
         @vy = 0
         @frame_init = 0
         @price = 1 #単価
-        @gravity = 0.5
+        @gravity = 0.37
         @image = game.imageload("coin")
         @catch_se = game.soundload("medal")
         @isHoming = isHoming
@@ -26,7 +26,7 @@ class Money extends Item
 
     _setGravity:()->
         if @isHoming is true
-            @gravity = 2
+            @gravity = 1.5
     ###
     プレイヤーに当たった時
     ###

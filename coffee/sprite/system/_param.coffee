@@ -4,17 +4,17 @@ class Param extends System
 
 class TensionGaugeBack extends Param
     constructor: (w, h) ->
-        super 610, 25
+        super 457, 19
         @image = @drawRect('#FFFFFF')
-        @x = 15
-        @y = 75
+        @x = 11
+        @y = 56
 
 class TensionGauge extends Param
     constructor: (w, h) ->
-        super 600, 15
+        super 450, 11
         @image = @drawRect('#6EB7DB')
-        @x = 20
-        @y = 80
+        @x = 15
+        @y = 60
         @setValue()
 
     setValue:()->
@@ -22,7 +22,7 @@ class TensionGauge extends Param
         if game.tension != 0
             tension = game.tension / game.slot_setting.tension_max
         @scaleX = tension
-        @x = 20 - ((@w - tension * @w) / 2)
+        @x = 15 - ((@w - tension * @w) / 2)
         if tension < 0.25
             @image = @drawRect('#6EB7DB')
         else if tension < 0.5

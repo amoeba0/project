@@ -9,10 +9,10 @@ class moneyText extends text
         super
         @text = 0
         @color = 'black'
-        @font_size = 30
+        @font_size = 22
         @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
         @x = 0
-        @y = 10
+        @y = 7
         @zandaka_text = '残高'
         @yen_text = '円'
         @setValue()
@@ -27,17 +27,17 @@ class moneyText extends text
     X座標の位置を設定
     ###
     setXposition: () ->
-        @x = game.width - @_boundWidth - 10
+        @x = game.width - @_boundWidth - 7
 
 class betText extends text
     constructor: () ->
         super
         @text = 0
         @color = 'black'
-        @font_size = 30
+        @font_size = 22
         @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
-        @x = 10
-        @y = 10
+        @x = 7
+        @y = 7
         @kakekin_text = '掛金'
         @yen_text = '円'
         @setValue()
@@ -49,23 +49,74 @@ class comboText extends text
         super
         @text = 0
         @color = 'black'
-        @font_size = 50
+        @font_size = 37
         @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
-        @x = 260
-        @y = 100
+        @x = 195
+        @y = 75
     setValue: () ->
         @text = game.combo
         @setXposition()
     setXposition: () ->
         unit = game.main_scene.gp_system.combo_unit_text
-        @x = game.width / 2 - (@_boundWidth + unit._boundWidth + 6) / 2
-        unit.x = @x + @_boundWidth + 6
+        @x = game.width / 2 - (@_boundWidth + unit._boundWidth + 5) / 2
+        unit.x = @x + @_boundWidth + 5
 
 class comboUnitText extends text
     constructor: () ->
         super
         @text = 'combo'
         @color = 'black'
+        @font = "22px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = 217
+        @y = 90
+
+class pauseMenuText extends text
+    constructor: () ->
+        super
+        @color = 'black'
         @font = "30px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
-        @x = 290
-        @y = 120
+
+class returnGameText extends pauseMenuText
+    constructor: () ->
+        super
+        @text = 'ゲームに戻る'
+        @x = 150
+        @y = 155
+    ontouchend: ()->
+        button = game.pause_scene.gp_main_menu.return_game_button
+        button.touchendEvent()
+
+class saveGameText extends pauseMenuText
+    constructor: () ->
+        super
+        @text = 'ゲームを保存する'
+        @x = 120
+        @y = 305
+    ontouchend: ()->
+        button = game.pause_scene.gp_main_menu.save_game_button
+        button.touchendEvent()
+
+class baseOkText extends text
+    constructor:()->
+        super
+        @text = 'ＯＫ'
+        @color = 'white'
+        @font = "37px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+
+class saveOkText extends baseOkText
+    constructor:()->
+        super
+        @x = 191
+        @y = 412
+    ontouchend: ()->
+        button = game.pause_scene.gp_save_menu.ok_button
+        button.touchendEvent()
+
+class messageText extends text
+    constructor:(text, x, y)->
+        super
+        @text = text
+        @color = 'black'
+        @font = "22px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = x
+        @y = y

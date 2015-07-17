@@ -57,7 +57,7 @@ class Catch extends Item
 ###
 class MacaroonCatch extends Catch
     constructor: (w, h) ->
-        super 50, 50
+        super 37, 37
         @image = game.imageload("sweets")
         @frame = 1
         @scaleX = 1.5
@@ -65,7 +65,7 @@ class MacaroonCatch extends Catch
 
 class OnionCatch extends Catch
     constructor: (w, h) ->
-        super 50, 50
+        super 37, 37
         @image = game.imageload("sweets")
         @frame = 5
         @scaleX = 1.5

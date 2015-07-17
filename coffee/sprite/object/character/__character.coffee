@@ -7,9 +7,9 @@ class Character extends appObject
         @isAir = true; #空中判定
         @vx = 0 #x軸速度
         @vy = 0 #y軸速度
-        @ax = 4 #x軸加速度
-        @mx = 9 #x軸速度最大値
-        @my = 25 #y軸初速度
+        @ax = 3 #x軸加速度
+        @mx = 7 #x軸速度最大値
+        @my = 19 #y軸初速度
     onenterframe: (e) ->
         @charMove()
 

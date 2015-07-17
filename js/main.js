@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, betText, catchAndSlotGame, comboText, comboUnitText, cutIn, effect, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, pauseButton, pauseScene, slotSetting, stageBack, stageFront, text, titleScene,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialog, baseOkButton, baseOkText, betText, catchAndSlotGame, comboText, comboUnitText, cutIn, effect, gpEffect, gpMainMenu, gpPanorama, gpSaveMenu, gpSlot, gpStage, gpSystem, gpTitleMenu, mainScene, messageText, moneyText, pauseBack, pauseButton, pauseMainMenuButton, pauseMenuText, pauseScene, returnGameButton, returnGameText, saveGameButton, saveGameText, saveOkButton, saveOkText, slotSetting, stageBack, stageFront, text, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -189,10 +189,9 @@ LoveliveGame = (function(_super) {
     LoveliveGame.__super__.constructor.call(this, this.width, this.height);
     this.debug = new Debug();
     this.slot_setting = new slotSetting();
-    this.width = 640;
-    this.height = 960;
+    this.width = 480;
+    this.height = 720;
     this.fps = 24;
-    this.scale = 0.7;
     this.imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin'];
     this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'zenkai_no_lovelive'];
     this.keybind(90, 'z');
@@ -200,20 +199,23 @@ LoveliveGame = (function(_super) {
     this.slot_setting.setMuseMember();
     this.musePreLoad();
     this.money_init = 100;
+    this.fever = false;
+    this.fever_down_tension = 0;
+    this.item_kind = 0;
     this.money = 0;
     this.bet = 1;
     this.combo = 0;
     this.tension = 0;
-    this.fever = false;
-    this.fever_down_tension = 0;
-    this.item_kind = 0;
   }
 
   LoveliveGame.prototype.onload = function() {
     this.gameInit();
     this.main_scene = new mainScene();
     this.pushScene(this.main_scene);
-    return this.pause_scene = new pauseScene();
+    this.pause_scene = new pauseScene();
+    if (this.debug.force_pause_flg === true) {
+      return this.pushScene(this.pause_scene);
+    }
   };
 
 
@@ -673,7 +675,7 @@ gpStage = (function(_super) {
 
   function gpStage() {
     gpStage.__super__.constructor.apply(this, arguments);
-    this.floor = 900;
+    this.floor = 675;
   }
 
   return gpStage;
@@ -1157,6 +1159,57 @@ gpSystem = (function(_super) {
 
 })(appGroup);
 
+gpMainMenu = (function(_super) {
+  __extends(gpMainMenu, _super);
+
+  function gpMainMenu() {
+    gpMainMenu.__super__.constructor.apply(this, arguments);
+    this.pause_back = new pauseBack();
+    this.addChild(this.pause_back);
+    this.return_game_button = new returnGameButton();
+    this.addChild(this.return_game_button);
+    this.return_game_text = new returnGameText();
+    this.addChild(this.return_game_text);
+    this.save_game_button = new saveGameButton();
+    this.addChild(this.save_game_button);
+    this.save_game_text = new saveGameText();
+    this.addChild(this.save_game_text);
+  }
+
+  return gpMainMenu;
+
+})(appGroup);
+
+gpSaveMenu = (function(_super) {
+  __extends(gpSaveMenu, _super);
+
+  function gpSaveMenu() {
+    gpSaveMenu.__super__.constructor.apply(this, arguments);
+    this.dialog = new baseDialog();
+    this.addChild(this.dialog);
+    this.ok_button = new saveOkButton();
+    this.addChild(this.ok_button);
+    this.ok_text = new saveOkText();
+    this.addChild(this.ok_text);
+    this.save_message = new messageText('保存しました。', 157, 262);
+    this.addChild(this.save_message);
+  }
+
+  return gpSaveMenu;
+
+})(appGroup);
+
+gpTitleMenu = (function(_super) {
+  __extends(gpTitleMenu, _super);
+
+  function gpTitleMenu() {
+    gpTitleMenu.__super__.constructor.apply(this, arguments);
+  }
+
+  return gpTitleMenu;
+
+})(appGroup);
+
 text = (function(_super) {
   __extends(text, _super);
 
@@ -1180,10 +1233,10 @@ moneyText = (function(_super) {
     moneyText.__super__.constructor.apply(this, arguments);
     this.text = 0;
     this.color = 'black';
-    this.font_size = 30;
+    this.font_size = 22;
     this.font = this.font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
     this.x = 0;
-    this.y = 10;
+    this.y = 7;
     this.zandaka_text = '残高';
     this.yen_text = '円';
     this.setValue();
@@ -1206,7 +1259,7 @@ moneyText = (function(_super) {
    */
 
   moneyText.prototype.setXposition = function() {
-    return this.x = game.width - this._boundWidth - 10;
+    return this.x = game.width - this._boundWidth - 7;
   };
 
   return moneyText;
@@ -1220,10 +1273,10 @@ betText = (function(_super) {
     betText.__super__.constructor.apply(this, arguments);
     this.text = 0;
     this.color = 'black';
-    this.font_size = 30;
+    this.font_size = 22;
     this.font = this.font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
-    this.x = 10;
-    this.y = 10;
+    this.x = 7;
+    this.y = 7;
     this.kakekin_text = '掛金';
     this.yen_text = '円';
     this.setValue();
@@ -1244,10 +1297,10 @@ comboText = (function(_super) {
     comboText.__super__.constructor.apply(this, arguments);
     this.text = 0;
     this.color = 'black';
-    this.font_size = 50;
+    this.font_size = 37;
     this.font = this.font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
-    this.x = 260;
-    this.y = 100;
+    this.x = 195;
+    this.y = 75;
   }
 
   comboText.prototype.setValue = function() {
@@ -1258,8 +1311,8 @@ comboText = (function(_super) {
   comboText.prototype.setXposition = function() {
     var unit;
     unit = game.main_scene.gp_system.combo_unit_text;
-    this.x = game.width / 2 - (this._boundWidth + unit._boundWidth + 6) / 2;
-    return unit.x = this.x + this._boundWidth + 6;
+    this.x = game.width / 2 - (this._boundWidth + unit._boundWidth + 5) / 2;
+    return unit.x = this.x + this._boundWidth + 5;
   };
 
   return comboText;
@@ -1273,12 +1326,114 @@ comboUnitText = (function(_super) {
     comboUnitText.__super__.constructor.apply(this, arguments);
     this.text = 'combo';
     this.color = 'black';
-    this.font = "30px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
-    this.x = 290;
-    this.y = 120;
+    this.font = "22px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
+    this.x = 217;
+    this.y = 90;
   }
 
   return comboUnitText;
+
+})(text);
+
+pauseMenuText = (function(_super) {
+  __extends(pauseMenuText, _super);
+
+  function pauseMenuText() {
+    pauseMenuText.__super__.constructor.apply(this, arguments);
+    this.color = 'black';
+    this.font = "30px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
+  }
+
+  return pauseMenuText;
+
+})(text);
+
+returnGameText = (function(_super) {
+  __extends(returnGameText, _super);
+
+  function returnGameText() {
+    returnGameText.__super__.constructor.apply(this, arguments);
+    this.text = 'ゲームに戻る';
+    this.x = 150;
+    this.y = 155;
+  }
+
+  returnGameText.prototype.ontouchend = function() {
+    var button;
+    button = game.pause_scene.gp_main_menu.return_game_button;
+    return button.touchendEvent();
+  };
+
+  return returnGameText;
+
+})(pauseMenuText);
+
+saveGameText = (function(_super) {
+  __extends(saveGameText, _super);
+
+  function saveGameText() {
+    saveGameText.__super__.constructor.apply(this, arguments);
+    this.text = 'ゲームを保存する';
+    this.x = 120;
+    this.y = 305;
+  }
+
+  saveGameText.prototype.ontouchend = function() {
+    var button;
+    button = game.pause_scene.gp_main_menu.save_game_button;
+    return button.touchendEvent();
+  };
+
+  return saveGameText;
+
+})(pauseMenuText);
+
+baseOkText = (function(_super) {
+  __extends(baseOkText, _super);
+
+  function baseOkText() {
+    baseOkText.__super__.constructor.apply(this, arguments);
+    this.text = 'ＯＫ';
+    this.color = 'white';
+    this.font = "37px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
+  }
+
+  return baseOkText;
+
+})(text);
+
+saveOkText = (function(_super) {
+  __extends(saveOkText, _super);
+
+  function saveOkText() {
+    saveOkText.__super__.constructor.apply(this, arguments);
+    this.x = 191;
+    this.y = 412;
+  }
+
+  saveOkText.prototype.ontouchend = function() {
+    var button;
+    button = game.pause_scene.gp_save_menu.ok_button;
+    return button.touchendEvent();
+  };
+
+  return saveOkText;
+
+})(baseOkText);
+
+messageText = (function(_super) {
+  __extends(messageText, _super);
+
+  function messageText(text, x, y) {
+    messageText.__super__.constructor.apply(this, arguments);
+    this.text = text;
+    this.color = 'black';
+    this.font = "22px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
+    this.x = x;
+    this.y = y;
+  }
+
+  return messageText;
 
 })(text);
 
@@ -1293,14 +1448,15 @@ Debug = (function(_super) {
   function Debug() {
     Debug.__super__.constructor.apply(this, arguments);
     this.all_debug_flg = false;
-    this.lille_flg = false;
-    this.item_flg = false;
+    this.force_pause_flg = false;
+    this.lille_flg = true;
+    this.item_flg = true;
     this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
     this.fix_tention_item_fall_flg = false;
     this.fix_tention_slot_hit_flg = false;
     this.force_insert_muse = false;
-    this.lille_array = [[15, 16], [15], [15]];
+    this.lille_array = [[16, 15], [15], [15]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -50;
     this.fix_tention_slot_hit_flg = 200;
@@ -1357,15 +1513,15 @@ slotSetting = (function(_super) {
     カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
     11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
     direction:キャラクターの向き、left or right
-    カットインの画像サイズ、頭の位置で760px
+    カットインの画像サイズ、頭の位置で570px
      */
     this.muse_material_list = {
       11: {
         'cut_in': [
           {
             'name': '11_0',
-            'width': 528,
-            'height': 760,
+            'width': 360,
+            'height': 570,
             'direction': 'left'
           }
         ],
@@ -1381,8 +1537,8 @@ slotSetting = (function(_super) {
         'cut_in': [
           {
             'name': '12_0',
-            'width': 680,
-            'height': 970,
+            'width': 510,
+            'height': 728,
             'direction': 'left'
           }
         ],
@@ -1398,8 +1554,8 @@ slotSetting = (function(_super) {
         'cut_in': [
           {
             'name': '13_0',
-            'width': 760,
-            'height': 845,
+            'width': 570,
+            'height': 634,
             'direction': 'left'
           }
         ],
@@ -1415,8 +1571,8 @@ slotSetting = (function(_super) {
         'cut_in': [
           {
             'name': '14_0',
-            'width': 634,
-            'height': 864,
+            'width': 476,
+            'height': 648,
             'direction': 'left'
           }
         ],
@@ -1432,13 +1588,13 @@ slotSetting = (function(_super) {
         'cut_in': [
           {
             'name': '15_0',
-            'width': 670,
-            'height': 760,
+            'width': 502,
+            'height': 570,
             'direction': 'right'
           }, {
             'name': '15_1',
-            'width': 801,
-            'height': 850,
+            'width': 601,
+            'height': 638,
             'direction': 'left'
           }
         ],
@@ -1454,8 +1610,8 @@ slotSetting = (function(_super) {
         'cut_in': [
           {
             'name': '16_0',
-            'width': 584,
-            'height': 760,
+            'width': 438,
+            'height': 570,
             'direction': 'right'
           }
         ],
@@ -1471,8 +1627,8 @@ slotSetting = (function(_super) {
         'cut_in': [
           {
             'name': '17_0',
-            'width': 620,
-            'height': 940,
+            'width': 465,
+            'height': 705,
             'direction': 'left'
           }
         ],
@@ -1488,8 +1644,8 @@ slotSetting = (function(_super) {
         'cut_in': [
           {
             'name': '18_0',
-            'width': 799,
-            'height': 808,
+            'width': 599,
+            'height': 606,
             'direction': 'right'
           }
         ],
@@ -1505,8 +1661,8 @@ slotSetting = (function(_super) {
         'cut_in': [
           {
             'name': '19_0',
-            'width': 613,
-            'height': 760,
+            'width': 460,
+            'height': 570,
             'direction': 'left'
           }
         ],
@@ -1526,9 +1682,9 @@ slotSetting = (function(_super) {
 
   slotSetting.prototype.setGravity = function() {
     var val;
-    val = Math.floor((game.tension / this.tension_max) * 1.2) + 0.7;
+    val = Math.floor((game.tension / this.tension_max) * 0.9) + 0.5;
     if (game.fever === true) {
-      val = 1.6;
+      val = 1.2;
     }
     return val;
   };
@@ -1825,8 +1981,8 @@ mainScene = (function(_super) {
     this.addChild(this.gp_stage_front);
     this.gp_system = new gpSystem();
     this.addChild(this.gp_system);
-    this.gp_slot.x = 150;
-    return this.gp_slot.y = 200;
+    this.gp_slot.x = 112;
+    return this.gp_slot.y = 150;
   };
 
   mainScene.prototype.onenterframe = function(e) {
@@ -1893,9 +2049,9 @@ mainScene = (function(_super) {
 
   mainScene.prototype.tensionSetValueFever = function() {
     if (game.fever === true) {
-      game.tensionSetValue(this.fever_down_tension);
+      game.tensionSetValue(game.fever_down_tension);
       if (game.tension <= 0) {
-        game.bgmStop(this.main_scene.gp_slot.fever_bgm);
+        game.bgmStop(game.main_scene.gp_slot.fever_bgm);
         return game.fever = false;
       }
     }
@@ -1910,7 +2066,41 @@ pauseScene = (function(_super) {
 
   function pauseScene() {
     pauseScene.__super__.constructor.apply(this, arguments);
+    this.gp_main_menu = new gpMainMenu();
+    this.gp_save_menu = new gpSaveMenu();
+    this.addChild(this.gp_main_menu);
   }
+
+  pauseScene.prototype.setSaveMenu = function() {
+    this.addChild(this.gp_save_menu);
+    return this._exeGameSave();
+  };
+
+  pauseScene.prototype.removeSaveMenu = function() {
+    return this.removeChild(this.gp_save_menu);
+  };
+
+
+  /*
+  データ保存の実行
+   */
+
+  pauseScene.prototype._exeGameSave = function() {
+    var key, saveData, val, _results;
+    saveData = {
+      'money': game.money,
+      'bet': game.bet,
+      'combo': game.combo,
+      'tension': game.tension,
+      'prev_muse': JSON.stringify(game.slot_setting.prev_muse)
+    };
+    _results = [];
+    for (key in saveData) {
+      val = saveData[key];
+      _results.push(window.localStorage.setItem(key, val));
+    }
+    return _results;
+  };
 
   return pauseScene;
 
@@ -1976,14 +2166,14 @@ FrontPanorama = (function(_super) {
   __extends(FrontPanorama, _super);
 
   function FrontPanorama(w, h) {
-    FrontPanorama.__super__.constructor.call(this, game.width, 400);
+    FrontPanorama.__super__.constructor.call(this, game.width, 300);
     this.image = game.imageload("okujou");
     this.setPosition();
   }
 
   FrontPanorama.prototype.setPosition = function() {
     this.x = 0;
-    return this.y = 560;
+    return this.y = 420;
   };
 
   return FrontPanorama;
@@ -2101,8 +2291,8 @@ appObject = (function(_super) {
 
   function appObject(w, h) {
     appObject.__super__.constructor.call(this, w, h);
-    this.gravity = 1.6;
-    this.friction = 2.3;
+    this.gravity = 1.2;
+    this.friction = 1.7;
   }
 
   return appObject;
@@ -2123,9 +2313,9 @@ Character = (function(_super) {
     this.isAir = true;
     this.vx = 0;
     this.vy = 0;
-    this.ax = 4;
-    this.mx = 9;
-    this.my = 25;
+    this.ax = 3;
+    this.mx = 7;
+    this.my = 19;
   }
 
   Character.prototype.onenterframe = function(e) {
@@ -2465,7 +2655,7 @@ Bear = (function(_super) {
   __extends(Bear, _super);
 
   function Bear() {
-    Bear.__super__.constructor.call(this, 90, 87);
+    Bear.__super__.constructor.call(this, 67, 65);
     this.image = game.imageload("chun");
     this.x = 0;
     this.y = 0;
@@ -2579,7 +2769,7 @@ MacaroonCatch = (function(_super) {
   __extends(MacaroonCatch, _super);
 
   function MacaroonCatch(w, h) {
-    MacaroonCatch.__super__.constructor.call(this, 50, 50);
+    MacaroonCatch.__super__.constructor.call(this, 37, 37);
     this.image = game.imageload("sweets");
     this.frame = 1;
     this.scaleX = 1.5;
@@ -2594,7 +2784,7 @@ OnionCatch = (function(_super) {
   __extends(OnionCatch, _super);
 
   function OnionCatch(w, h) {
-    OnionCatch.__super__.constructor.call(this, 50, 50);
+    OnionCatch.__super__.constructor.call(this, 37, 37);
     this.image = game.imageload("sweets");
     this.frame = 5;
     this.scaleX = 1.5;
@@ -2635,12 +2825,12 @@ Money = (function(_super) {
   __extends(Money, _super);
 
   function Money(isHoming) {
-    Money.__super__.constructor.call(this, 35, 40);
+    Money.__super__.constructor.call(this, 26, 30);
     this.vx = 0;
     this.vy = 0;
     this.frame_init = 0;
     this.price = 1;
-    this.gravity = 0.5;
+    this.gravity = 0.37;
     this.image = game.imageload("coin");
     this.catch_se = game.soundload("medal");
     this.isHoming = isHoming;
@@ -2659,7 +2849,7 @@ Money = (function(_super) {
 
   Money.prototype._setGravity = function() {
     if (this.isHoming === true) {
-      return this.gravity = 2;
+      return this.gravity = 1.5;
     }
   };
 
@@ -2881,7 +3071,7 @@ UnderFrame = (function(_super) {
   __extends(UnderFrame, _super);
 
   function UnderFrame(w, h) {
-    UnderFrame.__super__.constructor.call(this, 330, 110);
+    UnderFrame.__super__.constructor.call(this, 246, 82);
     this.image = game.imageload("under_frame");
   }
 
@@ -2904,7 +3094,7 @@ Lille = (function(_super) {
   __extends(Lille, _super);
 
   function Lille(w, h) {
-    Lille.__super__.constructor.call(this, 110, 110);
+    Lille.__super__.constructor.call(this, 82, 82);
     this.image = game.imageload("lille");
     this.lotate_se = game.soundload('select');
     this.lilleArray = [];
@@ -2963,7 +3153,7 @@ LeftLille = (function(_super) {
     LeftLille.__super__.constructor.apply(this, arguments);
     this.lilleArray = game.slot_setting.lille_array_0[0];
     this.eyeInit();
-    this.x = -55;
+    this.x = -41;
   }
 
   return LeftLille;
@@ -2977,7 +3167,7 @@ MiddleLille = (function(_super) {
     MiddleLille.__super__.constructor.apply(this, arguments);
     this.lilleArray = game.slot_setting.lille_array_0[1];
     this.eyeInit();
-    this.x = 110;
+    this.x = 82;
   }
 
   return MiddleLille;
@@ -2991,7 +3181,7 @@ RightLille = (function(_super) {
     RightLille.__super__.constructor.apply(this, arguments);
     this.lilleArray = game.slot_setting.lille_array_0[2];
     this.eyeInit();
-    this.x = 274;
+    this.x = 205;
   }
 
   RightLille.prototype.soundLotateSe = function() {
@@ -3011,12 +3201,36 @@ System = (function(_super) {
     System.__super__.constructor.call(this, w, h);
   }
 
+
+  /*
+  枠の無い長方形
+  @param color 色
+   */
+
   System.prototype.drawRect = function(color) {
     var surface;
     surface = new Surface(this.w, this.h);
     surface.context.fillStyle = color;
     surface.context.fillRect(0, 0, this.w, this.h, 10);
     surface.context.fill();
+    return surface;
+  };
+
+
+  /*
+  枠のある長方形
+  @param string strokeColor 枠の色
+  @param string fillColor   色
+  @param number thick       枠の太さ
+   */
+
+  System.prototype.drawStrokeRect = function(strokeColor, fillColor, thick) {
+    var surface;
+    surface = new Surface(this.w, this.h);
+    surface.context.fillStyle = strokeColor;
+    surface.context.fillRect(0, 0, this.w, this.h);
+    surface.context.fillStyle = fillColor;
+    surface.context.fillRect(thick, thick, this.w - (thick * 2), this.h - (thick * 2));
     return surface;
   };
 
@@ -3031,18 +3245,25 @@ Button = (function(_super) {
     Button.__super__.constructor.call(this, w, h);
   }
 
+  Button.prototype.touchendEvent = function() {};
+
   return Button;
 
 })(System);
+
+
+/*
+ポーズボタン
+ */
 
 pauseButton = (function(_super) {
   __extends(pauseButton, _super);
 
   function pauseButton() {
-    pauseButton.__super__.constructor.call(this, 40, 40);
+    pauseButton.__super__.constructor.call(this, 30, 30);
     this.image = this.drawRect('#F9DFD5');
-    this.x = 580;
-    this.y = 120;
+    this.x = 435;
+    this.y = 90;
   }
 
   pauseButton.prototype.ontouchend = function(e) {
@@ -3053,6 +3274,104 @@ pauseButton = (function(_super) {
 
 })(Button);
 
+
+/*
+ポーズメニューのボタン
+ */
+
+pauseMainMenuButton = (function(_super) {
+  __extends(pauseMainMenuButton, _super);
+
+  function pauseMainMenuButton() {
+    pauseMainMenuButton.__super__.constructor.call(this, 300, 45);
+    this.image = this.drawRect('#ffffff');
+    this.x = 90;
+    this.y = 0;
+  }
+
+  pauseMainMenuButton.prototype.ontouchend = function(e) {
+    return this.touchendEvent();
+  };
+
+  return pauseMainMenuButton;
+
+})(Button);
+
+
+/*
+ゲームへ戻る
+ */
+
+returnGameButton = (function(_super) {
+  __extends(returnGameButton, _super);
+
+  function returnGameButton() {
+    returnGameButton.__super__.constructor.apply(this, arguments);
+    this.y = 150;
+  }
+
+  returnGameButton.prototype.touchendEvent = function() {
+    return game.popScene(game.pause_scene);
+  };
+
+  return returnGameButton;
+
+})(pauseMainMenuButton);
+
+
+/*
+ゲームを保存する
+ */
+
+saveGameButton = (function(_super) {
+  __extends(saveGameButton, _super);
+
+  function saveGameButton() {
+    saveGameButton.__super__.constructor.apply(this, arguments);
+    this.y = 300;
+  }
+
+  saveGameButton.prototype.touchendEvent = function() {
+    return game.pause_scene.setSaveMenu();
+  };
+
+  return saveGameButton;
+
+})(pauseMainMenuButton);
+
+baseOkButton = (function(_super) {
+  __extends(baseOkButton, _super);
+
+  function baseOkButton() {
+    baseOkButton.__super__.constructor.call(this, 150, 45);
+    this.image = this.drawStrokeRect('#cccccc', '#FF5495', 3);
+  }
+
+  baseOkButton.prototype.ontouchend = function(e) {
+    return this.touchendEvent();
+  };
+
+  return baseOkButton;
+
+})(Button);
+
+saveOkButton = (function(_super) {
+  __extends(saveOkButton, _super);
+
+  function saveOkButton() {
+    saveOkButton.__super__.constructor.apply(this, arguments);
+    this.x = 157;
+    this.y = 412;
+  }
+
+  saveOkButton.prototype.touchendEvent = function() {
+    return game.pause_scene.removeSaveMenu();
+  };
+
+  return saveOkButton;
+
+})(baseOkButton);
+
 Dialog = (function(_super) {
   __extends(Dialog, _super);
 
@@ -3060,9 +3379,45 @@ Dialog = (function(_super) {
     Dialog.__super__.constructor.call(this, w, h);
   }
 
+
+  /*
+  ダイアログの描画
+   */
+
+  Dialog.prototype.drawDialog = function() {
+    return this.drawStrokeRect('#aaaaaa', '#ffffff', 5);
+  };
+
   return Dialog;
 
 })(System);
+
+pauseBack = (function(_super) {
+  __extends(pauseBack, _super);
+
+  function pauseBack(w, h) {
+    pauseBack.__super__.constructor.call(this, game.width, game.height);
+    this.image = this.drawRect('#000000');
+    this.opacity = 0.8;
+  }
+
+  return pauseBack;
+
+})(Dialog);
+
+baseDialog = (function(_super) {
+  __extends(baseDialog, _super);
+
+  function baseDialog() {
+    baseDialog.__super__.constructor.call(this, 375, 375);
+    this.image = this.drawDialog();
+    this.x = 60;
+    this.y = 150;
+  }
+
+  return baseDialog;
+
+})(Dialog);
 
 Param = (function(_super) {
   __extends(Param, _super);
@@ -3079,10 +3434,10 @@ TensionGaugeBack = (function(_super) {
   __extends(TensionGaugeBack, _super);
 
   function TensionGaugeBack(w, h) {
-    TensionGaugeBack.__super__.constructor.call(this, 610, 25);
+    TensionGaugeBack.__super__.constructor.call(this, 457, 19);
     this.image = this.drawRect('#FFFFFF');
-    this.x = 15;
-    this.y = 75;
+    this.x = 11;
+    this.y = 56;
   }
 
   return TensionGaugeBack;
@@ -3093,10 +3448,10 @@ TensionGauge = (function(_super) {
   __extends(TensionGauge, _super);
 
   function TensionGauge(w, h) {
-    TensionGauge.__super__.constructor.call(this, 600, 15);
+    TensionGauge.__super__.constructor.call(this, 450, 11);
     this.image = this.drawRect('#6EB7DB');
-    this.x = 20;
-    this.y = 80;
+    this.x = 15;
+    this.y = 60;
     this.setValue();
   }
 
@@ -3107,7 +3462,7 @@ TensionGauge = (function(_super) {
       tension = game.tension / game.slot_setting.tension_max;
     }
     this.scaleX = tension;
-    this.x = 20 - ((this.w - tension * this.w) / 2);
+    this.x = 15 - ((this.w - tension * this.w) / 2);
     if (tension < 0.25) {
       return this.image = this.drawRect('#6EB7DB');
     } else if (tension < 0.5) {

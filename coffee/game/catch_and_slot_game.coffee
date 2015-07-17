@@ -7,10 +7,9 @@ class LoveliveGame extends catchAndSlotGame
         super @width, @height
         @debug = new Debug()
         @slot_setting = new slotSetting()
-        @width = 640
-        @height = 960
+        @width = 480
+        @height = 720
         @fps = 24
-        @scale = 0.7
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin']
         #音声リスト
@@ -24,19 +23,23 @@ class LoveliveGame extends catchAndSlotGame
 
         #ゲーム中どこからでもアクセスのある数値
         @money_init = 100 #ゲーム開始時の所持金
+        @fever = false #trueならフィーバー中
+        @fever_down_tension = 0
+        @item_kind = 0 #落下アイテムの種類（フレーム）
+
+        #セーブする変数(slot_settingにもあるので注意)
         @money = 0 #現在の所持金
         @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
         @tension = 0 #現在のテンション(500がマックス)
-        @fever = false #trueならフィーバー中
-        @fever_down_tension = 0
-        @item_kind = 0 #落下アイテムの種類（フレーム）
 
     onload:() ->
         @gameInit()
         @main_scene = new mainScene()
         @pushScene(@main_scene)
         @pause_scene = new pauseScene()
+        if @debug.force_pause_flg is true
+            @pushScene(@pause_scene)
 
     ###
     スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
