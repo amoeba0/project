@@ -3,6 +3,10 @@ window.onload = ->
     #グローバル変数にはwindow.をつけて宣言する
     window.game = new LoveliveGame()
     game.start()
+class appDomLayer extends DomLayer
+    constructor: () ->
+        super
+
 class appGame extends Game
     constructor:(w, h)->
         super w, h
@@ -73,6 +77,12 @@ class appGame extends Game
 class appGroup extends Group
     constructor: () ->
         super
+class appHtml extends Entity
+    constructor: (width, height) ->
+        super
+        @_element = document.createElement('div')
+        @width = width
+        @height = height
 class appLabel extends Label
     constructor: () ->
         super
@@ -87,6 +97,25 @@ class appSprite extends Sprite
         super w, h
         @w = w
         @h = h
+class pauseMainLayer extends appDomLayer
+    constructor: () ->
+        super
+        @return_game_button = new returnGameButtonHtml()
+        @addChild(@return_game_button)
+        @save_game_button = new saveGameButtonHtml()
+        @addChild(@save_game_button)
+
+class pauseSaveLayer extends appDomLayer
+    constructor: () ->
+        super
+        @dialog = new saveDialogHtml()
+        @addChild(@dialog)
+        @ok_button = new saveOkButtonHtml()
+        @addChild(@ok_button)
+class titleMainLayer extends appDomLayer
+    constructor: () ->
+        super
+
 class catchAndSlotGame extends appGame
     constructor:(w, h)->
         super w, h
@@ -757,37 +786,95 @@ class gpSystem extends appGroup
             game.bet = 10000000
         @bet_text.setValue()
 
-class gpMainMenu extends appGroup
+class systemHtml extends appHtml
+    constructor: (width, height) ->
+        super width, height
+        @class = []
+        @text = ''
+    setHtml: ()->
+        tmp_cls = ''
+        for val in @class
+            tmp_cls += val + ' '
+        @_element.innerHTML = '<div class="'+tmp_cls+'">'+@text+'</div>'
+class buttonHtml extends systemHtml
+    constructor: (width, height) ->
+        super width, height
+        @class = ['base-button']
+    touchendEvent:() ->
+
+###
+ポーズメニューのボタン
+###
+class pauseMainMenuButtonHtml extends buttonHtml
+    constructor: () ->
+        super 300, 45
+        @x = 90
+        @y = 0
+        @class.push('pause-main-menu-button')
+    ontouchend: (e) ->
+        @touchendEvent()
+
+###
+ゲームへ戻る
+###
+class returnGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super
-        @pause_back = new pauseBack()
-        @addChild(@pause_back)
+        @y = 150
+        @text = 'ゲームに戻る'
+        @setHtml()
+    touchendEvent:() ->
+        game.popScene(game.pause_scene)
 
-        @return_game_button = new returnGameButton()
-        @addChild(@return_game_button)
-        @return_game_text = new returnGameText()
-        @addChild(@return_game_text)
-
-        @save_game_button = new saveGameButton()
-        @addChild(@save_game_button)
-        @save_game_text = new saveGameText()
-        @addChild(@save_game_text)
-class gpSaveMenu extends appGroup
+###
+ゲームを保存する
+###
+class saveGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super
-        @dialog = new baseDialog()
-        @addChild(@dialog)
+        @y = 300
+        @text = 'ゲームを保存する'
+        @setHtml()
+    touchendEvent:() ->
+        game.pause_scene.setSaveMenu()
 
-        @ok_button = new saveOkButton()
-        @addChild(@ok_button)
-        @ok_text = new saveOkText()
-        @addChild(@ok_text)
+###
+OKボタン
+###
+class baseOkButtonHtml extends buttonHtml
+    constructor:()->
+        super 150, 45
+        @class.push('base-ok-button')
+        @text = 'ＯＫ'
+        @setHtml()
+    ontouchend: (e) ->
+        @touchendEvent()
 
-        @save_message = new messageText('保存しました。', 157, 262)
-        @addChild(@save_message)
-class gpTitleMenu extends appGroup
+###
+セーブのOKボタン
+###
+class saveOkButtonHtml extends baseOkButtonHtml
+    constructor:()->
+        super
+        @x = 170
+        @y = 380
+    touchendEvent:() ->
+        game.pause_scene.removeSaveMenu()
+class dialogHtml extends systemHtml
+    constructor: (width, height) ->
+        super width, height
+class baseDialogHtml extends dialogHtml
+    constructor: () ->
+        super 375, 375
+        @class = ['base-dialog']
+class saveDialogHtml extends baseDialogHtml
     constructor: () ->
         super
+        @text = '保存しました。'
+        @class.push('base-dialog-save')
+        @x = 60
+        @y = 150
+        @setHtml()
 class text extends appLabel
     constructor: () ->
         super
@@ -859,57 +946,6 @@ class comboUnitText extends text
         @font = "22px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
         @x = 217
         @y = 90
-
-class pauseMenuText extends text
-    constructor: () ->
-        super
-        @color = 'black'
-        @font = "30px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
-
-class returnGameText extends pauseMenuText
-    constructor: () ->
-        super
-        @text = 'ゲームに戻る'
-        @x = 150
-        @y = 155
-    ontouchend: ()->
-        button = game.pause_scene.gp_main_menu.return_game_button
-        button.touchendEvent()
-
-class saveGameText extends pauseMenuText
-    constructor: () ->
-        super
-        @text = 'ゲームを保存する'
-        @x = 120
-        @y = 305
-    ontouchend: ()->
-        button = game.pause_scene.gp_main_menu.save_game_button
-        button.touchendEvent()
-
-class baseOkText extends text
-    constructor:()->
-        super
-        @text = 'ＯＫ'
-        @color = 'white'
-        @font = "37px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
-
-class saveOkText extends baseOkText
-    constructor:()->
-        super
-        @x = 191
-        @y = 412
-    ontouchend: ()->
-        button = game.pause_scene.gp_save_menu.ok_button
-        button.touchendEvent()
-
-class messageText extends text
-    constructor:(text, x, y)->
-        super
-        @text = text
-        @color = 'black'
-        @font = "22px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
-        @x = x
-        @y = y
 ###
 デバッグ用設定
 ###
@@ -924,9 +960,9 @@ class Debug extends appNode
         @force_pause_flg = false
 
         #デバッグ用リールにすりかえる
-        @lille_flg = true
+        @lille_flg = false
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = true
+        @item_flg = false
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する
@@ -1362,14 +1398,16 @@ class mainScene extends appScene
 class pauseScene extends appScene
     constructor: () ->
         super
-        @gp_main_menu = new gpMainMenu()
-        @gp_save_menu = new gpSaveMenu()
-        @addChild(@gp_main_menu)
+        @pause_back = new pauseBack()
+        @addChild(@pause_back)
+        @pause_main_layer = new pauseMainLayer()
+        @addChild(@pause_main_layer)
+        @pause_save_layer = new pauseSaveLayer()
     setSaveMenu: () ->
-        @addChild(@gp_save_menu)
+        @addChild(@pause_save_layer)
         @_exeGameSave()
     removeSaveMenu:()->
-        @removeChild(@gp_save_menu)
+        @removeChild(@pause_save_layer)
     ###
     データ保存の実行
     ###
@@ -2078,53 +2116,6 @@ class pauseButton extends Button
         @y = 90
     ontouchend: (e)->
         game.pushScene(game.pause_scene)
-
-###
-ポーズメニューのボタン
-###
-class pauseMainMenuButton extends Button
-    constructor: () ->
-        super 300, 45
-        @image = @drawRect('#ffffff')
-        @x = 90
-        @y = 0
-    ontouchend: (e) ->
-        @touchendEvent()
-
-###
-ゲームへ戻る
-###
-class returnGameButton extends pauseMainMenuButton
-    constructor: () ->
-        super
-        @y = 150
-    touchendEvent:() ->
-        game.popScene(game.pause_scene)
-
-###
-ゲームを保存する
-###
-class saveGameButton extends pauseMainMenuButton
-    constructor: () ->
-        super
-        @y = 300
-    touchendEvent:() ->
-        game.pause_scene.setSaveMenu()
-
-class baseOkButton extends Button
-    constructor:()->
-        super 150, 45
-        @image = @drawStrokeRect('#cccccc', '#FF5495', 3)
-    ontouchend: (e) ->
-        @touchendEvent()
-
-class saveOkButton extends baseOkButton
-    constructor:()->
-        super
-        @x = 157
-        @y = 412
-    touchendEvent:() ->
-        game.pause_scene.removeSaveMenu()
 class Dialog extends System
     constructor: (w, h) ->
         super w, h
@@ -2138,12 +2129,6 @@ class pauseBack extends Dialog
         super game.width, game.height
         @image = @drawRect('#000000')
         @opacity = 0.8
-class baseDialog extends Dialog
-    constructor: () ->
-        super 375, 375
-        @image = @drawDialog()
-        @x = 60
-        @y = 150
 
 class Param extends System
     constructor: (w, h) ->

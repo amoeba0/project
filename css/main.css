@@ -1,0 +1,32 @@
+.base-button {
+    text-align: center;
+    cursor: pointer;
+}
+.pause-main-menu-button {
+    background-color: #ffffff;
+    width: 300px;
+    font: 30px Consolas Monaco MSゴシック;
+    padding: 10px 0px;
+}
+.base-ok-button {
+    background-color: #FF5495;
+    width: 150px;
+    padding: 10px 0px;
+    font: 37px Consolas Monaco MSゴシック;
+    border: solid 3px #cccccc;
+    color: white;
+}
+
+
+
+.base-dialog {
+    background-color: #ffffff;
+    width: 375px;
+    text-align: center;
+    font: 22px Consolas Monaco MSゴシック;
+    border: solid 3px #aaaaaa;
+    border-radius: 10px;
+}
+.base-dialog-save {
+    padding: 100px 0px 200px 0px;
+}

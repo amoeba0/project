@@ -12,9 +12,9 @@ class Debug extends appNode
         @force_pause_flg = false
 
         #デバッグ用リールにすりかえる
-        @lille_flg = true
+        @lille_flg = false
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = true
+        @item_flg = false
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する

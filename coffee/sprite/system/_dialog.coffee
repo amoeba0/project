@@ -11,9 +11,3 @@ class pauseBack extends Dialog
         super game.width, game.height
         @image = @drawRect('#000000')
         @opacity = 0.8
-class baseDialog extends Dialog
-    constructor: () ->
-        super 375, 375
-        @image = @drawDialog()
-        @x = 60
-        @y = 150

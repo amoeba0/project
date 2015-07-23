@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appGame, appGroup, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialog, baseOkButton, baseOkText, betText, catchAndSlotGame, comboText, comboUnitText, cutIn, effect, gpEffect, gpMainMenu, gpPanorama, gpSaveMenu, gpSlot, gpStage, gpSystem, gpTitleMenu, mainScene, messageText, moneyText, pauseBack, pauseButton, pauseMainMenuButton, pauseMenuText, pauseScene, returnGameButton, returnGameText, saveGameButton, saveGameText, saveOkButton, saveOkText, slotSetting, stageBack, stageFront, text, titleScene,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betText, buttonHtml, catchAndSlotGame, comboText, comboUnitText, cutIn, dialogHtml, effect, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, pauseBack, pauseButton, pauseMainLayer, pauseMainMenuButtonHtml, pauseSaveLayer, pauseScene, returnGameButtonHtml, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, slotSetting, stageBack, stageFront, systemHtml, text, titleMainLayer, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -8,6 +8,17 @@ window.onload = function() {
   window.game = new LoveliveGame();
   return game.start();
 };
+
+appDomLayer = (function(_super) {
+  __extends(appDomLayer, _super);
+
+  function appDomLayer() {
+    appDomLayer.__super__.constructor.apply(this, arguments);
+  }
+
+  return appDomLayer;
+
+})(DomLayer);
 
 appGame = (function(_super) {
   __extends(appGame, _super);
@@ -125,6 +136,20 @@ appGroup = (function(_super) {
 
 })(Group);
 
+appHtml = (function(_super) {
+  __extends(appHtml, _super);
+
+  function appHtml(width, height) {
+    appHtml.__super__.constructor.apply(this, arguments);
+    this._element = document.createElement('div');
+    this.width = width;
+    this.height = height;
+  }
+
+  return appHtml;
+
+})(Entity);
+
 appLabel = (function(_super) {
   __extends(appLabel, _super);
 
@@ -170,6 +195,47 @@ appSprite = (function(_super) {
   return appSprite;
 
 })(Sprite);
+
+pauseMainLayer = (function(_super) {
+  __extends(pauseMainLayer, _super);
+
+  function pauseMainLayer() {
+    pauseMainLayer.__super__.constructor.apply(this, arguments);
+    this.return_game_button = new returnGameButtonHtml();
+    this.addChild(this.return_game_button);
+    this.save_game_button = new saveGameButtonHtml();
+    this.addChild(this.save_game_button);
+  }
+
+  return pauseMainLayer;
+
+})(appDomLayer);
+
+pauseSaveLayer = (function(_super) {
+  __extends(pauseSaveLayer, _super);
+
+  function pauseSaveLayer() {
+    pauseSaveLayer.__super__.constructor.apply(this, arguments);
+    this.dialog = new saveDialogHtml();
+    this.addChild(this.dialog);
+    this.ok_button = new saveOkButtonHtml();
+    this.addChild(this.ok_button);
+  }
+
+  return pauseSaveLayer;
+
+})(appDomLayer);
+
+titleMainLayer = (function(_super) {
+  __extends(titleMainLayer, _super);
+
+  function titleMainLayer() {
+    titleMainLayer.__super__.constructor.apply(this, arguments);
+  }
+
+  return titleMainLayer;
+
+})(appDomLayer);
 
 catchAndSlotGame = (function(_super) {
   __extends(catchAndSlotGame, _super);
@@ -1159,56 +1225,196 @@ gpSystem = (function(_super) {
 
 })(appGroup);
 
-gpMainMenu = (function(_super) {
-  __extends(gpMainMenu, _super);
+systemHtml = (function(_super) {
+  __extends(systemHtml, _super);
 
-  function gpMainMenu() {
-    gpMainMenu.__super__.constructor.apply(this, arguments);
-    this.pause_back = new pauseBack();
-    this.addChild(this.pause_back);
-    this.return_game_button = new returnGameButton();
-    this.addChild(this.return_game_button);
-    this.return_game_text = new returnGameText();
-    this.addChild(this.return_game_text);
-    this.save_game_button = new saveGameButton();
-    this.addChild(this.save_game_button);
-    this.save_game_text = new saveGameText();
-    this.addChild(this.save_game_text);
+  function systemHtml(width, height) {
+    systemHtml.__super__.constructor.call(this, width, height);
+    this["class"] = [];
+    this.text = '';
   }
 
-  return gpMainMenu;
+  systemHtml.prototype.setHtml = function() {
+    var tmp_cls, val, _i, _len, _ref;
+    tmp_cls = '';
+    _ref = this["class"];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      val = _ref[_i];
+      tmp_cls += val + ' ';
+    }
+    return this._element.innerHTML = '<div class="' + tmp_cls + '">' + this.text + '</div>';
+  };
 
-})(appGroup);
+  return systemHtml;
 
-gpSaveMenu = (function(_super) {
-  __extends(gpSaveMenu, _super);
+})(appHtml);
 
-  function gpSaveMenu() {
-    gpSaveMenu.__super__.constructor.apply(this, arguments);
-    this.dialog = new baseDialog();
-    this.addChild(this.dialog);
-    this.ok_button = new saveOkButton();
-    this.addChild(this.ok_button);
-    this.ok_text = new saveOkText();
-    this.addChild(this.ok_text);
-    this.save_message = new messageText('保存しました。', 157, 262);
-    this.addChild(this.save_message);
+buttonHtml = (function(_super) {
+  __extends(buttonHtml, _super);
+
+  function buttonHtml(width, height) {
+    buttonHtml.__super__.constructor.call(this, width, height);
+    this["class"] = ['base-button'];
   }
 
-  return gpSaveMenu;
+  buttonHtml.prototype.touchendEvent = function() {};
 
-})(appGroup);
+  return buttonHtml;
 
-gpTitleMenu = (function(_super) {
-  __extends(gpTitleMenu, _super);
+})(systemHtml);
 
-  function gpTitleMenu() {
-    gpTitleMenu.__super__.constructor.apply(this, arguments);
+
+/*
+ポーズメニューのボタン
+ */
+
+pauseMainMenuButtonHtml = (function(_super) {
+  __extends(pauseMainMenuButtonHtml, _super);
+
+  function pauseMainMenuButtonHtml() {
+    pauseMainMenuButtonHtml.__super__.constructor.call(this, 300, 45);
+    this.x = 90;
+    this.y = 0;
+    this["class"].push('pause-main-menu-button');
   }
 
-  return gpTitleMenu;
+  pauseMainMenuButtonHtml.prototype.ontouchend = function(e) {
+    return this.touchendEvent();
+  };
 
-})(appGroup);
+  return pauseMainMenuButtonHtml;
+
+})(buttonHtml);
+
+
+/*
+ゲームへ戻る
+ */
+
+returnGameButtonHtml = (function(_super) {
+  __extends(returnGameButtonHtml, _super);
+
+  function returnGameButtonHtml() {
+    returnGameButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 150;
+    this.text = 'ゲームに戻る';
+    this.setHtml();
+  }
+
+  returnGameButtonHtml.prototype.touchendEvent = function() {
+    return game.popScene(game.pause_scene);
+  };
+
+  return returnGameButtonHtml;
+
+})(pauseMainMenuButtonHtml);
+
+
+/*
+ゲームを保存する
+ */
+
+saveGameButtonHtml = (function(_super) {
+  __extends(saveGameButtonHtml, _super);
+
+  function saveGameButtonHtml() {
+    saveGameButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 300;
+    this.text = 'ゲームを保存する';
+    this.setHtml();
+  }
+
+  saveGameButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.setSaveMenu();
+  };
+
+  return saveGameButtonHtml;
+
+})(pauseMainMenuButtonHtml);
+
+
+/*
+OKボタン
+ */
+
+baseOkButtonHtml = (function(_super) {
+  __extends(baseOkButtonHtml, _super);
+
+  function baseOkButtonHtml() {
+    baseOkButtonHtml.__super__.constructor.call(this, 150, 45);
+    this["class"].push('base-ok-button');
+    this.text = 'ＯＫ';
+    this.setHtml();
+  }
+
+  baseOkButtonHtml.prototype.ontouchend = function(e) {
+    return this.touchendEvent();
+  };
+
+  return baseOkButtonHtml;
+
+})(buttonHtml);
+
+
+/*
+セーブのOKボタン
+ */
+
+saveOkButtonHtml = (function(_super) {
+  __extends(saveOkButtonHtml, _super);
+
+  function saveOkButtonHtml() {
+    saveOkButtonHtml.__super__.constructor.apply(this, arguments);
+    this.x = 170;
+    this.y = 380;
+  }
+
+  saveOkButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.removeSaveMenu();
+  };
+
+  return saveOkButtonHtml;
+
+})(baseOkButtonHtml);
+
+dialogHtml = (function(_super) {
+  __extends(dialogHtml, _super);
+
+  function dialogHtml(width, height) {
+    dialogHtml.__super__.constructor.call(this, width, height);
+  }
+
+  return dialogHtml;
+
+})(systemHtml);
+
+baseDialogHtml = (function(_super) {
+  __extends(baseDialogHtml, _super);
+
+  function baseDialogHtml() {
+    baseDialogHtml.__super__.constructor.call(this, 375, 375);
+    this["class"] = ['base-dialog'];
+  }
+
+  return baseDialogHtml;
+
+})(dialogHtml);
+
+saveDialogHtml = (function(_super) {
+  __extends(saveDialogHtml, _super);
+
+  function saveDialogHtml() {
+    saveDialogHtml.__super__.constructor.apply(this, arguments);
+    this.text = '保存しました。';
+    this["class"].push('base-dialog-save');
+    this.x = 60;
+    this.y = 150;
+    this.setHtml();
+  }
+
+  return saveDialogHtml;
+
+})(baseDialogHtml);
 
 text = (function(_super) {
   __extends(text, _super);
@@ -1335,108 +1541,6 @@ comboUnitText = (function(_super) {
 
 })(text);
 
-pauseMenuText = (function(_super) {
-  __extends(pauseMenuText, _super);
-
-  function pauseMenuText() {
-    pauseMenuText.__super__.constructor.apply(this, arguments);
-    this.color = 'black';
-    this.font = "30px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
-  }
-
-  return pauseMenuText;
-
-})(text);
-
-returnGameText = (function(_super) {
-  __extends(returnGameText, _super);
-
-  function returnGameText() {
-    returnGameText.__super__.constructor.apply(this, arguments);
-    this.text = 'ゲームに戻る';
-    this.x = 150;
-    this.y = 155;
-  }
-
-  returnGameText.prototype.ontouchend = function() {
-    var button;
-    button = game.pause_scene.gp_main_menu.return_game_button;
-    return button.touchendEvent();
-  };
-
-  return returnGameText;
-
-})(pauseMenuText);
-
-saveGameText = (function(_super) {
-  __extends(saveGameText, _super);
-
-  function saveGameText() {
-    saveGameText.__super__.constructor.apply(this, arguments);
-    this.text = 'ゲームを保存する';
-    this.x = 120;
-    this.y = 305;
-  }
-
-  saveGameText.prototype.ontouchend = function() {
-    var button;
-    button = game.pause_scene.gp_main_menu.save_game_button;
-    return button.touchendEvent();
-  };
-
-  return saveGameText;
-
-})(pauseMenuText);
-
-baseOkText = (function(_super) {
-  __extends(baseOkText, _super);
-
-  function baseOkText() {
-    baseOkText.__super__.constructor.apply(this, arguments);
-    this.text = 'ＯＫ';
-    this.color = 'white';
-    this.font = "37px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
-  }
-
-  return baseOkText;
-
-})(text);
-
-saveOkText = (function(_super) {
-  __extends(saveOkText, _super);
-
-  function saveOkText() {
-    saveOkText.__super__.constructor.apply(this, arguments);
-    this.x = 191;
-    this.y = 412;
-  }
-
-  saveOkText.prototype.ontouchend = function() {
-    var button;
-    button = game.pause_scene.gp_save_menu.ok_button;
-    return button.touchendEvent();
-  };
-
-  return saveOkText;
-
-})(baseOkText);
-
-messageText = (function(_super) {
-  __extends(messageText, _super);
-
-  function messageText(text, x, y) {
-    messageText.__super__.constructor.apply(this, arguments);
-    this.text = text;
-    this.color = 'black';
-    this.font = "22px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
-    this.x = x;
-    this.y = y;
-  }
-
-  return messageText;
-
-})(text);
-
 
 /*
 デバッグ用設定
@@ -1449,8 +1553,8 @@ Debug = (function(_super) {
     Debug.__super__.constructor.apply(this, arguments);
     this.all_debug_flg = false;
     this.force_pause_flg = false;
-    this.lille_flg = true;
-    this.item_flg = true;
+    this.lille_flg = false;
+    this.item_flg = false;
     this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
     this.fix_tention_item_fall_flg = false;
@@ -2066,18 +2170,20 @@ pauseScene = (function(_super) {
 
   function pauseScene() {
     pauseScene.__super__.constructor.apply(this, arguments);
-    this.gp_main_menu = new gpMainMenu();
-    this.gp_save_menu = new gpSaveMenu();
-    this.addChild(this.gp_main_menu);
+    this.pause_back = new pauseBack();
+    this.addChild(this.pause_back);
+    this.pause_main_layer = new pauseMainLayer();
+    this.addChild(this.pause_main_layer);
+    this.pause_save_layer = new pauseSaveLayer();
   }
 
   pauseScene.prototype.setSaveMenu = function() {
-    this.addChild(this.gp_save_menu);
+    this.addChild(this.pause_save_layer);
     return this._exeGameSave();
   };
 
   pauseScene.prototype.removeSaveMenu = function() {
-    return this.removeChild(this.gp_save_menu);
+    return this.removeChild(this.pause_save_layer);
   };
 
 
@@ -3274,104 +3380,6 @@ pauseButton = (function(_super) {
 
 })(Button);
 
-
-/*
-ポーズメニューのボタン
- */
-
-pauseMainMenuButton = (function(_super) {
-  __extends(pauseMainMenuButton, _super);
-
-  function pauseMainMenuButton() {
-    pauseMainMenuButton.__super__.constructor.call(this, 300, 45);
-    this.image = this.drawRect('#ffffff');
-    this.x = 90;
-    this.y = 0;
-  }
-
-  pauseMainMenuButton.prototype.ontouchend = function(e) {
-    return this.touchendEvent();
-  };
-
-  return pauseMainMenuButton;
-
-})(Button);
-
-
-/*
-ゲームへ戻る
- */
-
-returnGameButton = (function(_super) {
-  __extends(returnGameButton, _super);
-
-  function returnGameButton() {
-    returnGameButton.__super__.constructor.apply(this, arguments);
-    this.y = 150;
-  }
-
-  returnGameButton.prototype.touchendEvent = function() {
-    return game.popScene(game.pause_scene);
-  };
-
-  return returnGameButton;
-
-})(pauseMainMenuButton);
-
-
-/*
-ゲームを保存する
- */
-
-saveGameButton = (function(_super) {
-  __extends(saveGameButton, _super);
-
-  function saveGameButton() {
-    saveGameButton.__super__.constructor.apply(this, arguments);
-    this.y = 300;
-  }
-
-  saveGameButton.prototype.touchendEvent = function() {
-    return game.pause_scene.setSaveMenu();
-  };
-
-  return saveGameButton;
-
-})(pauseMainMenuButton);
-
-baseOkButton = (function(_super) {
-  __extends(baseOkButton, _super);
-
-  function baseOkButton() {
-    baseOkButton.__super__.constructor.call(this, 150, 45);
-    this.image = this.drawStrokeRect('#cccccc', '#FF5495', 3);
-  }
-
-  baseOkButton.prototype.ontouchend = function(e) {
-    return this.touchendEvent();
-  };
-
-  return baseOkButton;
-
-})(Button);
-
-saveOkButton = (function(_super) {
-  __extends(saveOkButton, _super);
-
-  function saveOkButton() {
-    saveOkButton.__super__.constructor.apply(this, arguments);
-    this.x = 157;
-    this.y = 412;
-  }
-
-  saveOkButton.prototype.touchendEvent = function() {
-    return game.pause_scene.removeSaveMenu();
-  };
-
-  return saveOkButton;
-
-})(baseOkButton);
-
 Dialog = (function(_super) {
   __extends(Dialog, _super);
 
@@ -3402,20 +3410,6 @@ pauseBack = (function(_super) {
   }
 
   return pauseBack;
-
-})(Dialog);
-
-baseDialog = (function(_super) {
-  __extends(baseDialog, _super);
-
-  function baseDialog() {
-    baseDialog.__super__.constructor.call(this, 375, 375);
-    this.image = this.drawDialog();
-    this.x = 60;
-    this.y = 150;
-  }
-
-  return baseDialog;
 
 })(Dialog);
 

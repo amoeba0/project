@@ -1,14 +1,16 @@
 class pauseScene extends appScene
     constructor: () ->
         super
-        @gp_main_menu = new gpMainMenu()
-        @gp_save_menu = new gpSaveMenu()
-        @addChild(@gp_main_menu)
+        @pause_back = new pauseBack()
+        @addChild(@pause_back)
+        @pause_main_layer = new pauseMainLayer()
+        @addChild(@pause_main_layer)
+        @pause_save_layer = new pauseSaveLayer()
     setSaveMenu: () ->
-        @addChild(@gp_save_menu)
+        @addChild(@pause_save_layer)
         @_exeGameSave()
     removeSaveMenu:()->
-        @removeChild(@gp_save_menu)
+        @removeChild(@pause_save_layer)
     ###
     データ保存の実行
     ###
