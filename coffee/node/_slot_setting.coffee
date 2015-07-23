@@ -41,7 +41,7 @@ class slotSetting extends appNode
                 'bgm':[
                     {'name':'', 'time':30}
                 ],
-                'voice':[]
+                'voice':['11_0', '11_1']
             },
             12:{
                 'cut_in':[
@@ -50,7 +50,7 @@ class slotSetting extends appNode
                 'bgm':[
                     {'name':'', 'time':30}
                 ],
-                'voice':[]
+                'voice':['12_0', '12_1']
             },
             13:{
                 'cut_in':[
@@ -59,7 +59,7 @@ class slotSetting extends appNode
                 'bgm':[
                     {'name':'', 'time':30}
                 ],
-                'voice':[]
+                'voice':['13_0', '13_1']
             },
             14:{
                 'cut_in':[
@@ -68,7 +68,7 @@ class slotSetting extends appNode
                 'bgm':[
                     {'name':'', 'time':30}
                 ],
-                'voice':[]
+                'voice':['14_0', '14_1']
             },
             15:{
                 'cut_in':[
@@ -87,7 +87,7 @@ class slotSetting extends appNode
                 'bgm':[
                     {'name':'', 'time':30}
                 ],
-                'voice':[]
+                'voice':['16_0', '16_1']
             },
             17:{
                 'cut_in':[
@@ -96,7 +96,7 @@ class slotSetting extends appNode
                 'bgm':[
                     {'name':'', 'time':30}
                 ],
-                'voice':[]
+                'voice':['17_0', '17_1']
             },
             18:{
                 'cut_in':[
@@ -105,7 +105,7 @@ class slotSetting extends appNode
                 'bgm':[
                     {'name':'', 'time':30}
                 ],
-                'voice':[]
+                'voice':['18_0', '18_1']
             },
             19:{
                 'cut_in':[
@@ -114,7 +114,7 @@ class slotSetting extends appNode
                 'bgm':[
                     {'name':'', 'time':30}
                 ],
-                'voice':[]
+                'voice':['19_0', '19_1']
             }
         }
         #テンションの最大値
@@ -256,6 +256,7 @@ class slotSetting extends appNode
     ###
     テンションの状態でスロットの内容を変更する
     ミスアイテムの頻度を決める
+    TODO 必ずμ’ｓが消えてしまう、0になるときμ’ｓが消えないバグあり
     @param number tension 変化前のテンション
     @param number val     テンションの増減値
     ###
