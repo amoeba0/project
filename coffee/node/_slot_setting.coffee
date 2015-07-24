@@ -125,6 +125,11 @@ class slotSetting extends appNode
         #セーブする変数
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
 
+    ###
+    落下アイテムの速度
+    TODO 掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
+    テンションが高いと速度に補正をかける
+    ###
     setGravity:()->
         val = Math.floor((game.tension / @tension_max) * 0.9) + 0.5
         if game.fever is true
@@ -176,17 +181,21 @@ class slotSetting extends appNode
 
     ###
     スロットを強制的に当たりにするかどうかを決める
+    コンボ数 * 0.1 ％
+    テンションMAXで2倍補正
+    過去のフィーバー回数が少ないほど上方補正かける 0回:+15,1回:+10,2回:+5
+    フィーバー中は強制的に当たり
     @return boolean true:当たり
     ###
     getIsForceSlotHit:()->
         result = false
-        rate = Math.floor(game.combo * 0.2)
+        rate = Math.floor(game.combo * 0.1 * ((game.tension / @tension_max) + 1))
+        if game.past_fever_num <= 2
+            rate += (3 - game.past_fever_num) * 5
         if rate > 100
             rate = 100
         random = Math.floor(Math.random() * 100)
-        if random < rate
-            result = true
-        if game.fever is true
+        if random < rate || game.fever is true || game.debug.force_slot_hit is true
             result = true
         return result
 
@@ -219,7 +228,7 @@ class slotSetting extends appNode
         val *= -1
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
-        #スロットにμ’ｓがいれば1つ消す
+        #TODO スロットにμ’ｓがいれば1つ消す
         return val
 
     ###
@@ -256,7 +265,6 @@ class slotSetting extends appNode
     ###
     テンションの状態でスロットの内容を変更する
     ミスアイテムの頻度を決める
-    TODO 必ずμ’ｓが消えてしまう、0になるときμ’ｓが消えないバグあり
     @param number tension 変化前のテンション
     @param number val     テンションの増減値
     ###

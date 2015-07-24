@@ -16,6 +16,7 @@ class LoveliveGame extends catchAndSlotGame
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'zenkai_no_lovelive']
 
         @keybind(90, 'z')
+        @keybind(88, 'x')
         @preloadAll()
         #一人目のμ’ｓメンバーを決めて素材をロードする
         @slot_setting.setMuseMember()
@@ -32,6 +33,7 @@ class LoveliveGame extends catchAndSlotGame
         @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
         @tension = 0 #現在のテンション(500がマックス)
+        @past_fever_num = 0 #過去にフィーバーになった回数
 
     onload:() ->
         @gameInit()

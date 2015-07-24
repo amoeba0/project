@@ -20,26 +20,27 @@ class gpSystem extends appGroup
         @_betSetting()
     ###
     キーの上下を押して掛け金を設定する
+    TODO スロットの当選金額落下中は変更できないようにする
     ###
     _betSetting: ()->
-        if game.main_scene.keyList['up'] is true
-            if @keyList['up'] is false
-                @_getBetSettingValue(true)
-                @keyList['up'] = true
-        else
-            if @keyList['up'] is true
-                @keyList['up'] = false
-        if game.main_scene.keyList['down'] is true
-            if @keyList['down'] is false
-                @_getBetSettingValue(false)
-                @keyList['down'] = true
-        else
-            if @keyList['down'] is true
-                @keyList['down'] = false
+        if game.fever is false
+            if game.main_scene.keyList['up'] is true
+                if @keyList['up'] is false
+                    @_getBetSettingValue(true)
+                    @keyList['up'] = true
+            else
+                if @keyList['up'] is true
+                    @keyList['up'] = false
+            if game.main_scene.keyList['down'] is true
+                if @keyList['down'] is false
+                    @_getBetSettingValue(false)
+                    @keyList['down'] = true
+            else
+                if @keyList['down'] is true
+                    @keyList['down'] = false
 
     ###
     掛け金の変更
-    TODO フィーバー中は変更できないようにする
     ###
     _getBetSettingValue:(up)->
         val = 1

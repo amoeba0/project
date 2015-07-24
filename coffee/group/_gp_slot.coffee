@@ -86,6 +86,7 @@ class gpSlot extends appGroup
         if hit_eye > 10 && game.fever is false
             game.bgmPlay(@fever_bgm, false)
             game.fever = true
+            game.past_fever_num += 1
             game.slot_setting.setMuseMember()
             game.musePreLoad()
             @_feverBgmStart(hit_eye)
@@ -143,15 +144,15 @@ class gpSlot extends appGroup
     _slotLilleChangeUnit:(target, change, isMuseDel)->
         arr = []
         return_arr = []
-        for key, val of change
-            return_arr.push(val)
+        return_arr = game.arrayCopy(change)
         if isMuseDel is false
             for key, val of target.lilleArray
                 if val > 10
                     arr.push(key)
             if arr.length > 0
                 for arr_key, arr_val of arr
-                    return_arr[arr_key] = target.lilleArray[arr_key]
+                    return_arr[arr_val] = target.lilleArray[arr_val]
+        console.log(return_arr)
         return return_arr
 
 
@@ -213,6 +214,6 @@ class gpSlot extends appGroup
     ###
     debugSlot:() ->
         if game.debug.lille_flg is true
-            @left_lille.lilleArray = game.debug.lille_array[0]
-            @middle_lille.lilleArray = game.debug.lille_array[1]
-            @right_lille.lilleArray = game.debug.lille_array[2]
+            @left_lille.lilleArray = game.arrayCopy(game.debug.lille_array[0])
+            @middle_lille.lilleArray = game.arrayCopy(game.debug.lille_array[1])
+            @right_lille.lilleArray = game.arrayCopy(game.debug.lille_array[2])

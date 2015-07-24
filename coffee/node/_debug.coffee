@@ -25,6 +25,8 @@ class Debug extends appNode
         @fix_tention_slot_hit_flg = false
         #スロットに必ずμ’ｓが追加される
         @force_insert_muse = false
+        #スロットが必ず当たる
+        @force_slot_hit = false
         #デバッグ用リール配列
         @lille_array = [
             [16, 15],

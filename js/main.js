@@ -121,6 +121,28 @@ appGame = (function(_super) {
     return result;
   };
 
+
+  /*
+  配列、オブジェクトの参照渡しを防ぐためにコピーする
+  http://monopocket.jp/blog/javascript/2137/
+  @param array or object target コピー対象
+  @param boolean isObject true:object false:array
+  @return array or object
+   */
+
+  appGame.prototype.arrayCopy = function(target, isObject) {
+    var tmp_arr;
+    if (isObject == null) {
+      isObject = false;
+    }
+    if (isObject === true) {
+      tmp_arr = {};
+    } else {
+      tmp_arr = [];
+    }
+    return $.extend(true, tmp_arr, target);
+  };
+
   return appGame;
 
 })(Game);
@@ -261,6 +283,7 @@ LoveliveGame = (function(_super) {
     this.imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin'];
     this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'zenkai_no_lovelive'];
     this.keybind(90, 'z');
+    this.keybind(88, 'x');
     this.preloadAll();
     this.slot_setting.setMuseMember();
     this.musePreLoad();
@@ -272,6 +295,7 @@ LoveliveGame = (function(_super) {
     this.bet = 1;
     this.combo = 0;
     this.tension = 0;
+    this.past_fever_num = 0;
   }
 
   LoveliveGame.prototype.onload = function() {
@@ -545,6 +569,7 @@ gpSlot = (function(_super) {
     if (hit_eye > 10 && game.fever === false) {
       game.bgmPlay(this.fever_bgm, false);
       game.fever = true;
+      game.past_fever_num += 1;
       game.slot_setting.setMuseMember();
       game.musePreLoad();
       return this._feverBgmStart(hit_eye);
@@ -622,10 +647,7 @@ gpSlot = (function(_super) {
     var arr, arr_key, arr_val, key, return_arr, val, _ref;
     arr = [];
     return_arr = [];
-    for (key in change) {
-      val = change[key];
-      return_arr.push(val);
-    }
+    return_arr = game.arrayCopy(change);
     if (isMuseDel === false) {
       _ref = target.lilleArray;
       for (key in _ref) {
@@ -637,10 +659,11 @@ gpSlot = (function(_super) {
       if (arr.length > 0) {
         for (arr_key in arr) {
           arr_val = arr[arr_key];
-          return_arr[arr_key] = target.lilleArray[arr_key];
+          return_arr[arr_val] = target.lilleArray[arr_val];
         }
       }
     }
+    console.log(return_arr);
     return return_arr;
   };
 
@@ -726,9 +749,9 @@ gpSlot = (function(_super) {
 
   gpSlot.prototype.debugSlot = function() {
     if (game.debug.lille_flg === true) {
-      this.left_lille.lilleArray = game.debug.lille_array[0];
-      this.middle_lille.lilleArray = game.debug.lille_array[1];
-      return this.right_lille.lilleArray = game.debug.lille_array[2];
+      this.left_lille.lilleArray = game.arrayCopy(game.debug.lille_array[0]);
+      this.middle_lille.lilleArray = game.arrayCopy(game.debug.lille_array[1]);
+      return this.right_lille.lilleArray = game.arrayCopy(game.debug.lille_array[2]);
     }
   };
 
@@ -1149,24 +1172,26 @@ gpSystem = (function(_super) {
    */
 
   gpSystem.prototype._betSetting = function() {
-    if (game.main_scene.keyList['up'] === true) {
-      if (this.keyList['up'] === false) {
-        this._getBetSettingValue(true);
-        this.keyList['up'] = true;
+    if (game.fever === false) {
+      if (game.main_scene.keyList['up'] === true) {
+        if (this.keyList['up'] === false) {
+          this._getBetSettingValue(true);
+          this.keyList['up'] = true;
+        }
+      } else {
+        if (this.keyList['up'] === true) {
+          this.keyList['up'] = false;
+        }
       }
-    } else {
-      if (this.keyList['up'] === true) {
-        this.keyList['up'] = false;
-      }
-    }
-    if (game.main_scene.keyList['down'] === true) {
-      if (this.keyList['down'] === false) {
-        this._getBetSettingValue(false);
-        return this.keyList['down'] = true;
-      }
-    } else {
-      if (this.keyList['down'] === true) {
-        return this.keyList['down'] = false;
+      if (game.main_scene.keyList['down'] === true) {
+        if (this.keyList['down'] === false) {
+          this._getBetSettingValue(false);
+          return this.keyList['down'] = true;
+        }
+      } else {
+        if (this.keyList['down'] === true) {
+          return this.keyList['down'] = false;
+        }
       }
     }
   };
@@ -1174,7 +1199,6 @@ gpSystem = (function(_super) {
 
   /*
   掛け金の変更
-  TODO フィーバー中は変更できないようにする
    */
 
   gpSystem.prototype._getBetSettingValue = function(up) {
@@ -1560,6 +1584,7 @@ Debug = (function(_super) {
     this.fix_tention_item_fall_flg = false;
     this.fix_tention_slot_hit_flg = false;
     this.force_insert_muse = false;
+    this.force_slot_hit = false;
     this.lille_array = [[16, 15], [15], [15]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -50;
@@ -1857,21 +1882,25 @@ slotSetting = (function(_super) {
 
   /*
   スロットを強制的に当たりにするかどうかを決める
+  コンボ数 * 0.1 ％
+  テンションMAXで2倍補正
+  過去のフィーバー回数が少ないほど上方補正かける 0回:+15,1回:+10,2回:+5
+  フィーバー中は強制的に当たり
   @return boolean true:当たり
    */
 
   slotSetting.prototype.getIsForceSlotHit = function() {
     var random, rate, result;
     result = false;
-    rate = Math.floor(game.combo * 0.2);
+    rate = Math.floor(game.combo * 0.1 * ((game.tension / this.tension_max) + 1));
+    if (game.past_fever_num <= 2) {
+      rate += (3 - game.past_fever_num) * 5;
+    }
     if (rate > 100) {
       rate = 100;
     }
     random = Math.floor(Math.random() * 100);
-    if (random < rate) {
-      result = true;
-    }
-    if (game.fever === true) {
+    if (random < rate || game.fever === true || game.debug.force_slot_hit === true) {
       result = true;
     }
     return result;
@@ -1968,7 +1997,6 @@ slotSetting = (function(_super) {
   /*
   テンションの状態でスロットの内容を変更する
   ミスアイテムの頻度を決める
-  TODO 必ずμ’ｓが消えてしまう、0になるときμ’ｓが消えないバグあり
   @param number tension 変化前のテンション
   @param number val     テンションの増減値
    */
@@ -2199,6 +2227,7 @@ pauseScene = (function(_super) {
       'bet': game.bet,
       'combo': game.combo,
       'tension': game.tension,
+      'past_fever_num': game.past_fever_num,
       'prev_muse': JSON.stringify(game.slot_setting.prev_muse)
     };
     _results = [];
@@ -3258,7 +3287,7 @@ LeftLille = (function(_super) {
 
   function LeftLille() {
     LeftLille.__super__.constructor.apply(this, arguments);
-    this.lilleArray = game.slot_setting.lille_array_0[0];
+    this.lilleArray = game.arrayCopy(game.slot_setting.lille_array_0[0]);
     this.eyeInit();
     this.x = -41;
   }
@@ -3272,7 +3301,7 @@ MiddleLille = (function(_super) {
 
   function MiddleLille() {
     MiddleLille.__super__.constructor.apply(this, arguments);
-    this.lilleArray = game.slot_setting.lille_array_0[1];
+    this.lilleArray = game.arrayCopy(game.slot_setting.lille_array_0[1]);
     this.eyeInit();
     this.x = 82;
   }
@@ -3286,7 +3315,7 @@ RightLille = (function(_super) {
 
   function RightLille() {
     RightLille.__super__.constructor.apply(this, arguments);
-    this.lilleArray = game.slot_setting.lille_array_0[2];
+    this.lilleArray = game.arrayCopy(game.slot_setting.lille_array_0[2]);
     this.eyeInit();
     this.x = 205;
   }

@@ -20,6 +20,7 @@ class pauseScene extends appScene
             'bet'      : game.bet,
             'combo'    : game.combo,
             'tension'  : game.tension,
+            'past_fever_num' : game.past_fever_num
             'prev_muse': JSON.stringify(game.slot_setting.prev_muse)
         }
         for key, val of saveData

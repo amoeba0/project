@@ -64,3 +64,17 @@ class appGame extends Game
         split = tmp_num.substring(split_num, split_num + 1)
         result = Number(split)
         return result
+
+    ###
+    配列、オブジェクトの参照渡しを防ぐためにコピーする
+    http://monopocket.jp/blog/javascript/2137/
+    @param array or object target コピー対象
+    @param boolean isObject true:object false:array
+    @return array or object
+    ###
+    arrayCopy:(target, isObject = false)->
+        if isObject is true
+            tmp_arr = {}
+        else
+            tmp_arr = []
+        return $.extend(true, tmp_arr, target)
