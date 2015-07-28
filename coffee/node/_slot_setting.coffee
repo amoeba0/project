@@ -39,7 +39,7 @@ class slotSetting extends appNode
                     {'name':'11_0', 'width':360, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['11_0', '11_1']
             },
@@ -48,7 +48,7 @@ class slotSetting extends appNode
                     {'name':'12_0', 'width':510, 'height':728, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['12_0', '12_1']
             },
@@ -57,7 +57,7 @@ class slotSetting extends appNode
                     {'name':'13_0', 'width':570, 'height':634, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['13_0', '13_1']
             },
@@ -66,7 +66,7 @@ class slotSetting extends appNode
                     {'name':'14_0', 'width':476, 'height':648, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['14_0', '14_1']
             },
@@ -76,7 +76,7 @@ class slotSetting extends appNode
                     {'name':'15_1', 'width':601, 'height':638, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'rinrinrin', 'time':128}
                 ],
                 'voice':['15_0', '15_1']
             },
@@ -85,7 +85,7 @@ class slotSetting extends appNode
                     {'name':'16_0', 'width':438, 'height':570, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['16_0', '16_1']
             },
@@ -94,7 +94,7 @@ class slotSetting extends appNode
                     {'name':'17_0', 'width':465, 'height':705, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['17_0', '17_1']
             },
@@ -103,7 +103,7 @@ class slotSetting extends appNode
                     {'name':'18_0', 'width':599, 'height':606, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['18_0', '18_1']
             },
@@ -112,7 +112,7 @@ class slotSetting extends appNode
                     {'name':'19_0', 'width':460, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['19_0', '19_1']
             }
@@ -167,7 +167,7 @@ class slotSetting extends appNode
                 remain.push(full[key])
         random = Math.floor(Math.random() * remain.length)
         member = remain[random]
-        #member = 15
+        #member = 16
         @now_muse_num = member
         if @prev_muse.indexOf(member) is -1
             @prev_muse.push(member)

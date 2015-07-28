@@ -5,7 +5,7 @@ class gpSlot extends appGroup
         @addChild(@underFrame)
         @lille_stop_se = game.soundload('dicision')
         @slot_hit_se = game.soundload('start')
-        @fever_bgm = game.soundload('zenkai_no_lovelive')
+        @fever_bgm = game.soundload('bgm/zenkai_no_lovelive')
         @isStopping = false #スロット停止中
         @stopIntervalFrame = 9 #スロットが連続で止まる間隔（フレーム）
         @slotIntervalFrameRandom = 0
@@ -84,7 +84,6 @@ class gpSlot extends appGroup
     ###
     _feverStart:(hit_eye)->
         if hit_eye > 10 && game.fever is false
-            game.bgmPlay(@fever_bgm, false)
             game.fever = true
             game.past_fever_num += 1
             game.slot_setting.setMuseMember()
@@ -99,8 +98,10 @@ class gpSlot extends appGroup
         random = Math.floor(Math.random() * bgms.length)
         bgm = bgms[random]
         @feverSec = bgm['time']
+        @fever_bgm = game.soundload('bgm/'+bgm['name'])
         game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (@feverSec * game.fps)) / 100
         game.fever_down_tension *= -1
+        game.bgmPlay(@fever_bgm, false)
 
     ###
     スロットの当選金額を計算
@@ -152,7 +153,6 @@ class gpSlot extends appGroup
             if arr.length > 0
                 for arr_key, arr_val of arr
                     return_arr[arr_val] = target.lilleArray[arr_val]
-        console.log(return_arr)
         return return_arr
 
 

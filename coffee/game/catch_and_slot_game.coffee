@@ -13,7 +13,7 @@ class LoveliveGame extends catchAndSlotGame
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin']
         #音声リスト
-        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'zenkai_no_lovelive']
+        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
 
         @keybind(90, 'z')
         @keybind(88, 'x')
@@ -55,6 +55,7 @@ class LoveliveGame extends catchAndSlotGame
             if material['voice'].length > 0
                 for key, val of material['voice']
                     @load('sounds/voice/'+val+'.mp3')
+            @load('sounds/bgm/'+material['bgm'][0]['name']+'.mp3')
 
     ###
     ゲーム開始時の初期数値調整

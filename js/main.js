@@ -281,7 +281,7 @@ LoveliveGame = (function(_super) {
     this.height = 720;
     this.fps = 24;
     this.imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin'];
-    this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'zenkai_no_lovelive'];
+    this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear'];
     this.keybind(90, 'z');
     this.keybind(88, 'x');
     this.preloadAll();
@@ -314,7 +314,7 @@ LoveliveGame = (function(_super) {
    */
 
   LoveliveGame.prototype.musePreLoad = function() {
-    var key, material, muse_num, val, _ref, _ref1, _results;
+    var key, material, muse_num, val, _ref, _ref1;
     muse_num = this.slot_setting.now_muse_num;
     if (this.slot_setting.muse_material_list[muse_num] !== void 0) {
       material = this.slot_setting.muse_material_list[muse_num];
@@ -325,13 +325,12 @@ LoveliveGame = (function(_super) {
       }
       if (material['voice'].length > 0) {
         _ref1 = material['voice'];
-        _results = [];
         for (key in _ref1) {
           val = _ref1[key];
-          _results.push(this.load('sounds/voice/' + val + '.mp3'));
+          this.load('sounds/voice/' + val + '.mp3');
         }
-        return _results;
       }
+      return this.load('sounds/bgm/' + material['bgm'][0]['name'] + '.mp3');
     }
   };
 
@@ -456,7 +455,7 @@ gpSlot = (function(_super) {
     this.addChild(this.underFrame);
     this.lille_stop_se = game.soundload('dicision');
     this.slot_hit_se = game.soundload('start');
-    this.fever_bgm = game.soundload('zenkai_no_lovelive');
+    this.fever_bgm = game.soundload('bgm/zenkai_no_lovelive');
     this.isStopping = false;
     this.stopIntervalFrame = 9;
     this.slotIntervalFrameRandom = 0;
@@ -567,7 +566,6 @@ gpSlot = (function(_super) {
 
   gpSlot.prototype._feverStart = function(hit_eye) {
     if (hit_eye > 10 && game.fever === false) {
-      game.bgmPlay(this.fever_bgm, false);
       game.fever = true;
       game.past_fever_num += 1;
       game.slot_setting.setMuseMember();
@@ -587,8 +585,10 @@ gpSlot = (function(_super) {
     random = Math.floor(Math.random() * bgms.length);
     bgm = bgms[random];
     this.feverSec = bgm['time'];
+    this.fever_bgm = game.soundload('bgm/' + bgm['name']);
     game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (this.feverSec * game.fps)) / 100;
-    return game.fever_down_tension *= -1;
+    game.fever_down_tension *= -1;
+    return game.bgmPlay(this.fever_bgm, false);
   };
 
 
@@ -663,7 +663,6 @@ gpSlot = (function(_super) {
         }
       }
     }
-    console.log(return_arr);
     return return_arr;
   };
 
@@ -1169,6 +1168,7 @@ gpSystem = (function(_super) {
 
   /*
   キーの上下を押して掛け金を設定する
+  TODO スロットの当選金額落下中は変更できないようにする
    */
 
   gpSystem.prototype._betSetting = function() {
@@ -1585,7 +1585,7 @@ Debug = (function(_super) {
     this.fix_tention_slot_hit_flg = false;
     this.force_insert_muse = false;
     this.force_slot_hit = false;
-    this.lille_array = [[16, 15], [15], [15]];
+    this.lille_array = [[15, 16], [16], [16]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -50;
     this.fix_tention_slot_hit_flg = 200;
@@ -1656,7 +1656,7 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': '',
+            'name': 'zenkai_no_lovelive',
             'time': 30
           }
         ],
@@ -1673,7 +1673,7 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': '',
+            'name': 'zenkai_no_lovelive',
             'time': 30
           }
         ],
@@ -1690,7 +1690,7 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': '',
+            'name': 'zenkai_no_lovelive',
             'time': 30
           }
         ],
@@ -1707,7 +1707,7 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': '',
+            'name': 'zenkai_no_lovelive',
             'time': 30
           }
         ],
@@ -1729,8 +1729,8 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': '',
-            'time': 30
+            'name': 'rinrinrin',
+            'time': 128
           }
         ],
         'voice': ['15_0', '15_1']
@@ -1746,7 +1746,7 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': '',
+            'name': 'zenkai_no_lovelive',
             'time': 30
           }
         ],
@@ -1763,7 +1763,7 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': '',
+            'name': 'zenkai_no_lovelive',
             'time': 30
           }
         ],
@@ -1780,7 +1780,7 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': '',
+            'name': 'zenkai_no_lovelive',
             'time': 30
           }
         ],
@@ -1797,7 +1797,7 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': '',
+            'name': 'zenkai_no_lovelive',
             'time': 30
           }
         ],
@@ -1808,6 +1808,13 @@ slotSetting = (function(_super) {
     this.now_muse_num = 0;
     this.prev_muse = [];
   }
+
+
+  /*
+  落下アイテムの速度
+  TODO 掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
+  テンションが高いと速度に補正をかける
+   */
 
   slotSetting.prototype.setGravity = function() {
     var val;

@@ -145,7 +145,7 @@ class LoveliveGame extends catchAndSlotGame
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin']
         #音声リスト
-        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'zenkai_no_lovelive']
+        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
 
         @keybind(90, 'z')
         @keybind(88, 'x')
@@ -187,6 +187,7 @@ class LoveliveGame extends catchAndSlotGame
             if material['voice'].length > 0
                 for key, val of material['voice']
                     @load('sounds/voice/'+val+'.mp3')
+            @load('sounds/bgm/'+material['bgm'][0]['name']+'.mp3')
 
     ###
     ゲーム開始時の初期数値調整
@@ -259,7 +260,7 @@ class gpSlot extends appGroup
         @addChild(@underFrame)
         @lille_stop_se = game.soundload('dicision')
         @slot_hit_se = game.soundload('start')
-        @fever_bgm = game.soundload('zenkai_no_lovelive')
+        @fever_bgm = game.soundload('bgm/zenkai_no_lovelive')
         @isStopping = false #スロット停止中
         @stopIntervalFrame = 9 #スロットが連続で止まる間隔（フレーム）
         @slotIntervalFrameRandom = 0
@@ -338,7 +339,6 @@ class gpSlot extends appGroup
     ###
     _feverStart:(hit_eye)->
         if hit_eye > 10 && game.fever is false
-            game.bgmPlay(@fever_bgm, false)
             game.fever = true
             game.past_fever_num += 1
             game.slot_setting.setMuseMember()
@@ -353,8 +353,10 @@ class gpSlot extends appGroup
         random = Math.floor(Math.random() * bgms.length)
         bgm = bgms[random]
         @feverSec = bgm['time']
+        @fever_bgm = game.soundload('bgm/'+bgm['name'])
         game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (@feverSec * game.fps)) / 100
         game.fever_down_tension *= -1
+        game.bgmPlay(@fever_bgm, false)
 
     ###
     スロットの当選金額を計算
@@ -406,7 +408,6 @@ class gpSlot extends appGroup
             if arr.length > 0
                 for arr_key, arr_val of arr
                     return_arr[arr_val] = target.lilleArray[arr_val]
-        console.log(return_arr)
         return return_arr
 
 
@@ -744,6 +745,7 @@ class gpSystem extends appGroup
         @_betSetting()
     ###
     キーの上下を押して掛け金を設定する
+    TODO スロットの当選金額落下中は変更できないようにする
     ###
     _betSetting: ()->
         if game.fever is false
@@ -994,9 +996,9 @@ class Debug extends appNode
         @force_slot_hit = false
         #デバッグ用リール配列
         @lille_array = [
-            [16, 15],
-            [15],
-            [15]
+            [15, 16],
+            [16],
+            [16]
         ]
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
@@ -1054,7 +1056,7 @@ class slotSetting extends appNode
                     {'name':'11_0', 'width':360, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['11_0', '11_1']
             },
@@ -1063,7 +1065,7 @@ class slotSetting extends appNode
                     {'name':'12_0', 'width':510, 'height':728, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['12_0', '12_1']
             },
@@ -1072,7 +1074,7 @@ class slotSetting extends appNode
                     {'name':'13_0', 'width':570, 'height':634, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['13_0', '13_1']
             },
@@ -1081,7 +1083,7 @@ class slotSetting extends appNode
                     {'name':'14_0', 'width':476, 'height':648, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['14_0', '14_1']
             },
@@ -1091,7 +1093,7 @@ class slotSetting extends appNode
                     {'name':'15_1', 'width':601, 'height':638, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'rinrinrin', 'time':128}
                 ],
                 'voice':['15_0', '15_1']
             },
@@ -1100,7 +1102,7 @@ class slotSetting extends appNode
                     {'name':'16_0', 'width':438, 'height':570, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['16_0', '16_1']
             },
@@ -1109,7 +1111,7 @@ class slotSetting extends appNode
                     {'name':'17_0', 'width':465, 'height':705, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['17_0', '17_1']
             },
@@ -1118,7 +1120,7 @@ class slotSetting extends appNode
                     {'name':'18_0', 'width':599, 'height':606, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['18_0', '18_1']
             },
@@ -1127,7 +1129,7 @@ class slotSetting extends appNode
                     {'name':'19_0', 'width':460, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'', 'time':30}
+                    {'name':'zenkai_no_lovelive', 'time':30}
                 ],
                 'voice':['19_0', '19_1']
             }
@@ -1140,6 +1142,11 @@ class slotSetting extends appNode
         #セーブする変数
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
 
+    ###
+    落下アイテムの速度
+    TODO 掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
+    テンションが高いと速度に補正をかける
+    ###
     setGravity:()->
         val = Math.floor((game.tension / @tension_max) * 0.9) + 0.5
         if game.fever is true
@@ -1177,7 +1184,7 @@ class slotSetting extends appNode
                 remain.push(full[key])
         random = Math.floor(Math.random() * remain.length)
         member = remain[random]
-        #member = 15
+        #member = 16
         @now_muse_num = member
         if @prev_muse.indexOf(member) is -1
             @prev_muse.push(member)
