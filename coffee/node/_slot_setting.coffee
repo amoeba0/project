@@ -39,7 +39,7 @@ class slotSetting extends appNode
                     {'name':'11_0', 'width':360, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'yumenaki', 'time':107}
                 ],
                 'voice':['11_0', '11_1']
             },
@@ -57,7 +57,7 @@ class slotSetting extends appNode
                     {'name':'13_0', 'width':570, 'height':634, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'reason', 'time':94}
                 ],
                 'voice':['13_0', '13_1']
             },
@@ -103,7 +103,7 @@ class slotSetting extends appNode
                     {'name':'18_0', 'width':599, 'height':606, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'junai', 'time':127}
                 ],
                 'voice':['18_0', '18_1']
             },
@@ -139,11 +139,15 @@ class slotSetting extends appNode
 
     ###
     テンションからスロットにμ’sが入るかどうかを返す
+    初期値5％、テンションMAXで20％
+    過去のフィーバー回数が少ないほど上方補正かける 0回:+12,1回:+8,2回:+4
     @return boolean
     ###
     isAddMuse:()->
         result = false
         rate = Math.floor((game.tension / @tension_max) * 15) + 5
+        if game.past_fever_num <= 2
+            rate += (3 - game.past_fever_num) * 4
         random = Math.floor(Math.random() * 100)
         if random < rate
             result = true

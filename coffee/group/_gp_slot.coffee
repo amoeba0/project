@@ -105,6 +105,7 @@ class gpSlot extends appGroup
 
     ###
     スロットの当選金額を計算
+    TODO フィーバー中は金額を減らす、BGMの再生時間が長いほど減らす
     ###
     _calcPrizeMoney: () ->
         ret_money = 0
