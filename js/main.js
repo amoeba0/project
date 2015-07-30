@@ -280,7 +280,7 @@ LoveliveGame = (function(_super) {
     this.width = 480;
     this.height = 720;
     this.fps = 24;
-    this.imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin'];
+    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin'];
     this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear'];
     this.keybind(90, 'z');
     this.keybind(88, 'x');
@@ -1585,7 +1585,7 @@ Debug = (function(_super) {
     this.fix_tention_slot_hit_flg = false;
     this.force_insert_muse = false;
     this.force_slot_hit = false;
-    this.lille_array = [[15, 16], [16], [16]];
+    this.lille_array = [[15, 16], [15], [15]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -50;
     this.fix_tention_slot_hit_flg = 200;
@@ -1673,8 +1673,8 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30
+            'name': 'blueberry',
+            'time': 98
           }
         ],
         'voice': ['12_0', '12_1']
@@ -1707,8 +1707,8 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30
+            'name': 'daring',
+            'time': 91
           }
         ],
         'voice': ['14_0', '14_1']
@@ -1746,8 +1746,8 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30
+            'name': 'nawatobi',
+            'time': 164
           }
         ],
         'voice': ['16_0', '16_1']
@@ -1763,8 +1763,8 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30
+            'name': 'mahoutukai',
+            'time': 105
           }
         ],
         'voice': ['17_0', '17_1']
@@ -1797,8 +1797,8 @@ slotSetting = (function(_super) {
         ],
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30
+            'name': 'arihureta',
+            'time': 93
           }
         ],
         'voice': ['19_0', '19_1']
@@ -2121,8 +2121,8 @@ mainScene = (function(_super) {
     this.addChild(this.gp_stage_front);
     this.gp_system = new gpSystem();
     this.addChild(this.gp_system);
-    this.gp_slot.x = 112;
-    return this.gp_slot.y = 150;
+    this.gp_slot.x = 55;
+    return this.gp_slot.y = 130;
   };
 
   mainScene.prototype.onenterframe = function(e) {
@@ -3191,9 +3191,22 @@ Slot = (function(_super) {
 
   function Slot(w, h) {
     Slot.__super__.constructor.call(this, w, h);
-    this.scaleX = 1.5;
-    this.scaleY = 1.5;
   }
+
+
+  /*
+  枠の無い長方形
+  @param color 色
+   */
+
+  Slot.prototype.drawRect = function(color) {
+    var surface;
+    surface = new Surface(this.w, this.h);
+    surface.context.fillStyle = color;
+    surface.context.fillRect(0, 0, this.w, this.h, 10);
+    surface.context.fill();
+    return surface;
+  };
 
   return Slot;
 
@@ -3214,8 +3227,8 @@ UnderFrame = (function(_super) {
   __extends(UnderFrame, _super);
 
   function UnderFrame(w, h) {
-    UnderFrame.__super__.constructor.call(this, 246, 82);
-    this.image = game.imageload("under_frame");
+    UnderFrame.__super__.constructor.call(this, 369, 123);
+    this.image = this.drawRect('white');
   }
 
   return UnderFrame;
@@ -3237,7 +3250,7 @@ Lille = (function(_super) {
   __extends(Lille, _super);
 
   function Lille(w, h) {
-    Lille.__super__.constructor.call(this, 82, 82);
+    Lille.__super__.constructor.call(this, 123, 123);
     this.image = game.imageload("lille");
     this.lotate_se = game.soundload('select');
     this.lilleArray = [];
@@ -3296,7 +3309,7 @@ LeftLille = (function(_super) {
     LeftLille.__super__.constructor.apply(this, arguments);
     this.lilleArray = game.arrayCopy(game.slot_setting.lille_array_0[0]);
     this.eyeInit();
-    this.x = -41;
+    this.x = 0;
   }
 
   return LeftLille;
@@ -3310,7 +3323,7 @@ MiddleLille = (function(_super) {
     MiddleLille.__super__.constructor.apply(this, arguments);
     this.lilleArray = game.arrayCopy(game.slot_setting.lille_array_0[1]);
     this.eyeInit();
-    this.x = 82;
+    this.x = 123;
   }
 
   return MiddleLille;
@@ -3324,7 +3337,7 @@ RightLille = (function(_super) {
     RightLille.__super__.constructor.apply(this, arguments);
     this.lilleArray = game.arrayCopy(game.slot_setting.lille_array_0[2]);
     this.eyeInit();
-    this.x = 205;
+    this.x = 246;
   }
 
   RightLille.prototype.soundLotateSe = function() {

@@ -1,6 +1,6 @@
 class Lille extends Slot
     constructor: (w, h) ->
-        super 82, 82
+        super 123, 123
         @image = game.imageload("lille")
         @lotate_se = game.soundload('select')
         @lilleArray = [] #リールの並び
@@ -39,21 +39,21 @@ class LeftLille extends Lille
         super
         @lilleArray = game.arrayCopy(game.slot_setting.lille_array_0[0])
         @eyeInit()
-        @x = -41
+        @x = 0
 
 class MiddleLille extends Lille
     constructor: () ->
         super
         @lilleArray = game.arrayCopy(game.slot_setting.lille_array_0[1])
         @eyeInit()
-        @x = 82
+        @x = 123
 
 class RightLille extends Lille
     constructor: () ->
         super
         @lilleArray = game.arrayCopy(game.slot_setting.lille_array_0[2])
         @eyeInit()
-        @x = 205
+        @x = 246
     soundLotateSe:()->
         if @age % 2 is 0
             game.sePlay(@lotate_se)

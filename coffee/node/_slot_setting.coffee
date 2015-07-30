@@ -48,7 +48,7 @@ class slotSetting extends appNode
                     {'name':'12_0', 'width':510, 'height':728, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'blueberry', 'time':98}
                 ],
                 'voice':['12_0', '12_1']
             },
@@ -66,7 +66,7 @@ class slotSetting extends appNode
                     {'name':'14_0', 'width':476, 'height':648, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'daring', 'time':91}
                 ],
                 'voice':['14_0', '14_1']
             },
@@ -85,7 +85,7 @@ class slotSetting extends appNode
                     {'name':'16_0', 'width':438, 'height':570, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'nawatobi', 'time':164}
                 ],
                 'voice':['16_0', '16_1']
             },
@@ -94,7 +94,7 @@ class slotSetting extends appNode
                     {'name':'17_0', 'width':465, 'height':705, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'mahoutukai', 'time':105}
                 ],
                 'voice':['17_0', '17_1']
             },
@@ -112,7 +112,7 @@ class slotSetting extends appNode
                     {'name':'19_0', 'width':460, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'arihureta', 'time':93}
                 ],
                 'voice':['19_0', '19_1']
             }

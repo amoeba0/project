@@ -143,7 +143,7 @@ class LoveliveGame extends catchAndSlotGame
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'under_frame', 'okujou', 'sky', 'coin']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
 
@@ -997,8 +997,8 @@ class Debug extends appNode
         #デバッグ用リール配列
         @lille_array = [
             [15, 16],
-            [16],
-            [16]
+            [15],
+            [15]
         ]
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
@@ -1065,7 +1065,7 @@ class slotSetting extends appNode
                     {'name':'12_0', 'width':510, 'height':728, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'blueberry', 'time':98}
                 ],
                 'voice':['12_0', '12_1']
             },
@@ -1083,7 +1083,7 @@ class slotSetting extends appNode
                     {'name':'14_0', 'width':476, 'height':648, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'daring', 'time':91}
                 ],
                 'voice':['14_0', '14_1']
             },
@@ -1102,7 +1102,7 @@ class slotSetting extends appNode
                     {'name':'16_0', 'width':438, 'height':570, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'nawatobi', 'time':164}
                 ],
                 'voice':['16_0', '16_1']
             },
@@ -1111,7 +1111,7 @@ class slotSetting extends appNode
                     {'name':'17_0', 'width':465, 'height':705, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'mahoutukai', 'time':105}
                 ],
                 'voice':['17_0', '17_1']
             },
@@ -1129,7 +1129,7 @@ class slotSetting extends appNode
                     {'name':'19_0', 'width':460, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'arihureta', 'time':93}
                 ],
                 'voice':['19_0', '19_1']
             }
@@ -1373,8 +1373,8 @@ class mainScene extends appScene
         @addChild(@gp_stage_front)
         @gp_system = new gpSystem()
         @addChild(@gp_system)
-        @gp_slot.x = 112
-        @gp_slot.y = 150
+        @gp_slot.x = 55
+        @gp_slot.y = 130
     onenterframe: (e) ->
         @buttonPush()
         @tensionSetValueFever()
@@ -2032,23 +2032,31 @@ class HundredThousandMoney extends Money
 class Slot extends appSprite
     constructor: (w, h) ->
         super w, h
-        @scaleX = 1.5
-        @scaleY = 1.5
+    ###
+    枠の無い長方形
+    @param color 色
+    ###
+    drawRect: (color) ->
+        surface = new Surface(@w, @h)
+        surface.context.fillStyle = color
+        surface.context.fillRect(0, 0, @w, @h, 10)
+        surface.context.fill()
+        return surface
 class Frame extends Slot
     constructor: (w, h) ->
         super w, h
 
 class UnderFrame extends Frame
     constructor: (w,h) ->
-        super 246, 82
-        @image = game.imageload("under_frame")
+        super 369, 123
+        @image = @drawRect('white')
 
 class UpperFrame extends Frame
     constructor: (w,h) ->
         super w, h
 class Lille extends Slot
     constructor: (w, h) ->
-        super 82, 82
+        super 123, 123
         @image = game.imageload("lille")
         @lotate_se = game.soundload('select')
         @lilleArray = [] #リールの並び
@@ -2087,21 +2095,21 @@ class LeftLille extends Lille
         super
         @lilleArray = game.arrayCopy(game.slot_setting.lille_array_0[0])
         @eyeInit()
-        @x = -41
+        @x = 0
 
 class MiddleLille extends Lille
     constructor: () ->
         super
         @lilleArray = game.arrayCopy(game.slot_setting.lille_array_0[1])
         @eyeInit()
-        @x = 82
+        @x = 123
 
 class RightLille extends Lille
     constructor: () ->
         super
         @lilleArray = game.arrayCopy(game.slot_setting.lille_array_0[2])
         @eyeInit()
-        @x = 205
+        @x = 246
     soundLotateSe:()->
         if @age % 2 is 0
             game.sePlay(@lotate_se)

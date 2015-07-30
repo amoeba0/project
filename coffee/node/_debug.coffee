@@ -30,8 +30,8 @@ class Debug extends appNode
         #デバッグ用リール配列
         @lille_array = [
             [15, 16],
-            [16],
-            [16]
+            [15],
+            [15]
         ]
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50

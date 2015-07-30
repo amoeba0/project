@@ -20,8 +20,8 @@ class mainScene extends appScene
         @addChild(@gp_stage_front)
         @gp_system = new gpSystem()
         @addChild(@gp_system)
-        @gp_slot.x = 112
-        @gp_slot.y = 150
+        @gp_slot.x = 55
+        @gp_slot.y = 130
     onenterframe: (e) ->
         @buttonPush()
         @tensionSetValueFever()
