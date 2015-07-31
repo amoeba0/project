@@ -70,7 +70,7 @@ class gpSlot extends appGroup
         if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
             game.sePlay(@slot_hit_se)
             hit_eye = @left_lille.lilleArray[@left_lille.nowEye]
-            prize_money = @_calcPrizeMoney()
+            prize_money = game.slot_setting.calcPrizeMoney(@middle_lille.lilleArray[@middle_lille.nowEye])
             game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
             game.tensionSetValueSlotHit(prize_money, hit_eye)
             @_feverStart(hit_eye)
@@ -88,6 +88,7 @@ class gpSlot extends appGroup
             game.past_fever_num += 1
             game.slot_setting.setMuseMember()
             game.musePreLoad()
+            game.fever_hit_eye = hit_eye
             @_feverBgmStart(hit_eye)
 
     ###
@@ -103,17 +104,7 @@ class gpSlot extends appGroup
         game.fever_down_tension *= -1
         game.bgmPlay(@fever_bgm, false)
 
-    ###
-    スロットの当選金額を計算
-    TODO フィーバー中は金額を減らす、BGMの再生時間が長いほど減らす
-    ###
-    _calcPrizeMoney: () ->
-        ret_money = 0
-        eye = @middle_lille.lilleArray[@middle_lille.nowEye]
-        ret_money = game.bet * game.slot_setting.bairitu[eye]
-        if ret_money > 10000000000
-            ret_money = 10000000000
-        return ret_money
+
 
     ###
     スロットマシンを画面に設置する

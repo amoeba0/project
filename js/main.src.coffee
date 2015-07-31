@@ -37,16 +37,18 @@ class appGame extends Game
     BGMをならす
     ###
     bgmPlay:(bgm, bgm_loop)->
-        bgm.play()
-        if bgm_loop is true
-            bgm._element.loop = true
-            #bgm.src.loop = true
+        if bgm != undefined
+            bgm.play()
+            if bgm_loop is true
+                bgm._element.loop = true
+                #bgm.src.loop = true
 
     ###
     BGMを止める
     ###
     bgmStop:(bgm)->
-        bgm.stop()
+        if bgm != undefined
+            bgm.stop()
 
     ###
         素材をすべて読み込む
@@ -159,6 +161,7 @@ class LoveliveGame extends catchAndSlotGame
         @fever = false #trueならフィーバー中
         @fever_down_tension = 0
         @item_kind = 0 #落下アイテムの種類（フレーム）
+        @fever_hit_eye = 0 #どの目で当たって今フィーバーになっているか
 
         #セーブする変数(slot_settingにもあるので注意)
         @money = 0 #現在の所持金
@@ -236,7 +239,8 @@ class LoveliveGame extends catchAndSlotGame
     tensionSetValueSlotHit:(prize_money, hit_eye)->
         val = @slot_setting.setTensionSlotHit(prize_money, hit_eye)
         @tensionSetValue(val)
-
+    setPauseScene:()->
+        @pushScene(@pause_scene)
 class gpEffect extends appGroup
     constructor: () ->
         super
@@ -325,7 +329,7 @@ class gpSlot extends appGroup
         if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
             game.sePlay(@slot_hit_se)
             hit_eye = @left_lille.lilleArray[@left_lille.nowEye]
-            prize_money = @_calcPrizeMoney()
+            prize_money = game.slot_setting.calcPrizeMoney(@middle_lille.lilleArray[@middle_lille.nowEye])
             game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
             game.tensionSetValueSlotHit(prize_money, hit_eye)
             @_feverStart(hit_eye)
@@ -343,6 +347,7 @@ class gpSlot extends appGroup
             game.past_fever_num += 1
             game.slot_setting.setMuseMember()
             game.musePreLoad()
+            game.fever_hit_eye = hit_eye
             @_feverBgmStart(hit_eye)
 
     ###
@@ -358,17 +363,7 @@ class gpSlot extends appGroup
         game.fever_down_tension *= -1
         game.bgmPlay(@fever_bgm, false)
 
-    ###
-    スロットの当選金額を計算
-    TODO フィーバー中は金額を減らす、BGMの再生時間が長いほど減らす
-    ###
-    _calcPrizeMoney: () ->
-        ret_money = 0
-        eye = @middle_lille.lilleArray[@middle_lille.nowEye]
-        ret_money = game.bet * game.slot_setting.bairitu[eye]
-        if ret_money > 10000000000
-            ret_money = 10000000000
-        return ret_money
+
 
     ###
     スロットマシンを画面に設置する
@@ -997,7 +992,7 @@ class Debug extends appNode
         @force_slot_hit = false
         #デバッグ用リール配列
         @lille_array = [
-            [15, 16],
+            [16, 15],
             [15],
             [15]
         ]
@@ -1144,16 +1139,31 @@ class slotSetting extends appNode
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
 
     ###
-    落下アイテムの速度
-    TODO 掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
-    テンションが高いと速度に補正をかける
+    落下アイテムの加速度
+    掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
     ###
     setGravity:()->
-        val = Math.floor((game.tension / @tension_max) * 0.9) + 0.5
-        if game.fever is true
-            val = 1.2
+        if game.bet < 5
+            val = 0.5
+        else if game.bet < 10
+            val = 0.6
+        else if game.bet < 50
+            val = 0.7
+        else if game.bet < 100
+            val = 0.8
+        else if game.bet < 500
+            val = 0.9
+        else if game.bet < 1000
+            val = 1
+        else if game.bet < 10000
+            val = 1 + Math.floor(game.bet / 500) / 10
+        else if game.bet < 100000
+            val = 3 + Math.floor(game.bet / 5000) / 10
+        else
+            val = 5
+        div = 1 + Math.floor(3 * game.tension / @tension_max) / 10
+        val = Math.floor(val * div * 10) / 10
         return val
-
 
     ###
     テンションからスロットにμ’sが入るかどうかを返す
@@ -1221,8 +1231,27 @@ class slotSetting extends appNode
             result = true
         return result
 
+    ###
+    スロットが回っている時に降ってくる掛け金の戻り分の額を計算
+    ###
     getReturnMoneyFallValue:()->
         return Math.floor(game.bet * game.combo * 0.05)
+
+    ###
+    スロットの当選金額を計算
+    @param eye 当たったスロットの目
+    ###
+    calcPrizeMoney: (eye) ->
+        ret_money = game.bet * @bairitu[eye]
+        if game.fever is true
+            time = @muse_material_list[game.fever_hit_eye]['bgm'][0]['time']
+            div = Math.floor(time / 30)
+            if div < 1
+                div = 1
+            ret_money = ret_money / div
+        if ret_money > 10000000000
+            ret_money = 10000000000
+        return ret_money
 
     ###
     アイテムを取った時のテンションゲージの増減値を決める
@@ -1319,22 +1348,22 @@ class slotSetting extends appNode
     getCatchItemFrame:()->
         val = 0
         rate = Math.round(Math.random() * 100)
-        if game.bet < 100
+        if game.bet < 10
             rate_0 = 60
             rate_1 = 80
             rate_2 = 90
             rate_3 = 95
-        else if game.bet < 1000
+        else if game.bet < 100
             rate_0 = 20
             rate_1 = 60
             rate_2 = 80
             rate_3 = 90
-        else if game.bet < 10000
+        else if game.bet < 1000
             rate_0 = 10
             rate_1 = 30
             rate_2 = 60
             rate_3 = 80
-        else if game.bet < 100000
+        else if game.bet < 5000
             rate_0 = 5
             rate_1 = 20
             rate_2 = 40
@@ -1361,7 +1390,7 @@ class mainScene extends appScene
         super
         @backgroundColor = '#93F0FF'
         #キーのリスト、物理キーとソフトキー両方に対応
-        @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false}
+        @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         @initial()
     initial:()->
         @setGroup()
@@ -1420,6 +1449,15 @@ class mainScene extends appScene
         else
             if @keyList.jump is true
                 @keyList.jump = false
+        #ポーズ
+        if game.input.x is true
+            if @keyList.pause is false
+                game.setPauseScene()
+                @keyList.pause = true
+        else
+            if @keyList.pause = true
+                @keyList.pause = false
+
     ###
     フィーバー中に一定時間でテンションが下がる
     テンションが0になったらフィーバーを解く
@@ -2159,7 +2197,7 @@ class pauseButton extends Button
         @x = 435
         @y = 90
     ontouchend: (e)->
-        game.pushScene(game.pause_scene)
+        game.setPauseScene()
 class Dialog extends System
     constructor: (w, h) ->
         super w, h

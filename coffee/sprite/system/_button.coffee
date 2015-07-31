@@ -13,4 +13,4 @@ class pauseButton extends Button
         @x = 435
         @y = 90
     ontouchend: (e)->
-        game.pushScene(game.pause_scene)
+        game.setPauseScene()

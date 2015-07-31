@@ -64,9 +64,11 @@ appGame = (function(_super) {
    */
 
   appGame.prototype.bgmPlay = function(bgm, bgm_loop) {
-    bgm.play();
-    if (bgm_loop === true) {
-      return bgm._element.loop = true;
+    if (bgm !== void 0) {
+      bgm.play();
+      if (bgm_loop === true) {
+        return bgm._element.loop = true;
+      }
     }
   };
 
@@ -76,7 +78,9 @@ appGame = (function(_super) {
    */
 
   appGame.prototype.bgmStop = function(bgm) {
-    return bgm.stop();
+    if (bgm !== void 0) {
+      return bgm.stop();
+    }
   };
 
 
@@ -291,6 +295,7 @@ LoveliveGame = (function(_super) {
     this.fever = false;
     this.fever_down_tension = 0;
     this.item_kind = 0;
+    this.fever_hit_eye = 0;
     this.money = 0;
     this.bet = 1;
     this.combo = 0;
@@ -404,6 +409,10 @@ LoveliveGame = (function(_super) {
     var val;
     val = this.slot_setting.setTensionSlotHit(prize_money, hit_eye);
     return this.tensionSetValue(val);
+  };
+
+  LoveliveGame.prototype.setPauseScene = function() {
+    return this.pushScene(this.pause_scene);
   };
 
   return LoveliveGame;
@@ -547,7 +556,7 @@ gpSlot = (function(_super) {
     if ((this.left_lille.lilleArray[this.left_lille.nowEye] === (_ref = this.middle_lille.lilleArray[this.middle_lille.nowEye]) && _ref === this.right_lille.lilleArray[this.right_lille.nowEye])) {
       game.sePlay(this.slot_hit_se);
       hit_eye = this.left_lille.lilleArray[this.left_lille.nowEye];
-      prize_money = this._calcPrizeMoney();
+      prize_money = game.slot_setting.calcPrizeMoney(this.middle_lille.lilleArray[this.middle_lille.nowEye]);
       game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money);
       game.tensionSetValueSlotHit(prize_money, hit_eye);
       return this._feverStart(hit_eye);
@@ -570,6 +579,7 @@ gpSlot = (function(_super) {
       game.past_fever_num += 1;
       game.slot_setting.setMuseMember();
       game.musePreLoad();
+      game.fever_hit_eye = hit_eye;
       return this._feverBgmStart(hit_eye);
     }
   };
@@ -589,23 +599,6 @@ gpSlot = (function(_super) {
     game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (this.feverSec * game.fps)) / 100;
     game.fever_down_tension *= -1;
     return game.bgmPlay(this.fever_bgm, false);
-  };
-
-
-  /*
-  スロットの当選金額を計算
-  TODO フィーバー中は金額を減らす、BGMの再生時間が長いほど減らす
-   */
-
-  gpSlot.prototype._calcPrizeMoney = function() {
-    var eye, ret_money;
-    ret_money = 0;
-    eye = this.middle_lille.lilleArray[this.middle_lille.nowEye];
-    ret_money = game.bet * game.slot_setting.bairitu[eye];
-    if (ret_money > 10000000000) {
-      ret_money = 10000000000;
-    }
-    return ret_money;
   };
 
 
@@ -1586,7 +1579,7 @@ Debug = (function(_super) {
     this.fix_tention_slot_hit_flg = false;
     this.force_insert_muse = false;
     this.force_slot_hit = false;
-    this.lille_array = [[15, 16], [15], [15]];
+    this.lille_array = [[16, 15], [15], [15]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -50;
     this.fix_tention_slot_hit_flg = 200;
@@ -1812,17 +1805,33 @@ slotSetting = (function(_super) {
 
 
   /*
-  落下アイテムの速度
-  TODO 掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
-  テンションが高いと速度に補正をかける
+  落下アイテムの加速度
+  掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
    */
 
   slotSetting.prototype.setGravity = function() {
-    var val;
-    val = Math.floor((game.tension / this.tension_max) * 0.9) + 0.5;
-    if (game.fever === true) {
-      val = 1.2;
+    var div, val;
+    if (game.bet < 5) {
+      val = 0.5;
+    } else if (game.bet < 10) {
+      val = 0.6;
+    } else if (game.bet < 50) {
+      val = 0.7;
+    } else if (game.bet < 100) {
+      val = 0.8;
+    } else if (game.bet < 500) {
+      val = 0.9;
+    } else if (game.bet < 1000) {
+      val = 1;
+    } else if (game.bet < 10000) {
+      val = 1 + Math.floor(game.bet / 500) / 10;
+    } else if (game.bet < 100000) {
+      val = 3 + Math.floor(game.bet / 5000) / 10;
+    } else {
+      val = 5;
     }
+    div = 1 + Math.floor(3 * game.tension / this.tension_max) / 10;
+    val = Math.floor(val * div * 10) / 10;
     return val;
   };
 
@@ -1919,8 +1928,36 @@ slotSetting = (function(_super) {
     return result;
   };
 
+
+  /*
+  スロットが回っている時に降ってくる掛け金の戻り分の額を計算
+   */
+
   slotSetting.prototype.getReturnMoneyFallValue = function() {
     return Math.floor(game.bet * game.combo * 0.05);
+  };
+
+
+  /*
+  スロットの当選金額を計算
+  @param eye 当たったスロットの目
+   */
+
+  slotSetting.prototype.calcPrizeMoney = function(eye) {
+    var div, ret_money, time;
+    ret_money = game.bet * this.bairitu[eye];
+    if (game.fever === true) {
+      time = this.muse_material_list[game.fever_hit_eye]['bgm'][0]['time'];
+      div = Math.floor(time / 30);
+      if (div < 1) {
+        div = 1;
+      }
+      ret_money = ret_money / div;
+    }
+    if (ret_money > 10000000000) {
+      ret_money = 10000000000;
+    }
+    return ret_money;
   };
 
 
@@ -2049,22 +2086,22 @@ slotSetting = (function(_super) {
     var rate, rate_0, rate_1, rate_2, rate_3, val;
     val = 0;
     rate = Math.round(Math.random() * 100);
-    if (game.bet < 100) {
+    if (game.bet < 10) {
       rate_0 = 60;
       rate_1 = 80;
       rate_2 = 90;
       rate_3 = 95;
-    } else if (game.bet < 1000) {
+    } else if (game.bet < 100) {
       rate_0 = 20;
       rate_1 = 60;
       rate_2 = 80;
       rate_3 = 90;
-    } else if (game.bet < 10000) {
+    } else if (game.bet < 1000) {
       rate_0 = 10;
       rate_1 = 30;
       rate_2 = 60;
       rate_3 = 80;
-    } else if (game.bet < 100000) {
+    } else if (game.bet < 5000) {
       rate_0 = 5;
       rate_1 = 20;
       rate_2 = 40;
@@ -2105,7 +2142,8 @@ mainScene = (function(_super) {
       'right': false,
       'jump': false,
       'up': false,
-      'down': false
+      'down': false,
+      'pause': false
     };
     this.initial();
   }
@@ -2178,11 +2216,21 @@ mainScene = (function(_super) {
     }
     if (game.input.z === true) {
       if (this.keyList.jump === false) {
-        return this.keyList.jump = true;
+        this.keyList.jump = true;
       }
     } else {
       if (this.keyList.jump === true) {
-        return this.keyList.jump = false;
+        this.keyList.jump = false;
+      }
+    }
+    if (game.input.x === true) {
+      if (this.keyList.pause === false) {
+        game.setPauseScene();
+        return this.keyList.pause = true;
+      }
+    } else {
+      if (this.keyList.pause = true) {
+        return this.keyList.pause = false;
       }
     }
   };
@@ -3429,7 +3477,7 @@ pauseButton = (function(_super) {
   }
 
   pauseButton.prototype.ontouchend = function(e) {
-    return game.pushScene(game.pause_scene);
+    return game.setPauseScene();
   };
 
   return pauseButton;

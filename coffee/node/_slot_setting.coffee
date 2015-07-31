@@ -126,16 +126,31 @@ class slotSetting extends appNode
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
 
     ###
-    落下アイテムの速度
-    TODO 掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
-    テンションが高いと速度に補正をかける
+    落下アイテムの加速度
+    掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
     ###
     setGravity:()->
-        val = Math.floor((game.tension / @tension_max) * 0.9) + 0.5
-        if game.fever is true
-            val = 1.2
+        if game.bet < 5
+            val = 0.5
+        else if game.bet < 10
+            val = 0.6
+        else if game.bet < 50
+            val = 0.7
+        else if game.bet < 100
+            val = 0.8
+        else if game.bet < 500
+            val = 0.9
+        else if game.bet < 1000
+            val = 1
+        else if game.bet < 10000
+            val = 1 + Math.floor(game.bet / 500) / 10
+        else if game.bet < 100000
+            val = 3 + Math.floor(game.bet / 5000) / 10
+        else
+            val = 5
+        div = 1 + Math.floor(3 * game.tension / @tension_max) / 10
+        val = Math.floor(val * div * 10) / 10
         return val
-
 
     ###
     テンションからスロットにμ’sが入るかどうかを返す
@@ -203,8 +218,27 @@ class slotSetting extends appNode
             result = true
         return result
 
+    ###
+    スロットが回っている時に降ってくる掛け金の戻り分の額を計算
+    ###
     getReturnMoneyFallValue:()->
         return Math.floor(game.bet * game.combo * 0.05)
+
+    ###
+    スロットの当選金額を計算
+    @param eye 当たったスロットの目
+    ###
+    calcPrizeMoney: (eye) ->
+        ret_money = game.bet * @bairitu[eye]
+        if game.fever is true
+            time = @muse_material_list[game.fever_hit_eye]['bgm'][0]['time']
+            div = Math.floor(time / 30)
+            if div < 1
+                div = 1
+            ret_money = ret_money / div
+        if ret_money > 10000000000
+            ret_money = 10000000000
+        return ret_money
 
     ###
     アイテムを取った時のテンションゲージの増減値を決める
@@ -301,22 +335,22 @@ class slotSetting extends appNode
     getCatchItemFrame:()->
         val = 0
         rate = Math.round(Math.random() * 100)
-        if game.bet < 100
+        if game.bet < 10
             rate_0 = 60
             rate_1 = 80
             rate_2 = 90
             rate_3 = 95
-        else if game.bet < 1000
+        else if game.bet < 100
             rate_0 = 20
             rate_1 = 60
             rate_2 = 80
             rate_3 = 90
-        else if game.bet < 10000
+        else if game.bet < 1000
             rate_0 = 10
             rate_1 = 30
             rate_2 = 60
             rate_3 = 80
-        else if game.bet < 100000
+        else if game.bet < 5000
             rate_0 = 5
             rate_1 = 20
             rate_2 = 40

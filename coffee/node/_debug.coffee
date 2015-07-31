@@ -29,7 +29,7 @@ class Debug extends appNode
         @force_slot_hit = false
         #デバッグ用リール配列
         @lille_array = [
-            [15, 16],
+            [16, 15],
             [15],
             [15]
         ]

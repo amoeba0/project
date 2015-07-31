@@ -28,16 +28,18 @@ class appGame extends Game
     BGMをならす
     ###
     bgmPlay:(bgm, bgm_loop)->
-        bgm.play()
-        if bgm_loop is true
-            bgm._element.loop = true
-            #bgm.src.loop = true
+        if bgm != undefined
+            bgm.play()
+            if bgm_loop is true
+                bgm._element.loop = true
+                #bgm.src.loop = true
 
     ###
     BGMを止める
     ###
     bgmStop:(bgm)->
-        bgm.stop()
+        if bgm != undefined
+            bgm.stop()
 
     ###
         素材をすべて読み込む

@@ -3,7 +3,7 @@ class mainScene extends appScene
         super
         @backgroundColor = '#93F0FF'
         #キーのリスト、物理キーとソフトキー両方に対応
-        @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false}
+        @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         @initial()
     initial:()->
         @setGroup()
@@ -62,6 +62,15 @@ class mainScene extends appScene
         else
             if @keyList.jump is true
                 @keyList.jump = false
+        #ポーズ
+        if game.input.x is true
+            if @keyList.pause is false
+                game.setPauseScene()
+                @keyList.pause = true
+        else
+            if @keyList.pause = true
+                @keyList.pause = false
+
     ###
     フィーバー中に一定時間でテンションが下がる
     テンションが0になったらフィーバーを解く

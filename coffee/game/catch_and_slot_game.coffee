@@ -27,6 +27,7 @@ class LoveliveGame extends catchAndSlotGame
         @fever = false #trueならフィーバー中
         @fever_down_tension = 0
         @item_kind = 0 #落下アイテムの種類（フレーム）
+        @fever_hit_eye = 0 #どの目で当たって今フィーバーになっているか
 
         #セーブする変数(slot_settingにもあるので注意)
         @money = 0 #現在の所持金
@@ -104,3 +105,5 @@ class LoveliveGame extends catchAndSlotGame
     tensionSetValueSlotHit:(prize_money, hit_eye)->
         val = @slot_setting.setTensionSlotHit(prize_money, hit_eye)
         @tensionSetValue(val)
+    setPauseScene:()->
+        @pushScene(@pause_scene)
