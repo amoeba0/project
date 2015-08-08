@@ -14,6 +14,8 @@ class gpSlot extends appGroup
         @feverSec = 0 #フィーバーの時間
         @slotSet()
         @debugSlot()
+        @upperFrame = new UpperFrame()
+        @addChild(@upperFrame)
     onenterframe: (e) ->
         @slotStopping()
 

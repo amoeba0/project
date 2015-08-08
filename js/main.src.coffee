@@ -145,7 +145,7 @@ class LoveliveGame extends catchAndSlotGame
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
 
@@ -273,6 +273,8 @@ class gpSlot extends appGroup
         @feverSec = 0 #フィーバーの時間
         @slotSet()
         @debugSlot()
+        @upperFrame = new UpperFrame()
+        @addChild(@upperFrame)
     onenterframe: (e) ->
         @slotStopping()
 
@@ -471,7 +473,7 @@ class gpSlot extends appGroup
 class gpStage extends appGroup
     constructor: () ->
         super
-        @floor = 675 #床の位置
+        @floor = 640 #床の位置
 
 ###
 ステージ前面
@@ -736,6 +738,16 @@ class gpSystem extends appGroup
         @addChild(@tension_gauge)
         @pause_button = new pauseButton()
         @addChild(@pause_button)
+        @left_button = new leftButton()
+        @addChild(@left_button)
+        @right_button = new rightButton()
+        @addChild(@right_button)
+        @jump_button = new jumpButton()
+        @addChild(@jump_button)
+        @heigh_bet_button = new heighBetButton()
+        @addChild(@heigh_bet_button)
+        @low_bet_button = new lowBetButton()
+        @addChild(@low_bet_button)
         @keyList = {'up':false, 'down':false}
     onenterframe: (e) ->
         @_betSetting()
@@ -928,13 +940,14 @@ class betText extends text
         @color = 'black'
         @font_size = 22
         @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
-        @x = 7
+        @x = 37
         @y = 7
         @kakekin_text = '掛金'
         @yen_text = '円'
-        @setValue()
+        @text = @kakekin_text + game.bet + @yen_text
     setValue: () ->
         @text = @kakekin_text + game.bet + @yen_text
+        game.main_scene.gp_system.low_bet_button.setXposition()
 
 class comboText extends text
     constructor: () ->
@@ -2096,7 +2109,10 @@ class UnderFrame extends Frame
 
 class UpperFrame extends Frame
     constructor: (w,h) ->
-        super w, h
+        super 381, 135
+        @image = game.imageload("frame")
+        @x = -6
+        @y = -6
 class Lille extends Slot
     constructor: (w, h) ->
         super 123, 123
@@ -2159,16 +2175,21 @@ class RightLille extends Lille
 class System extends appSprite
     constructor: (w, h) ->
         super w, h
+
+    _makeContext:() ->
+        @surface = new Surface(@w, @h)
+        @context = @surface.context
+
     ###
     枠の無い長方形
     @param color 色
     ###
     drawRect: (color) ->
-        surface = new Surface(@w, @h)
-        surface.context.fillStyle = color
-        surface.context.fillRect(0, 0, @w, @h, 10)
-        surface.context.fill()
-        return surface
+        @_makeContext()
+        @context.fillStyle = color
+        @context.fillRect(0, 0, @w, @h, 10)
+        @context.fill()
+        return @surface
     ###
     枠のある長方形
     @param string strokeColor 枠の色
@@ -2176,12 +2197,53 @@ class System extends appSprite
     @param number thick       枠の太さ
     ###
     drawStrokeRect:(strokeColor, fillColor, thick)->
-        surface = new Surface(@w, @h)
-        surface.context.fillStyle = strokeColor
-        surface.context.fillRect(0, 0, @w, @h)
-        surface.context.fillStyle = fillColor
-        surface.context.fillRect(thick, thick, @w - (thick * 2), @h - (thick * 2))
-        return surface
+        @_makeContext()
+        @context.fillStyle = strokeColor
+        @context.fillRect(0, 0, @w, @h)
+        @context.fillStyle = fillColor
+        @context.fillRect(thick, thick, @w - (thick * 2), @h - (thick * 2))
+        return @surface
+
+    ###
+    左向きの三角形
+    @param color 色
+    ###
+    drawLeftTriangle: (color) ->
+        @_makeContext()
+        @context.fillStyle = color
+        @context.beginPath()
+        @context.moveTo(0, @h / 2)
+        @context.lineTo(@w, 0)
+        @context.lineTo(@w, @h)
+        @context.closePath()
+        @context.fill()
+        return @surface
+
+    ###
+    上向きの三角形
+    @param color 色
+    ###
+    drawUpTriangle: (color) ->
+        @_makeContext()
+        @context.fillStyle = color
+        @context.beginPath()
+        @context.moveTo(@w / 2, 0)
+        @context.lineTo(@w, @h)
+        @context.lineTo(0, @h)
+        @context.closePath()
+        @context.fill()
+        return @surface
+
+    ###
+    丸
+    @param color 色
+    ###
+    drawCircle: (color) ->
+        @_makeContext()
+        @context.fillStyle = color
+        @context.arc(@w / 2, @h / 2, @w / 2, 0, Math.PI * 2, true)
+        @context.fill()
+        return @surface
 class Button extends System
     constructor: (w, h) ->
         super w, h
@@ -2192,12 +2254,81 @@ class Button extends System
 ###
 class pauseButton extends Button
     constructor: () ->
-        super 30, 30
-        @image = @drawRect('#F9DFD5')
-        @x = 435
-        @y = 90
+        super 36, 36
+        @image = game.imageload("pause")
+        @x = 430
+        @y = 76
     ontouchend: (e)->
         game.setPauseScene()
+
+###
+コントローラボタン
+###
+class controllerButton extends Button
+    constructor: () ->
+        super 50, 50
+        @color = "#aaa"
+        @opacity = 0.2
+        @x = 0
+        @y = 660
+
+###
+左ボタン
+###
+class leftButton extends controllerButton
+    constructor: () ->
+        super
+        @image = @drawLeftTriangle(@color)
+        @x = 30
+
+###
+右ボタン
+###
+class rightButton extends controllerButton
+    constructor: () ->
+        super
+        @image = @drawLeftTriangle(@color)
+        @scaleX = -1
+        @x = game.width - @w - 30
+
+###
+ジャンプボタン
+###
+class jumpButton extends controllerButton
+    constructor: () ->
+        super
+        @image = @drawCircle(@color)
+        @x = (game.width - @w) / 2
+
+###
+掛け金変更ボタン
+###
+class betButton extends Button
+    constructor: () ->
+        super 22, 22
+        @color = "black"
+        @y = 7
+
+###
+掛け金を増やすボタン
+###
+class heighBetButton extends betButton
+    constructor: () ->
+        super
+        @image = @drawUpTriangle(@color)
+        @x = 7
+
+###
+掛け金を減らすボタン
+###
+class lowBetButton extends betButton
+    constructor: () ->
+        super
+        @image = @drawUpTriangle(@color)
+        @scaleY = -1
+        @x = 121
+    setXposition: ()->
+        @x = game.main_scene.gp_system.bet_text._boundWidth + @w + 20
 class Dialog extends System
     constructor: (w, h) ->
         super w, h
@@ -2221,14 +2352,14 @@ class TensionGaugeBack extends Param
         super 457, 19
         @image = @drawRect('#FFFFFF')
         @x = 11
-        @y = 56
+        @y = 46
 
 class TensionGauge extends Param
     constructor: (w, h) ->
         super 450, 11
         @image = @drawRect('#6EB7DB')
         @x = 15
-        @y = 60
+        @y = 50
         @setValue()
 
     setValue:()->

@@ -36,13 +36,14 @@ class betText extends text
         @color = 'black'
         @font_size = 22
         @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
-        @x = 7
+        @x = 37
         @y = 7
         @kakekin_text = '掛金'
         @yen_text = '円'
-        @setValue()
+        @text = @kakekin_text + game.bet + @yen_text
     setValue: () ->
         @text = @kakekin_text + game.bet + @yen_text
+        game.main_scene.gp_system.low_bet_button.setXposition()
 
 class comboText extends text
     constructor: () ->

@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betText, buttonHtml, catchAndSlotGame, comboText, comboUnitText, cutIn, dialogHtml, effect, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, mainScene, moneyText, pauseBack, pauseButton, pauseMainLayer, pauseMainMenuButtonHtml, pauseSaveLayer, pauseScene, returnGameButtonHtml, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, slotSetting, stageBack, stageFront, systemHtml, text, titleMainLayer, titleScene,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betButton, betText, buttonHtml, catchAndSlotGame, comboText, comboUnitText, controllerButton, cutIn, dialogHtml, effect, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, jumpButton, leftButton, lowBetButton, mainScene, moneyText, pauseBack, pauseButton, pauseMainLayer, pauseMainMenuButtonHtml, pauseSaveLayer, pauseScene, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, slotSetting, stageBack, stageFront, systemHtml, text, titleMainLayer, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -284,7 +284,7 @@ LoveliveGame = (function(_super) {
     this.width = 480;
     this.height = 720;
     this.fps = 24;
-    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin'];
+    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause'];
     this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear'];
     this.keybind(90, 'z');
     this.keybind(88, 'x');
@@ -473,6 +473,8 @@ gpSlot = (function(_super) {
     this.feverSec = 0;
     this.slotSet();
     this.debugSlot();
+    this.upperFrame = new UpperFrame();
+    this.addChild(this.upperFrame);
   }
 
   gpSlot.prototype.onenterframe = function(e) {
@@ -757,7 +759,7 @@ gpStage = (function(_super) {
 
   function gpStage() {
     gpStage.__super__.constructor.apply(this, arguments);
-    this.floor = 675;
+    this.floor = 640;
   }
 
   return gpStage;
@@ -1149,6 +1151,16 @@ gpSystem = (function(_super) {
     this.addChild(this.tension_gauge);
     this.pause_button = new pauseButton();
     this.addChild(this.pause_button);
+    this.left_button = new leftButton();
+    this.addChild(this.left_button);
+    this.right_button = new rightButton();
+    this.addChild(this.right_button);
+    this.jump_button = new jumpButton();
+    this.addChild(this.jump_button);
+    this.heigh_bet_button = new heighBetButton();
+    this.addChild(this.heigh_bet_button);
+    this.low_bet_button = new lowBetButton();
+    this.addChild(this.low_bet_button);
     this.keyList = {
       'up': false,
       'down': false
@@ -1499,15 +1511,16 @@ betText = (function(_super) {
     this.color = 'black';
     this.font_size = 22;
     this.font = this.font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'";
-    this.x = 7;
+    this.x = 37;
     this.y = 7;
     this.kakekin_text = '掛金';
     this.yen_text = '円';
-    this.setValue();
+    this.text = this.kakekin_text + game.bet + this.yen_text;
   }
 
   betText.prototype.setValue = function() {
-    return this.text = this.kakekin_text + game.bet + this.yen_text;
+    this.text = this.kakekin_text + game.bet + this.yen_text;
+    return game.main_scene.gp_system.low_bet_button.setXposition();
   };
 
   return betText;
@@ -3293,7 +3306,10 @@ UpperFrame = (function(_super) {
   __extends(UpperFrame, _super);
 
   function UpperFrame(w, h) {
-    UpperFrame.__super__.constructor.call(this, w, h);
+    UpperFrame.__super__.constructor.call(this, 381, 135);
+    this.image = game.imageload("frame");
+    this.x = -6;
+    this.y = -6;
   }
 
   return UpperFrame;
@@ -3411,6 +3427,11 @@ System = (function(_super) {
     System.__super__.constructor.call(this, w, h);
   }
 
+  System.prototype._makeContext = function() {
+    this.surface = new Surface(this.w, this.h);
+    return this.context = this.surface.context;
+  };
+
 
   /*
   枠の無い長方形
@@ -3418,12 +3439,11 @@ System = (function(_super) {
    */
 
   System.prototype.drawRect = function(color) {
-    var surface;
-    surface = new Surface(this.w, this.h);
-    surface.context.fillStyle = color;
-    surface.context.fillRect(0, 0, this.w, this.h, 10);
-    surface.context.fill();
-    return surface;
+    this._makeContext();
+    this.context.fillStyle = color;
+    this.context.fillRect(0, 0, this.w, this.h, 10);
+    this.context.fill();
+    return this.surface;
   };
 
 
@@ -3435,13 +3455,62 @@ System = (function(_super) {
    */
 
   System.prototype.drawStrokeRect = function(strokeColor, fillColor, thick) {
-    var surface;
-    surface = new Surface(this.w, this.h);
-    surface.context.fillStyle = strokeColor;
-    surface.context.fillRect(0, 0, this.w, this.h);
-    surface.context.fillStyle = fillColor;
-    surface.context.fillRect(thick, thick, this.w - (thick * 2), this.h - (thick * 2));
-    return surface;
+    this._makeContext();
+    this.context.fillStyle = strokeColor;
+    this.context.fillRect(0, 0, this.w, this.h);
+    this.context.fillStyle = fillColor;
+    this.context.fillRect(thick, thick, this.w - (thick * 2), this.h - (thick * 2));
+    return this.surface;
+  };
+
+
+  /*
+  左向きの三角形
+  @param color 色
+   */
+
+  System.prototype.drawLeftTriangle = function(color) {
+    this._makeContext();
+    this.context.fillStyle = color;
+    this.context.beginPath();
+    this.context.moveTo(0, this.h / 2);
+    this.context.lineTo(this.w, 0);
+    this.context.lineTo(this.w, this.h);
+    this.context.closePath();
+    this.context.fill();
+    return this.surface;
+  };
+
+
+  /*
+  上向きの三角形
+  @param color 色
+   */
+
+  System.prototype.drawUpTriangle = function(color) {
+    this._makeContext();
+    this.context.fillStyle = color;
+    this.context.beginPath();
+    this.context.moveTo(this.w / 2, 0);
+    this.context.lineTo(this.w, this.h);
+    this.context.lineTo(0, this.h);
+    this.context.closePath();
+    this.context.fill();
+    return this.surface;
+  };
+
+
+  /*
+  丸
+  @param color 色
+   */
+
+  System.prototype.drawCircle = function(color) {
+    this._makeContext();
+    this.context.fillStyle = color;
+    this.context.arc(this.w / 2, this.h / 2, this.w / 2, 0, Math.PI * 2, true);
+    this.context.fill();
+    return this.surface;
   };
 
   return System;
@@ -3470,10 +3539,10 @@ pauseButton = (function(_super) {
   __extends(pauseButton, _super);
 
   function pauseButton() {
-    pauseButton.__super__.constructor.call(this, 30, 30);
-    this.image = this.drawRect('#F9DFD5');
-    this.x = 435;
-    this.y = 90;
+    pauseButton.__super__.constructor.call(this, 36, 36);
+    this.image = game.imageload("pause");
+    this.x = 430;
+    this.y = 76;
   }
 
   pauseButton.prototype.ontouchend = function(e) {
@@ -3483,6 +3552,140 @@ pauseButton = (function(_super) {
   return pauseButton;
 
 })(Button);
+
+
+/*
+コントローラボタン
+ */
+
+controllerButton = (function(_super) {
+  __extends(controllerButton, _super);
+
+  function controllerButton() {
+    controllerButton.__super__.constructor.call(this, 50, 50);
+    this.color = "#aaa";
+    this.opacity = 0.2;
+    this.x = 0;
+    this.y = 660;
+  }
+
+  return controllerButton;
+
+})(Button);
+
+
+/*
+左ボタン
+ */
+
+leftButton = (function(_super) {
+  __extends(leftButton, _super);
+
+  function leftButton() {
+    leftButton.__super__.constructor.apply(this, arguments);
+    this.image = this.drawLeftTriangle(this.color);
+    this.x = 30;
+  }
+
+  return leftButton;
+
+})(controllerButton);
+
+
+/*
+右ボタン
+ */
+
+rightButton = (function(_super) {
+  __extends(rightButton, _super);
+
+  function rightButton() {
+    rightButton.__super__.constructor.apply(this, arguments);
+    this.image = this.drawLeftTriangle(this.color);
+    this.scaleX = -1;
+    this.x = game.width - this.w - 30;
+  }
+
+  return rightButton;
+
+})(controllerButton);
+
+
+/*
+ジャンプボタン
+ */
+
+jumpButton = (function(_super) {
+  __extends(jumpButton, _super);
+
+  function jumpButton() {
+    jumpButton.__super__.constructor.apply(this, arguments);
+    this.image = this.drawCircle(this.color);
+    this.x = (game.width - this.w) / 2;
+  }
+
+  return jumpButton;
+
+})(controllerButton);
+
+
+/*
+掛け金変更ボタン
+ */
+
+betButton = (function(_super) {
+  __extends(betButton, _super);
+
+  function betButton() {
+    betButton.__super__.constructor.call(this, 22, 22);
+    this.color = "black";
+    this.y = 7;
+  }
+
+  return betButton;
+
+})(Button);
+
+
+/*
+掛け金を増やすボタン
+ */
+
+heighBetButton = (function(_super) {
+  __extends(heighBetButton, _super);
+
+  function heighBetButton() {
+    heighBetButton.__super__.constructor.apply(this, arguments);
+    this.image = this.drawUpTriangle(this.color);
+    this.x = 7;
+  }
+
+  return heighBetButton;
+
+})(betButton);
+
+
+/*
+掛け金を減らすボタン
+ */
+
+lowBetButton = (function(_super) {
+  __extends(lowBetButton, _super);
+
+  function lowBetButton() {
+    lowBetButton.__super__.constructor.apply(this, arguments);
+    this.image = this.drawUpTriangle(this.color);
+    this.scaleY = -1;
+    this.x = 121;
+  }
+
+  lowBetButton.prototype.setXposition = function() {
+    return this.x = game.main_scene.gp_system.bet_text._boundWidth + this.w + 20;
+  };
+
+  return lowBetButton;
+
+})(betButton);
 
 Dialog = (function(_super) {
   __extends(Dialog, _super);
@@ -3535,7 +3738,7 @@ TensionGaugeBack = (function(_super) {
     TensionGaugeBack.__super__.constructor.call(this, 457, 19);
     this.image = this.drawRect('#FFFFFF');
     this.x = 11;
-    this.y = 56;
+    this.y = 46;
   }
 
   return TensionGaugeBack;
@@ -3549,7 +3752,7 @@ TensionGauge = (function(_super) {
     TensionGauge.__super__.constructor.call(this, 450, 11);
     this.image = this.drawRect('#6EB7DB');
     this.x = 15;
-    this.y = 60;
+    this.y = 50;
     this.setValue();
   }
 

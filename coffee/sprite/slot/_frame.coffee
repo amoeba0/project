@@ -9,4 +9,7 @@ class UnderFrame extends Frame
 
 class UpperFrame extends Frame
     constructor: (w,h) ->
-        super w, h
+        super 381, 135
+        @image = game.imageload("frame")
+        @x = -6
+        @y = -6

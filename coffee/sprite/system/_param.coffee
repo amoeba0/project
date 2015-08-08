@@ -7,14 +7,14 @@ class TensionGaugeBack extends Param
         super 457, 19
         @image = @drawRect('#FFFFFF')
         @x = 11
-        @y = 56
+        @y = 46
 
 class TensionGauge extends Param
     constructor: (w, h) ->
         super 450, 11
         @image = @drawRect('#6EB7DB')
         @x = 15
-        @y = 60
+        @y = 50
         @setValue()
 
     setValue:()->

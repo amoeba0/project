@@ -15,6 +15,16 @@ class gpSystem extends appGroup
         @addChild(@tension_gauge)
         @pause_button = new pauseButton()
         @addChild(@pause_button)
+        @left_button = new leftButton()
+        @addChild(@left_button)
+        @right_button = new rightButton()
+        @addChild(@right_button)
+        @jump_button = new jumpButton()
+        @addChild(@jump_button)
+        @heigh_bet_button = new heighBetButton()
+        @addChild(@heigh_bet_button)
+        @low_bet_button = new lowBetButton()
+        @addChild(@low_bet_button)
         @keyList = {'up':false, 'down':false}
     onenterframe: (e) ->
         @_betSetting()
