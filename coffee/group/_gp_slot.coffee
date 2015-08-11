@@ -51,7 +51,7 @@ class gpSlot extends appGroup
     確率でスロットを強制的に当たりにする
     ###
     forceHit:(target)->
-        if game.slot_setting.getIsForceSlotHit() is true
+        if game.slot_setting.isForceSlotHit is true
             tmp_eye = @_searchEye(target)
             if tmp_eye != 0
                 target.nowEye = tmp_eye

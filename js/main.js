@@ -526,7 +526,7 @@ gpSlot = (function(_super) {
 
   gpSlot.prototype.forceHit = function(target) {
     var tmp_eye;
-    if (game.slot_setting.getIsForceSlotHit() === true) {
+    if (game.slot_setting.isForceSlotHit === true) {
       tmp_eye = this._searchEye(target);
       if (tmp_eye !== 0) {
         target.nowEye = tmp_eye;
@@ -885,7 +885,12 @@ stageFront = (function(_super) {
         game.bet = game.money;
       }
       game.main_scene.gp_system.money_text.setValue();
-      return game.main_scene.gp_slot.slotStart();
+      game.main_scene.gp_slot.slotStart();
+      if (game.slot_setting.getIsForceSlotHit() === true) {
+        return game.main_scene.gp_slot.upperFrame.frame = 1;
+      } else {
+        return game.main_scene.gp_slot.upperFrame.frame = 0;
+      }
     }
   };
 
@@ -1607,13 +1612,13 @@ Debug = (function(_super) {
     this.all_debug_flg = false;
     this.force_pause_flg = false;
     this.lille_flg = false;
-    this.item_flg = true;
+    this.item_flg = false;
     this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
     this.fix_tention_item_fall_flg = false;
     this.fix_tention_slot_hit_flg = false;
     this.force_insert_muse = false;
-    this.force_slot_hit = true;
+    this.force_slot_hit = false;
     this.lille_array = [[1, 2, 1], [2, 1, 1], [1, 2, 1]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -50;
@@ -1653,16 +1658,16 @@ slotSetting = (function(_super) {
       2: 30,
       3: 40,
       4: 50,
-      5: 300,
-      11: 100,
-      12: 100,
-      13: 100,
-      14: 100,
-      15: 100,
-      16: 100,
-      17: 100,
-      18: 100,
-      19: 100
+      5: 100,
+      11: 80,
+      12: 80,
+      13: 80,
+      14: 80,
+      15: 80,
+      16: 80,
+      17: 80,
+      18: 80,
+      19: 80
     };
 
     /*
@@ -1833,6 +1838,7 @@ slotSetting = (function(_super) {
     };
     this.tension_max = 500;
     this.now_muse_num = 0;
+    this.isForceSlotHit = false;
     this.prev_muse = [];
   }
 
@@ -1845,19 +1851,19 @@ slotSetting = (function(_super) {
   slotSetting.prototype.setGravity = function() {
     var div, val;
     if (game.bet < 5) {
-      val = 0.5;
+      val = 0.4;
     } else if (game.bet < 10) {
-      val = 0.6;
+      val = 0.5;
     } else if (game.bet < 50) {
-      val = 0.7;
+      val = 0.6;
     } else if (game.bet < 100) {
-      val = 0.8;
+      val = 0.7;
     } else if (game.bet < 500) {
-      val = 0.9;
+      val = 0.8;
     } else if (game.bet < 1000) {
-      val = 1;
+      val = 0.9;
     } else if (game.bet < 10000) {
-      val = 1 + Math.floor(game.bet / 500) / 10;
+      val = 0.9 + Math.floor(game.bet / 500) / 10;
     } else if (game.bet < 100000) {
       val = 3 + Math.floor(game.bet / 5000) / 10;
     } else {
@@ -1958,6 +1964,7 @@ slotSetting = (function(_super) {
     if (random < rate || game.fever === true || game.debug.force_slot_hit === true) {
       result = true;
     }
+    this.isForceSlotHit = result;
     return result;
   };
 

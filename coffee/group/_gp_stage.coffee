@@ -71,6 +71,10 @@ class stageFront extends gpStage
                 game.bet = game.money
             game.main_scene.gp_system.money_text.setValue()
             game.main_scene.gp_slot.slotStart()
+            if game.slot_setting.getIsForceSlotHit() is true
+                game.main_scene.gp_slot.upperFrame.frame = 1
+            else
+                game.main_scene.gp_slot.upperFrame.frame = 0
 
     _missCatchFall:()->
         if game.money >= game.bet

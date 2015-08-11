@@ -24,8 +24,8 @@ class slotSetting extends appNode
         ]
         #リールの目に対する当選額の倍率
         @bairitu = {
-            1:5, 2:30, 3:40, 4:50, 5:300,
-            11:100, 12:100, 13:100, 14:100, 15:100, 16:100, 17:100, 18:100, 19:100
+            1:5, 2:30, 3:40, 4:50, 5:100,
+            11:80, 12:80, 13:80, 14:80, 15:80, 16:80, 17:80, 18:80, 19:80
         }
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
@@ -121,6 +121,8 @@ class slotSetting extends appNode
         @tension_max = 500
         #現在スロットに入るμ’ｓ番号
         @now_muse_num = 0
+        #trueならスロットが強制で当たる
+        @isForceSlotHit = false
 
         #セーブする変数
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
@@ -131,19 +133,19 @@ class slotSetting extends appNode
     ###
     setGravity:()->
         if game.bet < 5
-            val = 0.5
+            val = 0.4
         else if game.bet < 10
-            val = 0.6
+            val = 0.5
         else if game.bet < 50
-            val = 0.7
+            val = 0.6
         else if game.bet < 100
-            val = 0.8
+            val = 0.7
         else if game.bet < 500
-            val = 0.9
+            val = 0.8
         else if game.bet < 1000
-            val = 1
+            val = 0.9
         else if game.bet < 10000
-            val = 1 + Math.floor(game.bet / 500) / 10
+            val = 0.9 + Math.floor(game.bet / 500) / 10
         else if game.bet < 100000
             val = 3 + Math.floor(game.bet / 5000) / 10
         else
@@ -216,6 +218,7 @@ class slotSetting extends appNode
         random = Math.floor(Math.random() * 100)
         if random < rate || game.fever is true || game.debug.force_slot_hit is true
             result = true
+        @isForceSlotHit = result
         return result
 
     ###
