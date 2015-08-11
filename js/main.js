@@ -1623,17 +1623,15 @@ slotSetting = (function(_super) {
 
   function slotSetting() {
     slotSetting.__super__.constructor.apply(this, arguments);
-    this.lille_array_0 = [[3, 2, 3, 4, 2, 3, 5, 2, 4, 3, 4, 5, 2, 5, 2, 1, 2, 3, 4, 5, 2, 3], [3, 5, 2, 5, 4, 2, 3, 4, 3, 2, 1, 5, 4, 3, 5, 2, 3, 4, 1, 4, 5, 3], [2, 4, 1, 5, 1, 4, 2, 3, 2, 4, 3, 1, 3, 2, 3, 2, 3, 5, 3, 2, 4, 5]];
-    this.lille_array_1 = [[1, 5, 3, 4, 2, 3, 5, 4, 1, 3, 4, 5, 4, 5, 4, 1, 4, 5, 4, 5, 1, 4], [4, 5, 2, 5, 4, 2, 5, 4, 4, 2, 1, 5, 4, 3, 5, 4, 3, 5, 1, 4, 5, 3], [5, 4, 1, 5, 1, 4, 2, 4, 5, 4, 3, 1, 5, 2, 4, 5, 1, 5, 3, 2, 4, 5]];
-    this.lille_array_2 = [[1, 5, 1, 4, 2, 3, 1, 4, 1, 5, 4, 1, 2, 5, 4, 1, 4, 1, 4, 5, 1, 4], [1, 5, 2, 1, 4, 2, 5, 1, 5, 2, 1, 5, 1, 3, 1, 5, 3, 4, 1, 4, 5, 1], [1, 4, 1, 5, 1, 4, 2, 1, 5, 1, 3, 1, 5, 2, 4, 5, 1, 5, 1, 3, 4, 1]];
+    this.lille_array_0 = [[1, 2, 1, 2, 1, 3, 5, 1, 2, 3, 5, 1, 2, 1, 3, 4, 1, 2, 1, 4], [2, 4, 1, 1, 3, 2, 4, 1, 3, 2, 5, 1, 3, 2, 4, 1, 3, 1, 5, 1], [1, 5, 2, 3, 1, 4, 1, 3, 1, 4, 5, 2, 3, 1, 4, 2, 3, 1, 2, 1]];
+    this.lille_array_1 = [[1, 3, 1, 3, 1, 2, 5, 1, 3, 2, 5, 1, 3, 1, 2, 4, 1, 3, 1, 4], [3, 4, 1, 1, 2, 3, 4, 1, 2, 3, 5, 1, 2, 3, 4, 1, 2, 1, 5, 1], [1, 5, 3, 2, 1, 4, 1, 2, 1, 4, 5, 3, 2, 1, 4, 3, 2, 1, 3, 1]];
+    this.lille_array_2 = [[1, 4, 1, 4, 1, 2, 5, 1, 4, 2, 5, 1, 4, 1, 2, 3, 1, 4, 1, 3], [4, 3, 1, 1, 2, 4, 3, 1, 2, 4, 5, 1, 2, 4, 3, 1, 2, 1, 5, 1], [1, 5, 4, 2, 1, 3, 1, 2, 1, 3, 5, 4, 2, 1, 3, 4, 2, 1, 4, 1]];
     this.bairitu = {
-      2: 20,
-      3: 30,
-      4: 40,
-      5: 50,
-      6: 60,
-      1: 70,
-      7: 80,
+      1: 5,
+      2: 30,
+      3: 40,
+      4: 50,
+      5: 300,
       11: 100,
       12: 100,
       13: 100,
@@ -2376,14 +2374,14 @@ FrontPanorama = (function(_super) {
   __extends(FrontPanorama, _super);
 
   function FrontPanorama(w, h) {
-    FrontPanorama.__super__.constructor.call(this, game.width, 300);
+    FrontPanorama.__super__.constructor.call(this, game.width, 310);
     this.image = game.imageload("okujou");
     this.setPosition();
   }
 
   FrontPanorama.prototype.setPosition = function() {
     this.x = 0;
-    return this.y = 420;
+    return this.y = game.height - this.h;
   };
 
   return FrontPanorama;
@@ -3564,7 +3562,7 @@ controllerButton = (function(_super) {
   function controllerButton() {
     controllerButton.__super__.constructor.call(this, 50, 50);
     this.color = "#aaa";
-    this.opacity = 0.2;
+    this.opacity = 0.4;
     this.x = 0;
     this.y = 660;
   }

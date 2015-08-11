@@ -22,7 +22,7 @@ class controllerButton extends Button
     constructor: () ->
         super 50, 50
         @color = "#aaa"
-        @opacity = 0.2
+        @opacity = 0.4
         @x = 0
         @y = 660
 
