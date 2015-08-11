@@ -559,13 +559,13 @@ gpSlot = (function(_super) {
       game.sePlay(this.slot_hit_se);
       hit_eye = this.left_lille.lilleArray[this.left_lille.nowEye];
       prize_money = game.slot_setting.calcPrizeMoney(this.middle_lille.lilleArray[this.middle_lille.nowEye]);
-      game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money);
       game.tensionSetValueSlotHit(prize_money, hit_eye);
-      return this._feverStart(hit_eye);
-    } else {
-      if (game.slot_setting.isAddMuse() === true) {
+      this._feverStart(hit_eye);
+      if (hit_eye === 1) {
         member = game.slot_setting.now_muse_num;
-        return this.slotAddMuse(member, 1);
+        return this.slotAddMuse(member);
+      } else {
+        return game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money);
       }
     }
   };
@@ -582,6 +582,7 @@ gpSlot = (function(_super) {
       game.slot_setting.setMuseMember();
       game.musePreLoad();
       game.fever_hit_eye = hit_eye;
+      this.slotAddMuseAll(hit_eye);
       return this._feverBgmStart(hit_eye);
     }
   };
@@ -664,16 +665,15 @@ gpSlot = (function(_super) {
 
 
   /*
-  リールにμ’sの誰かを挿入
-  スロットが止まってハズレだったときに確率で実行
+  リールの音ノ木坂学院校章のどこかにμ’sの誰かを挿入
+  スロットが音ノ木坂学院校章で止まったときに実行
   @param number num メンバーの指定
-  @param number cnt 人数の指定
    */
 
-  gpSlot.prototype.slotAddMuse = function(num, cnt) {
-    this.left_lille.lilleArray = this._slotAddMuseUnit(num, cnt, this.left_lille);
-    this.middle_lille.lilleArray = this._slotAddMuseUnit(num, cnt, this.middle_lille);
-    this.right_lille.lilleArray = this._slotAddMuseUnit(num, cnt, this.right_lille);
+  gpSlot.prototype.slotAddMuse = function(num) {
+    this.left_lille.lilleArray = this._slotAddMuseUnit(num, this.left_lille);
+    this.middle_lille.lilleArray = this._slotAddMuseUnit(num, this.middle_lille);
+    this.right_lille.lilleArray = this._slotAddMuseUnit(num, this.right_lille);
     return game.main_scene.gp_effect.cutInSet();
   };
 
@@ -681,25 +681,47 @@ gpSlot = (function(_super) {
   /*
   リールにμ’sの誰かを挿入(単体)
   @param number num   メンバーの指定
-  @param number cnt   人数の指定
   @param array  lille リール
    */
 
-  gpSlot.prototype._slotAddMuseUnit = function(num, cnt, lille) {
-    var add_num, arr, i, key, random_key, val, _i, _ref;
+  gpSlot.prototype._slotAddMuseUnit = function(num, lille) {
+    var add_num, arr, key, random_key, val, _ref;
     arr = [];
-    for (i = _i = 1; 1 <= cnt ? _i <= cnt : _i >= cnt; i = 1 <= cnt ? ++_i : --_i) {
-      _ref = lille.lilleArray;
-      for (key in _ref) {
-        val = _ref[key];
-        if (val < 10) {
-          arr.push(key);
-        }
+    _ref = lille.lilleArray;
+    for (key in _ref) {
+      val = _ref[key];
+      if (val === 1) {
+        arr.push(key);
       }
-      if (arr.length > 0) {
-        random_key = Math.floor(arr.length * Math.random());
-        add_num = arr[random_key];
-        lille.lilleArray[add_num] = num;
+    }
+    if (arr.length > 0) {
+      random_key = Math.floor(arr.length * Math.random());
+      add_num = arr[random_key];
+      lille.lilleArray[add_num] = num;
+    }
+    return lille.lilleArray;
+  };
+
+
+  /*
+  リールの音ノ木坂学院校章の全てにμ’sの誰かを挿入
+  フィーバー開始時に実行
+  @param number num メンバーの指定
+   */
+
+  gpSlot.prototype.slotAddMuseAll = function(num) {
+    this.left_lille.lilleArray = this._slotAddMuseAllUnit(num, this.left_lille);
+    this.middle_lille.lilleArray = this._slotAddMuseAllUnit(num, this.middle_lille);
+    return this.right_lille.lilleArray = this._slotAddMuseAllUnit(num, this.right_lille);
+  };
+
+  gpSlot.prototype._slotAddMuseAllUnit = function(num, lille) {
+    var key, val, _ref;
+    _ref = lille.lilleArray;
+    for (key in _ref) {
+      val = _ref[key];
+      if (val === 1) {
+        lille.lilleArray[key] = num;
       }
     }
     return lille.lilleArray;
@@ -1585,14 +1607,14 @@ Debug = (function(_super) {
     this.all_debug_flg = false;
     this.force_pause_flg = false;
     this.lille_flg = false;
-    this.item_flg = false;
+    this.item_flg = true;
     this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
     this.fix_tention_item_fall_flg = false;
     this.fix_tention_slot_hit_flg = false;
     this.force_insert_muse = false;
-    this.force_slot_hit = false;
-    this.lille_array = [[16, 15], [15], [15]];
+    this.force_slot_hit = true;
+    this.lille_array = [[1, 2, 1], [2, 1, 1], [1, 2, 1]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = -50;
     this.fix_tention_slot_hit_flg = 200;

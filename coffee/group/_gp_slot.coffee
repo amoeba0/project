@@ -73,13 +73,13 @@ class gpSlot extends appGroup
             game.sePlay(@slot_hit_se)
             hit_eye = @left_lille.lilleArray[@left_lille.nowEye]
             prize_money = game.slot_setting.calcPrizeMoney(@middle_lille.lilleArray[@middle_lille.nowEye])
-            game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
             game.tensionSetValueSlotHit(prize_money, hit_eye)
             @_feverStart(hit_eye)
-        else
-            if game.slot_setting.isAddMuse() is true
+            if hit_eye is 1
                 member = game.slot_setting.now_muse_num
-                @slotAddMuse(member, 1)
+                @slotAddMuse(member)
+            else
+                game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
 
     ###
     フィーバーを開始する
@@ -91,6 +91,7 @@ class gpSlot extends appGroup
             game.slot_setting.setMuseMember()
             game.musePreLoad()
             game.fever_hit_eye = hit_eye
+            @slotAddMuseAll(hit_eye)
             @_feverBgmStart(hit_eye)
 
     ###
@@ -151,33 +152,46 @@ class gpSlot extends appGroup
 
 
     ###
-    リールにμ’sの誰かを挿入
-    スロットが止まってハズレだったときに確率で実行
+    リールの音ノ木坂学院校章のどこかにμ’sの誰かを挿入
+    スロットが音ノ木坂学院校章で止まったときに実行
     @param number num メンバーの指定
-    @param number cnt 人数の指定
     ###
-    slotAddMuse:(num, cnt)->
-        @left_lille.lilleArray = @_slotAddMuseUnit(num, cnt, @left_lille)
-        @middle_lille.lilleArray = @_slotAddMuseUnit(num, cnt, @middle_lille)
-        @right_lille.lilleArray = @_slotAddMuseUnit(num, cnt, @right_lille)
+    slotAddMuse:(num)->
+        @left_lille.lilleArray = @_slotAddMuseUnit(num, @left_lille)
+        @middle_lille.lilleArray = @_slotAddMuseUnit(num, @middle_lille)
+        @right_lille.lilleArray = @_slotAddMuseUnit(num, @right_lille)
         game.main_scene.gp_effect.cutInSet()
 
     ###
     リールにμ’sの誰かを挿入(単体)
     @param number num   メンバーの指定
-    @param number cnt   人数の指定
     @param array  lille リール
     ###
-    _slotAddMuseUnit:(num, cnt, lille)->
+    _slotAddMuseUnit:(num, lille)->
         arr = []
-        for i in [1..cnt]
-            for key, val of lille.lilleArray
-                if val < 10
-                    arr.push(key)
-            if arr.length > 0
-                random_key = Math.floor(arr.length * Math.random())
-                add_num = arr[random_key]
-                lille.lilleArray[add_num] = num
+        for key, val of lille.lilleArray
+            if val is 1
+                arr.push(key)
+        if arr.length > 0
+            random_key = Math.floor(arr.length * Math.random())
+            add_num = arr[random_key]
+            lille.lilleArray[add_num] = num
+        return lille.lilleArray
+
+    ###
+    リールの音ノ木坂学院校章の全てにμ’sの誰かを挿入
+    フィーバー開始時に実行
+    @param number num メンバーの指定
+    ###
+    slotAddMuseAll:(num)->
+        @left_lille.lilleArray = @_slotAddMuseAllUnit(num, @left_lille)
+        @middle_lille.lilleArray = @_slotAddMuseAllUnit(num, @middle_lille)
+        @right_lille.lilleArray = @_slotAddMuseAllUnit(num, @right_lille)
+
+    _slotAddMuseAllUnit:(num, lille)->
+        for key, val of lille.lilleArray
+            if val is 1
+                lille.lilleArray[key] = num
         return lille.lilleArray
 
     ###
