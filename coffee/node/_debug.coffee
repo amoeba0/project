@@ -8,6 +8,8 @@ class Debug extends appNode
         #全てのデバッグフラグをONにする
         @all_debug_flg = false
 
+        #開始後いきなりメイン画面
+        @force_main_flg = true
         #開始後いきなりポーズ画面
         @force_pause_flg = false
 

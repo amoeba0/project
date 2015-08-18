@@ -301,15 +301,20 @@ LoveliveGame = (function(_super) {
     this.combo = 0;
     this.tension = 0;
     this.past_fever_num = 0;
+    this.money = this.money_init;
   }
 
   LoveliveGame.prototype.onload = function() {
-    this.gameInit();
+    this.title_scene = new titleScene();
     this.main_scene = new mainScene();
-    this.pushScene(this.main_scene);
     this.pause_scene = new pauseScene();
-    if (this.debug.force_pause_flg === true) {
-      return this.pushScene(this.pause_scene);
+    if (this.debug.force_main_flg === true) {
+      this.pushScene(this.main_scene);
+      if (this.debug.force_pause_flg === true) {
+        return this.pushScene(this.pause_scene);
+      }
+    } else {
+      return this.pushScene(this.title_scene);
     }
   };
 
@@ -337,15 +342,6 @@ LoveliveGame = (function(_super) {
       }
       return this.load('sounds/bgm/' + material['bgm'][0]['name'] + '.mp3');
     }
-  };
-
-
-  /*
-  ゲーム開始時の初期数値調整
-   */
-
-  LoveliveGame.prototype.gameInit = function() {
-    return this.money = this.money_init;
   };
 
 
@@ -411,8 +407,25 @@ LoveliveGame = (function(_super) {
     return this.tensionSetValue(val);
   };
 
+
+  /*
+  ポーズシーンをセットする
+   */
+
   LoveliveGame.prototype.setPauseScene = function() {
+    this.pause_scene.keyList.pause = true;
     return this.pushScene(this.pause_scene);
+  };
+
+
+  /*
+  ポーズシーンをポップする
+   */
+
+  LoveliveGame.prototype.popPauseScene = function() {
+    this.pause_scene.buttonList.pause = false;
+    this.main_scene.keyList.pause = true;
+    return this.popScene(this.pause_scene);
   };
 
   return LoveliveGame;
@@ -1359,7 +1372,7 @@ returnGameButtonHtml = (function(_super) {
   }
 
   returnGameButtonHtml.prototype.touchendEvent = function() {
-    return game.popScene(game.pause_scene);
+    return game.pause_scene.buttonList.pause = true;
   };
 
   return returnGameButtonHtml;
@@ -1610,6 +1623,7 @@ Debug = (function(_super) {
   function Debug() {
     Debug.__super__.constructor.apply(this, arguments);
     this.all_debug_flg = false;
+    this.force_main_flg = true;
     this.force_pause_flg = false;
     this.lille_flg = false;
     this.item_flg = false;
@@ -1654,20 +1668,20 @@ slotSetting = (function(_super) {
     this.lille_array_1 = [[1, 3, 1, 3, 1, 2, 5, 1, 3, 2, 5, 1, 3, 1, 2, 4, 1, 3, 1, 4], [3, 4, 1, 1, 2, 3, 4, 1, 2, 3, 5, 1, 2, 3, 4, 1, 2, 1, 5, 1], [1, 5, 3, 2, 1, 4, 1, 2, 1, 4, 5, 3, 2, 1, 4, 3, 2, 1, 3, 1]];
     this.lille_array_2 = [[1, 4, 1, 4, 1, 2, 5, 1, 4, 2, 5, 1, 4, 1, 2, 3, 1, 4, 1, 3], [4, 3, 1, 1, 2, 4, 3, 1, 2, 4, 5, 1, 2, 4, 3, 1, 2, 1, 5, 1], [1, 5, 4, 2, 1, 3, 1, 2, 1, 3, 5, 4, 2, 1, 3, 4, 2, 1, 4, 1]];
     this.bairitu = {
-      1: 5,
-      2: 30,
-      3: 40,
-      4: 50,
-      5: 100,
-      11: 80,
-      12: 80,
-      13: 80,
-      14: 80,
-      15: 80,
-      16: 80,
-      17: 80,
-      18: 80,
-      19: 80
+      1: 10,
+      2: 20,
+      3: 30,
+      4: 40,
+      5: 50,
+      11: 50,
+      12: 50,
+      13: 50,
+      14: 50,
+      15: 50,
+      16: 50,
+      17: 50,
+      18: 50,
+      19: 50
     };
 
     /*
@@ -1846,31 +1860,37 @@ slotSetting = (function(_super) {
   /*
   落下アイテムの加速度
   掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
+  TODO 掛け金が少なくてもコンボが多いと速度を上げる
    */
 
   slotSetting.prototype.setGravity = function() {
     var div, val;
-    if (game.bet < 5) {
+    if (game.bet < 10) {
       val = 0.4;
-    } else if (game.bet < 10) {
-      val = 0.5;
     } else if (game.bet < 50) {
-      val = 0.6;
+      val = 0.5;
     } else if (game.bet < 100) {
-      val = 0.7;
+      val = 0.6;
     } else if (game.bet < 500) {
-      val = 0.8;
+      val = 0.7;
     } else if (game.bet < 1000) {
-      val = 0.9;
+      val = 0.8;
     } else if (game.bet < 10000) {
-      val = 0.9 + Math.floor(game.bet / 500) / 10;
+      val = 0.8 + Math.floor(game.bet / 1000) / 10;
     } else if (game.bet < 100000) {
-      val = 3 + Math.floor(game.bet / 5000) / 10;
+      val = 1.7 + Math.floor(game.bet / 5000) / 10;
     } else {
-      val = 5;
+      val = 4;
     }
-    div = 1 + Math.floor(3 * game.tension / this.tension_max) / 10;
+    div = 1 + Math.floor(2 * game.tension / this.tension_max) / 10;
     val = Math.floor(val * div * 10) / 10;
+    if (100 < game.combo) {
+      div = Math.floor((game.combo - 100) / 20) / 10;
+      if (2 < div) {
+        div = 2;
+      }
+      val += div;
+    }
     return val;
   };
 
@@ -1943,9 +1963,9 @@ slotSetting = (function(_super) {
 
   /*
   スロットを強制的に当たりにするかどうかを決める
-  コンボ数 * 0.1 ％
-  テンションMAXで2倍補正
-  過去のフィーバー回数が少ないほど上方補正かける 0回:+15,1回:+10,2回:+5
+  コンボ数 * 0.07 ％
+  テンションMAXで1.5倍補正
+  過去のフィーバー回数が少ないほど上方補正かける 0回:+8,1回:+6,2回:+4,3回以上:+2
   フィーバー中は強制的に当たり
   @return boolean true:当たり
    */
@@ -1953,9 +1973,9 @@ slotSetting = (function(_super) {
   slotSetting.prototype.getIsForceSlotHit = function() {
     var random, rate, result;
     result = false;
-    rate = Math.floor(game.combo * 0.1 * ((game.tension / this.tension_max) + 1));
+    rate = Math.floor(game.combo * 0.07 * ((game.tension / (this.tension_max * 2)) + 1));
     if (game.past_fever_num <= 2) {
-      rate += (3 - game.past_fever_num) * 5;
+      rate += (1 + (3 - game.past_fever_num)) * 0.2;
     }
     if (rate > 100) {
       rate = 100;
@@ -1992,7 +2012,7 @@ slotSetting = (function(_super) {
       if (div < 1) {
         div = 1;
       }
-      ret_money = ret_money / div;
+      ret_money = Math.floor(ret_money / div);
     }
     if (ret_money > 10000000000) {
       ret_money = 10000000000;
@@ -2185,6 +2205,14 @@ mainScene = (function(_super) {
       'down': false,
       'pause': false
     };
+    this.buttonList = {
+      'left': false,
+      'right': false,
+      'jump': false,
+      'up': false,
+      'down': false,
+      'pause': false
+    };
     this.initial();
   }
 
@@ -2218,52 +2246,62 @@ mainScene = (function(_super) {
   /*ボタン操作、物理キーとソフトキー両方に対応 */
 
   mainScene.prototype.buttonPush = function() {
-    if (game.input.left === true) {
+    if (game.input.left === true || this.buttonList.left === true) {
       if (this.keyList.left === false) {
         this.keyList.left = true;
+        this.gp_system.left_button.changePushColor();
       }
     } else {
       if (this.keyList.left === true) {
         this.keyList.left = false;
+        this.gp_system.left_button.changePullColor();
       }
     }
-    if (game.input.right === true) {
+    if (game.input.right === true || this.buttonList.right === true) {
       if (this.keyList.right === false) {
         this.keyList.right = true;
+        this.gp_system.right_button.changePushColor();
       }
     } else {
       if (this.keyList.right === true) {
         this.keyList.right = false;
+        this.gp_system.right_button.changePullColor();
       }
     }
-    if (game.input.up === true) {
+    if (game.input.up === true || this.buttonList.up === true) {
       if (this.keyList.up === false) {
         this.keyList.up = true;
+        this.gp_system.heigh_bet_button.changePushColor();
       }
     } else {
       if (this.keyList.up === true) {
         this.keyList.up = false;
+        this.gp_system.heigh_bet_button.changePullColor();
       }
     }
-    if (game.input.down === true) {
+    if (game.input.down === true || this.buttonList.down === true) {
       if (this.keyList.down === false) {
         this.keyList.down = true;
+        this.gp_system.low_bet_button.changePushColor();
       }
     } else {
       if (this.keyList.down === true) {
         this.keyList.down = false;
+        this.gp_system.low_bet_button.changePullColor();
       }
     }
-    if (game.input.z === true) {
+    if (game.input.z === true || this.buttonList.jump === true) {
       if (this.keyList.jump === false) {
         this.keyList.jump = true;
+        this.gp_system.jump_button.changePushColor();
       }
     } else {
       if (this.keyList.jump === true) {
         this.keyList.jump = false;
+        this.gp_system.jump_button.changePullColor();
       }
     }
-    if (game.input.x === true) {
+    if (game.input.x === true || this.buttonList.pause === true) {
       if (this.keyList.pause === false) {
         game.setPauseScene();
         return this.keyList.pause = true;
@@ -2300,6 +2338,22 @@ pauseScene = (function(_super) {
 
   function pauseScene() {
     pauseScene.__super__.constructor.apply(this, arguments);
+    this.keyList = {
+      'left': false,
+      'right': false,
+      'jump': false,
+      'up': false,
+      'down': false,
+      'pause': false
+    };
+    this.buttonList = {
+      'left': false,
+      'right': false,
+      'jump': false,
+      'up': false,
+      'down': false,
+      'pause': false
+    };
     this.pause_back = new pauseBack();
     this.addChild(this.pause_back);
     this.pause_main_layer = new pauseMainLayer();
@@ -2314,6 +2368,28 @@ pauseScene = (function(_super) {
 
   pauseScene.prototype.removeSaveMenu = function() {
     return this.removeChild(this.pause_save_layer);
+  };
+
+  pauseScene.prototype.onenterframe = function(e) {
+    return this._pauseKeyPush();
+  };
+
+
+  /*
+  ポーズキーまたはポーズボタンを押した時の動作
+   */
+
+  pauseScene.prototype._pauseKeyPush = function() {
+    if (game.input.x === true || this.buttonList.pause === true) {
+      if (this.keyList.pause === false) {
+        game.popPauseScene();
+        return this.keyList.pause = true;
+      }
+    } else {
+      if (this.keyList.pause = true) {
+        return this.keyList.pause = false;
+      }
+    }
   };
 
 
@@ -2348,6 +2424,8 @@ titleScene = (function(_super) {
 
   function titleScene() {
     titleScene.__super__.constructor.apply(this, arguments);
+    this.title_main_layer = new titleMainLayer();
+    this.addChild(this.title_main_layer);
   }
 
   return titleScene;
@@ -3591,10 +3669,19 @@ controllerButton = (function(_super) {
   function controllerButton() {
     controllerButton.__super__.constructor.call(this, 50, 50);
     this.color = "#aaa";
+    this.pushColor = "#555";
     this.opacity = 0.4;
     this.x = 0;
     this.y = 660;
   }
+
+  controllerButton.prototype.changePushColor = function() {
+    return this.image = this.drawLeftTriangle(this.pushColor);
+  };
+
+  controllerButton.prototype.changePullColor = function() {
+    return this.image = this.drawLeftTriangle(this.color);
+  };
 
   return controllerButton;
 
@@ -3613,6 +3700,14 @@ leftButton = (function(_super) {
     this.image = this.drawLeftTriangle(this.color);
     this.x = 30;
   }
+
+  leftButton.prototype.ontouchstart = function() {
+    return game.main_scene.buttonList.left = true;
+  };
+
+  leftButton.prototype.ontouchend = function() {
+    return game.main_scene.buttonList.left = false;
+  };
 
   return leftButton;
 
@@ -3633,6 +3728,14 @@ rightButton = (function(_super) {
     this.x = game.width - this.w - 30;
   }
 
+  rightButton.prototype.ontouchstart = function() {
+    return game.main_scene.buttonList.right = true;
+  };
+
+  rightButton.prototype.ontouchend = function() {
+    return game.main_scene.buttonList.right = false;
+  };
+
   return rightButton;
 
 })(controllerButton);
@@ -3651,6 +3754,22 @@ jumpButton = (function(_super) {
     this.x = (game.width - this.w) / 2;
   }
 
+  jumpButton.prototype.ontouchstart = function() {
+    return game.main_scene.buttonList.jump = true;
+  };
+
+  jumpButton.prototype.ontouchend = function() {
+    return game.main_scene.buttonList.jump = false;
+  };
+
+  jumpButton.prototype.changePushColor = function() {
+    return this.image = this.drawCircle(this.pushColor);
+  };
+
+  jumpButton.prototype.changePullColor = function() {
+    return this.image = this.drawCircle(this.color);
+  };
+
   return jumpButton;
 
 })(controllerButton);
@@ -3666,8 +3785,17 @@ betButton = (function(_super) {
   function betButton() {
     betButton.__super__.constructor.call(this, 22, 22);
     this.color = "black";
+    this.pushColor = "white";
     this.y = 7;
   }
+
+  betButton.prototype.changePushColor = function() {
+    return this.image = this.drawUpTriangle(this.pushColor);
+  };
+
+  betButton.prototype.changePullColor = function() {
+    return this.image = this.drawUpTriangle(this.color);
+  };
 
   return betButton;
 
@@ -3686,6 +3814,14 @@ heighBetButton = (function(_super) {
     this.image = this.drawUpTriangle(this.color);
     this.x = 7;
   }
+
+  heighBetButton.prototype.ontouchstart = function() {
+    return game.main_scene.buttonList.up = true;
+  };
+
+  heighBetButton.prototype.ontouchend = function() {
+    return game.main_scene.buttonList.up = false;
+  };
 
   return heighBetButton;
 
@@ -3708,6 +3844,14 @@ lowBetButton = (function(_super) {
 
   lowBetButton.prototype.setXposition = function() {
     return this.x = game.main_scene.gp_system.bet_text._boundWidth + this.w + 20;
+  };
+
+  lowBetButton.prototype.ontouchstart = function() {
+    return game.main_scene.buttonList.down = true;
+  };
+
+  lowBetButton.prototype.ontouchend = function() {
+    return game.main_scene.buttonList.down = false;
   };
 
   return lowBetButton;

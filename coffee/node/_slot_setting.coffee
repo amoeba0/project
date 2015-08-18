@@ -24,8 +24,8 @@ class slotSetting extends appNode
         ]
         #リールの目に対する当選額の倍率
         @bairitu = {
-            1:5, 2:30, 3:40, 4:50, 5:100,
-            11:80, 12:80, 13:80, 14:80, 15:80, 16:80, 17:80, 18:80, 19:80
+            1:10, 2:20, 3:30, 4:40, 5:50,
+            11:50, 12:50, 13:50, 14:50, 15:50, 16:50, 17:50, 18:50, 19:50
         }
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
@@ -130,28 +130,32 @@ class slotSetting extends appNode
     ###
     落下アイテムの加速度
     掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
+    TODO 掛け金が少なくてもコンボが多いと速度を上げる
     ###
     setGravity:()->
-        if game.bet < 5
+        if game.bet < 10
             val = 0.4
-        else if game.bet < 10
-            val = 0.5
         else if game.bet < 50
-            val = 0.6
+            val = 0.5
         else if game.bet < 100
-            val = 0.7
+            val = 0.6
         else if game.bet < 500
-            val = 0.8
+            val = 0.7
         else if game.bet < 1000
-            val = 0.9
+            val = 0.8
         else if game.bet < 10000
-            val = 0.9 + Math.floor(game.bet / 500) / 10
+            val = 0.8 + Math.floor(game.bet / 1000) / 10
         else if game.bet < 100000
-            val = 3 + Math.floor(game.bet / 5000) / 10
+            val = 1.7 + Math.floor(game.bet / 5000) / 10
         else
-            val = 5
-        div = 1 + Math.floor(3 * game.tension / @tension_max) / 10
+            val = 4
+        div = 1 + Math.floor(2 * game.tension / @tension_max) / 10
         val = Math.floor(val * div * 10) / 10
+        if 100 < game.combo
+            div = Math.floor((game.combo - 100) / 20) / 10
+            if 2 < div
+                div = 2
+            val += div
         return val
 
     ###
@@ -202,17 +206,17 @@ class slotSetting extends appNode
 
     ###
     スロットを強制的に当たりにするかどうかを決める
-    コンボ数 * 0.1 ％
-    テンションMAXで2倍補正
-    過去のフィーバー回数が少ないほど上方補正かける 0回:+15,1回:+10,2回:+5
+    コンボ数 * 0.07 ％
+    テンションMAXで1.5倍補正
+    過去のフィーバー回数が少ないほど上方補正かける 0回:+8,1回:+6,2回:+4,3回以上:+2
     フィーバー中は強制的に当たり
     @return boolean true:当たり
     ###
     getIsForceSlotHit:()->
         result = false
-        rate = Math.floor(game.combo * 0.1 * ((game.tension / @tension_max) + 1))
+        rate = Math.floor(game.combo * 0.07 * ((game.tension / (@tension_max * 2)) + 1))
         if game.past_fever_num <= 2
-            rate += (3 - game.past_fever_num) * 5
+            rate += (1 + (3 - game.past_fever_num)) * 0.2
         if rate > 100
             rate = 100
         random = Math.floor(Math.random() * 100)
@@ -238,7 +242,7 @@ class slotSetting extends appNode
             div = Math.floor(time / 30)
             if div < 1
                 div = 1
-            ret_money = ret_money / div
+            ret_money = Math.floor(ret_money / div)
         if ret_money > 10000000000
             ret_money = 10000000000
         return ret_money

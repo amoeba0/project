@@ -36,13 +36,18 @@ class LoveliveGame extends catchAndSlotGame
         @tension = 0 #現在のテンション(500がマックス)
         @past_fever_num = 0 #過去にフィーバーになった回数
 
+        @money = @money_init
+
     onload:() ->
-        @gameInit()
+        @title_scene = new titleScene()
         @main_scene = new mainScene()
-        @pushScene(@main_scene)
         @pause_scene = new pauseScene()
-        if @debug.force_pause_flg is true
-            @pushScene(@pause_scene)
+        if @debug.force_main_flg is true
+            @pushScene(@main_scene)
+            if @debug.force_pause_flg is true
+                @pushScene(@pause_scene)
+        else
+            @pushScene(@title_scene)
 
     ###
     スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
@@ -57,12 +62,6 @@ class LoveliveGame extends catchAndSlotGame
                 for key, val of material['voice']
                     @load('sounds/voice/'+val+'.mp3')
             @load('sounds/bgm/'+material['bgm'][0]['name']+'.mp3')
-
-    ###
-    ゲーム開始時の初期数値調整
-    ###
-    gameInit:() ->
-        @money = @money_init
 
     ###
     テンションゲージを増減する
@@ -105,5 +104,16 @@ class LoveliveGame extends catchAndSlotGame
     tensionSetValueSlotHit:(prize_money, hit_eye)->
         val = @slot_setting.setTensionSlotHit(prize_money, hit_eye)
         @tensionSetValue(val)
+    ###
+    ポーズシーンをセットする
+    ###
     setPauseScene:()->
+        @pause_scene.keyList.pause = true
         @pushScene(@pause_scene)
+    ###
+    ポーズシーンをポップする
+    ###
+    popPauseScene:()->
+        @pause_scene.buttonList.pause = false
+        @main_scene.keyList.pause = true
+        @popScene(@pause_scene)

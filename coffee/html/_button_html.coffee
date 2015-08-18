@@ -26,7 +26,7 @@ class returnGameButtonHtml extends pauseMainMenuButtonHtml
         @text = 'ゲームに戻る'
         @setHtml()
     touchendEvent:() ->
-        game.popScene(game.pause_scene)
+        game.pause_scene.buttonList.pause = true
 
 ###
 ゲームを保存する

@@ -170,13 +170,18 @@ class LoveliveGame extends catchAndSlotGame
         @tension = 0 #現在のテンション(500がマックス)
         @past_fever_num = 0 #過去にフィーバーになった回数
 
+        @money = @money_init
+
     onload:() ->
-        @gameInit()
+        @title_scene = new titleScene()
         @main_scene = new mainScene()
-        @pushScene(@main_scene)
         @pause_scene = new pauseScene()
-        if @debug.force_pause_flg is true
-            @pushScene(@pause_scene)
+        if @debug.force_main_flg is true
+            @pushScene(@main_scene)
+            if @debug.force_pause_flg is true
+                @pushScene(@pause_scene)
+        else
+            @pushScene(@title_scene)
 
     ###
     スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
@@ -191,12 +196,6 @@ class LoveliveGame extends catchAndSlotGame
                 for key, val of material['voice']
                     @load('sounds/voice/'+val+'.mp3')
             @load('sounds/bgm/'+material['bgm'][0]['name']+'.mp3')
-
-    ###
-    ゲーム開始時の初期数値調整
-    ###
-    gameInit:() ->
-        @money = @money_init
 
     ###
     テンションゲージを増減する
@@ -239,8 +238,19 @@ class LoveliveGame extends catchAndSlotGame
     tensionSetValueSlotHit:(prize_money, hit_eye)->
         val = @slot_setting.setTensionSlotHit(prize_money, hit_eye)
         @tensionSetValue(val)
+    ###
+    ポーズシーンをセットする
+    ###
     setPauseScene:()->
+        @pause_scene.keyList.pause = true
         @pushScene(@pause_scene)
+    ###
+    ポーズシーンをポップする
+    ###
+    popPauseScene:()->
+        @pause_scene.buttonList.pause = false
+        @main_scene.keyList.pause = true
+        @popScene(@pause_scene)
 class gpEffect extends appGroup
     constructor: () ->
         super
@@ -869,7 +879,7 @@ class returnGameButtonHtml extends pauseMainMenuButtonHtml
         @text = 'ゲームに戻る'
         @setHtml()
     touchendEvent:() ->
-        game.popScene(game.pause_scene)
+        game.pause_scene.buttonList.pause = true
 
 ###
 ゲームを保存する
@@ -1002,6 +1012,8 @@ class Debug extends appNode
         #全てのデバッグフラグをONにする
         @all_debug_flg = false
 
+        #開始後いきなりメイン画面
+        @force_main_flg = true
         #開始後いきなりポーズ画面
         @force_pause_flg = false
 
@@ -1068,8 +1080,8 @@ class slotSetting extends appNode
         ]
         #リールの目に対する当選額の倍率
         @bairitu = {
-            1:5, 2:30, 3:40, 4:50, 5:100,
-            11:80, 12:80, 13:80, 14:80, 15:80, 16:80, 17:80, 18:80, 19:80
+            1:10, 2:20, 3:30, 4:40, 5:50,
+            11:50, 12:50, 13:50, 14:50, 15:50, 16:50, 17:50, 18:50, 19:50
         }
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
@@ -1174,28 +1186,32 @@ class slotSetting extends appNode
     ###
     落下アイテムの加速度
     掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
+    TODO 掛け金が少なくてもコンボが多いと速度を上げる
     ###
     setGravity:()->
-        if game.bet < 5
+        if game.bet < 10
             val = 0.4
-        else if game.bet < 10
-            val = 0.5
         else if game.bet < 50
-            val = 0.6
+            val = 0.5
         else if game.bet < 100
-            val = 0.7
+            val = 0.6
         else if game.bet < 500
-            val = 0.8
+            val = 0.7
         else if game.bet < 1000
-            val = 0.9
+            val = 0.8
         else if game.bet < 10000
-            val = 0.9 + Math.floor(game.bet / 500) / 10
+            val = 0.8 + Math.floor(game.bet / 1000) / 10
         else if game.bet < 100000
-            val = 3 + Math.floor(game.bet / 5000) / 10
+            val = 1.7 + Math.floor(game.bet / 5000) / 10
         else
-            val = 5
-        div = 1 + Math.floor(3 * game.tension / @tension_max) / 10
+            val = 4
+        div = 1 + Math.floor(2 * game.tension / @tension_max) / 10
         val = Math.floor(val * div * 10) / 10
+        if 100 < game.combo
+            div = Math.floor((game.combo - 100) / 20) / 10
+            if 2 < div
+                div = 2
+            val += div
         return val
 
     ###
@@ -1246,17 +1262,17 @@ class slotSetting extends appNode
 
     ###
     スロットを強制的に当たりにするかどうかを決める
-    コンボ数 * 0.1 ％
-    テンションMAXで2倍補正
-    過去のフィーバー回数が少ないほど上方補正かける 0回:+15,1回:+10,2回:+5
+    コンボ数 * 0.07 ％
+    テンションMAXで1.5倍補正
+    過去のフィーバー回数が少ないほど上方補正かける 0回:+8,1回:+6,2回:+4,3回以上:+2
     フィーバー中は強制的に当たり
     @return boolean true:当たり
     ###
     getIsForceSlotHit:()->
         result = false
-        rate = Math.floor(game.combo * 0.1 * ((game.tension / @tension_max) + 1))
+        rate = Math.floor(game.combo * 0.07 * ((game.tension / (@tension_max * 2)) + 1))
         if game.past_fever_num <= 2
-            rate += (3 - game.past_fever_num) * 5
+            rate += (1 + (3 - game.past_fever_num)) * 0.2
         if rate > 100
             rate = 100
         random = Math.floor(Math.random() * 100)
@@ -1282,7 +1298,7 @@ class slotSetting extends appNode
             div = Math.floor(time / 30)
             if div < 1
                 div = 1
-            ret_money = ret_money / div
+            ret_money = Math.floor(ret_money / div)
         if ret_money > 10000000000
             ret_money = 10000000000
         return ret_money
@@ -1425,6 +1441,8 @@ class mainScene extends appScene
         @backgroundColor = '#93F0FF'
         #キーのリスト、物理キーとソフトキー両方に対応
         @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
+        #ソフトキーのリスト
+        @buttonList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         @initial()
     initial:()->
         @setGroup()
@@ -1449,42 +1467,52 @@ class mainScene extends appScene
     ###ボタン操作、物理キーとソフトキー両方に対応###
     buttonPush:()->
         # 左
-        if game.input.left is true
+        if game.input.left is true || @buttonList.left is true
             if @keyList.left is false
                 @keyList.left = true
+                @gp_system.left_button.changePushColor()
         else
             if @keyList.left is true
                 @keyList.left = false
+                @gp_system.left_button.changePullColor()
         # 右
-        if game.input.right is true
+        if game.input.right is true || @buttonList.right is true
             if @keyList.right is false
                 @keyList.right = true
+                @gp_system.right_button.changePushColor()
         else
             if @keyList.right is true
                 @keyList.right = false
+                @gp_system.right_button.changePullColor()
         # 上
-        if game.input.up is true
+        if game.input.up is true || @buttonList.up is true
             if @keyList.up is false
                 @keyList.up = true
+                @gp_system.heigh_bet_button.changePushColor()
         else
             if @keyList.up is true
                 @keyList.up = false
+                @gp_system.heigh_bet_button.changePullColor()
         # 下
-        if game.input.down is true
+        if game.input.down is true || @buttonList.down is true
             if @keyList.down is false
                 @keyList.down = true
+                @gp_system.low_bet_button.changePushColor()
         else
             if @keyList.down is true
                 @keyList.down = false
+                @gp_system.low_bet_button.changePullColor()
         # ジャンプ
-        if game.input.z is true
+        if game.input.z is true || @buttonList.jump is true
             if @keyList.jump is false
                 @keyList.jump = true
+                @gp_system.jump_button.changePushColor()
         else
             if @keyList.jump is true
                 @keyList.jump = false
+                @gp_system.jump_button.changePullColor()
         #ポーズ
-        if game.input.x is true
+        if game.input.x is true || @buttonList.pause is true
             if @keyList.pause is false
                 game.setPauseScene()
                 @keyList.pause = true
@@ -1505,6 +1533,8 @@ class mainScene extends appScene
 class pauseScene extends appScene
     constructor: () ->
         super
+        @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
+        @buttonList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         @pause_back = new pauseBack()
         @addChild(@pause_back)
         @pause_main_layer = new pauseMainLayer()
@@ -1515,6 +1545,19 @@ class pauseScene extends appScene
         @_exeGameSave()
     removeSaveMenu:()->
         @removeChild(@pause_save_layer)
+    onenterframe: (e) ->
+        @_pauseKeyPush()
+    ###
+    ポーズキーまたはポーズボタンを押した時の動作
+    ###
+    _pauseKeyPush:()->
+        if game.input.x is true || @buttonList.pause is true
+            if @keyList.pause is false
+                game.popPauseScene()
+                @keyList.pause = true
+        else
+            if @keyList.pause = true
+                @keyList.pause = false
     ###
     データ保存の実行
     ###
@@ -1532,6 +1575,8 @@ class pauseScene extends appScene
 class titleScene extends appScene
     constructor: () ->
         super
+        @title_main_layer = new titleMainLayer()
+        @addChild(@title_main_layer)
 class backGround extends appSprite
     constructor: (w, h) ->
         super w, h
@@ -2289,9 +2334,14 @@ class controllerButton extends Button
     constructor: () ->
         super 50, 50
         @color = "#aaa"
+        @pushColor = "#555"
         @opacity = 0.4
         @x = 0
         @y = 660
+    changePushColor: () ->
+        @image = @drawLeftTriangle(@pushColor)
+    changePullColor: () ->
+        @image = @drawLeftTriangle(@color)
 
 ###
 左ボタン
@@ -2301,6 +2351,10 @@ class leftButton extends controllerButton
         super
         @image = @drawLeftTriangle(@color)
         @x = 30
+    ontouchstart: () ->
+        game.main_scene.buttonList.left = true
+    ontouchend: () ->
+        game.main_scene.buttonList.left = false
 
 ###
 右ボタン
@@ -2311,6 +2365,10 @@ class rightButton extends controllerButton
         @image = @drawLeftTriangle(@color)
         @scaleX = -1
         @x = game.width - @w - 30
+    ontouchstart: () ->
+        game.main_scene.buttonList.right = true
+    ontouchend: () ->
+        game.main_scene.buttonList.right = false
 
 ###
 ジャンプボタン
@@ -2320,6 +2378,14 @@ class jumpButton extends controllerButton
         super
         @image = @drawCircle(@color)
         @x = (game.width - @w) / 2
+    ontouchstart: () ->
+        game.main_scene.buttonList.jump = true
+    ontouchend: () ->
+        game.main_scene.buttonList.jump = false
+    changePushColor: () ->
+        @image = @drawCircle(@pushColor)
+    changePullColor: () ->
+        @image = @drawCircle(@color)
 
 ###
 掛け金変更ボタン
@@ -2328,7 +2394,12 @@ class betButton extends Button
     constructor: () ->
         super 22, 22
         @color = "black"
+        @pushColor = "white"
         @y = 7
+    changePushColor: () ->
+        @image = @drawUpTriangle(@pushColor)
+    changePullColor: () ->
+        @image = @drawUpTriangle(@color)
 
 ###
 掛け金を増やすボタン
@@ -2338,6 +2409,10 @@ class heighBetButton extends betButton
         super
         @image = @drawUpTriangle(@color)
         @x = 7
+    ontouchstart: () ->
+        game.main_scene.buttonList.up = true
+    ontouchend: () ->
+        game.main_scene.buttonList.up = false
 
 ###
 掛け金を減らすボタン
@@ -2350,6 +2425,10 @@ class lowBetButton extends betButton
         @x = 121
     setXposition: ()->
         @x = game.main_scene.gp_system.bet_text._boundWidth + @w + 20
+    ontouchstart: () ->
+        game.main_scene.buttonList.down = true
+    ontouchend: () ->
+        game.main_scene.buttonList.down = false
 class Dialog extends System
     constructor: (w, h) ->
         super w, h

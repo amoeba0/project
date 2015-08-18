@@ -4,6 +4,8 @@ class mainScene extends appScene
         @backgroundColor = '#93F0FF'
         #キーのリスト、物理キーとソフトキー両方に対応
         @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
+        #ソフトキーのリスト
+        @buttonList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         @initial()
     initial:()->
         @setGroup()
@@ -28,42 +30,52 @@ class mainScene extends appScene
     ###ボタン操作、物理キーとソフトキー両方に対応###
     buttonPush:()->
         # 左
-        if game.input.left is true
+        if game.input.left is true || @buttonList.left is true
             if @keyList.left is false
                 @keyList.left = true
+                @gp_system.left_button.changePushColor()
         else
             if @keyList.left is true
                 @keyList.left = false
+                @gp_system.left_button.changePullColor()
         # 右
-        if game.input.right is true
+        if game.input.right is true || @buttonList.right is true
             if @keyList.right is false
                 @keyList.right = true
+                @gp_system.right_button.changePushColor()
         else
             if @keyList.right is true
                 @keyList.right = false
+                @gp_system.right_button.changePullColor()
         # 上
-        if game.input.up is true
+        if game.input.up is true || @buttonList.up is true
             if @keyList.up is false
                 @keyList.up = true
+                @gp_system.heigh_bet_button.changePushColor()
         else
             if @keyList.up is true
                 @keyList.up = false
+                @gp_system.heigh_bet_button.changePullColor()
         # 下
-        if game.input.down is true
+        if game.input.down is true || @buttonList.down is true
             if @keyList.down is false
                 @keyList.down = true
+                @gp_system.low_bet_button.changePushColor()
         else
             if @keyList.down is true
                 @keyList.down = false
+                @gp_system.low_bet_button.changePullColor()
         # ジャンプ
-        if game.input.z is true
+        if game.input.z is true || @buttonList.jump is true
             if @keyList.jump is false
                 @keyList.jump = true
+                @gp_system.jump_button.changePushColor()
         else
             if @keyList.jump is true
                 @keyList.jump = false
+                @gp_system.jump_button.changePullColor()
         #ポーズ
-        if game.input.x is true
+        if game.input.x is true || @buttonList.pause is true
             if @keyList.pause is false
                 game.setPauseScene()
                 @keyList.pause = true
