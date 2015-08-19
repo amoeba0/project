@@ -117,3 +117,17 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.buttonList.pause = false
         @main_scene.keyList.pause = true
         @popScene(@pause_scene)
+
+    ###
+    ゲームをロードする
+    ###
+    loadGame:()->
+        ls = window.localStorage
+        money = ls.getItem('money')
+        if money != null
+            @money = money
+            @bet = ls.getItem('bet')
+            @combo = ls.getItem('combo')
+            @tension = ls.getItem('tension')
+            @past_fever_num = ls.getItem('past_fever_num')
+            @slot_setting.prev_muse = JSON.parse(ls.getItem('prev_muse'))

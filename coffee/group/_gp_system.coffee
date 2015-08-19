@@ -1,6 +1,7 @@
 class gpSystem extends appGroup
     constructor: () ->
         super
+        @paermit_bet_change_flg = true
         @money_text = new moneyText()
         @addChild(@money_text)
         @bet_text = new betText()
@@ -33,7 +34,7 @@ class gpSystem extends appGroup
     TODO スロットの当選金額落下中は変更できないようにする
     ###
     _betSetting: ()->
-        if game.fever is false
+        if @paermit_bet_change_flg is true
             if game.main_scene.keyList['up'] is true
                 if @keyList['up'] is false
                     @_getBetSettingValue(true)
@@ -89,3 +90,16 @@ class gpSystem extends appGroup
         else if game.bet > 10000000
             game.bet = 10000000
         @bet_text.setValue()
+    ###
+    掛け金の変更が可能かを変更する
+    @param boolean flg true:変更可能、false:変更不可能
+    ###
+    changeBetChangeFlg:(flg)->
+        if flg is true
+            @heigh_bet_button.opacity = 1
+            @low_bet_button.opacity = 1
+            @paermit_bet_change_flg = true
+        else
+            @heigh_bet_button.opacity = 0
+            @low_bet_button.opacity = 0
+            @paermit_bet_change_flg = false

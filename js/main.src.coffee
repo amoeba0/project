@@ -131,6 +131,8 @@ class pauseSaveLayer extends appDomLayer
 class titleMainLayer extends appDomLayer
     constructor: () ->
         super
+        @start_game_button = new startGameButtonHtml()
+        @addChild(@start_game_button)
 
 class catchAndSlotGame extends appGame
     constructor:(w, h)->
@@ -251,6 +253,20 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.buttonList.pause = false
         @main_scene.keyList.pause = true
         @popScene(@pause_scene)
+
+    ###
+    ゲームをロードする
+    ###
+    loadGame:()->
+        ls = window.localStorage
+        money = ls.getItem('money')
+        if money != null
+            @money = money
+            @bet = ls.getItem('bet')
+            @combo = ls.getItem('combo')
+            @tension = ls.getItem('tension')
+            @past_fever_num = ls.getItem('past_fever_num')
+            @slot_setting.prev_muse = JSON.parse(ls.getItem('prev_muse'))
 class gpEffect extends appGroup
     constructor: () ->
         super
@@ -349,6 +365,8 @@ class gpSlot extends appGroup
                 @slotAddMuse(member)
             else
                 game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
+            if game.slot_setting.isForceSlotHit is true
+                @endForceSlotHit()
 
     ###
     フィーバーを開始する
@@ -360,6 +378,7 @@ class gpSlot extends appGroup
             game.slot_setting.setMuseMember()
             game.musePreLoad()
             game.fever_hit_eye = hit_eye
+            game.main_scene.gp_system.changeBetChangeFlg(false)
             @slotAddMuseAll(hit_eye)
             @_feverBgmStart(hit_eye)
 
@@ -494,6 +513,22 @@ class gpSlot extends appGroup
             @left_lille.lilleArray = game.arrayCopy(game.debug.lille_array[0])
             @middle_lille.lilleArray = game.arrayCopy(game.debug.lille_array[1])
             @right_lille.lilleArray = game.arrayCopy(game.debug.lille_array[2])
+
+    ###
+    スロットの強制当たりを開始する
+    ###
+    startForceSlotHit:()->
+        @upperFrame.frame = 1
+        game.main_scene.gp_system.changeBetChangeFlg(false)
+
+    ###
+    スロットの強制当たりを終了する
+    ###
+    endForceSlotHit:()->
+        if game.fever is false
+            @upperFrame.frame = 0
+            game.main_scene.gp_system.changeBetChangeFlg(true)
+            game.slot_setting.isForceSlotHit = false
 class gpStage extends appGroup
     constructor: () ->
         super
@@ -568,9 +603,9 @@ class stageFront extends gpStage
             game.main_scene.gp_system.money_text.setValue()
             game.main_scene.gp_slot.slotStart()
             if game.slot_setting.getIsForceSlotHit() is true
-                game.main_scene.gp_slot.upperFrame.frame = 1
+                game.main_scene.gp_slot.startForceSlotHit()
             else
-                game.main_scene.gp_slot.upperFrame.frame = 0
+                game.main_scene.gp_slot.endForceSlotHit()
 
     _missCatchFall:()->
         if game.money >= game.bet
@@ -752,6 +787,7 @@ class stageBack extends gpStage
 class gpSystem extends appGroup
     constructor: () ->
         super
+        @paermit_bet_change_flg = true
         @money_text = new moneyText()
         @addChild(@money_text)
         @bet_text = new betText()
@@ -784,7 +820,7 @@ class gpSystem extends appGroup
     TODO スロットの当選金額落下中は変更できないようにする
     ###
     _betSetting: ()->
-        if game.fever is false
+        if @paermit_bet_change_flg is true
             if game.main_scene.keyList['up'] is true
                 if @keyList['up'] is false
                     @_getBetSettingValue(true)
@@ -840,6 +876,19 @@ class gpSystem extends appGroup
         else if game.bet > 10000000
             game.bet = 10000000
         @bet_text.setValue()
+    ###
+    掛け金の変更が可能かを変更する
+    @param boolean flg true:変更可能、false:変更不可能
+    ###
+    changeBetChangeFlg:(flg)->
+        if flg is true
+            @heigh_bet_button.opacity = 1
+            @low_bet_button.opacity = 1
+            @paermit_bet_change_flg = true
+        else
+            @heigh_bet_button.opacity = 0
+            @low_bet_button.opacity = 0
+            @paermit_bet_change_flg = false
 
 class systemHtml extends appHtml
     constructor: (width, height) ->
@@ -915,6 +964,31 @@ class saveOkButtonHtml extends baseOkButtonHtml
         @y = 380
     touchendEvent:() ->
         game.pause_scene.removeSaveMenu()
+
+###
+タイトルメニューのボタン
+###
+class titleMenuButtonHtml extends buttonHtml
+    constructor: () ->
+        super 200, 45
+        @x = 140
+        @y = 0
+        @class.push('title-menu-button')
+    ontouchend: (e) ->
+        @touchendEvent()
+
+###
+ゲーム開始ボタン
+###
+class startGameButtonHtml extends titleMenuButtonHtml
+    constructor: () ->
+        super
+        @y = 350
+        @text = 'ゲーム開始'
+        @setHtml()
+    touchendEvent:() ->
+        game.loadGame()
+        game.replaceScene(game.main_scene)
 class dialogHtml extends systemHtml
     constructor: (width, height) ->
         super width, height
@@ -1033,16 +1107,18 @@ class Debug extends appNode
         @force_insert_muse = false
         #スロットが必ず当たる
         @force_slot_hit = false
+        #スロットが2回に1回当たる
+        @half_slot_hit = false
         #デバッグ用リール配列
         @lille_array = [
-            [1, 2, 1],
-            [2, 1, 1],
-            [1, 2, 1]
+            [11, 12, 11],
+            [12, 11, 11],
+            [11, 12, 11]
         ]
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
         #アイテムを落とした時のテンション増減固定値
-        @fix_tention_item_fall_val = -50
+        @fix_tention_item_fall_val = 0
         #スロットが当たった時のテンション増減固定値
         @fix_tention_slot_hit_flg = 200
 
@@ -1054,6 +1130,9 @@ class Debug extends appNode
             @fix_tention_item_fall_flg = true
             @fix_tention_slot_hit_flg = true
             @force_insert_muse = true
+
+        if @force_pause_flg is true
+            @force_main_flg = true
 ###
 スロットのリールの並びや掛け金に対する当選額
 テンションによるリールの変化確率など
@@ -1186,7 +1265,6 @@ class slotSetting extends appNode
     ###
     落下アイテムの加速度
     掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
-    TODO 掛け金が少なくてもコンボが多いと速度を上げる
     ###
     setGravity:()->
         if game.bet < 10
@@ -1265,6 +1343,7 @@ class slotSetting extends appNode
     コンボ数 * 0.07 ％
     テンションMAXで1.5倍補正
     過去のフィーバー回数が少ないほど上方補正かける 0回:+8,1回:+6,2回:+4,3回以上:+2
+    最大値は20％
     フィーバー中は強制的に当たり
     @return boolean true:当たり
     ###
@@ -1273,8 +1352,10 @@ class slotSetting extends appNode
         rate = Math.floor(game.combo * 0.07 * ((game.tension / (@tension_max * 2)) + 1))
         if game.past_fever_num <= 2
             rate += (1 + (3 - game.past_fever_num)) * 0.2
-        if rate > 100
-            rate = 100
+        if rate > 20
+            rate = 20
+        if game.debug.half_slot_hit is true
+            rate = 50
         random = Math.floor(Math.random() * 100)
         if random < rate || game.fever is true || game.debug.force_slot_hit is true
             result = true
@@ -1529,6 +1610,7 @@ class mainScene extends appScene
             game.tensionSetValue(game.fever_down_tension)
             if game.tension <= 0
                 game.bgmStop(game.main_scene.gp_slot.fever_bgm)
+                @gp_system.changeBetChangeFlg(true)
                 game.fever = false
 class pauseScene extends appScene
     constructor: () ->

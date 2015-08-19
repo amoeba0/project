@@ -130,7 +130,6 @@ class slotSetting extends appNode
     ###
     落下アイテムの加速度
     掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
-    TODO 掛け金が少なくてもコンボが多いと速度を上げる
     ###
     setGravity:()->
         if game.bet < 10
@@ -209,6 +208,7 @@ class slotSetting extends appNode
     コンボ数 * 0.07 ％
     テンションMAXで1.5倍補正
     過去のフィーバー回数が少ないほど上方補正かける 0回:+8,1回:+6,2回:+4,3回以上:+2
+    最大値は20％
     フィーバー中は強制的に当たり
     @return boolean true:当たり
     ###
@@ -217,8 +217,10 @@ class slotSetting extends appNode
         rate = Math.floor(game.combo * 0.07 * ((game.tension / (@tension_max * 2)) + 1))
         if game.past_fever_num <= 2
             rate += (1 + (3 - game.past_fever_num)) * 0.2
-        if rate > 100
-            rate = 100
+        if rate > 20
+            rate = 20
+        if game.debug.half_slot_hit is true
+            rate = 50
         random = Math.floor(Math.random() * 100)
         if random < rate || game.fever is true || game.debug.force_slot_hit is true
             result = true

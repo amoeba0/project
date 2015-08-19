@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betButton, betText, buttonHtml, catchAndSlotGame, comboText, comboUnitText, controllerButton, cutIn, dialogHtml, effect, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, jumpButton, leftButton, lowBetButton, mainScene, moneyText, pauseBack, pauseButton, pauseMainLayer, pauseMainMenuButtonHtml, pauseSaveLayer, pauseScene, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, slotSetting, stageBack, stageFront, systemHtml, text, titleMainLayer, titleScene,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betButton, betText, buttonHtml, catchAndSlotGame, comboText, comboUnitText, controllerButton, cutIn, dialogHtml, effect, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, jumpButton, leftButton, lowBetButton, mainScene, moneyText, pauseBack, pauseButton, pauseMainLayer, pauseMainMenuButtonHtml, pauseSaveLayer, pauseScene, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, text, titleMainLayer, titleMenuButtonHtml, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -257,6 +257,8 @@ titleMainLayer = (function(_super) {
 
   function titleMainLayer() {
     titleMainLayer.__super__.constructor.apply(this, arguments);
+    this.start_game_button = new startGameButtonHtml();
+    this.addChild(this.start_game_button);
   }
 
   return titleMainLayer;
@@ -428,6 +430,25 @@ LoveliveGame = (function(_super) {
     return this.popScene(this.pause_scene);
   };
 
+
+  /*
+  ゲームをロードする
+   */
+
+  LoveliveGame.prototype.loadGame = function() {
+    var ls, money;
+    ls = window.localStorage;
+    money = ls.getItem('money');
+    if (money !== null) {
+      this.money = money;
+      this.bet = ls.getItem('bet');
+      this.combo = ls.getItem('combo');
+      this.tension = ls.getItem('tension');
+      this.past_fever_num = ls.getItem('past_fever_num');
+      return this.slot_setting.prev_muse = JSON.parse(ls.getItem('prev_muse'));
+    }
+  };
+
   return LoveliveGame;
 
 })(catchAndSlotGame);
@@ -576,9 +597,12 @@ gpSlot = (function(_super) {
       this._feverStart(hit_eye);
       if (hit_eye === 1) {
         member = game.slot_setting.now_muse_num;
-        return this.slotAddMuse(member);
+        this.slotAddMuse(member);
       } else {
-        return game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money);
+        game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money);
+      }
+      if (game.slot_setting.isForceSlotHit === true) {
+        return this.endForceSlotHit();
       }
     }
   };
@@ -595,6 +619,7 @@ gpSlot = (function(_super) {
       game.slot_setting.setMuseMember();
       game.musePreLoad();
       game.fever_hit_eye = hit_eye;
+      game.main_scene.gp_system.changeBetChangeFlg(false);
       this.slotAddMuseAll(hit_eye);
       return this._feverBgmStart(hit_eye);
     }
@@ -785,6 +810,29 @@ gpSlot = (function(_super) {
     }
   };
 
+
+  /*
+  スロットの強制当たりを開始する
+   */
+
+  gpSlot.prototype.startForceSlotHit = function() {
+    this.upperFrame.frame = 1;
+    return game.main_scene.gp_system.changeBetChangeFlg(false);
+  };
+
+
+  /*
+  スロットの強制当たりを終了する
+   */
+
+  gpSlot.prototype.endForceSlotHit = function() {
+    if (game.fever === false) {
+      this.upperFrame.frame = 0;
+      game.main_scene.gp_system.changeBetChangeFlg(true);
+      return game.slot_setting.isForceSlotHit = false;
+    }
+  };
+
   return gpSlot;
 
 })(appGroup);
@@ -900,9 +948,9 @@ stageFront = (function(_super) {
       game.main_scene.gp_system.money_text.setValue();
       game.main_scene.gp_slot.slotStart();
       if (game.slot_setting.getIsForceSlotHit() === true) {
-        return game.main_scene.gp_slot.upperFrame.frame = 1;
+        return game.main_scene.gp_slot.startForceSlotHit();
       } else {
-        return game.main_scene.gp_slot.upperFrame.frame = 0;
+        return game.main_scene.gp_slot.endForceSlotHit();
       }
     }
   };
@@ -1177,6 +1225,7 @@ gpSystem = (function(_super) {
 
   function gpSystem() {
     gpSystem.__super__.constructor.apply(this, arguments);
+    this.paermit_bet_change_flg = true;
     this.money_text = new moneyText();
     this.addChild(this.money_text);
     this.bet_text = new betText();
@@ -1218,7 +1267,7 @@ gpSystem = (function(_super) {
    */
 
   gpSystem.prototype._betSetting = function() {
-    if (game.fever === false) {
+    if (this.paermit_bet_change_flg === true) {
       if (game.main_scene.keyList['up'] === true) {
         if (this.keyList['up'] === false) {
           this._getBetSettingValue(true);
@@ -1289,6 +1338,24 @@ gpSystem = (function(_super) {
       game.bet = 10000000;
     }
     return this.bet_text.setValue();
+  };
+
+
+  /*
+  掛け金の変更が可能かを変更する
+  @param boolean flg true:変更可能、false:変更不可能
+   */
+
+  gpSystem.prototype.changeBetChangeFlg = function(flg) {
+    if (flg === true) {
+      this.heigh_bet_button.opacity = 1;
+      this.low_bet_button.opacity = 1;
+      return this.paermit_bet_change_flg = true;
+    } else {
+      this.heigh_bet_button.opacity = 0;
+      this.low_bet_button.opacity = 0;
+      return this.paermit_bet_change_flg = false;
+    }
   };
 
   return gpSystem;
@@ -1446,6 +1513,53 @@ saveOkButtonHtml = (function(_super) {
   return saveOkButtonHtml;
 
 })(baseOkButtonHtml);
+
+
+/*
+タイトルメニューのボタン
+ */
+
+titleMenuButtonHtml = (function(_super) {
+  __extends(titleMenuButtonHtml, _super);
+
+  function titleMenuButtonHtml() {
+    titleMenuButtonHtml.__super__.constructor.call(this, 200, 45);
+    this.x = 140;
+    this.y = 0;
+    this["class"].push('title-menu-button');
+  }
+
+  titleMenuButtonHtml.prototype.ontouchend = function(e) {
+    return this.touchendEvent();
+  };
+
+  return titleMenuButtonHtml;
+
+})(buttonHtml);
+
+
+/*
+ゲーム開始ボタン
+ */
+
+startGameButtonHtml = (function(_super) {
+  __extends(startGameButtonHtml, _super);
+
+  function startGameButtonHtml() {
+    startGameButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 350;
+    this.text = 'ゲーム開始';
+    this.setHtml();
+  }
+
+  startGameButtonHtml.prototype.touchendEvent = function() {
+    game.loadGame();
+    return game.replaceScene(game.main_scene);
+  };
+
+  return startGameButtonHtml;
+
+})(titleMenuButtonHtml);
 
 dialogHtml = (function(_super) {
   __extends(dialogHtml, _super);
@@ -1633,9 +1747,10 @@ Debug = (function(_super) {
     this.fix_tention_slot_hit_flg = false;
     this.force_insert_muse = false;
     this.force_slot_hit = false;
-    this.lille_array = [[1, 2, 1], [2, 1, 1], [1, 2, 1]];
+    this.half_slot_hit = false;
+    this.lille_array = [[11, 12, 11], [12, 11, 11], [11, 12, 11]];
     this.fix_tention_item_catch_val = 50;
-    this.fix_tention_item_fall_val = -50;
+    this.fix_tention_item_fall_val = 0;
     this.fix_tention_slot_hit_flg = 200;
     if (this.all_debug_flg === true) {
       this.lille_flg = true;
@@ -1645,6 +1760,9 @@ Debug = (function(_super) {
       this.fix_tention_item_fall_flg = true;
       this.fix_tention_slot_hit_flg = true;
       this.force_insert_muse = true;
+    }
+    if (this.force_pause_flg === true) {
+      this.force_main_flg = true;
     }
   }
 
@@ -1860,7 +1978,6 @@ slotSetting = (function(_super) {
   /*
   落下アイテムの加速度
   掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
-  TODO 掛け金が少なくてもコンボが多いと速度を上げる
    */
 
   slotSetting.prototype.setGravity = function() {
@@ -1966,6 +2083,7 @@ slotSetting = (function(_super) {
   コンボ数 * 0.07 ％
   テンションMAXで1.5倍補正
   過去のフィーバー回数が少ないほど上方補正かける 0回:+8,1回:+6,2回:+4,3回以上:+2
+  最大値は20％
   フィーバー中は強制的に当たり
   @return boolean true:当たり
    */
@@ -1977,8 +2095,11 @@ slotSetting = (function(_super) {
     if (game.past_fever_num <= 2) {
       rate += (1 + (3 - game.past_fever_num)) * 0.2;
     }
-    if (rate > 100) {
-      rate = 100;
+    if (rate > 20) {
+      rate = 20;
+    }
+    if (game.debug.half_slot_hit === true) {
+      rate = 50;
     }
     random = Math.floor(Math.random() * 100);
     if (random < rate || game.fever === true || game.debug.force_slot_hit === true) {
@@ -2324,6 +2445,7 @@ mainScene = (function(_super) {
       game.tensionSetValue(game.fever_down_tension);
       if (game.tension <= 0) {
         game.bgmStop(game.main_scene.gp_slot.fever_bgm);
+        this.gp_system.changeBetChangeFlg(true);
         return game.fever = false;
       }
     }

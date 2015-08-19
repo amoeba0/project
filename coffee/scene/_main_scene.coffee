@@ -92,4 +92,5 @@ class mainScene extends appScene
             game.tensionSetValue(game.fever_down_tension)
             if game.tension <= 0
                 game.bgmStop(game.main_scene.gp_slot.fever_bgm)
+                @gp_system.changeBetChangeFlg(true)
                 game.fever = false

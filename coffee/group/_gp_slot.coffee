@@ -80,6 +80,8 @@ class gpSlot extends appGroup
                 @slotAddMuse(member)
             else
                 game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
+            if game.slot_setting.isForceSlotHit is true
+                @endForceSlotHit()
 
     ###
     フィーバーを開始する
@@ -91,6 +93,7 @@ class gpSlot extends appGroup
             game.slot_setting.setMuseMember()
             game.musePreLoad()
             game.fever_hit_eye = hit_eye
+            game.main_scene.gp_system.changeBetChangeFlg(false)
             @slotAddMuseAll(hit_eye)
             @_feverBgmStart(hit_eye)
 
@@ -225,3 +228,19 @@ class gpSlot extends appGroup
             @left_lille.lilleArray = game.arrayCopy(game.debug.lille_array[0])
             @middle_lille.lilleArray = game.arrayCopy(game.debug.lille_array[1])
             @right_lille.lilleArray = game.arrayCopy(game.debug.lille_array[2])
+
+    ###
+    スロットの強制当たりを開始する
+    ###
+    startForceSlotHit:()->
+        @upperFrame.frame = 1
+        game.main_scene.gp_system.changeBetChangeFlg(false)
+
+    ###
+    スロットの強制当たりを終了する
+    ###
+    endForceSlotHit:()->
+        if game.fever is false
+            @upperFrame.frame = 0
+            game.main_scene.gp_system.changeBetChangeFlg(true)
+            game.slot_setting.isForceSlotHit = false

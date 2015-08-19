@@ -62,3 +62,28 @@ class saveOkButtonHtml extends baseOkButtonHtml
         @y = 380
     touchendEvent:() ->
         game.pause_scene.removeSaveMenu()
+
+###
+タイトルメニューのボタン
+###
+class titleMenuButtonHtml extends buttonHtml
+    constructor: () ->
+        super 200, 45
+        @x = 140
+        @y = 0
+        @class.push('title-menu-button')
+    ontouchend: (e) ->
+        @touchendEvent()
+
+###
+ゲーム開始ボタン
+###
+class startGameButtonHtml extends titleMenuButtonHtml
+    constructor: () ->
+        super
+        @y = 350
+        @text = 'ゲーム開始'
+        @setHtml()
+    touchendEvent:() ->
+        game.loadGame()
+        game.replaceScene(game.main_scene)
