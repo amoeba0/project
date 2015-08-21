@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betButton, betText, buttonHtml, catchAndSlotGame, comboText, comboUnitText, controllerButton, cutIn, dialogHtml, effect, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, jumpButton, leftButton, lowBetButton, mainScene, moneyText, pauseBack, pauseButton, pauseMainLayer, pauseMainMenuButtonHtml, pauseSaveLayer, pauseScene, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, text, titleMainLayer, titleMenuButtonHtml, titleScene,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betButton, betText, buttonHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogHtml, effect, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, jumpButton, leftButton, lowBetButton, mainScene, moneyText, pauseBack, pauseButton, pauseMainLayer, pauseMainMenuButtonHtml, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, text, titleMainLayer, titleMenuButtonHtml, titleScene,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -286,7 +286,7 @@ LoveliveGame = (function(_super) {
     this.width = 480;
     this.height = 720;
     this.fps = 24;
-    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause'];
+    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance'];
     this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear'];
     this.keybind(90, 'z');
     this.keybind(88, 'x');
@@ -301,7 +301,7 @@ LoveliveGame = (function(_super) {
     this.money = 0;
     this.bet = 1;
     this.combo = 0;
-    this.tension = 0;
+    this.tension = 500;
     this.past_fever_num = 0;
     this.money = this.money_init;
   }
@@ -392,7 +392,7 @@ LoveliveGame = (function(_super) {
 
   LoveliveGame.prototype.tensionSetValueMissItemCatch = function() {
     var val;
-    val = this.slot_setting.setTensionItemFall();
+    val = this.slot_setting.setTensionMissItem();
     return this.tensionSetValue(val);
   };
 
@@ -458,6 +458,7 @@ gpEffect = (function(_super) {
 
   function gpEffect() {
     gpEffect.__super__.constructor.apply(this, arguments);
+    this.chance_effect = new chanceEffect();
   }
 
   gpEffect.prototype.cutInSet = function() {
@@ -468,6 +469,11 @@ gpEffect = (function(_super) {
       this.addChild(this.cut_in);
       return game.main_scene.gp_stage_front.missItemFallSycleNow = 0;
     }
+  };
+
+  gpEffect.prototype.chanceEffectSet = function() {
+    this.addChild(this.chance_effect);
+    return this.chance_effect.setInit();
   };
 
   return gpEffect;
@@ -505,6 +511,7 @@ gpSlot = (function(_super) {
     this.stopStartAge = 0;
     this.leftSlotEye = 0;
     this.feverSec = 0;
+    this.isForceSlotHit = false;
     this.slotSet();
     this.debugSlot();
     this.upperFrame = new UpperFrame();
@@ -523,6 +530,7 @@ gpSlot = (function(_super) {
   gpSlot.prototype.slotStopping = function() {
     if (this.isStopping === true) {
       if (this.age === this.stopStartAge) {
+        this.forceHitStart();
         game.sePlay(this.lille_stop_se);
         this.left_lille.isRotation = false;
         this.saveLeftSlotEye();
@@ -538,6 +546,7 @@ gpSlot = (function(_super) {
         game.sePlay(this.lille_stop_se);
         this.right_lille.isRotation = false;
         this.forceHit(this.right_lille);
+        this.forceHitEnd();
         this.isStopping = false;
         return this.slotHitTest();
       }
@@ -553,6 +562,16 @@ gpSlot = (function(_super) {
     return this.leftSlotEye = this.left_lille.lilleArray[this.left_lille.nowEye];
   };
 
+  gpSlot.prototype.forceHitStart = function() {
+    if (game.slot_setting.isForceSlotHit === true) {
+      return this.isForceSlotHit = true;
+    }
+  };
+
+  gpSlot.prototype.forceHitEnd = function() {
+    return this.isForceSlotHit = false;
+  };
+
 
   /*
   確率でスロットを強制的に当たりにする
@@ -560,7 +579,7 @@ gpSlot = (function(_super) {
 
   gpSlot.prototype.forceHit = function(target) {
     var tmp_eye;
-    if (game.slot_setting.isForceSlotHit === true) {
+    if (this.isForceSlotHit === true) {
       tmp_eye = this._searchEye(target);
       if (tmp_eye !== 0) {
         target.nowEye = tmp_eye;
@@ -817,7 +836,10 @@ gpSlot = (function(_super) {
 
   gpSlot.prototype.startForceSlotHit = function() {
     this.upperFrame.frame = 1;
-    return game.main_scene.gp_system.changeBetChangeFlg(false);
+    game.main_scene.gp_system.changeBetChangeFlg(false);
+    if (game.fever === false) {
+      return game.main_scene.gp_effect.chanceEffectSet();
+    }
   };
 
 
@@ -826,7 +848,7 @@ gpSlot = (function(_super) {
    */
 
   gpSlot.prototype.endForceSlotHit = function() {
-    if (game.fever === false) {
+    if (game.fever === false && game.slot_setting.isForceSlotHit === true) {
       this.upperFrame.frame = 0;
       game.main_scene.gp_system.changeBetChangeFlg(true);
       return game.slot_setting.isForceSlotHit = false;
@@ -1971,6 +1993,7 @@ slotSetting = (function(_super) {
     this.tension_max = 500;
     this.now_muse_num = 0;
     this.isForceSlotHit = false;
+    this.slotHitRate = 0;
     this.prev_muse = [];
   }
 
@@ -2080,9 +2103,9 @@ slotSetting = (function(_super) {
 
   /*
   スロットを強制的に当たりにするかどうかを決める
-  コンボ数 * 0.07 ％
-  テンションMAXで1.5倍補正
-  過去のフィーバー回数が少ないほど上方補正かける 0回:+8,1回:+6,2回:+4,3回以上:+2
+  コンボ数 * 0.06 ％
+  テンションMAXで+5補正
+  過去のフィーバー回数が少ないほど上方補正かける 0回:+6,1回:+4,2回:+2
   最大値は20％
   フィーバー中は強制的に当たり
   @return boolean true:当たり
@@ -2091,9 +2114,9 @@ slotSetting = (function(_super) {
   slotSetting.prototype.getIsForceSlotHit = function() {
     var random, rate, result;
     result = false;
-    rate = Math.floor(game.combo * 0.07 * ((game.tension / (this.tension_max * 2)) + 1));
+    rate = Math.floor((game.combo * 0.06) + ((game.tension / this.tension_max) * 5));
     if (game.past_fever_num <= 2) {
-      rate += (1 + (3 - game.past_fever_num)) * 0.2;
+      rate += (3 - game.past_fever_num) * 2;
     }
     if (rate > 20) {
       rate = 20;
@@ -2101,6 +2124,7 @@ slotSetting = (function(_super) {
     if (game.debug.half_slot_hit === true) {
       rate = 50;
     }
+    this.slotHitRate = rate;
     random = Math.floor(Math.random() * 100);
     if (random < rate || game.fever === true || game.debug.force_slot_hit === true) {
       result = true;
@@ -2173,11 +2197,16 @@ slotSetting = (function(_super) {
 
   slotSetting.prototype.setTensionItemFall = function() {
     var val;
-    val = game.tension * 0.2;
-    if (val < this.tension_max * 0.1) {
-      val = this.tension_max * 0.1;
+    val = this.tension_max * -0.2;
+    if (game.debug.fix_tention_item_fall_flg === true) {
+      val = game.debug.fix_tention_item_fall_val;
     }
-    val *= -1;
+    return val;
+  };
+
+  slotSetting.prototype.setTensionMissItem = function() {
+    var val;
+    val = this.tension_max * -0.6;
     if (game.debug.fix_tention_item_fall_flg === true) {
       val = game.debug.fix_tention_item_fall_val;
     }
@@ -2306,6 +2335,28 @@ slotSetting = (function(_super) {
     }
     game.item_kind = val;
     return val;
+  };
+
+
+  /*
+  スロットの強制当たりが有効な時間を決める
+  エフェクトが画面にイン、アウトする時間が合計0.6秒あるので
+  実際はこれの返り値に+0.6追加される
+   */
+
+  slotSetting.prototype.setChanceTime = function() {
+    var fixTime, randomTime;
+    if (this.slotHitRate <= 10) {
+      fixTime = 2;
+      randomTime = 5;
+    } else if (this.slotHitRate <= 15) {
+      fixTime = 1.5;
+      randomTime = 10;
+    } else {
+      fixTime = 1;
+      randomTime = 15;
+    }
+    return fixTime + Math.floor(Math.random() * randomTime) / 10;
   };
 
   return slotSetting;
@@ -2444,6 +2495,7 @@ mainScene = (function(_super) {
     if (game.fever === true) {
       game.tensionSetValue(game.fever_down_tension);
       if (game.tension <= 0) {
+        game.main_scene.gp_slot.upperFrame.frame = 0;
         game.bgmStop(game.main_scene.gp_slot.fever_bgm);
         this.gp_system.changeBetChangeFlg(true);
         return game.fever = false;
@@ -2716,6 +2768,75 @@ cutIn = (function(_super) {
   return cutIn;
 
 })(effect);
+
+
+/*
+演出
+ */
+
+performanceEffect = (function(_super) {
+  __extends(performanceEffect, _super);
+
+  function performanceEffect(w, h) {
+    performanceEffect.__super__.constructor.call(this, w, h);
+  }
+
+  return performanceEffect;
+
+})(effect);
+
+
+/*
+チャンス
+ */
+
+chanceEffect = (function(_super) {
+  __extends(chanceEffect, _super);
+
+  function chanceEffect() {
+    chanceEffect.__super__.constructor.call(this, 237, 50);
+    this.image = game.imageload("chance");
+    this.y = 290;
+    this.x = game.width;
+    this.existTime = 2;
+    this.sound = game.soundload('clear');
+  }
+
+  chanceEffect.prototype.onenterframe = function(e) {
+    if (this.age - this.set_age === this.fast_age) {
+      game.sePlay(this.sound);
+      this.vx = this._setVxSlow();
+    }
+    if (this.age - this.set_age === this.slow_age) {
+      this.vx = this._setVxFast();
+    }
+    this.x += this.vx;
+    if (this.x + this.w < 0) {
+      game.main_scene.gp_slot.endForceSlotHit();
+      return game.main_scene.gp_effect.removeChild(this);
+    }
+  };
+
+  chanceEffect.prototype.setInit = function() {
+    this.existTime = game.slot_setting.setChanceTime();
+    this.x = game.width;
+    this.vx = this._setVxFast();
+    this.set_age = this.age;
+    this.fast_age = Math.round(0.3 * game.fps);
+    return this.slow_age = Math.round(this.existTime * game.fps) + this.fast_age;
+  };
+
+  chanceEffect.prototype._setVxFast = function() {
+    return Math.round(((game.width + this.w) / 2) / (0.3 * game.fps)) * -1;
+  };
+
+  chanceEffect.prototype._setVxSlow = function() {
+    return Math.round(((game.width - this.w) / 4) / (this.existTime * game.fps)) * -1;
+  };
+
+  return chanceEffect;
+
+})(performanceEffect);
 
 appObject = (function(_super) {
   __extends(appObject, _super);

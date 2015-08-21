@@ -147,7 +147,7 @@ class LoveliveGame extends catchAndSlotGame
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
 
@@ -169,7 +169,7 @@ class LoveliveGame extends catchAndSlotGame
         @money = 0 #現在の所持金
         @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
-        @tension = 0 #現在のテンション(500がマックス)
+        @tension = 500 #現在のテンション(500がマックス)
         @past_fever_num = 0 #過去にフィーバーになった回数
 
         @money = @money_init
@@ -229,7 +229,7 @@ class LoveliveGame extends catchAndSlotGame
     はずれのアイテムを取った時にテンションゲージを増減する
     ###
     tensionSetValueMissItemCatch:()->
-        val = @slot_setting.setTensionItemFall()
+        val = @slot_setting.setTensionMissItem()
         @tensionSetValue(val)
 
     ###
@@ -270,12 +270,17 @@ class LoveliveGame extends catchAndSlotGame
 class gpEffect extends appGroup
     constructor: () ->
         super
+        @chance_effect = new chanceEffect()
+
     cutInSet:()->
         setting = game.slot_setting
         if setting.muse_material_list[setting.now_muse_num] != undefined
             @cut_in = new cutIn()
             @addChild(@cut_in)
             game.main_scene.gp_stage_front.missItemFallSycleNow = 0
+    chanceEffectSet:()->
+        @addChild(@chance_effect)
+        @chance_effect.setInit()
 class gpPanorama extends appGroup
     constructor: () ->
         super
@@ -297,6 +302,7 @@ class gpSlot extends appGroup
         @stopStartAge = 0 #スロットの停止が開始したフレーム
         @leftSlotEye = 0 #左のスロットが当たった目
         @feverSec = 0 #フィーバーの時間
+        @isForceSlotHit = false
         @slotSet()
         @debugSlot()
         @upperFrame = new UpperFrame()
@@ -310,6 +316,7 @@ class gpSlot extends appGroup
     slotStopping: ()->
         if @isStopping is true
             if @age is @stopStartAge
+                @forceHitStart()
                 game.sePlay(@lille_stop_se)
                 @left_lille.isRotation = false
                 @saveLeftSlotEye()
@@ -323,6 +330,7 @@ class gpSlot extends appGroup
                 game.sePlay(@lille_stop_se)
                 @right_lille.isRotation = false
                 @forceHit(@right_lille)
+                @forceHitEnd()
                 @isStopping = false
                 @slotHitTest()
 
@@ -332,11 +340,18 @@ class gpSlot extends appGroup
     saveLeftSlotEye:()->
         @leftSlotEye = @left_lille.lilleArray[@left_lille.nowEye]
 
+    forceHitStart:()->
+        if game.slot_setting.isForceSlotHit is true
+            @isForceSlotHit = true
+
+    forceHitEnd:()->
+        @isForceSlotHit = false
+
     ###
     確率でスロットを強制的に当たりにする
     ###
     forceHit:(target)->
-        if game.slot_setting.isForceSlotHit is true
+        if @isForceSlotHit is true
             tmp_eye = @_searchEye(target)
             if tmp_eye != 0
                 target.nowEye = tmp_eye
@@ -520,12 +535,14 @@ class gpSlot extends appGroup
     startForceSlotHit:()->
         @upperFrame.frame = 1
         game.main_scene.gp_system.changeBetChangeFlg(false)
+        if game.fever is false
+            game.main_scene.gp_effect.chanceEffectSet()
 
     ###
     スロットの強制当たりを終了する
     ###
     endForceSlotHit:()->
-        if game.fever is false
+        if game.fever is false && game.slot_setting.isForceSlotHit is true
             @upperFrame.frame = 0
             game.main_scene.gp_system.changeBetChangeFlg(true)
             game.slot_setting.isForceSlotHit = false
@@ -1258,6 +1275,8 @@ class slotSetting extends appNode
         @now_muse_num = 0
         #trueならスロットが強制で当たる
         @isForceSlotHit = false
+        #スロットが強制で当たる確率
+        @slotHitRate = 0
 
         #セーブする変数
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
@@ -1340,22 +1359,23 @@ class slotSetting extends appNode
 
     ###
     スロットを強制的に当たりにするかどうかを決める
-    コンボ数 * 0.07 ％
-    テンションMAXで1.5倍補正
-    過去のフィーバー回数が少ないほど上方補正かける 0回:+8,1回:+6,2回:+4,3回以上:+2
+    コンボ数 * 0.06 ％
+    テンションMAXで+5補正
+    過去のフィーバー回数が少ないほど上方補正かける 0回:+6,1回:+4,2回:+2
     最大値は20％
     フィーバー中は強制的に当たり
     @return boolean true:当たり
     ###
     getIsForceSlotHit:()->
         result = false
-        rate = Math.floor(game.combo * 0.07 * ((game.tension / (@tension_max * 2)) + 1))
+        rate = Math.floor((game.combo * 0.06) + ((game.tension / @tension_max) * 5))
         if game.past_fever_num <= 2
-            rate += (1 + (3 - game.past_fever_num)) * 0.2
+            rate += ((3 - game.past_fever_num)) * 2
         if rate > 20
             rate = 20
         if game.debug.half_slot_hit is true
             rate = 50
+        @slotHitRate = rate
         random = Math.floor(Math.random() * 100)
         if random < rate || game.fever is true || game.debug.force_slot_hit is true
             result = true
@@ -1404,13 +1424,15 @@ class slotSetting extends appNode
     アイテムを落とした時のテンションゲージの増減値を決める
     ###
     setTensionItemFall:()->
-        val = game.tension * 0.2
-        if val < @tension_max * 0.1
-            val = @tension_max * 0.1
-        val *= -1
+        val = @tension_max * -0.2
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
-        #TODO スロットにμ’ｓがいれば1つ消す
+        return val
+
+    setTensionMissItem:()->
+        val = @tension_max * -0.6
+        if game.debug.fix_tention_item_fall_flg is true
+            val = game.debug.fix_tention_item_fall_val
         return val
 
     ###
@@ -1516,6 +1538,22 @@ class slotSetting extends appNode
             val = 4
         game.item_kind = val
         return val
+    ###
+    スロットの強制当たりが有効な時間を決める
+    エフェクトが画面にイン、アウトする時間が合計0.6秒あるので
+    実際はこれの返り値に+0.6追加される
+    ###
+    setChanceTime:()->
+        if @slotHitRate <= 10
+            fixTime = 2
+            randomTime = 5
+        else if @slotHitRate <= 15
+            fixTime = 1.5
+            randomTime = 10
+        else
+            fixTime = 1
+            randomTime = 15
+        return fixTime + Math.floor(Math.random() * randomTime) / 10
 class mainScene extends appScene
     constructor:()->
         super
@@ -1609,6 +1647,7 @@ class mainScene extends appScene
         if game.fever is true
             game.tensionSetValue(game.fever_down_tension)
             if game.tension <= 0
+                game.main_scene.gp_slot.upperFrame.frame = 0
                 game.bgmStop(game.main_scene.gp_slot.fever_bgm)
                 @gp_system.changeBetChangeFlg(true)
                 game.fever = false
@@ -1744,6 +1783,45 @@ class cutIn extends effect
         else
             voice = game.soundload('clear')
         return voice
+###
+演出
+###
+class performanceEffect extends effect
+    constructor: (w, h) ->
+        super w, h
+###
+チャンス
+###
+class chanceEffect extends performanceEffect
+    constructor:()->
+        super 237, 50
+        @image = game.imageload("chance")
+        @y = 290
+        @x = game.width
+        @existTime = 2
+        @sound = game.soundload('clear')
+    onenterframe: (e) ->
+        if @age - @set_age is @fast_age
+            game.sePlay(@sound)
+            @vx = @_setVxSlow()
+        if @age - @set_age is @slow_age
+            @vx = @_setVxFast()
+        @x += @vx
+        if @x + @w < 0
+            game.main_scene.gp_slot.endForceSlotHit()
+            game.main_scene.gp_effect.removeChild(@)
+    setInit:()->
+        @existTime = game.slot_setting.setChanceTime()
+        @x = game.width
+        @vx = @_setVxFast()
+        @set_age = @age
+        @fast_age = Math.round(0.3 * game.fps)
+        @slow_age = Math.round(@existTime * game.fps) + @fast_age
+    _setVxFast:()->
+        return Math.round(((game.width + @w) / 2) / (0.3 * game.fps)) * -1
+    _setVxSlow:()->
+        return Math.round(((game.width - @w) / 4) / (@existTime * game.fps)) * -1
+
 class appObject extends appSprite
     ###
     制約

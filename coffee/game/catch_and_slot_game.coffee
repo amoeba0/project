@@ -11,7 +11,7 @@ class LoveliveGame extends catchAndSlotGame
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
 
@@ -33,7 +33,7 @@ class LoveliveGame extends catchAndSlotGame
         @money = 0 #現在の所持金
         @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
-        @tension = 0 #現在のテンション(500がマックス)
+        @tension = 500 #現在のテンション(500がマックス)
         @past_fever_num = 0 #過去にフィーバーになった回数
 
         @money = @money_init
@@ -93,7 +93,7 @@ class LoveliveGame extends catchAndSlotGame
     はずれのアイテムを取った時にテンションゲージを増減する
     ###
     tensionSetValueMissItemCatch:()->
-        val = @slot_setting.setTensionItemFall()
+        val = @slot_setting.setTensionMissItem()
         @tensionSetValue(val)
 
     ###

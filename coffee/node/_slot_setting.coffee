@@ -123,6 +123,8 @@ class slotSetting extends appNode
         @now_muse_num = 0
         #trueならスロットが強制で当たる
         @isForceSlotHit = false
+        #スロットが強制で当たる確率
+        @slotHitRate = 0
 
         #セーブする変数
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
@@ -205,22 +207,23 @@ class slotSetting extends appNode
 
     ###
     スロットを強制的に当たりにするかどうかを決める
-    コンボ数 * 0.07 ％
-    テンションMAXで1.5倍補正
-    過去のフィーバー回数が少ないほど上方補正かける 0回:+8,1回:+6,2回:+4,3回以上:+2
+    コンボ数 * 0.06 ％
+    テンションMAXで+5補正
+    過去のフィーバー回数が少ないほど上方補正かける 0回:+6,1回:+4,2回:+2
     最大値は20％
     フィーバー中は強制的に当たり
     @return boolean true:当たり
     ###
     getIsForceSlotHit:()->
         result = false
-        rate = Math.floor(game.combo * 0.07 * ((game.tension / (@tension_max * 2)) + 1))
+        rate = Math.floor((game.combo * 0.06) + ((game.tension / @tension_max) * 5))
         if game.past_fever_num <= 2
-            rate += (1 + (3 - game.past_fever_num)) * 0.2
+            rate += ((3 - game.past_fever_num)) * 2
         if rate > 20
             rate = 20
         if game.debug.half_slot_hit is true
             rate = 50
+        @slotHitRate = rate
         random = Math.floor(Math.random() * 100)
         if random < rate || game.fever is true || game.debug.force_slot_hit is true
             result = true
@@ -269,13 +272,15 @@ class slotSetting extends appNode
     アイテムを落とした時のテンションゲージの増減値を決める
     ###
     setTensionItemFall:()->
-        val = game.tension * 0.2
-        if val < @tension_max * 0.1
-            val = @tension_max * 0.1
-        val *= -1
+        val = @tension_max * -0.2
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
-        #TODO スロットにμ’ｓがいれば1つ消す
+        return val
+
+    setTensionMissItem:()->
+        val = @tension_max * -0.6
+        if game.debug.fix_tention_item_fall_flg is true
+            val = game.debug.fix_tention_item_fall_val
         return val
 
     ###
@@ -381,3 +386,19 @@ class slotSetting extends appNode
             val = 4
         game.item_kind = val
         return val
+    ###
+    スロットの強制当たりが有効な時間を決める
+    エフェクトが画面にイン、アウトする時間が合計0.6秒あるので
+    実際はこれの返り値に+0.6追加される
+    ###
+    setChanceTime:()->
+        if @slotHitRate <= 10
+            fixTime = 2
+            randomTime = 5
+        else if @slotHitRate <= 15
+            fixTime = 1.5
+            randomTime = 10
+        else
+            fixTime = 1
+            randomTime = 15
+        return fixTime + Math.floor(Math.random() * randomTime) / 10

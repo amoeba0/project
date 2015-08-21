@@ -12,6 +12,7 @@ class gpSlot extends appGroup
         @stopStartAge = 0 #スロットの停止が開始したフレーム
         @leftSlotEye = 0 #左のスロットが当たった目
         @feverSec = 0 #フィーバーの時間
+        @isForceSlotHit = false
         @slotSet()
         @debugSlot()
         @upperFrame = new UpperFrame()
@@ -25,6 +26,7 @@ class gpSlot extends appGroup
     slotStopping: ()->
         if @isStopping is true
             if @age is @stopStartAge
+                @forceHitStart()
                 game.sePlay(@lille_stop_se)
                 @left_lille.isRotation = false
                 @saveLeftSlotEye()
@@ -38,6 +40,7 @@ class gpSlot extends appGroup
                 game.sePlay(@lille_stop_se)
                 @right_lille.isRotation = false
                 @forceHit(@right_lille)
+                @forceHitEnd()
                 @isStopping = false
                 @slotHitTest()
 
@@ -47,11 +50,18 @@ class gpSlot extends appGroup
     saveLeftSlotEye:()->
         @leftSlotEye = @left_lille.lilleArray[@left_lille.nowEye]
 
+    forceHitStart:()->
+        if game.slot_setting.isForceSlotHit is true
+            @isForceSlotHit = true
+
+    forceHitEnd:()->
+        @isForceSlotHit = false
+
     ###
     確率でスロットを強制的に当たりにする
     ###
     forceHit:(target)->
-        if game.slot_setting.isForceSlotHit is true
+        if @isForceSlotHit is true
             tmp_eye = @_searchEye(target)
             if tmp_eye != 0
                 target.nowEye = tmp_eye
@@ -235,12 +245,14 @@ class gpSlot extends appGroup
     startForceSlotHit:()->
         @upperFrame.frame = 1
         game.main_scene.gp_system.changeBetChangeFlg(false)
+        if game.fever is false
+            game.main_scene.gp_effect.chanceEffectSet()
 
     ###
     スロットの強制当たりを終了する
     ###
     endForceSlotHit:()->
-        if game.fever is false
+        if game.fever is false && game.slot_setting.isForceSlotHit is true
             @upperFrame.frame = 0
             game.main_scene.gp_system.changeBetChangeFlg(true)
             game.slot_setting.isForceSlotHit = false
