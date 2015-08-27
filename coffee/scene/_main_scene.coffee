@@ -94,4 +94,5 @@ class mainScene extends appScene
                 game.main_scene.gp_slot.upperFrame.frame = 0
                 game.bgmStop(game.main_scene.gp_slot.fever_bgm)
                 @gp_system.changeBetChangeFlg(true)
+                @gp_effect.feverEffectEnd()
                 game.fever = false

@@ -22,7 +22,7 @@ class pauseMainMenuButtonHtml extends buttonHtml
 class returnGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super
-        @y = 150
+        @y = 100
         @text = 'ゲームに戻る'
         @setHtml()
     touchendEvent:() ->
@@ -34,11 +34,38 @@ class returnGameButtonHtml extends pauseMainMenuButtonHtml
 class saveGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super
-        @y = 300
+        @y = 200
         @text = 'ゲームを保存する'
         @setHtml()
     touchendEvent:() ->
         game.pause_scene.setSaveMenu()
+
+class buyItemButtonHtml extends pauseMainMenuButtonHtml
+    constructor: () ->
+        super
+        @y = 300
+        @text = 'アイテム・部員を買う'
+        @setHtml()
+    touchendEvent:() ->
+        game.pause_scene.setItemBuyMenu()
+
+class useItemButtonHtml extends pauseMainMenuButtonHtml
+    constructor: () ->
+        super
+        @y = 400
+        @text = 'アイテムを使う'
+        @setHtml()
+    touchendEvent:() ->
+        game.pause_scene.setItemUseMenu()
+
+class setMemberButtonHtml extends pauseMainMenuButtonHtml
+    constructor: () ->
+        super
+        @y = 500
+        @text = '部員を編成する'
+        @setHtml()
+    touchendEvent:() ->
+        game.pause_scene.setMemberSetMenu()
 
 ###
 OKボタン
@@ -87,3 +114,32 @@ class startGameButtonHtml extends titleMenuButtonHtml
     touchendEvent:() ->
         game.loadGame()
         game.replaceScene(game.main_scene)
+
+###
+ダイアログを閉じるボタン
+###
+class dialogCloseButton extends systemHtml
+    constructor:()->
+        super 30, 30
+        @image_name = 'close'
+        @x = 375
+        @y = 115
+        @setImageHtml()
+
+class itemBuyDialogCloseButton extends dialogCloseButton
+    constructor:()->
+        super
+    ontouchend: () ->
+        game.pause_scene.removeItemBuyMenu()
+
+class itemUseDialogCloseButton extends dialogCloseButton
+    constructor:()->
+        super
+    ontouchend: () ->
+        game.pause_scene.removeItemUseMenu()
+
+class memberSetDialogCloseButton extends dialogCloseButton
+    constructor:()->
+        super
+    ontouchend: () ->
+        game.pause_scene.removeMemberSetMenu()

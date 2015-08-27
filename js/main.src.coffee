@@ -6,7 +6,6 @@ window.onload = ->
 class appDomLayer extends DomLayer
     constructor: () ->
         super
-
 class appGame extends Game
     constructor:(w, h)->
         super w, h
@@ -113,14 +112,42 @@ class appSprite extends Sprite
         super w, h
         @w = w
         @h = h
+class pauseItemBuyLayer extends appDomLayer
+    constructor: () ->
+        super
+        @dialog = new itemBuyDialogHtml()
+        @close_button = new itemBuyDialogCloseButton()
+        @addChild(@dialog)
+        @addChild(@close_button)
+class pauseItemUseLayer extends appDomLayer
+    constructor: () ->
+        super
+        @dialog = new itemUseDialogHtml()
+        @close_button = new itemUseDialogCloseButton()
+        @addChild(@dialog)
+        @addChild(@close_button)
 class pauseMainLayer extends appDomLayer
     constructor: () ->
         super
         @return_game_button = new returnGameButtonHtml()
-        @addChild(@return_game_button)
         @save_game_button = new saveGameButtonHtml()
+        @buy_item_button = new buyItemButtonHtml()
+        @use_item_button = new useItemButtonHtml()
+        @set_member_button = new setMemberButtonHtml()
+        @addChild(@return_game_button)
         @addChild(@save_game_button)
+        @addChild(@buy_item_button)
+        @addChild(@use_item_button)
+        @addChild(@set_member_button)
 
+
+class pauseMemberSetLayer extends appDomLayer
+    constructor: () ->
+        super
+        @dialog = new memberSetDialogHtml()
+        @close_button = new memberSetDialogCloseButton()
+        @addChild(@dialog)
+        @addChild(@close_button)
 class pauseSaveLayer extends appDomLayer
     constructor: () ->
         super
@@ -147,7 +174,7 @@ class LoveliveGame extends catchAndSlotGame
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
 
@@ -169,7 +196,7 @@ class LoveliveGame extends catchAndSlotGame
         @money = 0 #現在の所持金
         @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
-        @tension = 500 #現在のテンション(500がマックス)
+        @tension = 0 #現在のテンション(500がマックス)
         @past_fever_num = 0 #過去にフィーバーになった回数
 
         @money = @money_init
@@ -271,6 +298,8 @@ class gpEffect extends appGroup
     constructor: () ->
         super
         @chance_effect = new chanceEffect()
+        @fever_effect = new feverEffect()
+        @fever_overlay = new feverOverlay()
 
     cutInSet:()->
         setting = game.slot_setting
@@ -281,6 +310,15 @@ class gpEffect extends appGroup
     chanceEffectSet:()->
         @addChild(@chance_effect)
         @chance_effect.setInit()
+
+    feverEffectSet:()->
+        @addChild(@fever_effect)
+        @addChild(@fever_overlay)
+        @fever_overlay.setInit()
+
+    feverEffectEnd:()->
+        @removeChild(@fever_effect)
+        @removeChild(@fever_overlay)
 class gpPanorama extends appGroup
     constructor: () ->
         super
@@ -394,6 +432,7 @@ class gpSlot extends appGroup
             game.musePreLoad()
             game.fever_hit_eye = hit_eye
             game.main_scene.gp_system.changeBetChangeFlg(false)
+            game.main_scene.gp_effect.feverEffectSet()
             @slotAddMuseAll(hit_eye)
             @_feverBgmStart(hit_eye)
 
@@ -912,11 +951,17 @@ class systemHtml extends appHtml
         super width, height
         @class = []
         @text = ''
+        @is_button = true
     setHtml: ()->
         tmp_cls = ''
         for val in @class
             tmp_cls += val + ' '
         @_element.innerHTML = '<div class="'+tmp_cls+'">'+@text+'</div>'
+    setImageHtml:()->
+        tmp_class = ''
+        if @is_button is true
+            tmp_class = 'image-button'
+        @_element.innerHTML = '<img src="images/html/'+@image_name+'.png" class="'+tmp_class+'"></img>'
 class buttonHtml extends systemHtml
     constructor: (width, height) ->
         super width, height
@@ -941,7 +986,7 @@ class pauseMainMenuButtonHtml extends buttonHtml
 class returnGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super
-        @y = 150
+        @y = 100
         @text = 'ゲームに戻る'
         @setHtml()
     touchendEvent:() ->
@@ -953,11 +998,38 @@ class returnGameButtonHtml extends pauseMainMenuButtonHtml
 class saveGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super
-        @y = 300
+        @y = 200
         @text = 'ゲームを保存する'
         @setHtml()
     touchendEvent:() ->
         game.pause_scene.setSaveMenu()
+
+class buyItemButtonHtml extends pauseMainMenuButtonHtml
+    constructor: () ->
+        super
+        @y = 300
+        @text = 'アイテム・部員を買う'
+        @setHtml()
+    touchendEvent:() ->
+        game.pause_scene.setItemBuyMenu()
+
+class useItemButtonHtml extends pauseMainMenuButtonHtml
+    constructor: () ->
+        super
+        @y = 400
+        @text = 'アイテムを使う'
+        @setHtml()
+    touchendEvent:() ->
+        game.pause_scene.setItemUseMenu()
+
+class setMemberButtonHtml extends pauseMainMenuButtonHtml
+    constructor: () ->
+        super
+        @y = 500
+        @text = '部員を編成する'
+        @setHtml()
+    touchendEvent:() ->
+        game.pause_scene.setMemberSetMenu()
 
 ###
 OKボタン
@@ -1006,21 +1078,69 @@ class startGameButtonHtml extends titleMenuButtonHtml
     touchendEvent:() ->
         game.loadGame()
         game.replaceScene(game.main_scene)
+
+###
+ダイアログを閉じるボタン
+###
+class dialogCloseButton extends systemHtml
+    constructor:()->
+        super 30, 30
+        @image_name = 'close'
+        @x = 375
+        @y = 115
+        @setImageHtml()
+
+class itemBuyDialogCloseButton extends dialogCloseButton
+    constructor:()->
+        super
+    ontouchend: () ->
+        game.pause_scene.removeItemBuyMenu()
+
+class itemUseDialogCloseButton extends dialogCloseButton
+    constructor:()->
+        super
+    ontouchend: () ->
+        game.pause_scene.removeItemUseMenu()
+
+class memberSetDialogCloseButton extends dialogCloseButton
+    constructor:()->
+        super
+    ontouchend: () ->
+        game.pause_scene.removeMemberSetMenu()
 class dialogHtml extends systemHtml
     constructor: (width, height) ->
         super width, height
 class baseDialogHtml extends dialogHtml
-    constructor: () ->
-        super 375, 375
+    constructor: (width, height) ->
+        super width, height
         @class = ['base-dialog']
 class saveDialogHtml extends baseDialogHtml
     constructor: () ->
-        super
+        super 375, 375
         @text = '保存しました。'
         @class.push('base-dialog-save')
         @x = 60
         @y = 150
         @setHtml()
+class menuDialogHtml extends baseDialogHtml
+    constructor:()->
+        super 375, 400
+        @text = '　'
+        @class.push('base-dialog-menu')
+        @x = 45
+        @y = 100
+        @setHtml()
+class itemBuyDialogHtml extends menuDialogHtml
+    constructor:()->
+        super
+
+class itemUseDialogHtml extends menuDialogHtml
+    constructor:()->
+        super
+
+class memberSetDialogHtml extends menuDialogHtml
+    constructor:()->
+        super
 class text extends appLabel
     constructor: () ->
         super
@@ -1128,9 +1248,9 @@ class Debug extends appNode
         @half_slot_hit = false
         #デバッグ用リール配列
         @lille_array = [
-            [11, 12, 11],
-            [12, 11, 11],
-            [11, 12, 11]
+            [11, 11, 11],
+            [11, 11, 11],
+            [11, 11, 11]
         ]
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
@@ -1650,6 +1770,7 @@ class mainScene extends appScene
                 game.main_scene.gp_slot.upperFrame.frame = 0
                 game.bgmStop(game.main_scene.gp_slot.fever_bgm)
                 @gp_system.changeBetChangeFlg(true)
+                @gp_effect.feverEffectEnd()
                 game.fever = false
 class pauseScene extends appScene
     constructor: () ->
@@ -1657,15 +1778,30 @@ class pauseScene extends appScene
         @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         @buttonList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         @pause_back = new pauseBack()
-        @addChild(@pause_back)
         @pause_main_layer = new pauseMainLayer()
-        @addChild(@pause_main_layer)
         @pause_save_layer = new pauseSaveLayer()
+        @pause_item_buy_layer = new pauseItemBuyLayer()
+        @pause_item_use_layer = new pauseItemUseLayer()
+        @pause_member_set_layer = new pauseMemberSetLayer()
+        @addChild(@pause_back)
+        @addChild(@pause_main_layer)
     setSaveMenu: () ->
         @addChild(@pause_save_layer)
         @_exeGameSave()
     removeSaveMenu:()->
         @removeChild(@pause_save_layer)
+    setItemBuyMenu:()->
+        @addChild(@pause_item_buy_layer)
+    removeItemBuyMenu:()->
+        @removeChild(@pause_item_buy_layer)
+    setItemUseMenu:()->
+        @addChild(@pause_item_use_layer)
+    removeItemUseMenu:()->
+        @removeChild(@pause_item_use_layer)
+    setMemberSetMenu:()->
+        @addChild(@pause_member_set_layer)
+    removeMemberSetMenu:()->
+        @removeChild(@pause_member_set_layer)
     onenterframe: (e) ->
         @_pauseKeyPush()
     ###
@@ -1822,6 +1958,31 @@ class chanceEffect extends performanceEffect
     _setVxSlow:()->
         return Math.round(((game.width - @w) / 4) / (@existTime * game.fps)) * -1
 
+###
+フィーバー
+###
+class feverEffect extends performanceEffect
+    constructor:()->
+        super 190, 50
+        @image = game.imageload("fever")
+        @y = 290
+        @x = (game.width - @w) / 2
+        @frame = 0
+class feverOverlay extends feverEffect
+    constructor:()->
+        super
+        @frame = 1
+        @opacity_frm = Math.floor(100 / game.fps) / 100
+    setInit:()->
+        @opacity = 0
+    onenterframe: (e) ->
+        @opacity += @opacity_frm
+        if @opacity < 0
+            @opacity = 0
+            @opacity_frm *= -1
+        if 1 < @opacity
+            @opacity = 1
+            @opacity_frm *= -1
 class appObject extends appSprite
     ###
     制約

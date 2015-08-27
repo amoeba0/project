@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betButton, betText, buttonHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogHtml, effect, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, jumpButton, leftButton, lowBetButton, mainScene, moneyText, pauseBack, pauseButton, pauseMainLayer, pauseMainMenuButtonHtml, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, text, titleMainLayer, titleMenuButtonHtml, titleScene,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betButton, betText, buttonHtml, buyItemButtonHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, effect, feverEffect, feverOverlay, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, itemBuyDialogCloseButton, itemBuyDialogHtml, itemUseDialogCloseButton, itemUseDialogHtml, jumpButton, leftButton, lowBetButton, mainScene, memberSetDialogCloseButton, memberSetDialogHtml, menuDialogHtml, moneyText, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemUseLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, setMemberButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, text, titleMainLayer, titleMenuButtonHtml, titleScene, useItemButtonHtml,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -222,18 +222,69 @@ appSprite = (function(_super) {
 
 })(Sprite);
 
+pauseItemBuyLayer = (function(_super) {
+  __extends(pauseItemBuyLayer, _super);
+
+  function pauseItemBuyLayer() {
+    pauseItemBuyLayer.__super__.constructor.apply(this, arguments);
+    this.dialog = new itemBuyDialogHtml();
+    this.close_button = new itemBuyDialogCloseButton();
+    this.addChild(this.dialog);
+    this.addChild(this.close_button);
+  }
+
+  return pauseItemBuyLayer;
+
+})(appDomLayer);
+
+pauseItemUseLayer = (function(_super) {
+  __extends(pauseItemUseLayer, _super);
+
+  function pauseItemUseLayer() {
+    pauseItemUseLayer.__super__.constructor.apply(this, arguments);
+    this.dialog = new itemUseDialogHtml();
+    this.close_button = new itemUseDialogCloseButton();
+    this.addChild(this.dialog);
+    this.addChild(this.close_button);
+  }
+
+  return pauseItemUseLayer;
+
+})(appDomLayer);
+
 pauseMainLayer = (function(_super) {
   __extends(pauseMainLayer, _super);
 
   function pauseMainLayer() {
     pauseMainLayer.__super__.constructor.apply(this, arguments);
     this.return_game_button = new returnGameButtonHtml();
-    this.addChild(this.return_game_button);
     this.save_game_button = new saveGameButtonHtml();
+    this.buy_item_button = new buyItemButtonHtml();
+    this.use_item_button = new useItemButtonHtml();
+    this.set_member_button = new setMemberButtonHtml();
+    this.addChild(this.return_game_button);
     this.addChild(this.save_game_button);
+    this.addChild(this.buy_item_button);
+    this.addChild(this.use_item_button);
+    this.addChild(this.set_member_button);
   }
 
   return pauseMainLayer;
+
+})(appDomLayer);
+
+pauseMemberSetLayer = (function(_super) {
+  __extends(pauseMemberSetLayer, _super);
+
+  function pauseMemberSetLayer() {
+    pauseMemberSetLayer.__super__.constructor.apply(this, arguments);
+    this.dialog = new memberSetDialogHtml();
+    this.close_button = new memberSetDialogCloseButton();
+    this.addChild(this.dialog);
+    this.addChild(this.close_button);
+  }
+
+  return pauseMemberSetLayer;
 
 })(appDomLayer);
 
@@ -286,7 +337,7 @@ LoveliveGame = (function(_super) {
     this.width = 480;
     this.height = 720;
     this.fps = 24;
-    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance'];
+    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira'];
     this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear'];
     this.keybind(90, 'z');
     this.keybind(88, 'x');
@@ -301,7 +352,7 @@ LoveliveGame = (function(_super) {
     this.money = 0;
     this.bet = 1;
     this.combo = 0;
-    this.tension = 500;
+    this.tension = 0;
     this.past_fever_num = 0;
     this.money = this.money_init;
   }
@@ -459,6 +510,8 @@ gpEffect = (function(_super) {
   function gpEffect() {
     gpEffect.__super__.constructor.apply(this, arguments);
     this.chance_effect = new chanceEffect();
+    this.fever_effect = new feverEffect();
+    this.fever_overlay = new feverOverlay();
   }
 
   gpEffect.prototype.cutInSet = function() {
@@ -474,6 +527,17 @@ gpEffect = (function(_super) {
   gpEffect.prototype.chanceEffectSet = function() {
     this.addChild(this.chance_effect);
     return this.chance_effect.setInit();
+  };
+
+  gpEffect.prototype.feverEffectSet = function() {
+    this.addChild(this.fever_effect);
+    this.addChild(this.fever_overlay);
+    return this.fever_overlay.setInit();
+  };
+
+  gpEffect.prototype.feverEffectEnd = function() {
+    this.removeChild(this.fever_effect);
+    return this.removeChild(this.fever_overlay);
   };
 
   return gpEffect;
@@ -639,6 +703,7 @@ gpSlot = (function(_super) {
       game.musePreLoad();
       game.fever_hit_eye = hit_eye;
       game.main_scene.gp_system.changeBetChangeFlg(false);
+      game.main_scene.gp_effect.feverEffectSet();
       this.slotAddMuseAll(hit_eye);
       return this._feverBgmStart(hit_eye);
     }
@@ -1391,6 +1456,7 @@ systemHtml = (function(_super) {
     systemHtml.__super__.constructor.call(this, width, height);
     this["class"] = [];
     this.text = '';
+    this.is_button = true;
   }
 
   systemHtml.prototype.setHtml = function() {
@@ -1402,6 +1468,15 @@ systemHtml = (function(_super) {
       tmp_cls += val + ' ';
     }
     return this._element.innerHTML = '<div class="' + tmp_cls + '">' + this.text + '</div>';
+  };
+
+  systemHtml.prototype.setImageHtml = function() {
+    var tmp_class;
+    tmp_class = '';
+    if (this.is_button === true) {
+      tmp_class = 'image-button';
+    }
+    return this._element.innerHTML = '<img src="images/html/' + this.image_name + '.png" class="' + tmp_class + '"></img>';
   };
 
   return systemHtml;
@@ -1455,7 +1530,7 @@ returnGameButtonHtml = (function(_super) {
 
   function returnGameButtonHtml() {
     returnGameButtonHtml.__super__.constructor.apply(this, arguments);
-    this.y = 150;
+    this.y = 100;
     this.text = 'ゲームに戻る';
     this.setHtml();
   }
@@ -1478,7 +1553,7 @@ saveGameButtonHtml = (function(_super) {
 
   function saveGameButtonHtml() {
     saveGameButtonHtml.__super__.constructor.apply(this, arguments);
-    this.y = 300;
+    this.y = 200;
     this.text = 'ゲームを保存する';
     this.setHtml();
   }
@@ -1488,6 +1563,60 @@ saveGameButtonHtml = (function(_super) {
   };
 
   return saveGameButtonHtml;
+
+})(pauseMainMenuButtonHtml);
+
+buyItemButtonHtml = (function(_super) {
+  __extends(buyItemButtonHtml, _super);
+
+  function buyItemButtonHtml() {
+    buyItemButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 300;
+    this.text = 'アイテム・部員を買う';
+    this.setHtml();
+  }
+
+  buyItemButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.setItemBuyMenu();
+  };
+
+  return buyItemButtonHtml;
+
+})(pauseMainMenuButtonHtml);
+
+useItemButtonHtml = (function(_super) {
+  __extends(useItemButtonHtml, _super);
+
+  function useItemButtonHtml() {
+    useItemButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 400;
+    this.text = 'アイテムを使う';
+    this.setHtml();
+  }
+
+  useItemButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.setItemUseMenu();
+  };
+
+  return useItemButtonHtml;
+
+})(pauseMainMenuButtonHtml);
+
+setMemberButtonHtml = (function(_super) {
+  __extends(setMemberButtonHtml, _super);
+
+  function setMemberButtonHtml() {
+    setMemberButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 500;
+    this.text = '部員を編成する';
+    this.setHtml();
+  }
+
+  setMemberButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.setMemberSetMenu();
+  };
+
+  return setMemberButtonHtml;
 
 })(pauseMainMenuButtonHtml);
 
@@ -1583,6 +1712,71 @@ startGameButtonHtml = (function(_super) {
 
 })(titleMenuButtonHtml);
 
+
+/*
+ダイアログを閉じるボタン
+ */
+
+dialogCloseButton = (function(_super) {
+  __extends(dialogCloseButton, _super);
+
+  function dialogCloseButton() {
+    dialogCloseButton.__super__.constructor.call(this, 30, 30);
+    this.image_name = 'close';
+    this.x = 375;
+    this.y = 115;
+    this.setImageHtml();
+  }
+
+  return dialogCloseButton;
+
+})(systemHtml);
+
+itemBuyDialogCloseButton = (function(_super) {
+  __extends(itemBuyDialogCloseButton, _super);
+
+  function itemBuyDialogCloseButton() {
+    itemBuyDialogCloseButton.__super__.constructor.apply(this, arguments);
+  }
+
+  itemBuyDialogCloseButton.prototype.ontouchend = function() {
+    return game.pause_scene.removeItemBuyMenu();
+  };
+
+  return itemBuyDialogCloseButton;
+
+})(dialogCloseButton);
+
+itemUseDialogCloseButton = (function(_super) {
+  __extends(itemUseDialogCloseButton, _super);
+
+  function itemUseDialogCloseButton() {
+    itemUseDialogCloseButton.__super__.constructor.apply(this, arguments);
+  }
+
+  itemUseDialogCloseButton.prototype.ontouchend = function() {
+    return game.pause_scene.removeItemUseMenu();
+  };
+
+  return itemUseDialogCloseButton;
+
+})(dialogCloseButton);
+
+memberSetDialogCloseButton = (function(_super) {
+  __extends(memberSetDialogCloseButton, _super);
+
+  function memberSetDialogCloseButton() {
+    memberSetDialogCloseButton.__super__.constructor.apply(this, arguments);
+  }
+
+  memberSetDialogCloseButton.prototype.ontouchend = function() {
+    return game.pause_scene.removeMemberSetMenu();
+  };
+
+  return memberSetDialogCloseButton;
+
+})(dialogCloseButton);
+
 dialogHtml = (function(_super) {
   __extends(dialogHtml, _super);
 
@@ -1597,8 +1791,8 @@ dialogHtml = (function(_super) {
 baseDialogHtml = (function(_super) {
   __extends(baseDialogHtml, _super);
 
-  function baseDialogHtml() {
-    baseDialogHtml.__super__.constructor.call(this, 375, 375);
+  function baseDialogHtml(width, height) {
+    baseDialogHtml.__super__.constructor.call(this, width, height);
     this["class"] = ['base-dialog'];
   }
 
@@ -1610,7 +1804,7 @@ saveDialogHtml = (function(_super) {
   __extends(saveDialogHtml, _super);
 
   function saveDialogHtml() {
-    saveDialogHtml.__super__.constructor.apply(this, arguments);
+    saveDialogHtml.__super__.constructor.call(this, 375, 375);
     this.text = '保存しました。';
     this["class"].push('base-dialog-save');
     this.x = 60;
@@ -1621,6 +1815,55 @@ saveDialogHtml = (function(_super) {
   return saveDialogHtml;
 
 })(baseDialogHtml);
+
+menuDialogHtml = (function(_super) {
+  __extends(menuDialogHtml, _super);
+
+  function menuDialogHtml() {
+    menuDialogHtml.__super__.constructor.call(this, 375, 400);
+    this.text = '　';
+    this["class"].push('base-dialog-menu');
+    this.x = 45;
+    this.y = 100;
+    this.setHtml();
+  }
+
+  return menuDialogHtml;
+
+})(baseDialogHtml);
+
+itemBuyDialogHtml = (function(_super) {
+  __extends(itemBuyDialogHtml, _super);
+
+  function itemBuyDialogHtml() {
+    itemBuyDialogHtml.__super__.constructor.apply(this, arguments);
+  }
+
+  return itemBuyDialogHtml;
+
+})(menuDialogHtml);
+
+itemUseDialogHtml = (function(_super) {
+  __extends(itemUseDialogHtml, _super);
+
+  function itemUseDialogHtml() {
+    itemUseDialogHtml.__super__.constructor.apply(this, arguments);
+  }
+
+  return itemUseDialogHtml;
+
+})(menuDialogHtml);
+
+memberSetDialogHtml = (function(_super) {
+  __extends(memberSetDialogHtml, _super);
+
+  function memberSetDialogHtml() {
+    memberSetDialogHtml.__super__.constructor.apply(this, arguments);
+  }
+
+  return memberSetDialogHtml;
+
+})(menuDialogHtml);
 
 text = (function(_super) {
   __extends(text, _super);
@@ -1770,7 +2013,7 @@ Debug = (function(_super) {
     this.force_insert_muse = false;
     this.force_slot_hit = false;
     this.half_slot_hit = false;
-    this.lille_array = [[11, 12, 11], [12, 11, 11], [11, 12, 11]];
+    this.lille_array = [[11, 11, 11], [11, 11, 11], [11, 11, 11]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = 0;
     this.fix_tention_slot_hit_flg = 200;
@@ -2498,6 +2741,7 @@ mainScene = (function(_super) {
         game.main_scene.gp_slot.upperFrame.frame = 0;
         game.bgmStop(game.main_scene.gp_slot.fever_bgm);
         this.gp_system.changeBetChangeFlg(true);
+        this.gp_effect.feverEffectEnd();
         return game.fever = false;
       }
     }
@@ -2529,10 +2773,13 @@ pauseScene = (function(_super) {
       'pause': false
     };
     this.pause_back = new pauseBack();
-    this.addChild(this.pause_back);
     this.pause_main_layer = new pauseMainLayer();
-    this.addChild(this.pause_main_layer);
     this.pause_save_layer = new pauseSaveLayer();
+    this.pause_item_buy_layer = new pauseItemBuyLayer();
+    this.pause_item_use_layer = new pauseItemUseLayer();
+    this.pause_member_set_layer = new pauseMemberSetLayer();
+    this.addChild(this.pause_back);
+    this.addChild(this.pause_main_layer);
   }
 
   pauseScene.prototype.setSaveMenu = function() {
@@ -2542,6 +2789,30 @@ pauseScene = (function(_super) {
 
   pauseScene.prototype.removeSaveMenu = function() {
     return this.removeChild(this.pause_save_layer);
+  };
+
+  pauseScene.prototype.setItemBuyMenu = function() {
+    return this.addChild(this.pause_item_buy_layer);
+  };
+
+  pauseScene.prototype.removeItemBuyMenu = function() {
+    return this.removeChild(this.pause_item_buy_layer);
+  };
+
+  pauseScene.prototype.setItemUseMenu = function() {
+    return this.addChild(this.pause_item_use_layer);
+  };
+
+  pauseScene.prototype.removeItemUseMenu = function() {
+    return this.removeChild(this.pause_item_use_layer);
+  };
+
+  pauseScene.prototype.setMemberSetMenu = function() {
+    return this.addChild(this.pause_member_set_layer);
+  };
+
+  pauseScene.prototype.removeMemberSetMenu = function() {
+    return this.removeChild(this.pause_member_set_layer);
   };
 
   pauseScene.prototype.onenterframe = function(e) {
@@ -2837,6 +3108,55 @@ chanceEffect = (function(_super) {
   return chanceEffect;
 
 })(performanceEffect);
+
+
+/*
+フィーバー
+ */
+
+feverEffect = (function(_super) {
+  __extends(feverEffect, _super);
+
+  function feverEffect() {
+    feverEffect.__super__.constructor.call(this, 190, 50);
+    this.image = game.imageload("fever");
+    this.y = 290;
+    this.x = (game.width - this.w) / 2;
+    this.frame = 0;
+  }
+
+  return feverEffect;
+
+})(performanceEffect);
+
+feverOverlay = (function(_super) {
+  __extends(feverOverlay, _super);
+
+  function feverOverlay() {
+    feverOverlay.__super__.constructor.apply(this, arguments);
+    this.frame = 1;
+    this.opacity_frm = Math.floor(100 / game.fps) / 100;
+  }
+
+  feverOverlay.prototype.setInit = function() {
+    return this.opacity = 0;
+  };
+
+  feverOverlay.prototype.onenterframe = function(e) {
+    this.opacity += this.opacity_frm;
+    if (this.opacity < 0) {
+      this.opacity = 0;
+      this.opacity_frm *= -1;
+    }
+    if (1 < this.opacity) {
+      this.opacity = 1;
+      return this.opacity_frm *= -1;
+    }
+  };
+
+  return feverOverlay;
+
+})(feverEffect);
 
 appObject = (function(_super) {
   __extends(appObject, _super);

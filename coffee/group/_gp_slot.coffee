@@ -104,6 +104,7 @@ class gpSlot extends appGroup
             game.musePreLoad()
             game.fever_hit_eye = hit_eye
             game.main_scene.gp_system.changeBetChangeFlg(false)
+            game.main_scene.gp_effect.feverEffectSet()
             @slotAddMuseAll(hit_eye)
             @_feverBgmStart(hit_eye)
 

@@ -33,9 +33,9 @@ class Debug extends appNode
         @half_slot_hit = false
         #デバッグ用リール配列
         @lille_array = [
-            [11, 12, 11],
-            [12, 11, 11],
-            [11, 12, 11]
+            [11, 11, 11],
+            [11, 11, 11],
+            [11, 11, 11]
         ]
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
