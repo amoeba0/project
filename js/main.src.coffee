@@ -300,6 +300,8 @@ class gpEffect extends appGroup
         @chance_effect = new chanceEffect()
         @fever_effect = new feverEffect()
         @fever_overlay = new feverOverlay()
+        @kirakira_effect = []
+        @kirakira_num = 40
 
     cutInSet:()->
         setting = game.slot_setting
@@ -315,10 +317,21 @@ class gpEffect extends appGroup
         @addChild(@fever_effect)
         @addChild(@fever_overlay)
         @fever_overlay.setInit()
+        @_setKirakiraEffect()
 
     feverEffectEnd:()->
         @removeChild(@fever_effect)
         @removeChild(@fever_overlay)
+        @_endKirakiraEffect()
+
+    _setKirakiraEffect:()->
+        for i in [1..@kirakira_num]
+            @kirakira_effect.push(new kirakiraEffect())
+            @addChild(@kirakira_effect[i-1])
+
+    _endKirakiraEffect:()->
+        for i in [1..@kirakira_num]
+            @removeChild(@kirakira_effect[i-1])
 class gpPanorama extends appGroup
     constructor: () ->
         super
@@ -1481,7 +1494,7 @@ class slotSetting extends appNode
     スロットを強制的に当たりにするかどうかを決める
     コンボ数 * 0.06 ％
     テンションMAXで+5補正
-    過去のフィーバー回数が少ないほど上方補正かける 0回:+6,1回:+4,2回:+2
+    過去のフィーバー回数が少ないほど上方補正かける 0回:+9,1回:+6,2回:+3
     最大値は20％
     フィーバー中は強制的に当たり
     @return boolean true:当たり
@@ -1490,7 +1503,7 @@ class slotSetting extends appNode
         result = false
         rate = Math.floor((game.combo * 0.06) + ((game.tension / @tension_max) * 5))
         if game.past_fever_num <= 2
-            rate += ((3 - game.past_fever_num)) * 2
+            rate += ((3 - game.past_fever_num)) * 3
         if rate > 20
             rate = 20
         if game.debug.half_slot_hit is true
@@ -1983,6 +1996,49 @@ class feverOverlay extends feverEffect
         if 1 < @opacity
             @opacity = 1
             @opacity_frm *= -1
+
+###
+キラキラ
+###
+class kirakiraEffect extends performanceEffect
+    constructor:()->
+        super 50, 50
+        @image = game.imageload("kira")
+        @flashPeriodFrm = game.fps #光ってる間の時間
+        @setInit()
+    setInit:()->
+        @x = Math.floor(Math.random() * game.width)
+        @y = Math.floor(Math.random() * game.height)
+        @randomPeriodFrm = Math.floor(Math.random() * 3 * game.fps) #次に光るまでの時間
+        @halfFrm = @randomPeriodFrm + Math.round(@flashPeriodFrm / 2)
+        @totalFrm = @randomPeriodFrm + @flashPeriodFrm
+        randomSize = Math.floor(Math.random() * 30) + 20
+        @scaleV = Math.floor((randomSize / 50) * 200 / @flashPeriodFrm) / 100 #1フレーム当たりに変わるサイズ
+        @opacityV = Math.floor((Math.random() * 50 + 50) * 2 / @flashPeriodFrm) / 100 #1フレームあたりに変わる透明度
+        @scaleX = 0
+        @scaleY = 0
+        @opacity = 0
+    onenterframe: (e) ->
+        unitAge = @age % @totalFrm
+        if unitAge < @randomPeriodFrm
+        else if unitAge < @halfFrm
+            @scaleX += @scaleV
+            @scaleY += @scaleV
+            @opacity += @opacityV
+        else if unitAge < @totalFrm
+            @scaleX -= @scaleV
+            @scaleY -= @scaleV
+            @opacity -= @opacityV
+            if @scaleX < 0
+                @scaleX = 0
+            if @scaleY < 0
+                @scaleY = 0
+            if @opacity < 0
+                @opacity = 0
+        else if unitAge is 0
+            @setInit()
+
+
 class appObject extends appSprite
     ###
     制約

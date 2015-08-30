@@ -4,6 +4,8 @@ class gpEffect extends appGroup
         @chance_effect = new chanceEffect()
         @fever_effect = new feverEffect()
         @fever_overlay = new feverOverlay()
+        @kirakira_effect = []
+        @kirakira_num = 40
 
     cutInSet:()->
         setting = game.slot_setting
@@ -19,7 +21,18 @@ class gpEffect extends appGroup
         @addChild(@fever_effect)
         @addChild(@fever_overlay)
         @fever_overlay.setInit()
+        @_setKirakiraEffect()
 
     feverEffectEnd:()->
         @removeChild(@fever_effect)
         @removeChild(@fever_overlay)
+        @_endKirakiraEffect()
+
+    _setKirakiraEffect:()->
+        for i in [1..@kirakira_num]
+            @kirakira_effect.push(new kirakiraEffect())
+            @addChild(@kirakira_effect[i-1])
+
+    _endKirakiraEffect:()->
+        for i in [1..@kirakira_num]
+            @removeChild(@kirakira_effect[i-1])

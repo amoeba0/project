@@ -209,7 +209,7 @@ class slotSetting extends appNode
     スロットを強制的に当たりにするかどうかを決める
     コンボ数 * 0.06 ％
     テンションMAXで+5補正
-    過去のフィーバー回数が少ないほど上方補正かける 0回:+6,1回:+4,2回:+2
+    過去のフィーバー回数が少ないほど上方補正かける 0回:+9,1回:+6,2回:+3
     最大値は20％
     フィーバー中は強制的に当たり
     @return boolean true:当たり
@@ -218,7 +218,7 @@ class slotSetting extends appNode
         result = false
         rate = Math.floor((game.combo * 0.06) + ((game.tension / @tension_max) * 5))
         if game.past_fever_num <= 2
-            rate += ((3 - game.past_fever_num)) * 2
+            rate += ((3 - game.past_fever_num)) * 3
         if rate > 20
             rate = 20
         if game.debug.half_slot_hit is true

@@ -62,3 +62,45 @@ class feverOverlay extends feverEffect
         if 1 < @opacity
             @opacity = 1
             @opacity_frm *= -1
+
+###
+キラキラ
+###
+class kirakiraEffect extends performanceEffect
+    constructor:()->
+        super 50, 50
+        @image = game.imageload("kira")
+        @flashPeriodFrm = game.fps #光ってる間の時間
+        @setInit()
+    setInit:()->
+        @x = Math.floor(Math.random() * game.width)
+        @y = Math.floor(Math.random() * game.height)
+        @randomPeriodFrm = Math.floor(Math.random() * 3 * game.fps) #次に光るまでの時間
+        @halfFrm = @randomPeriodFrm + Math.round(@flashPeriodFrm / 2)
+        @totalFrm = @randomPeriodFrm + @flashPeriodFrm
+        randomSize = Math.floor(Math.random() * 30) + 20
+        @scaleV = Math.floor((randomSize / 50) * 200 / @flashPeriodFrm) / 100 #1フレーム当たりに変わるサイズ
+        @opacityV = Math.floor((Math.random() * 50 + 50) * 2 / @flashPeriodFrm) / 100 #1フレームあたりに変わる透明度
+        @scaleX = 0
+        @scaleY = 0
+        @opacity = 0
+    onenterframe: (e) ->
+        unitAge = @age % @totalFrm
+        if unitAge < @randomPeriodFrm
+        else if unitAge < @halfFrm
+            @scaleX += @scaleV
+            @scaleY += @scaleV
+            @opacity += @opacityV
+        else if unitAge < @totalFrm
+            @scaleX -= @scaleV
+            @scaleY -= @scaleV
+            @opacity -= @opacityV
+            if @scaleX < 0
+                @scaleX = 0
+            if @scaleY < 0
+                @scaleY = 0
+            if @opacity < 0
+                @opacity = 0
+        else if unitAge is 0
+            @setInit()
+

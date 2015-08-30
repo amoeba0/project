@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betButton, betText, buttonHtml, buyItemButtonHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, effect, feverEffect, feverOverlay, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, itemBuyDialogCloseButton, itemBuyDialogHtml, itemUseDialogCloseButton, itemUseDialogHtml, jumpButton, leftButton, lowBetButton, mainScene, memberSetDialogCloseButton, memberSetDialogHtml, menuDialogHtml, moneyText, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemUseLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, setMemberButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, text, titleMainLayer, titleMenuButtonHtml, titleScene, useItemButtonHtml,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betButton, betText, buttonHtml, buyItemButtonHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, effect, feverEffect, feverOverlay, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, itemBuyDialogCloseButton, itemBuyDialogHtml, itemUseDialogCloseButton, itemUseDialogHtml, jumpButton, kirakiraEffect, leftButton, lowBetButton, mainScene, memberSetDialogCloseButton, memberSetDialogHtml, menuDialogHtml, moneyText, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemUseLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, setMemberButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, text, titleMainLayer, titleMenuButtonHtml, titleScene, useItemButtonHtml,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -512,6 +512,8 @@ gpEffect = (function(_super) {
     this.chance_effect = new chanceEffect();
     this.fever_effect = new feverEffect();
     this.fever_overlay = new feverOverlay();
+    this.kirakira_effect = [];
+    this.kirakira_num = 40;
   }
 
   gpEffect.prototype.cutInSet = function() {
@@ -532,12 +534,33 @@ gpEffect = (function(_super) {
   gpEffect.prototype.feverEffectSet = function() {
     this.addChild(this.fever_effect);
     this.addChild(this.fever_overlay);
-    return this.fever_overlay.setInit();
+    this.fever_overlay.setInit();
+    return this._setKirakiraEffect();
   };
 
   gpEffect.prototype.feverEffectEnd = function() {
     this.removeChild(this.fever_effect);
-    return this.removeChild(this.fever_overlay);
+    this.removeChild(this.fever_overlay);
+    return this._endKirakiraEffect();
+  };
+
+  gpEffect.prototype._setKirakiraEffect = function() {
+    var i, _i, _ref, _results;
+    _results = [];
+    for (i = _i = 1, _ref = this.kirakira_num; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+      this.kirakira_effect.push(new kirakiraEffect());
+      _results.push(this.addChild(this.kirakira_effect[i - 1]));
+    }
+    return _results;
+  };
+
+  gpEffect.prototype._endKirakiraEffect = function() {
+    var i, _i, _ref, _results;
+    _results = [];
+    for (i = _i = 1, _ref = this.kirakira_num; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+      _results.push(this.removeChild(this.kirakira_effect[i - 1]));
+    }
+    return _results;
   };
 
   return gpEffect;
@@ -2348,7 +2371,7 @@ slotSetting = (function(_super) {
   スロットを強制的に当たりにするかどうかを決める
   コンボ数 * 0.06 ％
   テンションMAXで+5補正
-  過去のフィーバー回数が少ないほど上方補正かける 0回:+6,1回:+4,2回:+2
+  過去のフィーバー回数が少ないほど上方補正かける 0回:+9,1回:+6,2回:+3
   最大値は20％
   フィーバー中は強制的に当たり
   @return boolean true:当たり
@@ -2359,7 +2382,7 @@ slotSetting = (function(_super) {
     result = false;
     rate = Math.floor((game.combo * 0.06) + ((game.tension / this.tension_max) * 5));
     if (game.past_fever_num <= 2) {
-      rate += (3 - game.past_fever_num) * 2;
+      rate += (3 - game.past_fever_num) * 3;
     }
     if (rate > 20) {
       rate = 20;
@@ -3157,6 +3180,67 @@ feverOverlay = (function(_super) {
   return feverOverlay;
 
 })(feverEffect);
+
+
+/*
+キラキラ
+ */
+
+kirakiraEffect = (function(_super) {
+  __extends(kirakiraEffect, _super);
+
+  function kirakiraEffect() {
+    kirakiraEffect.__super__.constructor.call(this, 50, 50);
+    this.image = game.imageload("kira");
+    this.flashPeriodFrm = game.fps;
+    this.setInit();
+  }
+
+  kirakiraEffect.prototype.setInit = function() {
+    var randomSize;
+    this.x = Math.floor(Math.random() * game.width);
+    this.y = Math.floor(Math.random() * game.height);
+    this.randomPeriodFrm = Math.floor(Math.random() * 3 * game.fps);
+    this.halfFrm = this.randomPeriodFrm + Math.round(this.flashPeriodFrm / 2);
+    this.totalFrm = this.randomPeriodFrm + this.flashPeriodFrm;
+    randomSize = Math.floor(Math.random() * 30) + 20;
+    this.scaleV = Math.floor((randomSize / 50) * 200 / this.flashPeriodFrm) / 100;
+    this.opacityV = Math.floor((Math.random() * 50 + 50) * 2 / this.flashPeriodFrm) / 100;
+    this.scaleX = 0;
+    this.scaleY = 0;
+    return this.opacity = 0;
+  };
+
+  kirakiraEffect.prototype.onenterframe = function(e) {
+    var unitAge;
+    unitAge = this.age % this.totalFrm;
+    if (unitAge < this.randomPeriodFrm) {
+
+    } else if (unitAge < this.halfFrm) {
+      this.scaleX += this.scaleV;
+      this.scaleY += this.scaleV;
+      return this.opacity += this.opacityV;
+    } else if (unitAge < this.totalFrm) {
+      this.scaleX -= this.scaleV;
+      this.scaleY -= this.scaleV;
+      this.opacity -= this.opacityV;
+      if (this.scaleX < 0) {
+        this.scaleX = 0;
+      }
+      if (this.scaleY < 0) {
+        this.scaleY = 0;
+      }
+      if (this.opacity < 0) {
+        return this.opacity = 0;
+      }
+    } else if (unitAge === 0) {
+      return this.setInit();
+    }
+  };
+
+  return kirakiraEffect;
+
+})(performanceEffect);
 
 appObject = (function(_super) {
   __extends(appObject, _super);
