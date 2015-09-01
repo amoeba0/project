@@ -117,6 +117,18 @@ class slotSetting extends appNode
                 'voice':['19_0', '19_1']
             }
         }
+        ###
+        ユニットに関する素材
+        20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
+        31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
+        ###
+        @unit_material_list = {
+            20:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            }
+        }
         #テンションの最大値
         @tension_max = 500
         #現在スロットに入るμ’ｓ番号
@@ -137,21 +149,21 @@ class slotSetting extends appNode
         if game.bet < 10
             val = 0.4
         else if game.bet < 50
-            val = 0.5
+            val = 0.45
         else if game.bet < 100
-            val = 0.6
+            val = 0.5
         else if game.bet < 500
-            val = 0.7
+            val = 0.55
         else if game.bet < 1000
-            val = 0.8
+            val = 0.6
         else if game.bet < 10000
-            val = 0.8 + Math.floor(game.bet / 1000) / 10
+            val = 0.6 + Math.floor(game.bet / 100) / 100
         else if game.bet < 100000
-            val = 1.7 + Math.floor(game.bet / 5000) / 10
+            val = 1.5 + Math.floor(game.bet / 1000) / 100
         else
-            val = 4
+            val = 3
         div = 1 + Math.floor(2 * game.tension / @tension_max) / 10
-        val = Math.floor(val * div * 10) / 10
+        val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
             div = Math.floor((game.combo - 100) / 20) / 10
             if 2 < div
@@ -402,3 +414,31 @@ class slotSetting extends appNode
             fixTime = 1
             randomTime = 15
         return fixTime + Math.floor(Math.random() * randomTime) / 10
+    ###
+    スロットの揃った目が全てμ’sなら役を判定して返します
+    メンバー:11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
+    @return role
+    ユニット(役):20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
+    31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
+    ###
+    getHitRole:(left, middle, right)->
+        role = 20
+        lille = [left, middle, right]
+        items = game.getDeduplicationList(lille)
+        items = game.sortAsc(items)
+        items = items.join(',')
+        switch items #重複除外、昇順、カンマ区切りの文字列になる
+            when '14,15,16' then role = 21
+            when '11,12,13' then role = 22
+            when '17,18,19' then role = 23
+            when '11,12,16' then role = 24
+            when '13,15,18' then role = 25
+            when '14,17,19' then role = 26
+            when '15,16,17' then role = 27
+            when '13,14,19' then role = 28
+            when '18,19'    then role = 31
+            when '11,15'    then role = 32
+            when '12,16'    then role = 33
+            when '14,17'    then role = 34
+            else role = 20
+        return role

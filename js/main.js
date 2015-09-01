@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betButton, betText, buttonHtml, buyItemButtonHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, effect, feverEffect, feverOverlay, gpEffect, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, itemBuyDialogCloseButton, itemBuyDialogHtml, itemUseDialogCloseButton, itemUseDialogHtml, jumpButton, kirakiraEffect, leftButton, lowBetButton, mainScene, memberSetDialogCloseButton, memberSetDialogHtml, menuDialogHtml, moneyText, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemUseLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, setMemberButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, text, titleMainLayer, titleMenuButtonHtml, titleScene, useItemButtonHtml,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, effect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, itemBuyDialogCloseButton, itemBuyDialogHtml, itemUseDialogCloseButton, itemUseDialogHtml, jumpButton, kirakiraEffect, leftButton, lowBetButton, mainScene, memberSetDialogCloseButton, memberSetDialogHtml, menuDialogHtml, moneyText, panoramaEffect, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemUseLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, setMemberButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleMainLayer, titleMenuButtonHtml, titleScene, useItemButtonHtml,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -145,6 +145,51 @@ appGame = (function(_super) {
       tmp_arr = [];
     }
     return $.extend(true, tmp_arr, target);
+  };
+
+
+  /*
+  配列から重複を除外したリストを返す
+   */
+
+  appGame.prototype.getDeduplicationList = function(arr) {
+    return arr.filter(function(x, i, self) {
+      return self.indexOf(x) === i;
+    });
+  };
+
+
+  /*
+  数値の昇順ソート
+   */
+
+  appGame.prototype.sortAsc = function(arr) {
+    return arr.sort(function(a, b) {
+      if (a < b) {
+        return -1;
+      }
+      if (a > b) {
+        return 1;
+      }
+      return 0;
+    });
+  };
+
+
+  /*
+  数値の降順ソート
+   */
+
+  appGame.prototype.sortDesc = function(arr) {
+    return arr.sort(function(a, b) {
+      if (a > b) {
+        return -1;
+      }
+      if (a < b) {
+        return 1;
+      }
+      return 0;
+    });
   };
 
   return appGame;
@@ -334,10 +379,11 @@ LoveliveGame = (function(_super) {
     LoveliveGame.__super__.constructor.call(this, this.width, this.height);
     this.debug = new Debug();
     this.slot_setting = new slotSetting();
+    this.test = new Test();
     this.width = 480;
     this.height = 720;
     this.fps = 24;
-    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira'];
+    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'];
     this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear'];
     this.keybind(90, 'z');
     this.keybind(88, 'x');
@@ -361,7 +407,11 @@ LoveliveGame = (function(_super) {
     this.title_scene = new titleScene();
     this.main_scene = new mainScene();
     this.pause_scene = new pauseScene();
-    if (this.debug.force_main_flg === true) {
+    if (this.test.test_exe_flg === true) {
+      this.test_scene = new testScene();
+      this.pushScene(this.test_scene);
+      return this.test.testExe();
+    } else if (this.debug.force_main_flg === true) {
       this.pushScene(this.main_scene);
       if (this.debug.force_pause_flg === true) {
         return this.pushScene(this.pause_scene);
@@ -572,15 +622,76 @@ gpPanorama = (function(_super) {
 
   function gpPanorama() {
     gpPanorama.__super__.constructor.apply(this, arguments);
-    this.back_panorama = new BackPanorama();
-    this.addChild(this.back_panorama);
-    this.front_panorama = new FrontPanorama();
-    this.addChild(this.front_panorama);
   }
 
   return gpPanorama;
 
 })(appGroup);
+
+gpBackPanorama = (function(_super) {
+  __extends(gpBackPanorama, _super);
+
+  function gpBackPanorama() {
+    gpBackPanorama.__super__.constructor.apply(this, arguments);
+    this.back_panorama = new BackPanorama();
+    this.big_kotori = new bigKotori();
+    this.now_back_effect_flg = false;
+    this.back_effect_rate = 100;
+    this.addChild(this.back_panorama);
+  }
+
+
+  /*
+  背景レイヤーのエフェクト表示を開始
+   */
+
+  gpBackPanorama.prototype.setBackEffect = function() {
+    var random;
+    if (game.fever === false && this.now_back_effect_flg === false) {
+      random = Math.floor(Math.random() * this.back_effect_rate);
+      if (random === 1) {
+        return this._setBigKotori();
+      }
+    }
+  };
+
+
+  /*
+  進撃のことりを設置
+   */
+
+  gpBackPanorama.prototype._setBigKotori = function() {
+    this.big_kotori.setInit();
+    this.addChild(this.big_kotori);
+    return this.now_back_effect_flg = true;
+  };
+
+
+  /*
+  進撃のことりを終了
+   */
+
+  gpBackPanorama.prototype.endBigKotori = function() {
+    this.removeChild(this.big_kotori);
+    return this.now_back_effect_flg = false;
+  };
+
+  return gpBackPanorama;
+
+})(gpPanorama);
+
+gpFrontPanorama = (function(_super) {
+  __extends(gpFrontPanorama, _super);
+
+  function gpFrontPanorama() {
+    gpFrontPanorama.__super__.constructor.apply(this, arguments);
+    this.front_panorama = new FrontPanorama();
+    this.addChild(this.front_panorama);
+  }
+
+  return gpFrontPanorama;
+
+})(gpPanorama);
 
 gpSlot = (function(_super) {
   __extends(gpSlot, _super);
@@ -598,6 +709,7 @@ gpSlot = (function(_super) {
     this.stopStartAge = 0;
     this.leftSlotEye = 0;
     this.feverSec = 0;
+    this.hit_role = 0;
     this.isForceSlotHit = false;
     this.slotSet();
     this.debugSlot();
@@ -690,18 +802,18 @@ gpSlot = (function(_super) {
 
 
   /*
-  スロットの当選判定
+  スロットの当選判定をして当たった時の処理を流す
    */
 
   gpSlot.prototype.slotHitTest = function() {
-    var hit_eye, member, prize_money, _ref;
-    if ((this.left_lille.lilleArray[this.left_lille.nowEye] === (_ref = this.middle_lille.lilleArray[this.middle_lille.nowEye]) && _ref === this.right_lille.lilleArray[this.right_lille.nowEye])) {
+    var member, prize_money;
+    if (this._isSlotHit() === true) {
       game.sePlay(this.slot_hit_se);
-      hit_eye = this.left_lille.lilleArray[this.left_lille.nowEye];
+      this.hit_role = this.left_lille.lilleArray[this.left_lille.nowEye];
       prize_money = game.slot_setting.calcPrizeMoney(this.middle_lille.lilleArray[this.middle_lille.nowEye]);
-      game.tensionSetValueSlotHit(prize_money, hit_eye);
-      this._feverStart(hit_eye);
-      if (hit_eye === 1) {
+      game.tensionSetValueSlotHit(prize_money, this.hit_role);
+      this._feverStart(this.hit_role);
+      if (this.hit_role === 1) {
         member = game.slot_setting.now_muse_num;
         this.slotAddMuse(member);
       } else {
@@ -711,6 +823,28 @@ gpSlot = (function(_super) {
         return this.endForceSlotHit();
       }
     }
+  };
+
+
+  /*
+  スロットの当選判定をする
+  true:３つとも全て同じ目、または、３つとも全てμ’s
+   */
+
+  gpSlot.prototype._isSlotHit = function() {
+    var hit_flg, left, middle, right;
+    left = this.left_lille.lilleArray[this.left_lille.nowEye];
+    middle = this.middle_lille.lilleArray[this.middle_lille.nowEye];
+    right = this.right_lille.lilleArray[this.right_lille.nowEye];
+    hit_flg = false;
+    if ((left === middle && middle === right)) {
+      hit_flg = true;
+      this.hit_role = left;
+    } else if (left > 10 && middle > 10 && right > 10) {
+      hit_flg = true;
+      this.hit_role = game.slot_setting.getHitRole(left, middle, right);
+    }
+    return hit_flg;
   };
 
 
@@ -738,15 +872,33 @@ gpSlot = (function(_super) {
    */
 
   gpSlot.prototype._feverBgmStart = function(hit_eye) {
-    var bgm, bgms, random;
-    bgms = game.slot_setting.muse_material_list[hit_eye]['bgm'];
-    random = Math.floor(Math.random() * bgms.length);
-    bgm = bgms[random];
+    var bgm;
+    bgm = this._getFeverBgm(hit_eye);
     this.feverSec = bgm['time'];
     this.fever_bgm = game.soundload('bgm/' + bgm['name']);
     game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (this.feverSec * game.fps)) / 100;
     game.fever_down_tension *= -1;
     return game.bgmPlay(this.fever_bgm, false);
+  };
+
+
+  /*
+  揃った目の役からフィーバーのBGMを返す
+   */
+
+  gpSlot.prototype._getFeverBgm = function(hit_role) {
+    var bgms, material, random;
+    if (hit_role <= 19) {
+      material = game.slot_setting.muse_material_list;
+    } else {
+      material = game.slot_setting.unit_material_list;
+    }
+    if (material[hit_role] === void 0) {
+      hit_role = 20;
+    }
+    bgms = material[hit_role]['bgm'];
+    random = Math.floor(Math.random() * bgms.length);
+    return bgms[random];
   };
 
 
@@ -1030,6 +1182,7 @@ stageFront = (function(_super) {
       this._catchFall();
       this.missItemFallSycleNow += 1;
       game.main_scene.gp_stage_back.returnMoneyFallStart();
+      game.main_scene.gp_back_panorama.setBackEffect();
       if (this.itemFallSec !== this.itemFallSecInit) {
         this.setItemFallFrm(this.itemFallSecInit);
       }
@@ -2036,7 +2189,7 @@ Debug = (function(_super) {
     this.force_insert_muse = false;
     this.force_slot_hit = false;
     this.half_slot_hit = false;
-    this.lille_array = [[11, 11, 11], [11, 11, 11], [11, 11, 11]];
+    this.lille_array = [[11, 12, 13], [14, 15, 16], [17, 18, 19]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = 0;
     this.fix_tention_slot_hit_flg = 200;
@@ -2256,6 +2409,22 @@ slotSetting = (function(_super) {
         'voice': ['19_0', '19_1']
       }
     };
+
+    /*
+    ユニットに関する素材
+    20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
+    31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
+     */
+    this.unit_material_list = {
+      20: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30
+          }
+        ]
+      }
+    };
     this.tension_max = 500;
     this.now_muse_num = 0;
     this.isForceSlotHit = false;
@@ -2274,22 +2443,22 @@ slotSetting = (function(_super) {
     if (game.bet < 10) {
       val = 0.4;
     } else if (game.bet < 50) {
-      val = 0.5;
+      val = 0.45;
     } else if (game.bet < 100) {
-      val = 0.6;
+      val = 0.5;
     } else if (game.bet < 500) {
-      val = 0.7;
+      val = 0.55;
     } else if (game.bet < 1000) {
-      val = 0.8;
+      val = 0.6;
     } else if (game.bet < 10000) {
-      val = 0.8 + Math.floor(game.bet / 1000) / 10;
+      val = 0.6 + Math.floor(game.bet / 100) / 100;
     } else if (game.bet < 100000) {
-      val = 1.7 + Math.floor(game.bet / 5000) / 10;
+      val = 1.5 + Math.floor(game.bet / 1000) / 100;
     } else {
-      val = 4;
+      val = 3;
     }
     div = 1 + Math.floor(2 * game.tension / this.tension_max) / 10;
-    val = Math.floor(val * div * 10) / 10;
+    val = Math.floor(val * div * 100) / 100;
     if (100 < game.combo) {
       div = Math.floor((game.combo - 100) / 20) / 10;
       if (2 < div) {
@@ -2625,7 +2794,112 @@ slotSetting = (function(_super) {
     return fixTime + Math.floor(Math.random() * randomTime) / 10;
   };
 
+
+  /*
+  スロットの揃った目が全てμ’sなら役を判定して返します
+  メンバー:11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
+  @return role
+  ユニット(役):20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
+  31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
+   */
+
+  slotSetting.prototype.getHitRole = function(left, middle, right) {
+    var items, lille, role;
+    role = 20;
+    lille = [left, middle, right];
+    items = game.getDeduplicationList(lille);
+    items = game.sortAsc(items);
+    items = items.join(',');
+    switch (items) {
+      case '14,15,16':
+        role = 21;
+        break;
+      case '11,12,13':
+        role = 22;
+        break;
+      case '17,18,19':
+        role = 23;
+        break;
+      case '11,12,16':
+        role = 24;
+        break;
+      case '13,15,18':
+        role = 25;
+        break;
+      case '14,17,19':
+        role = 26;
+        break;
+      case '15,16,17':
+        role = 27;
+        break;
+      case '13,14,19':
+        role = 28;
+        break;
+      case '18,19':
+        role = 31;
+        break;
+      case '11,15':
+        role = 32;
+        break;
+      case '12,16':
+        role = 33;
+        break;
+      case '14,17':
+        role = 34;
+        break;
+      default:
+        role = 20;
+    }
+    return role;
+  };
+
   return slotSetting;
+
+})(appNode);
+
+
+/*
+テストコード用
+ */
+
+Test = (function(_super) {
+  __extends(Test, _super);
+
+  function Test() {
+    Test.__super__.constructor.apply(this, arguments);
+    this.test_exe_flg = false;
+  }
+
+
+  /*
+  ここにゲーム呼び出し時に実行するテストを書く
+   */
+
+  Test.prototype.testExe = function() {
+    return this.testSetGravity();
+  };
+
+  Test.prototype.testGetHitRole = function() {
+    var result;
+    result = game.slot_setting.getHitRole(17, 17, 14);
+    return console.log(result);
+  };
+
+  Test.prototype.testSetGravity = function() {
+    var key, param, result, val, _results;
+    param = [1, 5, 10, 50, 100, 500, 1000, 2000];
+    _results = [];
+    for (key in param) {
+      val = param[key];
+      console.log('bet:' + val);
+      game.bet = val;
+      result = game.slot_setting.setGravity();
+      _results.push(console.log('gravity:' + result));
+    }
+    return _results;
+  };
+
+  return Test;
 
 })(appNode);
 
@@ -2659,8 +2933,10 @@ mainScene = (function(_super) {
   };
 
   mainScene.prototype.setGroup = function() {
-    this.gp_panorama = new gpPanorama();
-    this.addChild(this.gp_panorama);
+    this.gp_back_panorama = new gpBackPanorama();
+    this.addChild(this.gp_back_panorama);
+    this.gp_front_panorama = new gpFrontPanorama();
+    this.addChild(this.gp_front_panorama);
     this.gp_stage_back = new stageBack();
     this.addChild(this.gp_stage_back);
     this.gp_slot = new gpSlot();
@@ -2884,6 +3160,22 @@ pauseScene = (function(_super) {
   };
 
   return pauseScene;
+
+})(appScene);
+
+
+/*
+テスト用、空のシーン
+ */
+
+testScene = (function(_super) {
+  __extends(testScene, _super);
+
+  function testScene() {
+    testScene.__super__.constructor.apply(this, arguments);
+  }
+
+  return testScene;
 
 })(appScene);
 
@@ -3241,6 +3533,66 @@ kirakiraEffect = (function(_super) {
   return kirakiraEffect;
 
 })(performanceEffect);
+
+
+/*
+背景のレイヤーに表示するエフェクト
+ */
+
+panoramaEffect = (function(_super) {
+  __extends(panoramaEffect, _super);
+
+  function panoramaEffect(w, h) {
+    panoramaEffect.__super__.constructor.call(this, w, h);
+    this.x_init = 0;
+    this.y_init = game.height - Math.floor(310 / 2);
+  }
+
+  panoramaEffect.prototype.setInit = function() {
+    this.age = 0;
+    this.x = this.x_init;
+    return this.y = this.y_init;
+  };
+
+  return panoramaEffect;
+
+})(backGround);
+
+
+/*
+進撃のことり
+ */
+
+bigKotori = (function(_super) {
+  __extends(bigKotori, _super);
+
+  function bigKotori() {
+    bigKotori.__super__.constructor.call(this, 365, 360);
+    this.image = game.imageload('big-kotori');
+    this.x_init = -this.w;
+    this.move_sec = 20;
+    this.wait_sec = 20;
+    this.v = Math.floor(this.w * 10 / (this.move_sec * game.fps)) / 10;
+    this.wait_start_frm = this.move_sec * game.fps;
+    this.wait_end_frm = (this.move_sec + this.wait_sec) * game.fps;
+    this.move_end_frm = (this.move_sec * 2 + this.wait_sec) * game.fps;
+  }
+
+  bigKotori.prototype.onenterframe = function() {
+    if (0 <= this.age && this.age < this.wait_start_frm) {
+      this.x += this.v;
+      return this.y -= this.v;
+    } else if (this.wait_end_frm <= this.age && this.age < this.move_end_frm) {
+      this.x -= this.v;
+      return this.y += this.v;
+    } else if (this.age === this.move_end_frm) {
+      return game.main_scene.gp_back_panorama.endBigKotori();
+    }
+  };
+
+  return bigKotori;
+
+})(panoramaEffect);
 
 appObject = (function(_super) {
   __extends(appObject, _super);
@@ -4315,8 +4667,8 @@ controllerButton = (function(_super) {
 
   function controllerButton() {
     controllerButton.__super__.constructor.call(this, 50, 50);
-    this.color = "#aaa";
-    this.pushColor = "#555";
+    this.color = "#888";
+    this.pushColor = "#333";
     this.opacity = 0.4;
     this.x = 0;
     this.y = 660;

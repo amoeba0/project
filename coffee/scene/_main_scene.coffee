@@ -10,8 +10,10 @@ class mainScene extends appScene
     initial:()->
         @setGroup()
     setGroup:()->
-        @gp_panorama = new gpPanorama()
-        @addChild(@gp_panorama)
+        @gp_back_panorama = new gpBackPanorama()
+        @addChild(@gp_back_panorama)
+        @gp_front_panorama = new gpFrontPanorama()
+        @addChild(@gp_front_panorama)
         @gp_stage_back = new stageBack()
         @addChild(@gp_stage_back)
         @gp_slot = new gpSlot()

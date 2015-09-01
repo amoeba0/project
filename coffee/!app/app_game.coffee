@@ -80,3 +80,36 @@ class appGame extends Game
         else
             tmp_arr = []
         return $.extend(true, tmp_arr, target)
+
+    ###
+    配列から重複を除外したリストを返す
+    ###
+    getDeduplicationList:(arr)->
+        return arr.filter(
+            (x, i, self)->
+                return self.indexOf(x) == i
+        )
+    ###
+    数値の昇順ソート
+    ###
+    sortAsc:(arr)->
+        return arr.sort(
+            (a,b)->
+                if a < b
+                    return -1
+                if a > b
+                    return 1
+                return 0
+        )
+    ###
+    数値の降順ソート
+    ###
+    sortDesc:(arr)->
+        return arr.sort(
+            (a,b)->
+                if a > b
+                    return -1
+                if a < b
+                    return 1
+                return 0
+        )

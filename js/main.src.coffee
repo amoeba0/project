@@ -89,6 +89,38 @@ class appGame extends Game
             tmp_arr = []
         return $.extend(true, tmp_arr, target)
 
+    ###
+    配列から重複を除外したリストを返す
+    ###
+    getDeduplicationList:(arr)->
+        return arr.filter(
+            (x, i, self)->
+                return self.indexOf(x) == i
+        )
+    ###
+    数値の昇順ソート
+    ###
+    sortAsc:(arr)->
+        return arr.sort(
+            (a,b)->
+                if a < b
+                    return -1
+                if a > b
+                    return 1
+                return 0
+        )
+    ###
+    数値の降順ソート
+    ###
+    sortDesc:(arr)->
+        return arr.sort(
+            (a,b)->
+                if a > b
+                    return -1
+                if a < b
+                    return 1
+                return 0
+        )
 class appGroup extends Group
     constructor: () ->
         super
@@ -170,11 +202,12 @@ class LoveliveGame extends catchAndSlotGame
         super @width, @height
         @debug = new Debug()
         @slot_setting = new slotSetting()
+        @test = new Test()
         @width = 480
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
 
@@ -205,7 +238,11 @@ class LoveliveGame extends catchAndSlotGame
         @title_scene = new titleScene()
         @main_scene = new mainScene()
         @pause_scene = new pauseScene()
-        if @debug.force_main_flg is true
+        if @test.test_exe_flg is true
+            @test_scene = new testScene()
+            @pushScene(@test_scene)
+            @test.testExe()
+        else if @debug.force_main_flg is true
             @pushScene(@main_scene)
             if @debug.force_pause_flg is true
                 @pushScene(@pause_scene)
@@ -333,10 +370,42 @@ class gpEffect extends appGroup
         for i in [1..@kirakira_num]
             @removeChild(@kirakira_effect[i-1])
 class gpPanorama extends appGroup
+    constructor:()->
+        super
+
+class gpBackPanorama extends gpPanorama
     constructor: () ->
         super
         @back_panorama = new BackPanorama()
+        @big_kotori = new bigKotori()
+        @now_back_effect_flg = false #背景レイヤーのエフェクトを表示中ならtrue
+        @back_effect_rate = 100 #背景レイヤーのエフェクトが表示される確率
         @addChild(@back_panorama)
+    ###
+    背景レイヤーのエフェクト表示を開始
+    ###
+    setBackEffect:()->
+        if game.fever is false && @now_back_effect_flg is false
+            random = Math.floor(Math.random() * @back_effect_rate)
+            if random is 1
+                @_setBigKotori()
+    ###
+    進撃のことりを設置
+    ###
+    _setBigKotori:()->
+        @big_kotori.setInit()
+        @addChild(@big_kotori)
+        @now_back_effect_flg = true
+    ###
+    進撃のことりを終了
+    ###
+    endBigKotori:()->
+        @removeChild(@big_kotori)
+        @now_back_effect_flg = false
+
+class gpFrontPanorama extends gpPanorama
+    constructor:()->
+        super
         @front_panorama = new FrontPanorama()
         @addChild(@front_panorama)
 class gpSlot extends appGroup
@@ -353,6 +422,7 @@ class gpSlot extends appGroup
         @stopStartAge = 0 #スロットの停止が開始したフレーム
         @leftSlotEye = 0 #左のスロットが当たった目
         @feverSec = 0 #フィーバーの時間
+        @hit_role = 0 #スロットが揃った目の役
         @isForceSlotHit = false
         @slotSet()
         @debugSlot()
@@ -417,22 +487,39 @@ class gpSlot extends appGroup
 
 
     ###
-    スロットの当選判定
+    スロットの当選判定をして当たった時の処理を流す
     ###
     slotHitTest: () ->
-        if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
+        if @_isSlotHit() is true
             game.sePlay(@slot_hit_se)
-            hit_eye = @left_lille.lilleArray[@left_lille.nowEye]
+            @hit_role = @left_lille.lilleArray[@left_lille.nowEye]
             prize_money = game.slot_setting.calcPrizeMoney(@middle_lille.lilleArray[@middle_lille.nowEye])
-            game.tensionSetValueSlotHit(prize_money, hit_eye)
-            @_feverStart(hit_eye)
-            if hit_eye is 1
+            game.tensionSetValueSlotHit(prize_money, @hit_role)
+            @_feverStart(@hit_role)
+            if @hit_role is 1
                 member = game.slot_setting.now_muse_num
                 @slotAddMuse(member)
             else
                 game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
             if game.slot_setting.isForceSlotHit is true
                 @endForceSlotHit()
+
+    ###
+    スロットの当選判定をする
+    true:３つとも全て同じ目、または、３つとも全てμ’s
+    ###
+    _isSlotHit:()->
+        left = @left_lille.lilleArray[@left_lille.nowEye]
+        middle = @middle_lille.lilleArray[@middle_lille.nowEye]
+        right = @right_lille.lilleArray[@right_lille.nowEye]
+        hit_flg = false
+        if left is middle is right
+            hit_flg = true
+            @hit_role = left
+        else if left > 10 && middle > 10 && right > 10
+            hit_flg = true
+            @hit_role = game.slot_setting.getHitRole(left, middle, right)
+        return hit_flg
 
     ###
     フィーバーを開始する
@@ -453,16 +540,26 @@ class gpSlot extends appGroup
     フィーバー中のBGMを開始する
     ###
     _feverBgmStart:(hit_eye)->
-        bgms = game.slot_setting.muse_material_list[hit_eye]['bgm']
-        random = Math.floor(Math.random() * bgms.length)
-        bgm = bgms[random]
+        bgm = @_getFeverBgm(hit_eye)
         @feverSec = bgm['time']
         @fever_bgm = game.soundload('bgm/'+bgm['name'])
         game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (@feverSec * game.fps)) / 100
         game.fever_down_tension *= -1
         game.bgmPlay(@fever_bgm, false)
 
-
+    ###
+    揃った目の役からフィーバーのBGMを返す
+    ###
+    _getFeverBgm:(hit_role)->
+        if hit_role <= 19
+            material = game.slot_setting.muse_material_list
+        else
+            material = game.slot_setting.unit_material_list
+        if material[hit_role] is undefined
+            hit_role = 20
+        bgms = material[hit_role]['bgm']
+        random = Math.floor(Math.random() * bgms.length)
+        return bgms[random]
 
     ###
     スロットマシンを画面に設置する
@@ -651,6 +748,7 @@ class stageFront extends gpStage
             @_catchFall()
             @missItemFallSycleNow += 1
             game.main_scene.gp_stage_back.returnMoneyFallStart()
+            game.main_scene.gp_back_panorama.setBackEffect()
             if @itemFallSec != @itemFallSecInit
                 @setItemFallFrm(@itemFallSecInit)
         if @missItemFallSycleNow is @missItemFallSycle && @age % @itemFallFrm is @itemFallFrm / 2
@@ -1261,9 +1359,9 @@ class Debug extends appNode
         @half_slot_hit = false
         #デバッグ用リール配列
         @lille_array = [
-            [11, 11, 11],
-            [11, 11, 11],
-            [11, 11, 11]
+            [11, 12, 13],
+            [14, 15, 16],
+            [17, 18, 19]
         ]
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
@@ -1402,6 +1500,18 @@ class slotSetting extends appNode
                 'voice':['19_0', '19_1']
             }
         }
+        ###
+        ユニットに関する素材
+        20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
+        31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
+        ###
+        @unit_material_list = {
+            20:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            }
+        }
         #テンションの最大値
         @tension_max = 500
         #現在スロットに入るμ’ｓ番号
@@ -1422,21 +1532,21 @@ class slotSetting extends appNode
         if game.bet < 10
             val = 0.4
         else if game.bet < 50
-            val = 0.5
+            val = 0.45
         else if game.bet < 100
-            val = 0.6
+            val = 0.5
         else if game.bet < 500
-            val = 0.7
+            val = 0.55
         else if game.bet < 1000
-            val = 0.8
+            val = 0.6
         else if game.bet < 10000
-            val = 0.8 + Math.floor(game.bet / 1000) / 10
+            val = 0.6 + Math.floor(game.bet / 100) / 100
         else if game.bet < 100000
-            val = 1.7 + Math.floor(game.bet / 5000) / 10
+            val = 1.5 + Math.floor(game.bet / 1000) / 100
         else
-            val = 4
+            val = 3
         div = 1 + Math.floor(2 * game.tension / @tension_max) / 10
-        val = Math.floor(val * div * 10) / 10
+        val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
             div = Math.floor((game.combo - 100) / 20) / 10
             if 2 < div
@@ -1687,6 +1797,61 @@ class slotSetting extends appNode
             fixTime = 1
             randomTime = 15
         return fixTime + Math.floor(Math.random() * randomTime) / 10
+    ###
+    スロットの揃った目が全てμ’sなら役を判定して返します
+    メンバー:11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
+    @return role
+    ユニット(役):20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
+    31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
+    ###
+    getHitRole:(left, middle, right)->
+        role = 20
+        lille = [left, middle, right]
+        items = game.getDeduplicationList(lille)
+        items = game.sortAsc(items)
+        items = items.join(',')
+        switch items #重複除外、昇順、カンマ区切りの文字列になる
+            when '14,15,16' then role = 21
+            when '11,12,13' then role = 22
+            when '17,18,19' then role = 23
+            when '11,12,16' then role = 24
+            when '13,15,18' then role = 25
+            when '14,17,19' then role = 26
+            when '15,16,17' then role = 27
+            when '13,14,19' then role = 28
+            when '18,19'    then role = 31
+            when '11,15'    then role = 32
+            when '12,16'    then role = 33
+            when '14,17'    then role = 34
+            else role = 20
+        return role
+###
+テストコード用
+###
+class Test extends appNode
+    constructor: () ->
+        super
+        @test_exe_flg = false #テスト実行フラグ、trueだとゲーム呼び出し時にテスト関数を走らせる
+    ###
+    ここにゲーム呼び出し時に実行するテストを書く
+    ###
+    testExe:()->
+        #@testGetHitRole()
+        @testSetGravity()
+
+    #以下、テスト用関数
+
+    testGetHitRole:()->
+        result = game.slot_setting.getHitRole(17, 17, 14)
+        console.log(result)
+
+    testSetGravity:()->
+        param = [1, 5, 10, 50, 100, 500, 1000, 2000]
+        for key, val of param
+            console.log('bet:'+val)
+            game.bet = val
+            result = game.slot_setting.setGravity()
+            console.log('gravity:'+result)
 class mainScene extends appScene
     constructor:()->
         super
@@ -1699,8 +1864,10 @@ class mainScene extends appScene
     initial:()->
         @setGroup()
     setGroup:()->
-        @gp_panorama = new gpPanorama()
-        @addChild(@gp_panorama)
+        @gp_back_panorama = new gpBackPanorama()
+        @addChild(@gp_back_panorama)
+        @gp_front_panorama = new gpFrontPanorama()
+        @addChild(@gp_front_panorama)
         @gp_stage_back = new stageBack()
         @addChild(@gp_stage_back)
         @gp_slot = new gpSlot()
@@ -1842,6 +2009,12 @@ class pauseScene extends appScene
         }
         for key, val of saveData
             window.localStorage.setItem(key, val)
+###
+テスト用、空のシーン
+###
+class testScene extends appScene
+    constructor: () ->
+        super
 class titleScene extends appScene
     constructor: () ->
         super
@@ -2038,6 +2211,41 @@ class kirakiraEffect extends performanceEffect
         else if unitAge is 0
             @setInit()
 
+###
+背景のレイヤーに表示するエフェクト
+###
+class panoramaEffect extends backGround
+    constructor:(w, h)->
+        super w,h
+        @x_init = 0
+        @y_init = game.height - Math.floor(310 / 2)
+    setInit:()->
+        @age = 0
+        @x = @x_init
+        @y = @y_init
+###
+進撃のことり
+###
+class bigKotori extends panoramaEffect
+    constructor:()->
+        super 365, 360
+        @image = game.imageload('big-kotori')
+        @x_init = -@w
+        @move_sec = 20
+        @wait_sec = 20
+        @v = Math.floor(@w * 10 / (@move_sec * game.fps)) / 10
+        @wait_start_frm = @move_sec * game.fps
+        @wait_end_frm = (@move_sec + @wait_sec) * game.fps
+        @move_end_frm = (@move_sec * 2 + @wait_sec) * game.fps
+    onenterframe:()->
+        if 0 <= @age && @age < @wait_start_frm
+            @x += @v
+            @y -= @v
+        else if @wait_end_frm <= @age && @age < @move_end_frm
+            @x -= @v
+            @y += @v
+        else if @age is @move_end_frm
+            game.main_scene.gp_back_panorama.endBigKotori()
 
 class appObject extends appSprite
     ###
@@ -2710,8 +2918,8 @@ class pauseButton extends Button
 class controllerButton extends Button
     constructor: () ->
         super 50, 50
-        @color = "#aaa"
-        @pushColor = "#555"
+        @color = "#888"
+        @pushColor = "#333"
         @opacity = 0.4
         @x = 0
         @y = 660

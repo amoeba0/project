@@ -12,6 +12,7 @@ class gpSlot extends appGroup
         @stopStartAge = 0 #スロットの停止が開始したフレーム
         @leftSlotEye = 0 #左のスロットが当たった目
         @feverSec = 0 #フィーバーの時間
+        @hit_role = 0 #スロットが揃った目の役
         @isForceSlotHit = false
         @slotSet()
         @debugSlot()
@@ -76,22 +77,39 @@ class gpSlot extends appGroup
 
 
     ###
-    スロットの当選判定
+    スロットの当選判定をして当たった時の処理を流す
     ###
     slotHitTest: () ->
-        if @left_lille.lilleArray[@left_lille.nowEye] is @middle_lille.lilleArray[@middle_lille.nowEye] is @right_lille.lilleArray[@right_lille.nowEye]
+        if @_isSlotHit() is true
             game.sePlay(@slot_hit_se)
-            hit_eye = @left_lille.lilleArray[@left_lille.nowEye]
+            @hit_role = @left_lille.lilleArray[@left_lille.nowEye]
             prize_money = game.slot_setting.calcPrizeMoney(@middle_lille.lilleArray[@middle_lille.nowEye])
-            game.tensionSetValueSlotHit(prize_money, hit_eye)
-            @_feverStart(hit_eye)
-            if hit_eye is 1
+            game.tensionSetValueSlotHit(prize_money, @hit_role)
+            @_feverStart(@hit_role)
+            if @hit_role is 1
                 member = game.slot_setting.now_muse_num
                 @slotAddMuse(member)
             else
                 game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
             if game.slot_setting.isForceSlotHit is true
                 @endForceSlotHit()
+
+    ###
+    スロットの当選判定をする
+    true:３つとも全て同じ目、または、３つとも全てμ’s
+    ###
+    _isSlotHit:()->
+        left = @left_lille.lilleArray[@left_lille.nowEye]
+        middle = @middle_lille.lilleArray[@middle_lille.nowEye]
+        right = @right_lille.lilleArray[@right_lille.nowEye]
+        hit_flg = false
+        if left is middle is right
+            hit_flg = true
+            @hit_role = left
+        else if left > 10 && middle > 10 && right > 10
+            hit_flg = true
+            @hit_role = game.slot_setting.getHitRole(left, middle, right)
+        return hit_flg
 
     ###
     フィーバーを開始する
@@ -112,16 +130,26 @@ class gpSlot extends appGroup
     フィーバー中のBGMを開始する
     ###
     _feverBgmStart:(hit_eye)->
-        bgms = game.slot_setting.muse_material_list[hit_eye]['bgm']
-        random = Math.floor(Math.random() * bgms.length)
-        bgm = bgms[random]
+        bgm = @_getFeverBgm(hit_eye)
         @feverSec = bgm['time']
         @fever_bgm = game.soundload('bgm/'+bgm['name'])
         game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (@feverSec * game.fps)) / 100
         game.fever_down_tension *= -1
         game.bgmPlay(@fever_bgm, false)
 
-
+    ###
+    揃った目の役からフィーバーのBGMを返す
+    ###
+    _getFeverBgm:(hit_role)->
+        if hit_role <= 19
+            material = game.slot_setting.muse_material_list
+        else
+            material = game.slot_setting.unit_material_list
+        if material[hit_role] is undefined
+            hit_role = 20
+        bgms = material[hit_role]['bgm']
+        random = Math.floor(Math.random() * bgms.length)
+        return bgms[random]
 
     ###
     スロットマシンを画面に設置する

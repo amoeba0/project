@@ -104,3 +104,38 @@ class kirakiraEffect extends performanceEffect
         else if unitAge is 0
             @setInit()
 
+###
+背景のレイヤーに表示するエフェクト
+###
+class panoramaEffect extends backGround
+    constructor:(w, h)->
+        super w,h
+        @x_init = 0
+        @y_init = game.height - Math.floor(310 / 2)
+    setInit:()->
+        @age = 0
+        @x = @x_init
+        @y = @y_init
+###
+進撃のことり
+###
+class bigKotori extends panoramaEffect
+    constructor:()->
+        super 365, 360
+        @image = game.imageload('big-kotori')
+        @x_init = -@w
+        @move_sec = 20
+        @wait_sec = 20
+        @v = Math.floor(@w * 10 / (@move_sec * game.fps)) / 10
+        @wait_start_frm = @move_sec * game.fps
+        @wait_end_frm = (@move_sec + @wait_sec) * game.fps
+        @move_end_frm = (@move_sec * 2 + @wait_sec) * game.fps
+    onenterframe:()->
+        if 0 <= @age && @age < @wait_start_frm
+            @x += @v
+            @y -= @v
+        else if @wait_end_frm <= @age && @age < @move_end_frm
+            @x -= @v
+            @y += @v
+        else if @age is @move_end_frm
+            game.main_scene.gp_back_panorama.endBigKotori()

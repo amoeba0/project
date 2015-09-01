@@ -51,6 +51,7 @@ class stageFront extends gpStage
             @_catchFall()
             @missItemFallSycleNow += 1
             game.main_scene.gp_stage_back.returnMoneyFallStart()
+            game.main_scene.gp_back_panorama.setBackEffect()
             if @itemFallSec != @itemFallSecInit
                 @setItemFallFrm(@itemFallSecInit)
         if @missItemFallSycleNow is @missItemFallSycle && @age % @itemFallFrm is @itemFallFrm / 2

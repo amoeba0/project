@@ -7,11 +7,12 @@ class LoveliveGame extends catchAndSlotGame
         super @width, @height
         @debug = new Debug()
         @slot_setting = new slotSetting()
+        @test = new Test()
         @width = 480
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
 
@@ -42,7 +43,11 @@ class LoveliveGame extends catchAndSlotGame
         @title_scene = new titleScene()
         @main_scene = new mainScene()
         @pause_scene = new pauseScene()
-        if @debug.force_main_flg is true
+        if @test.test_exe_flg is true
+            @test_scene = new testScene()
+            @pushScene(@test_scene)
+            @test.testExe()
+        else if @debug.force_main_flg is true
             @pushScene(@main_scene)
             if @debug.force_pause_flg is true
                 @pushScene(@pause_scene)

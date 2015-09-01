@@ -21,8 +21,8 @@ class pauseButton extends Button
 class controllerButton extends Button
     constructor: () ->
         super 50, 50
-        @color = "#aaa"
-        @pushColor = "#555"
+        @color = "#888"
+        @pushColor = "#333"
         @opacity = 0.4
         @x = 0
         @y = 660
