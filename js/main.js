@@ -2189,7 +2189,7 @@ Debug = (function(_super) {
     this.force_insert_muse = false;
     this.force_slot_hit = false;
     this.half_slot_hit = false;
-    this.lille_array = [[11, 12, 13], [14, 15, 16], [17, 18, 19]];
+    this.lille_array = [[1, 1, 1], [1, 1, 1], [1, 1, 1]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = 0;
     this.fix_tention_slot_hit_flg = 200;
@@ -2248,6 +2248,7 @@ slotSetting = (function(_super) {
     11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
     direction:キャラクターの向き、left or right
     カットインの画像サイズ、頭の位置で570px
+    頭の上に余白がある場合の高さ計算式：(570/(元画像高さ-元画像頭のY座標))*元画像高さ
      */
     this.muse_material_list = {
       11: {
@@ -2256,6 +2257,11 @@ slotSetting = (function(_super) {
             'name': '11_0',
             'width': 360,
             'height': 570,
+            'direction': 'left'
+          }, {
+            'name': '11_1',
+            'width': 730,
+            'height': 662,
             'direction': 'left'
           }
         ],
@@ -2274,6 +2280,11 @@ slotSetting = (function(_super) {
             'width': 510,
             'height': 728,
             'direction': 'left'
+          }, {
+            'name': '12_1',
+            'width': 640,
+            'height': 648,
+            'direction': 'right'
           }
         ],
         'bgm': [
@@ -2290,6 +2301,11 @@ slotSetting = (function(_super) {
             'name': '13_0',
             'width': 570,
             'height': 634,
+            'direction': 'left'
+          }, {
+            'name': '13_1',
+            'width': 408,
+            'height': 570,
             'direction': 'left'
           }
         ],
@@ -2308,6 +2324,11 @@ slotSetting = (function(_super) {
             'width': 476,
             'height': 648,
             'direction': 'left'
+          }, {
+            'name': '14_1',
+            'width': 650,
+            'height': 570,
+            'direction': 'right'
           }
         ],
         'bgm': [
@@ -2347,6 +2368,11 @@ slotSetting = (function(_super) {
             'width': 438,
             'height': 570,
             'direction': 'right'
+          }, {
+            'name': '16_1',
+            'width': 580,
+            'height': 644,
+            'direction': 'left'
           }
         ],
         'bgm': [
@@ -2363,6 +2389,11 @@ slotSetting = (function(_super) {
             'name': '17_0',
             'width': 465,
             'height': 705,
+            'direction': 'left'
+          }, {
+            'name': '17_1',
+            'width': 361,
+            'height': 570,
             'direction': 'left'
           }
         ],
@@ -2381,6 +2412,11 @@ slotSetting = (function(_super) {
             'width': 599,
             'height': 606,
             'direction': 'right'
+          }, {
+            'name': '18_1',
+            'width': 380,
+            'height': 675,
+            'direction': 'left'
           }
         ],
         'bgm': [
@@ -2398,6 +2434,11 @@ slotSetting = (function(_super) {
             'width': 460,
             'height': 570,
             'direction': 'left'
+          }, {
+            'name': '19_1',
+            'width': 670,
+            'height': 650,
+            'direction': 'right'
           }
         ],
         'bgm': [

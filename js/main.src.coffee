@@ -1359,9 +1359,9 @@ class Debug extends appNode
         @half_slot_hit = false
         #デバッグ用リール配列
         @lille_array = [
-            [11, 12, 13],
-            [14, 15, 16],
-            [17, 18, 19]
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]
         ]
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
@@ -1415,11 +1415,13 @@ class slotSetting extends appNode
         11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
         direction:キャラクターの向き、left or right
         カットインの画像サイズ、頭の位置で570px
+        頭の上に余白がある場合の高さ計算式：(570/(元画像高さ-元画像頭のY座標))*元画像高さ
         ###
         @muse_material_list = {
             11:{
                 'cut_in':[
-                    {'name':'11_0', 'width':360, 'height':570, 'direction':'left'}
+                    {'name':'11_0', 'width':360, 'height':570, 'direction':'left'},
+                    {'name':'11_1', 'width':730, 'height':662, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'yumenaki', 'time':107}
@@ -1428,7 +1430,8 @@ class slotSetting extends appNode
             },
             12:{
                 'cut_in':[
-                    {'name':'12_0', 'width':510, 'height':728, 'direction':'left'}
+                    {'name':'12_0', 'width':510, 'height':728, 'direction':'left'},
+                    {'name':'12_1', 'width':640, 'height':648, 'direction':'right'}
                 ],
                 'bgm':[
                     {'name':'blueberry', 'time':98}
@@ -1437,7 +1440,8 @@ class slotSetting extends appNode
             },
             13:{
                 'cut_in':[
-                    {'name':'13_0', 'width':570, 'height':634, 'direction':'left'}
+                    {'name':'13_0', 'width':570, 'height':634, 'direction':'left'},
+                    {'name':'13_1', 'width':408, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'reason', 'time':94}
@@ -1446,7 +1450,8 @@ class slotSetting extends appNode
             },
             14:{
                 'cut_in':[
-                    {'name':'14_0', 'width':476, 'height':648, 'direction':'left'}
+                    {'name':'14_0', 'width':476, 'height':648, 'direction':'left'},
+                    {'name':'14_1', 'width':650, 'height':570, 'direction':'right'}
                 ],
                 'bgm':[
                     {'name':'daring', 'time':91}
@@ -1465,7 +1470,8 @@ class slotSetting extends appNode
             },
             16:{
                 'cut_in':[
-                    {'name':'16_0', 'width':438, 'height':570, 'direction':'right'}
+                    {'name':'16_0', 'width':438, 'height':570, 'direction':'right'},
+                    {'name':'16_1', 'width':580, 'height':644, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'nawatobi', 'time':164}
@@ -1474,7 +1480,8 @@ class slotSetting extends appNode
             },
             17:{
                 'cut_in':[
-                    {'name':'17_0', 'width':465, 'height':705, 'direction':'left'}
+                    {'name':'17_0', 'width':465, 'height':705, 'direction':'left'},
+                    {'name':'17_1', 'width':361, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'mahoutukai', 'time':105}
@@ -1483,7 +1490,8 @@ class slotSetting extends appNode
             },
             18:{
                 'cut_in':[
-                    {'name':'18_0', 'width':599, 'height':606, 'direction':'right'}
+                    {'name':'18_0', 'width':599, 'height':606, 'direction':'right'},
+                    {'name':'18_1', 'width':380, 'height':675, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'junai', 'time':127}
@@ -1492,7 +1500,8 @@ class slotSetting extends appNode
             },
             19:{
                 'cut_in':[
-                    {'name':'19_0', 'width':460, 'height':570, 'direction':'left'}
+                    {'name':'19_0', 'width':460, 'height':570, 'direction':'left'},
+                    {'name':'19_1', 'width':670, 'height':650, 'direction':'right'}
                 ],
                 'bgm':[
                     {'name':'arihureta', 'time':93}
@@ -1588,7 +1597,7 @@ class slotSetting extends appNode
                 remain.push(full[key])
         random = Math.floor(Math.random() * remain.length)
         member = remain[random]
-        #member = 16
+        #member = 11
         @now_muse_num = member
         if @prev_muse.indexOf(member) is -1
             @prev_muse.push(member)
