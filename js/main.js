@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseDialogHtml, baseOkButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, effect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, itemBuyDialogCloseButton, itemBuyDialogHtml, itemUseDialogCloseButton, itemUseDialogHtml, jumpButton, kirakiraEffect, leftButton, lowBetButton, mainScene, memberSetDialogCloseButton, memberSetDialogHtml, menuDialogHtml, moneyText, panoramaEffect, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemUseLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, setMemberButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleMainLayer, titleMenuButtonHtml, titleScene, useItemButtonHtml,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, imageHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseDialogCloseButton, itemUseDialogHtml, jumpButton, kirakiraEffect, leftButton, lowBetButton, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, menuDialogHtml, modal, moneyText, panoramaEffect, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setMemberButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, useItemButtonHtml, useItemHtml, useMemberHtml,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -14,6 +14,7 @@ appDomLayer = (function(_super) {
 
   function appDomLayer() {
     appDomLayer.__super__.constructor.apply(this, arguments);
+    this.modal = new modal();
   }
 
   return appDomLayer;
@@ -271,14 +272,95 @@ pauseItemBuyLayer = (function(_super) {
   __extends(pauseItemBuyLayer, _super);
 
   function pauseItemBuyLayer() {
+    var i, _i, _j;
     pauseItemBuyLayer.__super__.constructor.apply(this, arguments);
     this.dialog = new itemBuyDialogHtml();
     this.close_button = new itemBuyDialogCloseButton();
+    this.addChild(this.modal);
     this.addChild(this.dialog);
     this.addChild(this.close_button);
+    this.item_list = {};
+    for (i = _i = 1; _i <= 9; i = ++_i) {
+      this.item_list[i] = new buyItemHtml(i);
+    }
+    this.member_list = {};
+    for (i = _j = 11; _j <= 19; i = ++_j) {
+      this.member_list[i] = new buyMemberHtml(i);
+    }
+    this.setItemList();
+    this.item_title = new itemItemBuyDiscription();
+    this.addChild(this.item_title);
+    this.member_title = new memberItemBuyDiscription();
+    this.addChild(this.member_title);
   }
 
+  pauseItemBuyLayer.prototype.setItemList = function() {
+    var item_key, item_val, member_key, member_val, _ref, _ref1, _results;
+    _ref = this.item_list;
+    for (item_key in _ref) {
+      item_val = _ref[item_key];
+      this.addChild(item_val);
+      item_val.setPosition();
+    }
+    _ref1 = this.member_list;
+    _results = [];
+    for (member_key in _ref1) {
+      member_val = _ref1[member_key];
+      this.addChild(member_val);
+      _results.push(member_val.setPosition());
+    }
+    return _results;
+  };
+
   return pauseItemBuyLayer;
+
+})(appDomLayer);
+
+pauseItemBuySelectLayer = (function(_super) {
+  __extends(pauseItemBuySelectLayer, _super);
+
+  function pauseItemBuySelectLayer() {
+    pauseItemBuySelectLayer.__super__.constructor.apply(this, arguments);
+    this.dialog = new itemBuySelectDialogHtml();
+    this.cancel_button = new itemBuyCancelButtonHtml();
+    this.item_name = new itemNameDiscription();
+    this.item_image = new selectItemImage();
+    this.item_discription = new itemDiscription();
+    this.addChild(this.modal);
+    this.addChild(this.dialog);
+    this.addChild(this.item_image);
+    this.addChild(this.item_name);
+    this.addChild(this.item_discription);
+    this.addChild(this.cancel_button);
+  }
+
+  pauseItemBuySelectLayer.prototype.setSelectItem = function(kind) {
+    var discription, item_options;
+    item_options = game.slot_setting.item_list[kind];
+    if (item_options === void 0) {
+      item_options = game.slot_setting.item_list[0];
+    }
+    this.item_name.setText(item_options.name);
+    this.item_image.setImage(item_options.image);
+    discription = this._setDiscription(item_options);
+    return this.item_discription.setText(discription);
+  };
+
+  pauseItemBuySelectLayer.prototype._setDiscription = function(item_options) {
+    var text;
+    text = '効果：' + item_options.discription;
+    if (item_options.durationSec !== void 0) {
+      text += '<br>持続時間：' + item_options.durationSec + '秒';
+    }
+    if (item_options.condFunc() === true) {
+      text += '<br>値段：' + item_options.price + '円';
+    } else {
+      text += '<br>出現条件：' + item_options.conditoin;
+    }
+    return text;
+  };
+
+  return pauseItemBuySelectLayer;
 
 })(appDomLayer);
 
@@ -289,6 +371,7 @@ pauseItemUseLayer = (function(_super) {
     pauseItemUseLayer.__super__.constructor.apply(this, arguments);
     this.dialog = new itemUseDialogHtml();
     this.close_button = new itemUseDialogCloseButton();
+    this.addChild(this.modal);
     this.addChild(this.dialog);
     this.addChild(this.close_button);
   }
@@ -325,6 +408,7 @@ pauseMemberSetLayer = (function(_super) {
     pauseMemberSetLayer.__super__.constructor.apply(this, arguments);
     this.dialog = new memberSetDialogHtml();
     this.close_button = new memberSetDialogCloseButton();
+    this.addChild(this.modal);
     this.addChild(this.dialog);
     this.addChild(this.close_button);
   }
@@ -338,6 +422,7 @@ pauseSaveLayer = (function(_super) {
 
   function pauseSaveLayer() {
     pauseSaveLayer.__super__.constructor.apply(this, arguments);
+    this.addChild(this.modal);
     this.dialog = new saveDialogHtml();
     this.addChild(this.dialog);
     this.ok_button = new saveOkButtonHtml();
@@ -377,6 +462,7 @@ LoveliveGame = (function(_super) {
 
   function LoveliveGame() {
     LoveliveGame.__super__.constructor.call(this, this.width, this.height);
+    this.local_storage = window.localStorage;
     this.debug = new Debug();
     this.slot_setting = new slotSetting();
     this.test = new Test();
@@ -411,13 +497,16 @@ LoveliveGame = (function(_super) {
       this.test_scene = new testScene();
       this.pushScene(this.test_scene);
       return this.test.testExe();
-    } else if (this.debug.force_main_flg === true) {
-      this.pushScene(this.main_scene);
-      if (this.debug.force_pause_flg === true) {
-        return this.pushScene(this.pause_scene);
-      }
     } else {
-      return this.pushScene(this.title_scene);
+      this.loadGame();
+      if (this.debug.force_main_flg === true) {
+        this.pushScene(this.main_scene);
+        if (this.debug.force_pause_flg === true) {
+          return this.pushScene(this.pause_scene);
+        }
+      } else {
+        return this.pushScene(this.title_scene);
+      }
     }
   };
 
@@ -537,17 +626,96 @@ LoveliveGame = (function(_super) {
    */
 
   LoveliveGame.prototype.loadGame = function() {
-    var ls, money;
-    ls = window.localStorage;
-    money = ls.getItem('money');
-    if (money !== null) {
-      this.money = money;
-      this.bet = ls.getItem('bet');
-      this.combo = ls.getItem('combo');
-      this.tension = ls.getItem('tension');
-      this.past_fever_num = ls.getItem('past_fever_num');
-      return this.slot_setting.prev_muse = JSON.parse(ls.getItem('prev_muse'));
+    if (this.debug.not_load_flg === false) {
+      if (this.debug.test_load_flg === false) {
+        this._loadGameProduct();
+      } else {
+        this._loadGameTest();
+      }
+      return this._gameInitSetting();
     }
+  };
+
+
+  /*
+  ゲームをセーブする、ブラウザのローカルストレージへ
+   */
+
+  LoveliveGame.prototype.saveGame = function() {
+    var key, saveData, val, _results;
+    saveData = {
+      'money': this.money,
+      'bet': this.bet,
+      'combo': this.combo,
+      'tension': this.tension,
+      'past_fever_num': this.past_fever_num,
+      'prev_muse': JSON.stringify(this.slot_setting.prev_muse)
+    };
+    _results = [];
+    for (key in saveData) {
+      val = saveData[key];
+      _results.push(this.local_storage.setItem(key, val));
+    }
+    return _results;
+  };
+
+
+  /*
+  ゲームのロード本番用、ブラウザのローカルストレージから
+   */
+
+  LoveliveGame.prototype._loadGameProduct = function() {
+    var money;
+    money = this.local_storage.getItem('money');
+    if (money !== null) {
+      this.money = parseInt(money);
+      this.bet = this._loadNumber('bet');
+      this.combo = this._loadNumber('combo');
+      this.tension = this._loadNumber('tension');
+      this.past_fever_num = this._loadNumber('past_fever_num');
+      return this.slot_setting.prev_muse = JSON.parse(this.local_storage.getItem('prev_muse'));
+    }
+  };
+
+
+  /*
+  ローカルストレージから指定のキーの値を取り出して数値に変換する
+   */
+
+  LoveliveGame.prototype._loadNumber = function(key) {
+    var val;
+    val = this.local_storage.getItem(key);
+    return parseInt(val);
+  };
+
+
+  /*
+  ゲームのロードテスト用、デバッグの決まった値
+   */
+
+  LoveliveGame.prototype._loadGameTest = function() {
+    var data;
+    data = this.debug.test_load_val;
+    this.money = data.money;
+    this.bet = data.bet;
+    this.combo = data.combo;
+    this.tension = data.tension;
+    this.past_fever_num = data.past_fever_num;
+    return this.slot_setting.prev_muse = data.prev_muse;
+  };
+
+
+  /*
+  ゲームロード後の画面表示等の初期値設定
+   */
+
+  LoveliveGame.prototype._gameInitSetting = function() {
+    var sys;
+    sys = this.main_scene.gp_system;
+    sys.money_text.setValue();
+    sys.bet_text.setValue();
+    sys.combo_text.setValue();
+    return sys.tension_gauge.setValue();
   };
 
   return LoveliveGame;
@@ -1503,6 +1671,12 @@ gpSystem = (function(_super) {
     this.addChild(this.tension_gauge);
     this.pause_button = new pauseButton();
     this.addChild(this.pause_button);
+    this.item_slot = new ItemSlot();
+    this.addChild(this.item_slot);
+    this.item_gauge_back = new ItemGaugeBack();
+    this.addChild(this.item_gauge_back);
+    this.item_gauge = new ItemGauge();
+    this.addChild(this.item_gauge);
     this.left_button = new leftButton();
     this.addChild(this.left_button);
     this.right_button = new rightButton();
@@ -1843,6 +2017,51 @@ saveOkButtonHtml = (function(_super) {
 
 
 /*
+キャンセルボタン
+ */
+
+baseCancelButtonHtml = (function(_super) {
+  __extends(baseCancelButtonHtml, _super);
+
+  function baseCancelButtonHtml() {
+    baseCancelButtonHtml.__super__.constructor.call(this, 150, 45);
+    this["class"].push('base-cancel-button');
+    this.text = 'キャンセル';
+    this.setHtml();
+  }
+
+  baseCancelButtonHtml.prototype.ontouchend = function(e) {
+    return this.touchendEvent();
+  };
+
+  return baseCancelButtonHtml;
+
+})(buttonHtml);
+
+
+/*
+アイテム購入のキャンセルボタン
+ */
+
+itemBuyCancelButtonHtml = (function(_super) {
+  __extends(itemBuyCancelButtonHtml, _super);
+
+  function itemBuyCancelButtonHtml() {
+    itemBuyCancelButtonHtml.__super__.constructor.apply(this, arguments);
+    this.x = 170;
+    this.y = 500;
+  }
+
+  itemBuyCancelButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.removeItemBuySelectMenu();
+  };
+
+  return itemBuyCancelButtonHtml;
+
+})(baseCancelButtonHtml);
+
+
+/*
 タイトルメニューのボタン
  */
 
@@ -1880,7 +2099,6 @@ startGameButtonHtml = (function(_super) {
   }
 
   startGameButtonHtml.prototype.touchendEvent = function() {
-    game.loadGame();
     return game.replaceScene(game.main_scene);
   };
 
@@ -1899,8 +2117,8 @@ dialogCloseButton = (function(_super) {
   function dialogCloseButton() {
     dialogCloseButton.__super__.constructor.call(this, 30, 30);
     this.image_name = 'close';
-    this.x = 375;
-    this.y = 115;
+    this.x = 400;
+    this.y = 100;
     this.setImageHtml();
   }
 
@@ -1964,6 +2182,20 @@ dialogHtml = (function(_super) {
 
 })(systemHtml);
 
+modal = (function(_super) {
+  __extends(modal, _super);
+
+  function modal() {
+    modal.__super__.constructor.call(this, game.width, game.height);
+    this["class"] = ['modal'];
+    this.text = '　';
+    this.setHtml();
+  }
+
+  return modal;
+
+})(dialogHtml);
+
 baseDialogHtml = (function(_super) {
   __extends(baseDialogHtml, _super);
 
@@ -1996,11 +2228,11 @@ menuDialogHtml = (function(_super) {
   __extends(menuDialogHtml, _super);
 
   function menuDialogHtml() {
-    menuDialogHtml.__super__.constructor.call(this, 375, 400);
+    menuDialogHtml.__super__.constructor.call(this, 420, 460);
     this.text = '　';
     this["class"].push('base-dialog-menu');
-    this.x = 45;
-    this.y = 100;
+    this.x = 25;
+    this.y = 80;
     this.setHtml();
   }
 
@@ -2040,6 +2272,277 @@ memberSetDialogHtml = (function(_super) {
   return memberSetDialogHtml;
 
 })(menuDialogHtml);
+
+selectDialogHtml = (function(_super) {
+  __extends(selectDialogHtml, _super);
+
+  function selectDialogHtml() {
+    selectDialogHtml.__super__.constructor.call(this, 300, 400);
+    this.text = '　';
+    this["class"].push('base-dialog-select');
+    this.x = 35;
+    this.y = 150;
+    this.setHtml();
+  }
+
+  return selectDialogHtml;
+
+})(baseDialogHtml);
+
+itemBuySelectDialogHtml = (function(_super) {
+  __extends(itemBuySelectDialogHtml, _super);
+
+  function itemBuySelectDialogHtml() {
+    itemBuySelectDialogHtml.__super__.constructor.apply(this, arguments);
+  }
+
+  return itemBuySelectDialogHtml;
+
+})(selectDialogHtml);
+
+discriptionTextDialogHtml = (function(_super) {
+  __extends(discriptionTextDialogHtml, _super);
+
+  function discriptionTextDialogHtml(w, h) {
+    discriptionTextDialogHtml.__super__.constructor.call(this, w, h);
+    this["class"].push('base-discription');
+  }
+
+  return discriptionTextDialogHtml;
+
+})(dialogHtml);
+
+titleDiscription = (function(_super) {
+  __extends(titleDiscription, _super);
+
+  function titleDiscription() {
+    titleDiscription.__super__.constructor.call(this, 200, 20);
+    this["class"].push('title-discription');
+  }
+
+  return titleDiscription;
+
+})(discriptionTextDialogHtml);
+
+itemItemBuyDiscription = (function(_super) {
+  __extends(itemItemBuyDiscription, _super);
+
+  function itemItemBuyDiscription() {
+    itemItemBuyDiscription.__super__.constructor.apply(this, arguments);
+    this.x = 190;
+    this.y = 130;
+    this.text = 'アイテム';
+    this.setHtml();
+  }
+
+  return itemItemBuyDiscription;
+
+})(titleDiscription);
+
+memberItemBuyDiscription = (function(_super) {
+  __extends(memberItemBuyDiscription, _super);
+
+  function memberItemBuyDiscription() {
+    memberItemBuyDiscription.__super__.constructor.apply(this, arguments);
+    this.x = 220;
+    this.y = 370;
+    this.text = '部員';
+    this.setHtml();
+  }
+
+  return memberItemBuyDiscription;
+
+})(titleDiscription);
+
+itemNameDiscription = (function(_super) {
+  __extends(itemNameDiscription, _super);
+
+  function itemNameDiscription() {
+    itemNameDiscription.__super__.constructor.apply(this, arguments);
+    this.x = 180;
+    this.y = 290;
+  }
+
+  itemNameDiscription.prototype.setText = function(text) {
+    this.text = text;
+    return this.setHtml();
+  };
+
+  return itemNameDiscription;
+
+})(titleDiscription);
+
+itemDiscription = (function(_super) {
+  __extends(itemDiscription, _super);
+
+  function itemDiscription() {
+    itemDiscription.__super__.constructor.call(this, 400, 190);
+    this.x = 60;
+    this.y = 340;
+  }
+
+  itemDiscription.prototype.setText = function(text) {
+    this.text = text;
+    return this.setHtml();
+  };
+
+  return itemDiscription;
+
+})(discriptionTextDialogHtml);
+
+imageHtml = (function(_super) {
+  __extends(imageHtml, _super);
+
+  function imageHtml(width, height) {
+    imageHtml.__super__.constructor.call(this, width, height);
+  }
+
+  return imageHtml;
+
+})(systemHtml);
+
+
+/*
+アイテム画像のベース
+@param kind 種別
+ */
+
+baseItemHtml = (function(_super) {
+  __extends(baseItemHtml, _super);
+
+  function baseItemHtml(kind) {
+    baseItemHtml.__super__.constructor.call(this, 100, 100);
+    this.image_name = 'test_image';
+    this.setImageHtml();
+    this.item_kind = kind;
+    this.scaleX = 0.7;
+    this.scaleY = 0.7;
+    this.positionY = 0;
+    this.positoin_kind = this.item_kind;
+  }
+
+  baseItemHtml.prototype.setPosition = function() {
+    if (this.positoin_kind <= 4) {
+      this.y = this.positionY;
+      return this.x = 80 * (this.positoin_kind - 1) + 70;
+    } else {
+      this.y = this.positionY + 80;
+      return this.x = 80 * (this.positoin_kind - 5) + 30;
+    }
+  };
+
+  baseItemHtml.prototype.dispItemBuySelectDialog = function(kind) {
+    return game.pause_scene.setItemBuySelectMenu(kind);
+  };
+
+  return baseItemHtml;
+
+})(systemHtml);
+
+
+/*
+アイテム
+ */
+
+itemHtml = (function(_super) {
+  __extends(itemHtml, _super);
+
+  function itemHtml(kind) {
+    itemHtml.__super__.constructor.call(this, kind);
+  }
+
+  return itemHtml;
+
+})(baseItemHtml);
+
+buyItemHtml = (function(_super) {
+  __extends(buyItemHtml, _super);
+
+  function buyItemHtml(kind) {
+    buyItemHtml.__super__.constructor.call(this, kind);
+    this.positionY = 160;
+  }
+
+  buyItemHtml.prototype.ontouchend = function() {
+    return this.dispItemBuySelectDialog(this.item_kind);
+  };
+
+  return buyItemHtml;
+
+})(itemHtml);
+
+useItemHtml = (function(_super) {
+  __extends(useItemHtml, _super);
+
+  function useItemHtml(kind) {
+    useItemHtml.__super__.constructor.call(this, kind);
+  }
+
+  return useItemHtml;
+
+})(itemHtml);
+
+
+/*
+部員
+ */
+
+memberHtml = (function(_super) {
+  __extends(memberHtml, _super);
+
+  function memberHtml(kind) {
+    memberHtml.__super__.constructor.call(this, kind);
+    this.positoin_kind = this.item_kind - 10;
+  }
+
+  return memberHtml;
+
+})(baseItemHtml);
+
+buyMemberHtml = (function(_super) {
+  __extends(buyMemberHtml, _super);
+
+  function buyMemberHtml(kind) {
+    buyMemberHtml.__super__.constructor.call(this, kind);
+    this.positionY = 400;
+  }
+
+  buyMemberHtml.prototype.ontouchend = function() {
+    return this.dispItemBuySelectDialog(this.item_kind);
+  };
+
+  return buyMemberHtml;
+
+})(memberHtml);
+
+useMemberHtml = (function(_super) {
+  __extends(useMemberHtml, _super);
+
+  function useMemberHtml(kind) {
+    useMemberHtml.__super__.constructor.call(this, kind);
+  }
+
+  return useMemberHtml;
+
+})(memberHtml);
+
+selectItemImage = (function(_super) {
+  __extends(selectItemImage, _super);
+
+  function selectItemImage() {
+    selectItemImage.__super__.constructor.call(this, 100, 100);
+    this.x = 200;
+    this.y = 180;
+  }
+
+  selectItemImage.prototype.setImage = function(image) {
+    this.image_name = image;
+    return this.setImageHtml();
+  };
+
+  return selectItemImage;
+
+})(imageHtml);
 
 text = (function(_super) {
   __extends(text, _super);
@@ -2177,10 +2680,20 @@ Debug = (function(_super) {
 
   function Debug() {
     Debug.__super__.constructor.apply(this, arguments);
-    this.all_debug_flg = false;
-    this.force_main_flg = true;
-    this.force_pause_flg = false;
+    this.force_main_flg = false;
+    this.force_pause_flg = true;
+    this.not_load_flg = false;
+    this.test_load_flg = false;
+    this.test_load_val = {
+      'money': 1000,
+      'bet': 10,
+      'combo': 10,
+      'tension': 100,
+      'past_fever_num': 0,
+      'prev_muse': []
+    };
     this.lille_flg = false;
+    this.lille_array = [[1, 1, 1], [1, 1, 1], [1, 1, 1]];
     this.item_flg = false;
     this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
@@ -2189,19 +2702,9 @@ Debug = (function(_super) {
     this.force_insert_muse = false;
     this.force_slot_hit = false;
     this.half_slot_hit = false;
-    this.lille_array = [[1, 1, 1], [1, 1, 1], [1, 1, 1]];
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = 0;
     this.fix_tention_slot_hit_flg = 200;
-    if (this.all_debug_flg === true) {
-      this.lille_flg = true;
-      this.item_flg = true;
-      this.item_fall_early_flg = true;
-      this.fix_tention_item_catch_flg = true;
-      this.fix_tention_item_fall_flg = true;
-      this.fix_tention_slot_hit_flg = true;
-      this.force_insert_muse = true;
-    }
     if (this.force_pause_flg === true) {
       this.force_main_flg = true;
     }
@@ -2464,6 +2967,44 @@ slotSetting = (function(_super) {
             'time': 30
           }
         ]
+      }
+    };
+
+    /*
+    アイテムのリスト
+     */
+    this.item_list = {
+      0: {
+        'name': 'アイテム',
+        'image': 'test_image',
+        'discription': 'アイテムの説明',
+        'price': 100,
+        'durationSec': 30,
+        'conditoin': '出現条件',
+        'condFunc': function() {
+          return true;
+        }
+      },
+      1: {
+        'name': 'ほげほげ',
+        'image': 'test_image',
+        'discription': 'ほげほげするよ<br>　ほげほげがほげほげになるよ',
+        'price': 1000000000,
+        'durationSec': 2,
+        'conditoin': '絶対でないよ',
+        'condFunc': function() {
+          return false;
+        }
+      },
+      11: {
+        'name': '高坂穂乃果',
+        'image': 'test_image',
+        'discription': '部員に穂乃果を追加<br>　できるようになる',
+        'price': 0,
+        'conditoin': '穂乃果でスロットを3つ揃える',
+        'condFunc': function() {
+          return false;
+        }
       }
     };
     this.tension_max = 500;
@@ -3118,13 +3659,14 @@ pauseScene = (function(_super) {
     this.pause_item_buy_layer = new pauseItemBuyLayer();
     this.pause_item_use_layer = new pauseItemUseLayer();
     this.pause_member_set_layer = new pauseMemberSetLayer();
+    this.pause_item_buy_select_layer = new pauseItemBuySelectLayer();
     this.addChild(this.pause_back);
     this.addChild(this.pause_main_layer);
   }
 
   pauseScene.prototype.setSaveMenu = function() {
     this.addChild(this.pause_save_layer);
-    return this._exeGameSave();
+    return game.saveGame();
   };
 
   pauseScene.prototype.removeSaveMenu = function() {
@@ -3155,6 +3697,15 @@ pauseScene = (function(_super) {
     return this.removeChild(this.pause_member_set_layer);
   };
 
+  pauseScene.prototype.setItemBuySelectMenu = function(kind) {
+    this.addChild(this.pause_item_buy_select_layer);
+    return this.pause_item_buy_select_layer.setSelectItem(kind);
+  };
+
+  pauseScene.prototype.removeItemBuySelectMenu = function() {
+    return this.removeChild(this.pause_item_buy_select_layer);
+  };
+
   pauseScene.prototype.onenterframe = function(e) {
     return this._pauseKeyPush();
   };
@@ -3175,29 +3726,6 @@ pauseScene = (function(_super) {
         return this.keyList.pause = false;
       }
     }
-  };
-
-
-  /*
-  データ保存の実行
-   */
-
-  pauseScene.prototype._exeGameSave = function() {
-    var key, saveData, val, _results;
-    saveData = {
-      'money': game.money,
-      'bet': game.bet,
-      'combo': game.combo,
-      'tension': game.tension,
-      'past_fever_num': game.past_fever_num,
-      'prev_muse': JSON.stringify(game.slot_setting.prev_muse)
-    };
-    _results = [];
-    for (key in saveData) {
-      val = saveData[key];
-      _results.push(window.localStorage.setItem(key, val));
-    }
-    return _results;
   };
 
   return pauseScene;
@@ -4989,6 +5517,48 @@ TensionGauge = (function(_super) {
   };
 
   return TensionGauge;
+
+})(Param);
+
+ItemSlot = (function(_super) {
+  __extends(ItemSlot, _super);
+
+  function ItemSlot() {
+    ItemSlot.__super__.constructor.call(this, 55, 55);
+    this.image = this.drawCircle('#aaa');
+    this.x = 5;
+    this.y = 70;
+  }
+
+  return ItemSlot;
+
+})(Param);
+
+ItemGaugeBack = (function(_super) {
+  __extends(ItemGaugeBack, _super);
+
+  function ItemGaugeBack() {
+    ItemGaugeBack.__super__.constructor.call(this, 50, 8);
+    this.image = this.drawRect('#333');
+    this.x = 8;
+    this.y = 112;
+  }
+
+  return ItemGaugeBack;
+
+})(Param);
+
+ItemGauge = (function(_super) {
+  __extends(ItemGauge, _super);
+
+  function ItemGauge() {
+    ItemGauge.__super__.constructor.call(this, 50, 8);
+    this.image = this.drawRect('#A6E39D');
+    this.x = 8;
+    this.y = 112;
+  }
+
+  return ItemGauge;
 
 })(Param);
 

@@ -138,6 +138,42 @@ class slotSetting extends appNode
                 ]
             }
         }
+
+        ###
+        アイテムのリスト
+        ###
+        @item_list = {
+            0:{
+                'name':'アイテム',
+                'image':'test_image',
+                'discription':'アイテムの説明',
+                'price':100, #値段
+                'durationSec':30, #持続時間(秒)
+                'conditoin':'出現条件',
+                'condFunc':()-> #出現条件の関数 true:出す、false:隠す
+                    return true
+            },
+            1:{
+                'name':'ほげほげ',
+                'image':'test_image',
+                'discription':'ほげほげするよ<br>　ほげほげがほげほげになるよ',
+                'price':1000000000,
+                'durationSec':2,
+                'conditoin':'絶対でないよ',
+                'condFunc':()->
+                    return false
+            },
+            11:{
+                'name':'高坂穂乃果',
+                'image':'test_image',
+                'discription':'部員に穂乃果を追加<br>　できるようになる',
+                'price':0,
+                'conditoin':'穂乃果でスロットを3つ揃える',
+                'condFunc':()->
+                    return false
+            }
+        }
+
         #テンションの最大値
         @tension_max = 500
         #現在スロットに入るμ’ｓ番号

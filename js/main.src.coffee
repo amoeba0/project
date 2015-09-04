@@ -6,6 +6,7 @@ window.onload = ->
 class appDomLayer extends DomLayer
     constructor: () ->
         super
+        @modal = new modal()
 class appGame extends Game
     constructor:(w, h)->
         super w, h
@@ -149,13 +150,66 @@ class pauseItemBuyLayer extends appDomLayer
         super
         @dialog = new itemBuyDialogHtml()
         @close_button = new itemBuyDialogCloseButton()
+        @addChild(@modal)
         @addChild(@dialog)
         @addChild(@close_button)
+        @item_list = {}
+        for i in [1..9]
+            @item_list[i] = new buyItemHtml(i)
+        @member_list = {}
+        for i in [11..19]
+            @member_list[i] = new buyMemberHtml(i)
+        @setItemList()
+        @item_title = new itemItemBuyDiscription()
+        @addChild(@item_title)
+        @member_title = new memberItemBuyDiscription()
+        @addChild(@member_title)
+    setItemList:()->
+        for item_key, item_val of @item_list
+            @addChild(item_val)
+            item_val.setPosition()
+        for member_key, member_val of @member_list
+            @addChild(member_val)
+            member_val.setPosition()
+
+class pauseItemBuySelectLayer extends appDomLayer
+    constructor:()->
+        super
+        @dialog = new itemBuySelectDialogHtml()
+        @cancel_button = new itemBuyCancelButtonHtml()
+        @item_name = new itemNameDiscription()
+        @item_image = new selectItemImage()
+        @item_discription = new itemDiscription()
+        @addChild(@modal)
+        @addChild(@dialog)
+        @addChild(@item_image)
+        @addChild(@item_name)
+        @addChild(@item_discription)
+        @addChild(@cancel_button)
+    setSelectItem:(kind)->
+        item_options = game.slot_setting.item_list[kind]
+        if item_options is undefined
+            item_options = game.slot_setting.item_list[0]
+        @item_name.setText(item_options.name)
+        @item_image.setImage(item_options.image)
+        discription = @_setDiscription(item_options)
+        @item_discription.setText(discription)
+    _setDiscription:(item_options)->
+        text = '効果：'+item_options.discription
+        if item_options.durationSec != undefined
+            text += '<br>持続時間：'+item_options.durationSec+'秒'
+        if item_options.condFunc() is true
+            text += '<br>値段：'+item_options.price+'円'
+        else
+            text += '<br>出現条件：'+item_options.conditoin
+        return text
+
 class pauseItemUseLayer extends appDomLayer
     constructor: () ->
         super
         @dialog = new itemUseDialogHtml()
         @close_button = new itemUseDialogCloseButton()
+        @addChild(@modal)
         @addChild(@dialog)
         @addChild(@close_button)
 class pauseMainLayer extends appDomLayer
@@ -178,11 +232,13 @@ class pauseMemberSetLayer extends appDomLayer
         super
         @dialog = new memberSetDialogHtml()
         @close_button = new memberSetDialogCloseButton()
+        @addChild(@modal)
         @addChild(@dialog)
         @addChild(@close_button)
 class pauseSaveLayer extends appDomLayer
     constructor: () ->
         super
+        @addChild(@modal)
         @dialog = new saveDialogHtml()
         @addChild(@dialog)
         @ok_button = new saveOkButtonHtml()
@@ -200,6 +256,7 @@ class catchAndSlotGame extends appGame
 class LoveliveGame extends catchAndSlotGame
     constructor:()->
         super @width, @height
+        @local_storage = window.localStorage
         @debug = new Debug()
         @slot_setting = new slotSetting()
         @test = new Test()
@@ -242,12 +299,14 @@ class LoveliveGame extends catchAndSlotGame
             @test_scene = new testScene()
             @pushScene(@test_scene)
             @test.testExe()
-        else if @debug.force_main_flg is true
-            @pushScene(@main_scene)
-            if @debug.force_pause_flg is true
-                @pushScene(@pause_scene)
         else
-            @pushScene(@title_scene)
+            @loadGame()
+            if @debug.force_main_flg is true
+                @pushScene(@main_scene)
+                if @debug.force_pause_flg is true
+                    @pushScene(@pause_scene)
+            else
+                @pushScene(@title_scene)
 
     ###
     スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
@@ -322,15 +381,67 @@ class LoveliveGame extends catchAndSlotGame
     ゲームをロードする
     ###
     loadGame:()->
-        ls = window.localStorage
-        money = ls.getItem('money')
+        if @debug.not_load_flg is false
+            if @debug.test_load_flg is false
+                @_loadGameProduct()
+            else
+                @_loadGameTest()
+            @_gameInitSetting()
+    ###
+    ゲームをセーブする、ブラウザのローカルストレージへ
+    ###
+    saveGame:()->
+        saveData = {
+            'money'    : @money,
+            'bet'      : @bet,
+            'combo'    : @combo,
+            'tension'  : @tension,
+            'past_fever_num' : @past_fever_num
+            'prev_muse': JSON.stringify(@slot_setting.prev_muse)
+        }
+        for key, val of saveData
+            @local_storage.setItem(key, val)
+
+    ###
+    ゲームのロード本番用、ブラウザのローカルストレージから
+    ###
+    _loadGameProduct:()->
+        money = @local_storage.getItem('money')
         if money != null
-            @money = money
-            @bet = ls.getItem('bet')
-            @combo = ls.getItem('combo')
-            @tension = ls.getItem('tension')
-            @past_fever_num = ls.getItem('past_fever_num')
-            @slot_setting.prev_muse = JSON.parse(ls.getItem('prev_muse'))
+            @money = parseInt(money)
+            @bet = @_loadNumber('bet')
+            @combo = @_loadNumber('combo')
+            @tension = @_loadNumber('tension')
+            @past_fever_num = @_loadNumber('past_fever_num')
+            @slot_setting.prev_muse = JSON.parse(@local_storage.getItem('prev_muse'))
+    ###
+    ローカルストレージから指定のキーの値を取り出して数値に変換する
+    ###
+    _loadNumber:(key)->
+        val = @local_storage.getItem(key)
+        return parseInt(val)
+
+    ###
+    ゲームのロードテスト用、デバッグの決まった値
+    ###
+    _loadGameTest:()->
+        data = @debug.test_load_val
+        @money = data.money
+        @bet = data.bet
+        @combo = data.combo
+        @tension = data.tension
+        @past_fever_num = data.past_fever_num
+        @slot_setting.prev_muse = data.prev_muse
+
+    ###
+    ゲームロード後の画面表示等の初期値設定
+    ###
+    _gameInitSetting:()->
+        sys = @main_scene.gp_system
+        sys.money_text.setValue()
+        sys.bet_text.setValue()
+        sys.combo_text.setValue()
+        sys.tension_gauge.setValue()
 class gpEffect extends appGroup
     constructor: () ->
         super
@@ -969,6 +1080,12 @@ class gpSystem extends appGroup
         @addChild(@tension_gauge)
         @pause_button = new pauseButton()
         @addChild(@pause_button)
+        @item_slot = new ItemSlot()
+        @addChild(@item_slot)
+        @item_gauge_back = new ItemGaugeBack()
+        @addChild(@item_gauge_back)
+        @item_gauge = new ItemGauge()
+        @addChild(@item_gauge)
         @left_button = new leftButton()
         @addChild(@left_button)
         @right_button = new rightButton()
@@ -1166,6 +1283,29 @@ class saveOkButtonHtml extends baseOkButtonHtml
         game.pause_scene.removeSaveMenu()
 
 ###
+キャンセルボタン
+###
+class baseCancelButtonHtml extends buttonHtml
+    constructor:()->
+        super 150, 45
+        @class.push('base-cancel-button')
+        @text = 'キャンセル'
+        @setHtml()
+    ontouchend: (e) ->
+        @touchendEvent()
+
+###
+アイテム購入のキャンセルボタン
+###
+class itemBuyCancelButtonHtml extends baseCancelButtonHtml
+    constructor:()->
+        super
+        @x = 170
+        @y = 500
+    touchendEvent:() ->
+        game.pause_scene.removeItemBuySelectMenu()
+
+###
 タイトルメニューのボタン
 ###
 class titleMenuButtonHtml extends buttonHtml
@@ -1187,7 +1327,6 @@ class startGameButtonHtml extends titleMenuButtonHtml
         @text = 'ゲーム開始'
         @setHtml()
     touchendEvent:() ->
-        game.loadGame()
         game.replaceScene(game.main_scene)
 
 ###
@@ -1197,8 +1336,8 @@ class dialogCloseButton extends systemHtml
     constructor:()->
         super 30, 30
         @image_name = 'close'
-        @x = 375
-        @y = 115
+        @x = 400
+        @y = 100
         @setImageHtml()
 
 class itemBuyDialogCloseButton extends dialogCloseButton
@@ -1221,6 +1360,12 @@ class memberSetDialogCloseButton extends dialogCloseButton
 class dialogHtml extends systemHtml
     constructor: (width, height) ->
         super width, height
+class modal extends dialogHtml
+    constructor:()->
+        super game.width, game.height
+        @class = ['modal']
+        @text = '　'
+        @setHtml()
 class baseDialogHtml extends dialogHtml
     constructor: (width, height) ->
         super width, height
@@ -1235,11 +1380,11 @@ class saveDialogHtml extends baseDialogHtml
         @setHtml()
 class menuDialogHtml extends baseDialogHtml
     constructor:()->
-        super 375, 400
+        super 420, 460
         @text = '　'
         @class.push('base-dialog-menu')
-        @x = 45
-        @y = 100
+        @x = 25
+        @y = 80
         @setHtml()
 class itemBuyDialogHtml extends menuDialogHtml
     constructor:()->
@@ -1252,6 +1397,136 @@ class itemUseDialogHtml extends menuDialogHtml
 class memberSetDialogHtml extends menuDialogHtml
     constructor:()->
         super
+
+class selectDialogHtml extends baseDialogHtml
+    constructor:()->
+        super 300, 400
+        @text = '　'
+        @class.push('base-dialog-select')
+        @x = 35
+        @y = 150
+        @setHtml()
+
+class itemBuySelectDialogHtml extends selectDialogHtml
+    constructor:()->
+        super
+
+class discriptionTextDialogHtml extends dialogHtml
+    constructor:(w, h)->
+        super w, h
+        @class.push('base-discription')
+
+class titleDiscription extends discriptionTextDialogHtml
+    constructor:()->
+        super 200, 20
+        @class.push('title-discription')
+
+class itemItemBuyDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 190
+        @y = 130
+        @text = 'アイテム'
+        @setHtml()
+
+class memberItemBuyDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 220
+        @y = 370
+        @text = '部員'
+        @setHtml()
+
+class itemNameDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 180
+        @y = 290
+    setText:(text)->
+        @text = text
+        @setHtml()
+
+class itemDiscription extends discriptionTextDialogHtml
+    constructor:()->
+        super 400, 190
+        @x = 60
+        @y = 340
+    setText:(text)->
+        @text = text
+        @setHtml()
+class imageHtml extends systemHtml
+    constructor: (width, height) ->
+        super width, height
+
+###
+アイテム画像のベース
+@param kind 種別
+###
+class baseItemHtml extends systemHtml
+    constructor: (kind)->
+        super 100, 100
+        @image_name = 'test_image'
+        @setImageHtml()
+        @item_kind = kind
+        @scaleX = 0.7
+        @scaleY = 0.7
+        @positionY = 0
+        @positoin_kind = @item_kind
+    setPosition:()->
+        if @positoin_kind <= 4
+            @y = @positionY
+            @x = 80 * (@positoin_kind - 1) + 70
+        else
+            @y = @positionY + 80
+            @x = 80 * (@positoin_kind - 5) + 30
+    dispItemBuySelectDialog:(kind)->
+        game.pause_scene.setItemBuySelectMenu(kind)
+
+###
+アイテム
+###
+class itemHtml extends baseItemHtml
+    constructor:(kind)->
+        super kind
+
+class buyItemHtml extends itemHtml
+    constructor:(kind)->
+        super kind
+        @positionY = 160
+    ontouchend: () ->
+        @dispItemBuySelectDialog(@item_kind)
+
+class useItemHtml extends itemHtml
+    constructor:(kind)->
+        super kind
+
+###
+部員
+###
+class memberHtml extends baseItemHtml
+    constructor:(kind)->
+        super kind
+        @positoin_kind = @item_kind - 10
+
+class buyMemberHtml extends memberHtml
+    constructor:(kind)->
+        super kind
+        @positionY = 400
+    ontouchend: () ->
+        @dispItemBuySelectDialog(@item_kind)
+
+class useMemberHtml extends memberHtml
+    constructor:(kind)->
+        super kind
+
+class selectItemImage extends imageHtml
+    constructor:()->
+        super 100, 100
+        @x = 200
+        @y = 180
+    setImage:(image)->
+        @image_name = image
+        @setImageHtml()
 class text extends appLabel
     constructor: () ->
         super
@@ -1331,16 +1606,34 @@ class Debug extends appNode
     constructor: () ->
         super
 
-        #全てのデバッグフラグをONにする
-        @all_debug_flg = false
-
         #開始後いきなりメイン画面
-        @force_main_flg = true
+        @force_main_flg = false
         #開始後いきなりポーズ画面
-        @force_pause_flg = false
+        @force_pause_flg = true
+
+        #ゲーム開始時ロードをしない
+        @not_load_flg = false
+        #テストロードに切り替え
+        @test_load_flg = false
+        #テストロード用の値
+        @test_load_val = {
+            'money':1000,
+            'bet':10,
+            'combo':10,
+            'tension':100,
+            'past_fever_num':0,
+            'prev_muse':[]
+        }
 
         #デバッグ用リールにすりかえる
         @lille_flg = false
+        #デバッグ用リール配列
+        @lille_array = [
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]
+        ]
+
         #降ってくるアイテムの位置が常にプレイヤーの頭上
         @item_flg = false
         #アイテムが降ってくる頻度を上げる
@@ -1357,27 +1650,13 @@ class Debug extends appNode
         @force_slot_hit = false
         #スロットが2回に1回当たる
         @half_slot_hit = false
-        #デバッグ用リール配列
-        @lille_array = [
-            [1, 1, 1],
-            [1, 1, 1],
-            [1, 1, 1]
-        ]
+
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
         #アイテムを落とした時のテンション増減固定値
         @fix_tention_item_fall_val = 0
         #スロットが当たった時のテンション増減固定値
         @fix_tention_slot_hit_flg = 200
-
-        if @all_debug_flg is true
-            @lille_flg = true
-            @item_flg = true
-            @item_fall_early_flg = true
-            @fix_tention_item_catch_flg = true
-            @fix_tention_item_fall_flg = true
-            @fix_tention_slot_hit_flg = true
-            @force_insert_muse = true
 
         if @force_pause_flg is true
             @force_main_flg = true
@@ -1521,6 +1800,42 @@ class slotSetting extends appNode
                 ]
             }
         }
+
+        ###
+        アイテムのリスト
+        ###
+        @item_list = {
+            0:{
+                'name':'アイテム',
+                'image':'test_image',
+                'discription':'アイテムの説明',
+                'price':100, #値段
+                'durationSec':30, #持続時間(秒)
+                'conditoin':'出現条件',
+                'condFunc':()-> #出現条件の関数 true:出す、false:隠す
+                    return true
+            },
+            1:{
+                'name':'ほげほげ',
+                'image':'test_image',
+                'discription':'ほげほげするよ<br>　ほげほげがほげほげになるよ',
+                'price':1000000000,
+                'durationSec':2,
+                'conditoin':'絶対でないよ',
+                'condFunc':()->
+                    return false
+            },
+            11:{
+                'name':'高坂穂乃果',
+                'image':'test_image',
+                'discription':'部員に穂乃果を追加<br>　できるようになる',
+                'price':0,
+                'conditoin':'穂乃果でスロットを3つ揃える',
+                'condFunc':()->
+                    return false
+            }
+        }
+
         #テンションの最大値
         @tension_max = 500
         #現在スロットに入るμ’ｓ番号
@@ -1972,11 +2287,12 @@ class pauseScene extends appScene
         @pause_item_buy_layer = new pauseItemBuyLayer()
         @pause_item_use_layer = new pauseItemUseLayer()
         @pause_member_set_layer = new pauseMemberSetLayer()
+        @pause_item_buy_select_layer = new pauseItemBuySelectLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
     setSaveMenu: () ->
         @addChild(@pause_save_layer)
-        @_exeGameSave()
+        game.saveGame()
     removeSaveMenu:()->
         @removeChild(@pause_save_layer)
     setItemBuyMenu:()->
@@ -1991,6 +2307,11 @@ class pauseScene extends appScene
         @addChild(@pause_member_set_layer)
     removeMemberSetMenu:()->
         @removeChild(@pause_member_set_layer)
+    setItemBuySelectMenu:(kind)->
+        @addChild(@pause_item_buy_select_layer)
+        @pause_item_buy_select_layer.setSelectItem(kind)
+    removeItemBuySelectMenu:()->
+        @removeChild(@pause_item_buy_select_layer)
     onenterframe: (e) ->
         @_pauseKeyPush()
     ###
@@ -2004,20 +2325,7 @@ class pauseScene extends appScene
         else
             if @keyList.pause = true
                 @keyList.pause = false
-    ###
-    データ保存の実行
-    ###
-    _exeGameSave:()->
-        saveData = {
-            'money'    : game.money,
-            'bet'      : game.bet,
-            'combo'    : game.combo,
-            'tension'  : game.tension,
-            'past_fever_num' : game.past_fever_num
-            'prev_muse': JSON.stringify(game.slot_setting.prev_muse)
-        }
-        for key, val of saveData
-            window.localStorage.setItem(key, val)
+
 ###
 テスト用、空のシーン
 ###
@@ -3036,7 +3344,6 @@ class pauseBack extends Dialog
         super game.width, game.height
         @image = @drawRect('#000000')
         @opacity = 0.8
-
 class Param extends System
     constructor: (w, h) ->
         super w, h
@@ -3072,3 +3379,24 @@ class TensionGauge extends Param
             @image = @drawRect('#EDA184')
         else
             @image = @drawRect('#F4D2DE')
+
+class ItemSlot extends Param
+    constructor:()->
+        super 55, 55
+        @image = @drawCircle('#aaa')
+        @x = 5
+        @y = 70
+
+class ItemGaugeBack extends Param
+    constructor:()->
+        super 50, 8
+        @image = @drawRect('#333')
+        @x = 8
+        @y = 112
+
+class ItemGauge extends Param
+    constructor:()->
+        super 50, 8
+        @image = @drawRect('#A6E39D')
+        @x = 8
+        @y = 112

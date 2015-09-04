@@ -5,6 +5,7 @@ class catchAndSlotGame extends appGame
 class LoveliveGame extends catchAndSlotGame
     constructor:()->
         super @width, @height
+        @local_storage = window.localStorage
         @debug = new Debug()
         @slot_setting = new slotSetting()
         @test = new Test()
@@ -47,12 +48,14 @@ class LoveliveGame extends catchAndSlotGame
             @test_scene = new testScene()
             @pushScene(@test_scene)
             @test.testExe()
-        else if @debug.force_main_flg is true
-            @pushScene(@main_scene)
-            if @debug.force_pause_flg is true
-                @pushScene(@pause_scene)
         else
-            @pushScene(@title_scene)
+            @loadGame()
+            if @debug.force_main_flg is true
+                @pushScene(@main_scene)
+                if @debug.force_pause_flg is true
+                    @pushScene(@pause_scene)
+            else
+                @pushScene(@title_scene)
 
     ###
     スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
@@ -127,12 +130,64 @@ class LoveliveGame extends catchAndSlotGame
     ゲームをロードする
     ###
     loadGame:()->
-        ls = window.localStorage
-        money = ls.getItem('money')
+        if @debug.not_load_flg is false
+            if @debug.test_load_flg is false
+                @_loadGameProduct()
+            else
+                @_loadGameTest()
+            @_gameInitSetting()
+    ###
+    ゲームをセーブする、ブラウザのローカルストレージへ
+    ###
+    saveGame:()->
+        saveData = {
+            'money'    : @money,
+            'bet'      : @bet,
+            'combo'    : @combo,
+            'tension'  : @tension,
+            'past_fever_num' : @past_fever_num
+            'prev_muse': JSON.stringify(@slot_setting.prev_muse)
+        }
+        for key, val of saveData
+            @local_storage.setItem(key, val)
+
+    ###
+    ゲームのロード本番用、ブラウザのローカルストレージから
+    ###
+    _loadGameProduct:()->
+        money = @local_storage.getItem('money')
         if money != null
-            @money = money
-            @bet = ls.getItem('bet')
-            @combo = ls.getItem('combo')
-            @tension = ls.getItem('tension')
-            @past_fever_num = ls.getItem('past_fever_num')
-            @slot_setting.prev_muse = JSON.parse(ls.getItem('prev_muse'))
+            @money = parseInt(money)
+            @bet = @_loadNumber('bet')
+            @combo = @_loadNumber('combo')
+            @tension = @_loadNumber('tension')
+            @past_fever_num = @_loadNumber('past_fever_num')
+            @slot_setting.prev_muse = JSON.parse(@local_storage.getItem('prev_muse'))
+    ###
+    ローカルストレージから指定のキーの値を取り出して数値に変換する
+    ###
+    _loadNumber:(key)->
+        val = @local_storage.getItem(key)
+        return parseInt(val)
+
+    ###
+    ゲームのロードテスト用、デバッグの決まった値
+    ###
+    _loadGameTest:()->
+        data = @debug.test_load_val
+        @money = data.money
+        @bet = data.bet
+        @combo = data.combo
+        @tension = data.tension
+        @past_fever_num = data.past_fever_num
+        @slot_setting.prev_muse = data.prev_muse
+
+    ###
+    ゲームロード後の画面表示等の初期値設定
+    ###
+    _gameInitSetting:()->
+        sys = @main_scene.gp_system
+        sys.money_text.setValue()
+        sys.bet_text.setValue()
+        sys.combo_text.setValue()
+        sys.tension_gauge.setValue()

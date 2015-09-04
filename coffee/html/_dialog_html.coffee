@@ -1,6 +1,12 @@
 class dialogHtml extends systemHtml
     constructor: (width, height) ->
         super width, height
+class modal extends dialogHtml
+    constructor:()->
+        super game.width, game.height
+        @class = ['modal']
+        @text = '　'
+        @setHtml()
 class baseDialogHtml extends dialogHtml
     constructor: (width, height) ->
         super width, height
@@ -15,11 +21,11 @@ class saveDialogHtml extends baseDialogHtml
         @setHtml()
 class menuDialogHtml extends baseDialogHtml
     constructor:()->
-        super 375, 400
+        super 420, 460
         @text = '　'
         @class.push('base-dialog-menu')
-        @x = 45
-        @y = 100
+        @x = 25
+        @y = 80
         @setHtml()
 class itemBuyDialogHtml extends menuDialogHtml
     constructor:()->
@@ -32,3 +38,60 @@ class itemUseDialogHtml extends menuDialogHtml
 class memberSetDialogHtml extends menuDialogHtml
     constructor:()->
         super
+
+class selectDialogHtml extends baseDialogHtml
+    constructor:()->
+        super 300, 400
+        @text = '　'
+        @class.push('base-dialog-select')
+        @x = 35
+        @y = 150
+        @setHtml()
+
+class itemBuySelectDialogHtml extends selectDialogHtml
+    constructor:()->
+        super
+
+class discriptionTextDialogHtml extends dialogHtml
+    constructor:(w, h)->
+        super w, h
+        @class.push('base-discription')
+
+class titleDiscription extends discriptionTextDialogHtml
+    constructor:()->
+        super 200, 20
+        @class.push('title-discription')
+
+class itemItemBuyDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 190
+        @y = 130
+        @text = 'アイテム'
+        @setHtml()
+
+class memberItemBuyDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 220
+        @y = 370
+        @text = '部員'
+        @setHtml()
+
+class itemNameDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 180
+        @y = 290
+    setText:(text)->
+        @text = text
+        @setHtml()
+
+class itemDiscription extends discriptionTextDialogHtml
+    constructor:()->
+        super 400, 190
+        @x = 60
+        @y = 340
+    setText:(text)->
+        @text = text
+        @setHtml()

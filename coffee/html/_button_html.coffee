@@ -91,6 +91,29 @@ class saveOkButtonHtml extends baseOkButtonHtml
         game.pause_scene.removeSaveMenu()
 
 ###
+キャンセルボタン
+###
+class baseCancelButtonHtml extends buttonHtml
+    constructor:()->
+        super 150, 45
+        @class.push('base-cancel-button')
+        @text = 'キャンセル'
+        @setHtml()
+    ontouchend: (e) ->
+        @touchendEvent()
+
+###
+アイテム購入のキャンセルボタン
+###
+class itemBuyCancelButtonHtml extends baseCancelButtonHtml
+    constructor:()->
+        super
+        @x = 170
+        @y = 500
+    touchendEvent:() ->
+        game.pause_scene.removeItemBuySelectMenu()
+
+###
 タイトルメニューのボタン
 ###
 class titleMenuButtonHtml extends buttonHtml
@@ -112,7 +135,6 @@ class startGameButtonHtml extends titleMenuButtonHtml
         @text = 'ゲーム開始'
         @setHtml()
     touchendEvent:() ->
-        game.loadGame()
         game.replaceScene(game.main_scene)
 
 ###
@@ -122,8 +144,8 @@ class dialogCloseButton extends systemHtml
     constructor:()->
         super 30, 30
         @image_name = 'close'
-        @x = 375
-        @y = 115
+        @x = 400
+        @y = 100
         @setImageHtml()
 
 class itemBuyDialogCloseButton extends dialogCloseButton

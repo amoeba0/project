@@ -1,3 +1,10 @@
+.modal {
+    background-color: #000000;
+    width: 480px;
+    height: 720px;
+    opacity: 0.3;
+}
+
 .base-button {
     text-align: center;
     cursor: pointer;
@@ -23,6 +30,14 @@
     border: solid 3px #cccccc;
     color: white;
 }
+.base-cancel-button {
+    background-color: #44A5CB;
+    width: 150px;
+    padding: 10px 0px;
+    font: 30px Consolas Monaco MSゴシック;
+    border: solid 3px #cccccc;
+    color: white;
+}
 .image-button {
     cursor: pointer;
 }
@@ -31,7 +46,6 @@
 
 .base-dialog {
     background-color: #ffffff;
-    width: 375px;
     text-align: center;
     font: 22px Consolas Monaco MSゴシック;
     border: solid 3px #aaaaaa;
@@ -42,4 +56,17 @@
 }
 .base-dialog-menu {
     padding: 200px 0px 300px 0px;
+    width: 420px;
+}
+.base-dialog-select {
+    padding: 200px 0px 200px 0px;
+    width: 400px;
+}
+
+
+.base-discription{
+    font: 22px Consolas Monaco MSゴシック;
+}
+.title-discription{
+    font-size: 34px;
 }

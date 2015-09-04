@@ -33,3 +33,24 @@ class TensionGauge extends Param
             @image = @drawRect('#EDA184')
         else
             @image = @drawRect('#F4D2DE')
+
+class ItemSlot extends Param
+    constructor:()->
+        super 55, 55
+        @image = @drawCircle('#aaa')
+        @x = 5
+        @y = 70
+
+class ItemGaugeBack extends Param
+    constructor:()->
+        super 50, 8
+        @image = @drawRect('#333')
+        @x = 8
+        @y = 112
+
+class ItemGauge extends Param
+    constructor:()->
+        super 50, 8
+        @image = @drawRect('#A6E39D')
+        @x = 8
+        @y = 112

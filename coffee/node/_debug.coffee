@@ -5,16 +5,34 @@ class Debug extends appNode
     constructor: () ->
         super
 
-        #全てのデバッグフラグをONにする
-        @all_debug_flg = false
-
         #開始後いきなりメイン画面
-        @force_main_flg = true
+        @force_main_flg = false
         #開始後いきなりポーズ画面
-        @force_pause_flg = false
+        @force_pause_flg = true
+
+        #ゲーム開始時ロードをしない
+        @not_load_flg = false
+        #テストロードに切り替え
+        @test_load_flg = false
+        #テストロード用の値
+        @test_load_val = {
+            'money':1000,
+            'bet':10,
+            'combo':10,
+            'tension':100,
+            'past_fever_num':0,
+            'prev_muse':[]
+        }
 
         #デバッグ用リールにすりかえる
         @lille_flg = false
+        #デバッグ用リール配列
+        @lille_array = [
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1]
+        ]
+
         #降ってくるアイテムの位置が常にプレイヤーの頭上
         @item_flg = false
         #アイテムが降ってくる頻度を上げる
@@ -31,27 +49,13 @@ class Debug extends appNode
         @force_slot_hit = false
         #スロットが2回に1回当たる
         @half_slot_hit = false
-        #デバッグ用リール配列
-        @lille_array = [
-            [1, 1, 1],
-            [1, 1, 1],
-            [1, 1, 1]
-        ]
+
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
         #アイテムを落とした時のテンション増減固定値
         @fix_tention_item_fall_val = 0
         #スロットが当たった時のテンション増減固定値
         @fix_tention_slot_hit_flg = 200
-
-        if @all_debug_flg is true
-            @lille_flg = true
-            @item_flg = true
-            @item_fall_early_flg = true
-            @fix_tention_item_catch_flg = true
-            @fix_tention_item_fall_flg = true
-            @fix_tention_slot_hit_flg = true
-            @force_insert_muse = true
 
         if @force_pause_flg is true
             @force_main_flg = true

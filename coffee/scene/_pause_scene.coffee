@@ -9,11 +9,12 @@ class pauseScene extends appScene
         @pause_item_buy_layer = new pauseItemBuyLayer()
         @pause_item_use_layer = new pauseItemUseLayer()
         @pause_member_set_layer = new pauseMemberSetLayer()
+        @pause_item_buy_select_layer = new pauseItemBuySelectLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
     setSaveMenu: () ->
         @addChild(@pause_save_layer)
-        @_exeGameSave()
+        game.saveGame()
     removeSaveMenu:()->
         @removeChild(@pause_save_layer)
     setItemBuyMenu:()->
@@ -28,6 +29,11 @@ class pauseScene extends appScene
         @addChild(@pause_member_set_layer)
     removeMemberSetMenu:()->
         @removeChild(@pause_member_set_layer)
+    setItemBuySelectMenu:(kind)->
+        @addChild(@pause_item_buy_select_layer)
+        @pause_item_buy_select_layer.setSelectItem(kind)
+    removeItemBuySelectMenu:()->
+        @removeChild(@pause_item_buy_select_layer)
     onenterframe: (e) ->
         @_pauseKeyPush()
     ###
@@ -41,17 +47,3 @@ class pauseScene extends appScene
         else
             if @keyList.pause = true
                 @keyList.pause = false
-    ###
-    データ保存の実行
-    ###
-    _exeGameSave:()->
-        saveData = {
-            'money'    : game.money,
-            'bet'      : game.bet,
-            'combo'    : game.combo,
-            'tension'  : game.tension,
-            'past_fever_num' : game.past_fever_num
-            'prev_muse': JSON.stringify(game.slot_setting.prev_muse)
-        }
-        for key, val of saveData
-            window.localStorage.setItem(key, val)
