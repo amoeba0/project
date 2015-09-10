@@ -6,9 +6,9 @@ class Debug extends appNode
         super
 
         #開始後いきなりメイン画面
-        @force_main_flg = false
+        @force_main_flg = true
         #開始後いきなりポーズ画面
-        @force_pause_flg = true
+        @force_pause_flg = false
 
         #ゲーム開始時ロードをしない
         @not_load_flg = false
@@ -34,7 +34,7 @@ class Debug extends appNode
         ]
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = false
+        @item_flg = true
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する

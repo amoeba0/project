@@ -6,6 +6,7 @@ class gpEffect extends appGroup
         @fever_overlay = new feverOverlay()
         @kirakira_effect = []
         @kirakira_num = 40
+        @item_catch_effect = []
 
     cutInSet:()->
         setting = game.slot_setting
@@ -36,3 +37,9 @@ class gpEffect extends appGroup
     _endKirakiraEffect:()->
         for i in [1..@kirakira_num]
             @removeChild(@kirakira_effect[i-1])
+
+    setItemChatchEffect:(x, y)->
+        @item_catch_effect = []
+        for i in [1..4]
+            @item_catch_effect.push(new itemCatchEffect(i, x, y))
+            @addChild(@item_catch_effect[i-1])

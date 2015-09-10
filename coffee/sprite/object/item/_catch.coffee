@@ -15,6 +15,7 @@ class Catch extends Item
     ###
     hitPlayer:()->
         if game.main_scene.gp_stage_front.player.intersect(@)
+            game.main_scene.gp_effect.setItemChatchEffect(@x, @y)
             game.main_scene.gp_stage_front.removeChild(@)
             game.combo += 1
             game.main_scene.gp_system.combo_text.setValue()

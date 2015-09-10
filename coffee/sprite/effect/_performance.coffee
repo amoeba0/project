@@ -139,3 +139,38 @@ class bigKotori extends panoramaEffect
             @y += @v
         else if @age is @move_end_frm
             game.main_scene.gp_back_panorama.endBigKotori()
+
+###
+アイテムを取った時、弾けるエフェクト
+###
+class itemCatchEffect extends performanceEffect
+    constructor:(num, x, y)->
+        super 50, 47
+        @image = game.imageload('heart')
+        view_sec = 1
+        @vx = Math.floor((80 * 10) / (view_sec * game.fps)) / 10
+        if num % 2 is 0
+            @vx *= -1
+        @opacityV = Math.floor(100 / (view_sec * game.fps)) / 100
+        unit = Math.floor(((num - 1) / 2))
+        @gravity = 0.9 + unit * 0.4
+        vy_init = -10 - unit * 6
+        scale_init = 0.2
+        @scaleV = Math.floor(((1 - scale_init - (unit * 0.1)) * 100) / (view_sec * game.fps)) / 100
+        @scaleX = scale_init
+        @scaleY = scale_init
+        @opacity = 1
+        @x = x + 5
+        @y = y
+        @vy = vy_init
+    onenterframe:()->
+        @x += @vx
+        @vy += @gravity
+        @y += @vy
+        @opacity -= @opacityV
+        @scaleX += @scaleV
+        @scaleY += @scaleV
+        if @opacity < 0
+            @remove()
+    remove:()->
+        game.main_scene.gp_effect.removeChild(@)

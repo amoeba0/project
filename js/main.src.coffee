@@ -264,7 +264,7 @@ class LoveliveGame extends catchAndSlotGame
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
 
@@ -389,6 +389,7 @@ class LoveliveGame extends catchAndSlotGame
             @_gameInitSetting()
     ###
     ゲームをセーブする、ブラウザのローカルストレージへ
+    TODO リールの状態もセーブする
     ###
     saveGame:()->
         saveData = {
@@ -450,6 +451,7 @@ class gpEffect extends appGroup
         @fever_overlay = new feverOverlay()
         @kirakira_effect = []
         @kirakira_num = 40
+        @item_catch_effect = []
 
     cutInSet:()->
         setting = game.slot_setting
@@ -480,6 +482,12 @@ class gpEffect extends appGroup
     _endKirakiraEffect:()->
         for i in [1..@kirakira_num]
             @removeChild(@kirakira_effect[i-1])
+
+    setItemChatchEffect:(x, y)->
+        @item_catch_effect = []
+        for i in [1..4]
+            @item_catch_effect.push(new itemCatchEffect(i, x, y))
+            @addChild(@item_catch_effect[i-1])
 class gpPanorama extends appGroup
     constructor:()->
         super
@@ -1607,9 +1615,9 @@ class Debug extends appNode
         super
 
         #開始後いきなりメイン画面
-        @force_main_flg = false
+        @force_main_flg = true
         #開始後いきなりポーズ画面
-        @force_pause_flg = true
+        @force_pause_flg = false
 
         #ゲーム開始時ロードをしない
         @not_load_flg = false
@@ -1635,7 +1643,7 @@ class Debug extends appNode
         ]
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = false
+        @item_flg = true
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する
@@ -2361,6 +2369,13 @@ class FrontPanorama extends Panorama
 class effect extends appSprite
     constructor: (w, h) ->
         super w, h
+    drawCircle: (color) ->
+        @surface = new Surface(@w, @h)
+        @context = @surface.context
+        @context.fillStyle = color
+        @context.arc(@w / 2, @h / 2, @w / 2, 0, Math.PI * 2, true)
+        @context.fill()
+        return @surface
 ###
 カットインの画像サイズ、頭の位置で760px
 ###
@@ -2563,6 +2578,41 @@ class bigKotori extends panoramaEffect
             @y += @v
         else if @age is @move_end_frm
             game.main_scene.gp_back_panorama.endBigKotori()
+
+###
+アイテムを取った時、弾けるエフェクト
+###
+class itemCatchEffect extends performanceEffect
+    constructor:(num, x, y)->
+        super 50, 47
+        @image = game.imageload('heart')
+        view_sec = 1
+        @vx = Math.floor((80 * 10) / (view_sec * game.fps)) / 10
+        if num % 2 is 0
+            @vx *= -1
+        @opacityV = Math.floor(100 / (view_sec * game.fps)) / 100
+        unit = Math.floor(((num - 1) / 2))
+        @gravity = 0.9 + unit * 0.4
+        vy_init = -10 - unit * 6
+        scale_init = 0.2
+        @scaleV = Math.floor(((1 - scale_init - (unit * 0.1)) * 100) / (view_sec * game.fps)) / 100
+        @scaleX = scale_init
+        @scaleY = scale_init
+        @opacity = 1
+        @x = x + 5
+        @y = y
+        @vy = vy_init
+    onenterframe:()->
+        @x += @vx
+        @vy += @gravity
+        @y += @vy
+        @opacity -= @opacityV
+        @scaleX += @scaleV
+        @scaleY += @scaleV
+        if @opacity < 0
+            @remove()
+    remove:()->
+        game.main_scene.gp_effect.removeChild(@)
 
 class appObject extends appSprite
     ###
@@ -2840,6 +2890,7 @@ class Catch extends Item
     ###
     hitPlayer:()->
         if game.main_scene.gp_stage_front.player.intersect(@)
+            game.main_scene.gp_effect.setItemChatchEffect(@x, @y)
             game.main_scene.gp_stage_front.removeChild(@)
             game.combo += 1
             game.main_scene.gp_system.combo_text.setValue()

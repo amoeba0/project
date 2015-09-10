@@ -13,7 +13,7 @@ class LoveliveGame extends catchAndSlotGame
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
 
@@ -138,6 +138,7 @@ class LoveliveGame extends catchAndSlotGame
             @_gameInitSetting()
     ###
     ゲームをセーブする、ブラウザのローカルストレージへ
+    TODO リールの状態もセーブする
     ###
     saveGame:()->
         saveData = {
