@@ -264,9 +264,9 @@ class LoveliveGame extends catchAndSlotGame
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart', 'explosion']
         #音声リスト
-        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
+        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion']
 
         @keybind(90, 'z')
         @keybind(88, 'x')
@@ -831,10 +831,12 @@ class stageFront extends gpStage
         @itemFallFrm = 0 #アイテムを降らせる周期（フレーム）
         @catchItems = [] #キャッチアイテムのインスタンスを格納
         @nowCatchItemsNum = 0
-        @missItemFallSycle = 4 #ハズレアイテムを取る周期
+        #TODO 4
+        @missItemFallSycle = 1 #ハズレアイテムを取る周期
         @missItemFallSycleNow = 0
         @catchMissItems = []
         @nowCatchMissItemsNum = 0
+        @explotion_effect = new explosionEffect()
         @initial()
     initial:()->
         @setPlayer()
@@ -899,6 +901,10 @@ class stageFront extends gpStage
             @addChild(@catchMissItems[@nowCatchMissItemsNum])
             @catchMissItems[@nowCatchMissItemsNum].setPosition()
             @nowCatchMissItemsNum += 1
+
+    setExplosionEffect:(x, y)->
+        @addChild(@explotion_effect)
+        @explotion_effect.setInit(x, y)
 
 
 ###
@@ -2614,6 +2620,41 @@ class itemCatchEffect extends performanceEffect
     remove:()->
         game.main_scene.gp_effect.removeChild(@)
 
+###
+爆発
+###
+class explosionEffect extends performanceEffect
+    constructor:()->
+        super 100, 100
+        @image = game.imageload('explosion')
+        @explosion_se = game.soundload('explosion')
+        @view_frm = Math.floor(0.6 * game.fps)
+        @view_frm_half = Math.floor(@view_frm / 2)
+        @vy = Math.floor(50 * 10 / @view_frm) / 10
+        @opacityV = Math.floor(100 / (@view_frm_half)) / 100
+        @scale_init = 0.2
+        @scaleV = Math.floor(((1 - @scale_init) * 100) / @view_frm_half) / 100
+    setInit:(x, y)->
+        @x = x - 10
+        @y = y - 30
+        @scaleX = @scale_init
+        @scaleY = @scale_init
+        @opacity = 1
+        @age = 0
+        game.sePlay(@explosion_se)
+    onenterframe:()->
+        if @age <= @view_frm
+            @y -= @vy
+            if @age <= @view_frm_half
+                @scaleX += @scaleV
+                @scaleY += @scaleV
+            else
+                @opacity -= @opacityV
+        if @opacity < 0
+            @remove()
+    remove:()->
+        game.main_scene.gp_stage_front.removeChild(@)
+
 class appObject extends appSprite
     ###
     制約
@@ -2948,9 +2989,12 @@ class OnionCatch extends Catch
         @scaleY = 1.5
     hitPlayer:()->
         if game.main_scene.gp_stage_front.player.intersect(@)
+            game.main_scene.gp_stage_front.setExplosionEffect(@x, @y)
             game.sePlay(@miss_se)
             game.main_scene.gp_stage_front.removeChild(@)
             game.tensionSetValueMissItemCatch()
+            game.main_scene.gp_stage_front.player.vx = 0
+            game.main_scene.gp_stage_front.player.vy = 0
     removeOnFloor:()->
         if @y > game.height + @h
             game.main_scene.gp_stage_front.removeChild(@)

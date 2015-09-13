@@ -174,3 +174,38 @@ class itemCatchEffect extends performanceEffect
             @remove()
     remove:()->
         game.main_scene.gp_effect.removeChild(@)
+
+###
+爆発
+###
+class explosionEffect extends performanceEffect
+    constructor:()->
+        super 100, 100
+        @image = game.imageload('explosion')
+        @explosion_se = game.soundload('explosion')
+        @view_frm = Math.floor(0.6 * game.fps)
+        @view_frm_half = Math.floor(@view_frm / 2)
+        @vy = Math.floor(50 * 10 / @view_frm) / 10
+        @opacityV = Math.floor(100 / (@view_frm_half)) / 100
+        @scale_init = 0.2
+        @scaleV = Math.floor(((1 - @scale_init) * 100) / @view_frm_half) / 100
+    setInit:(x, y)->
+        @x = x - 10
+        @y = y - 30
+        @scaleX = @scale_init
+        @scaleY = @scale_init
+        @opacity = 1
+        @age = 0
+        game.sePlay(@explosion_se)
+    onenterframe:()->
+        if @age <= @view_frm
+            @y -= @vy
+            if @age <= @view_frm_half
+                @scaleX += @scaleV
+                @scaleY += @scaleV
+            else
+                @opacity -= @opacityV
+        if @opacity < 0
+            @remove()
+    remove:()->
+        game.main_scene.gp_stage_front.removeChild(@)

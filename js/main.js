@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, imageHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemCatchEffect, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseDialogCloseButton, itemUseDialogHtml, jumpButton, kirakiraEffect, leftButton, lowBetButton, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, menuDialogHtml, modal, moneyText, panoramaEffect, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setMemberButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, useItemButtonHtml, useItemHtml, useMemberHtml,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, explosionEffect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, imageHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemCatchEffect, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseDialogCloseButton, itemUseDialogHtml, jumpButton, kirakiraEffect, leftButton, lowBetButton, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, menuDialogHtml, modal, moneyText, panoramaEffect, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setMemberButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, useItemButtonHtml, useItemHtml, useMemberHtml,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -469,8 +469,8 @@ LoveliveGame = (function(_super) {
     this.width = 480;
     this.height = 720;
     this.fps = 24;
-    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart'];
-    this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear'];
+    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart', 'explosion'];
+    this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion'];
     this.keybind(90, 'z');
     this.keybind(88, 'x');
     this.preloadAll();
@@ -1308,10 +1308,11 @@ stageFront = (function(_super) {
     this.itemFallFrm = 0;
     this.catchItems = [];
     this.nowCatchItemsNum = 0;
-    this.missItemFallSycle = 4;
+    this.missItemFallSycle = 1;
     this.missItemFallSycleNow = 0;
     this.catchMissItems = [];
     this.nowCatchMissItemsNum = 0;
+    this.explotion_effect = new explosionEffect();
     this.initial();
   }
 
@@ -1406,6 +1407,11 @@ stageFront = (function(_super) {
       this.catchMissItems[this.nowCatchMissItemsNum].setPosition();
       return this.nowCatchMissItemsNum += 1;
     }
+  };
+
+  stageFront.prototype.setExplosionEffect = function(x, y) {
+    this.addChild(this.explotion_effect);
+    return this.explotion_effect.setInit(x, y);
   };
 
   return stageFront;
@@ -4236,6 +4242,59 @@ itemCatchEffect = (function(_super) {
 
 })(performanceEffect);
 
+
+/*
+爆発
+ */
+
+explosionEffect = (function(_super) {
+  __extends(explosionEffect, _super);
+
+  function explosionEffect() {
+    explosionEffect.__super__.constructor.call(this, 100, 100);
+    this.image = game.imageload('explosion');
+    this.explosion_se = game.soundload('explosion');
+    this.view_frm = Math.floor(0.6 * game.fps);
+    this.view_frm_half = Math.floor(this.view_frm / 2);
+    this.vy = Math.floor(50 * 10 / this.view_frm) / 10;
+    this.opacityV = Math.floor(100 / this.view_frm_half) / 100;
+    this.scale_init = 0.2;
+    this.scaleV = Math.floor(((1 - this.scale_init) * 100) / this.view_frm_half) / 100;
+  }
+
+  explosionEffect.prototype.setInit = function(x, y) {
+    this.x = x - 10;
+    this.y = y - 30;
+    this.scaleX = this.scale_init;
+    this.scaleY = this.scale_init;
+    this.opacity = 1;
+    this.age = 0;
+    return game.sePlay(this.explosion_se);
+  };
+
+  explosionEffect.prototype.onenterframe = function() {
+    if (this.age <= this.view_frm) {
+      this.y -= this.vy;
+      if (this.age <= this.view_frm_half) {
+        this.scaleX += this.scaleV;
+        this.scaleY += this.scaleV;
+      } else {
+        this.opacity -= this.opacityV;
+      }
+    }
+    if (this.opacity < 0) {
+      return this.remove();
+    }
+  };
+
+  explosionEffect.prototype.remove = function() {
+    return game.main_scene.gp_stage_front.removeChild(this);
+  };
+
+  return explosionEffect;
+
+})(performanceEffect);
+
 appObject = (function(_super) {
   __extends(appObject, _super);
 
@@ -4750,9 +4809,12 @@ OnionCatch = (function(_super) {
 
   OnionCatch.prototype.hitPlayer = function() {
     if (game.main_scene.gp_stage_front.player.intersect(this)) {
+      game.main_scene.gp_stage_front.setExplosionEffect(this.x, this.y);
       game.sePlay(this.miss_se);
       game.main_scene.gp_stage_front.removeChild(this);
-      return game.tensionSetValueMissItemCatch();
+      game.tensionSetValueMissItemCatch();
+      game.main_scene.gp_stage_front.player.vx = 0;
+      return game.main_scene.gp_stage_front.player.vy = 0;
     }
   };
 

@@ -13,9 +13,9 @@ class LoveliveGame extends catchAndSlotGame
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart', 'explosion']
         #音声リスト
-        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear']
+        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion']
 
         @keybind(90, 'z')
         @keybind(88, 'x')

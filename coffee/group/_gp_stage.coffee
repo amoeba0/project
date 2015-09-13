@@ -15,10 +15,12 @@ class stageFront extends gpStage
         @itemFallFrm = 0 #アイテムを降らせる周期（フレーム）
         @catchItems = [] #キャッチアイテムのインスタンスを格納
         @nowCatchItemsNum = 0
-        @missItemFallSycle = 4 #ハズレアイテムを取る周期
+        #TODO 4
+        @missItemFallSycle = 1 #ハズレアイテムを取る周期
         @missItemFallSycleNow = 0
         @catchMissItems = []
         @nowCatchMissItemsNum = 0
+        @explotion_effect = new explosionEffect()
         @initial()
     initial:()->
         @setPlayer()
@@ -83,6 +85,10 @@ class stageFront extends gpStage
             @addChild(@catchMissItems[@nowCatchMissItemsNum])
             @catchMissItems[@nowCatchMissItemsNum].setPosition()
             @nowCatchMissItemsNum += 1
+
+    setExplosionEffect:(x, y)->
+        @addChild(@explotion_effect)
+        @explotion_effect.setInit(x, y)
 
 
 ###

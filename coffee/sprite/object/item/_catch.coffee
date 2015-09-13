@@ -73,9 +73,12 @@ class OnionCatch extends Catch
         @scaleY = 1.5
     hitPlayer:()->
         if game.main_scene.gp_stage_front.player.intersect(@)
+            game.main_scene.gp_stage_front.setExplosionEffect(@x, @y)
             game.sePlay(@miss_se)
             game.main_scene.gp_stage_front.removeChild(@)
             game.tensionSetValueMissItemCatch()
+            game.main_scene.gp_stage_front.player.vx = 0
+            game.main_scene.gp_stage_front.player.vy = 0
     removeOnFloor:()->
         if @y > game.height + @h
             game.main_scene.gp_stage_front.removeChild(@)
