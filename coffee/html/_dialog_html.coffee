@@ -78,6 +78,22 @@ class memberItemBuyDiscription extends titleDiscription
         @text = '部員'
         @setHtml()
 
+class useSetDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 180
+        @y = 170
+        @text = 'セット中'
+        @setHtml()
+
+class useHaveDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 170
+        @y = 370
+        @text = '所持リスト'
+        @setHtml()
+
 class itemNameDiscription extends titleDiscription
     constructor:()->
         super
@@ -90,8 +106,29 @@ class itemNameDiscription extends titleDiscription
 class itemDiscription extends discriptionTextDialogHtml
     constructor:()->
         super 400, 190
-        @x = 60
+        @x = 50
         @y = 340
     setText:(text)->
         @text = text
+        @setHtml()
+
+class longTitleDiscription extends discriptionTextDialogHtml
+    constructor:()->
+        super 250, 20
+        @class.push('head-title-discription')
+
+class itemUseDiscription extends longTitleDiscription
+    constructor:()->
+        super
+        @x = 130
+        @y = 110
+        @text = 'アイテムを使う'
+        @setHtml()
+
+class memberSetDiscription extends longTitleDiscription
+    constructor:()->
+        super
+        @x = 120
+        @y = 110
+        @text = '部員を編成する'
         @setHtml()

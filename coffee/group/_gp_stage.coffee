@@ -15,8 +15,7 @@ class stageFront extends gpStage
         @itemFallFrm = 0 #アイテムを降らせる周期（フレーム）
         @catchItems = [] #キャッチアイテムのインスタンスを格納
         @nowCatchItemsNum = 0
-        #TODO 4
-        @missItemFallSycle = 1 #ハズレアイテムを取る周期
+        @missItemFallSycle = 4 #ハズレアイテムを取る周期
         @missItemFallSycleNow = 0
         @catchMissItems = []
         @nowCatchMissItemsNum = 0

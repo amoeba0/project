@@ -14,3 +14,9 @@ class systemHtml extends appHtml
         if @is_button is true
             tmp_class = 'image-button'
         @_element.innerHTML = '<img src="images/html/'+@image_name+'.png" class="'+tmp_class+'"></img>'
+    changeNotButton:()->
+        @is_button = false
+        @setImageHtml()
+    changeIsButton:()->
+        @is_button = true
+        @setImageHtml()

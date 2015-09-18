@@ -38,6 +38,14 @@
     border: solid 3px #cccccc;
     color: white;
 }
+.base-buy-button {
+    background-color: #A4C520;
+    width: 150px;
+    padding: 7px 0px;
+    font: 37px Consolas Monaco MSゴシック;
+    border: solid 3px #cccccc;
+    color: white;
+}
 .image-button {
     cursor: pointer;
 }
@@ -69,4 +77,8 @@
 }
 .title-discription{
     font-size: 34px;
+}
+.head-title-discription{
+    font-size: 34px;
+    text-decoration: underline;
 }

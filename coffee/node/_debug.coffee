@@ -21,7 +21,8 @@ class Debug extends appNode
             'combo':10,
             'tension':100,
             'past_fever_num':0,
-            'prev_muse':[]
+            'prev_muse':[],
+            'item_have_now':[]
         }
 
         #デバッグ用リールにすりかえる
@@ -34,7 +35,7 @@ class Debug extends appNode
         ]
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = true
+        @item_flg = false
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する

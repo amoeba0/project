@@ -37,12 +37,15 @@ class buyItemHtml extends itemHtml
     constructor:(kind)->
         super kind
         @positionY = 160
+        @is_exist = true
     ontouchend: () ->
-        @dispItemBuySelectDialog(@item_kind)
+        if @is_exist is true
+            @dispItemBuySelectDialog(@item_kind)
 
 class useItemHtml extends itemHtml
     constructor:(kind)->
         super kind
+        @positionY = 400
 
 ###
 部員
@@ -56,18 +59,22 @@ class buyMemberHtml extends memberHtml
     constructor:(kind)->
         super kind
         @positionY = 400
+        @is_exist = true
     ontouchend: () ->
-        @dispItemBuySelectDialog(@item_kind)
+        if @is_exist is true
+            @dispItemBuySelectDialog(@item_kind)
 
 class useMemberHtml extends memberHtml
     constructor:(kind)->
         super kind
+        @positionY = 400
 
 class selectItemImage extends imageHtml
     constructor:()->
         super 100, 100
         @x = 200
         @y = 180
+        @is_button = false
     setImage:(image)->
         @image_name = image
         @setImageHtml()

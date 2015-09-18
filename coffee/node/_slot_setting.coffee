@@ -161,12 +161,12 @@ class slotSetting extends appNode
                 'durationSec':2,
                 'conditoin':'絶対でないよ',
                 'condFunc':()->
-                    return false
+                    return true
             },
             11:{
                 'name':'高坂穂乃果',
                 'image':'test_image',
-                'discription':'部員に穂乃果を追加<br>　できるようになる',
+                'discription':'部員に穂乃果を追加できるようになる',
                 'price':0,
                 'conditoin':'穂乃果でスロットを3つ揃える',
                 'condFunc':()->

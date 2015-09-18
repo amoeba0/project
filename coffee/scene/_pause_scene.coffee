@@ -22,10 +22,12 @@ class pauseScene extends appScene
     removeItemBuyMenu:()->
         @removeChild(@pause_item_buy_layer)
     setItemUseMenu:()->
+        @pause_item_use_layer.resetItemList()
         @addChild(@pause_item_use_layer)
     removeItemUseMenu:()->
         @removeChild(@pause_item_use_layer)
     setMemberSetMenu:()->
+        @pause_member_set_layer.resetItemList()
         @addChild(@pause_member_set_layer)
     removeMemberSetMenu:()->
         @removeChild(@pause_member_set_layer)

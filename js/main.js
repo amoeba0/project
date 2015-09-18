@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, explosionEffect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, imageHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemCatchEffect, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseDialogCloseButton, itemUseDialogHtml, jumpButton, kirakiraEffect, leftButton, lowBetButton, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, menuDialogHtml, modal, moneyText, panoramaEffect, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setMemberButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, useItemButtonHtml, useItemHtml, useMemberHtml,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseByuButtonHtml, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, explosionEffect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, imageHtml, itemBuyBuyButtonHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemCatchEffect, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseDialogCloseButton, itemUseDialogHtml, itemUseDiscription, jumpButton, kirakiraEffect, leftButton, longTitleDiscription, lowBetButton, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, memberSetDiscription, menuDialogHtml, modal, moneyText, panoramaEffect, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setMemberButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, useHaveDiscription, useItemButtonHtml, useItemHtml, useMemberHtml, useSetDiscription,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -288,6 +288,7 @@ pauseItemBuyLayer = (function(_super) {
       this.member_list[i] = new buyMemberHtml(i);
     }
     this.setItemList();
+    this.resetItemList();
     this.item_title = new itemItemBuyDiscription();
     this.addChild(this.item_title);
     this.member_title = new memberItemBuyDiscription();
@@ -312,6 +313,39 @@ pauseItemBuyLayer = (function(_super) {
     return _results;
   };
 
+  pauseItemBuyLayer.prototype.resetItemList = function() {
+    var i, master_list, _i;
+    master_list = game.slot_setting.item_list;
+    for (i = _i = 1; _i <= 19; i = ++_i) {
+      if (master_list[i] === void 0) {
+        master_list[i] = master_list[0];
+      }
+    }
+    this._resetItemList(this.item_list, master_list);
+    return this._resetItemList(this.member_list, master_list);
+  };
+
+  pauseItemBuyLayer.prototype._resetItemList = function(item_list, master_list) {
+    var item_key, item_val, _results;
+    _results = [];
+    for (item_key in item_list) {
+      item_val = item_list[item_key];
+      if (master_list[item_key].condFunc() === false || master_list[item_key].price > game.money) {
+        item_val.opacity = 0.5;
+      } else {
+        item_val.opacity = 1;
+      }
+      if (game.item_have_now.indexOf(parseInt(item_key)) !== -1) {
+        item_val.opacity = 0;
+        item_val.is_exist = false;
+        _results.push(item_val.changeNotButton());
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
   return pauseItemBuyLayer;
 
 })(appDomLayer);
@@ -323,6 +357,7 @@ pauseItemBuySelectLayer = (function(_super) {
     pauseItemBuySelectLayer.__super__.constructor.apply(this, arguments);
     this.dialog = new itemBuySelectDialogHtml();
     this.cancel_button = new itemBuyCancelButtonHtml();
+    this.buy_button = new itemBuyBuyButtonHtml();
     this.item_name = new itemNameDiscription();
     this.item_image = new selectItemImage();
     this.item_discription = new itemDiscription();
@@ -332,32 +367,60 @@ pauseItemBuySelectLayer = (function(_super) {
     this.addChild(this.item_name);
     this.addChild(this.item_discription);
     this.addChild(this.cancel_button);
+    this.addChild(this.buy_button);
+    this.item_kind = 0;
+    this.item_options = [];
   }
 
   pauseItemBuySelectLayer.prototype.setSelectItem = function(kind) {
-    var discription, item_options;
-    item_options = game.slot_setting.item_list[kind];
-    if (item_options === void 0) {
-      item_options = game.slot_setting.item_list[0];
+    var discription;
+    this.item_kind = kind;
+    this.item_options = game.slot_setting.item_list[kind];
+    if (this.item_options === void 0) {
+      this.item_options = game.slot_setting.item_list[0];
     }
-    this.item_name.setText(item_options.name);
-    this.item_image.setImage(item_options.image);
-    discription = this._setDiscription(item_options);
-    return this.item_discription.setText(discription);
+    this.item_name.setText(this.item_options.name);
+    this.item_image.setImage(this.item_options.image);
+    discription = this._setDiscription();
+    this.item_discription.setText(discription);
+    return this._setButton();
   };
 
-  pauseItemBuySelectLayer.prototype._setDiscription = function(item_options) {
+  pauseItemBuySelectLayer.prototype._setDiscription = function() {
     var text;
-    text = '効果：' + item_options.discription;
-    if (item_options.durationSec !== void 0) {
-      text += '<br>持続時間：' + item_options.durationSec + '秒';
+    text = '効果：' + this.item_options.discription;
+    if (this.item_options.durationSec !== void 0) {
+      text += '<br>持続時間：' + this.item_options.durationSec + '秒';
     }
-    if (item_options.condFunc() === true) {
-      text += '<br>値段：' + item_options.price + '円';
+    if (this.item_options.condFunc() === true) {
+      text += '<br>値段：' + this.item_options.price + '円' + '(所持金' + game.money + '円)';
     } else {
-      text += '<br>出現条件：' + item_options.conditoin;
+      text += '<br>出現条件：' + this.item_options.conditoin;
     }
     return text;
+  };
+
+  pauseItemBuySelectLayer.prototype._setButton = function() {
+    if (this.item_options.condFunc() === true && game.money >= this.item_options.price) {
+      this.cancel_button.setBuyPossiblePosition();
+      return this.buy_button.setBuyPossiblePosition();
+    } else {
+      this.cancel_button.setBuyImpossiblePositon();
+      return this.buy_button.setBuyImpossiblePositon();
+    }
+  };
+
+
+  /*
+  アイテムの購入
+   */
+
+  pauseItemBuySelectLayer.prototype.buyItem = function() {
+    game.money -= this.item_options.price;
+    game.item_have_now.push(this.item_kind);
+    game.pause_scene.removeItemBuySelectMenu();
+    game.pause_scene.pause_item_buy_layer.resetItemList();
+    return game.main_scene.gp_system.money_text.setValue();
   };
 
   return pauseItemBuySelectLayer;
@@ -368,13 +431,54 @@ pauseItemUseLayer = (function(_super) {
   __extends(pauseItemUseLayer, _super);
 
   function pauseItemUseLayer() {
+    var i, _i;
     pauseItemUseLayer.__super__.constructor.apply(this, arguments);
     this.dialog = new itemUseDialogHtml();
     this.close_button = new itemUseDialogCloseButton();
+    this.menu_title = new itemUseDiscription();
+    this.set_title = new useSetDiscription();
+    this.have_title = new useHaveDiscription();
     this.addChild(this.modal);
     this.addChild(this.dialog);
     this.addChild(this.close_button);
+    this.addChild(this.menu_title);
+    this.addChild(this.set_title);
+    this.addChild(this.have_title);
+    this.item_list = {};
+    for (i = _i = 1; _i <= 9; i = ++_i) {
+      this.item_list[i] = new useItemHtml(i);
+    }
+    this.setItemList();
   }
+
+  pauseItemUseLayer.prototype.setItemList = function() {
+    var item_key, item_val, _ref, _results;
+    _ref = this.item_list;
+    _results = [];
+    for (item_key in _ref) {
+      item_val = _ref[item_key];
+      this.addChild(item_val);
+      _results.push(item_val.setPosition());
+    }
+    return _results;
+  };
+
+  pauseItemUseLayer.prototype.resetItemList = function() {
+    var item_key, item_val, _ref, _results;
+    _ref = this.item_list;
+    _results = [];
+    for (item_key in _ref) {
+      item_val = _ref[item_key];
+      if (game.item_have_now.indexOf(parseInt(item_key)) !== -1) {
+        item_val.opacity = 1;
+        _results.push(item_val.changeIsButton());
+      } else {
+        item_val.opacity = 0.5;
+        _results.push(item_val.changeNotButton());
+      }
+    }
+    return _results;
+  };
 
   return pauseItemUseLayer;
 
@@ -405,13 +509,54 @@ pauseMemberSetLayer = (function(_super) {
   __extends(pauseMemberSetLayer, _super);
 
   function pauseMemberSetLayer() {
+    var i, _i;
     pauseMemberSetLayer.__super__.constructor.apply(this, arguments);
     this.dialog = new memberSetDialogHtml();
     this.close_button = new memberSetDialogCloseButton();
+    this.menu_title = new memberSetDiscription();
+    this.set_title = new useSetDiscription();
+    this.have_title = new useHaveDiscription();
     this.addChild(this.modal);
     this.addChild(this.dialog);
     this.addChild(this.close_button);
+    this.addChild(this.menu_title);
+    this.addChild(this.set_title);
+    this.addChild(this.have_title);
+    this.member_list = {};
+    for (i = _i = 11; _i <= 19; i = ++_i) {
+      this.member_list[i] = new useMemberHtml(i);
+    }
+    this.setItemList();
   }
+
+  pauseMemberSetLayer.prototype.setItemList = function() {
+    var member_key, member_val, _ref, _results;
+    _ref = this.member_list;
+    _results = [];
+    for (member_key in _ref) {
+      member_val = _ref[member_key];
+      this.addChild(member_val);
+      _results.push(member_val.setPosition());
+    }
+    return _results;
+  };
+
+  pauseMemberSetLayer.prototype.resetItemList = function() {
+    var member_key, member_val, _ref, _results;
+    _ref = this.member_list;
+    _results = [];
+    for (member_key in _ref) {
+      member_val = _ref[member_key];
+      if (game.item_have_now.indexOf(parseInt(member_key)) !== -1) {
+        member_val.opacity = 1;
+        _results.push(member_val.changeIsButton());
+      } else {
+        member_val.opacity = 0.5;
+        _results.push(member_val.changeNotButton());
+      }
+    }
+    return _results;
+  };
 
   return pauseMemberSetLayer;
 
@@ -474,8 +619,6 @@ LoveliveGame = (function(_super) {
     this.keybind(90, 'z');
     this.keybind(88, 'x');
     this.preloadAll();
-    this.slot_setting.setMuseMember();
-    this.musePreLoad();
     this.money_init = 100;
     this.fever = false;
     this.fever_down_tension = 0;
@@ -486,6 +629,7 @@ LoveliveGame = (function(_super) {
     this.combo = 0;
     this.tension = 0;
     this.past_fever_num = 0;
+    this.item_have_now = [];
     this.money = this.money_init;
   }
 
@@ -502,11 +646,15 @@ LoveliveGame = (function(_super) {
       if (this.debug.force_main_flg === true) {
         this.pushScene(this.main_scene);
         if (this.debug.force_pause_flg === true) {
-          return this.pushScene(this.pause_scene);
+          this.pushScene(this.pause_scene);
         }
       } else {
-        return this.pushScene(this.title_scene);
+        this.pushScene(this.title_scene);
       }
+      if (this.slot_setting.now_muse_num === 0) {
+        this.slot_setting.setMuseMember();
+      }
+      return this.musePreLoad();
     }
   };
 
@@ -639,7 +787,6 @@ LoveliveGame = (function(_super) {
 
   /*
   ゲームをセーブする、ブラウザのローカルストレージへ
-  TODO リールの状態もセーブする
    */
 
   LoveliveGame.prototype.saveGame = function() {
@@ -650,7 +797,12 @@ LoveliveGame = (function(_super) {
       'combo': this.combo,
       'tension': this.tension,
       'past_fever_num': this.past_fever_num,
-      'prev_muse': JSON.stringify(this.slot_setting.prev_muse)
+      'prev_muse': JSON.stringify(this.slot_setting.prev_muse),
+      'now_muse_num': this.slot_setting.now_muse_num,
+      'left_lille': JSON.stringify(this.main_scene.gp_slot.left_lille.lilleArray),
+      'middle_lille': JSON.stringify(this.main_scene.gp_slot.middle_lille.lilleArray),
+      'right_lille': JSON.stringify(this.main_scene.gp_slot.right_lille.lilleArray),
+      'item_have_now': JSON.stringify(this.item_have_now)
     };
     _results = [];
     for (key in saveData) {
@@ -674,7 +826,12 @@ LoveliveGame = (function(_super) {
       this.combo = this._loadNumber('combo');
       this.tension = this._loadNumber('tension');
       this.past_fever_num = this._loadNumber('past_fever_num');
-      return this.slot_setting.prev_muse = JSON.parse(this.local_storage.getItem('prev_muse'));
+      this.slot_setting.prev_muse = JSON.parse(this.local_storage.getItem('prev_muse'));
+      this.slot_setting.now_muse_num = this._loadNumber('now_muse_num');
+      this.main_scene.gp_slot.left_lille.lilleArray = JSON.parse(this.local_storage.getItem('left_lille'));
+      this.main_scene.gp_slot.middle_lille.lilleArray = JSON.parse(this.local_storage.getItem('middle_lille'));
+      this.main_scene.gp_slot.right_lille.lilleArray = JSON.parse(this.local_storage.getItem('right_lille'));
+      return this.item_have_now = JSON.parse(this.local_storage.getItem('item_have_now'));
     }
   };
 
@@ -702,7 +859,8 @@ LoveliveGame = (function(_super) {
     this.combo = data.combo;
     this.tension = data.tension;
     this.past_fever_num = data.past_fever_num;
-    return this.slot_setting.prev_muse = data.prev_muse;
+    this.slot_setting.prev_muse = data.prev_muse;
+    return this.item_have_now = data.item_have_now;
   };
 
 
@@ -716,7 +874,8 @@ LoveliveGame = (function(_super) {
     sys.money_text.setValue();
     sys.bet_text.setValue();
     sys.combo_text.setValue();
-    return sys.tension_gauge.setValue();
+    sys.tension_gauge.setValue();
+    return this.pause_scene.pause_item_buy_layer.resetItemList();
   };
 
   return LoveliveGame;
@@ -1308,7 +1467,7 @@ stageFront = (function(_super) {
     this.itemFallFrm = 0;
     this.catchItems = [];
     this.nowCatchItemsNum = 0;
-    this.missItemFallSycle = 1;
+    this.missItemFallSycle = 4;
     this.missItemFallSycleNow = 0;
     this.catchMissItems = [];
     this.nowCatchMissItemsNum = 0;
@@ -1848,6 +2007,16 @@ systemHtml = (function(_super) {
     return this._element.innerHTML = '<img src="images/html/' + this.image_name + '.png" class="' + tmp_class + '"></img>';
   };
 
+  systemHtml.prototype.changeNotButton = function() {
+    this.is_button = false;
+    return this.setImageHtml();
+  };
+
+  systemHtml.prototype.changeIsButton = function() {
+    this.is_button = true;
+    return this.setImageHtml();
+  };
+
   return systemHtml;
 
 })(appHtml);
@@ -2067,7 +2236,6 @@ itemBuyCancelButtonHtml = (function(_super) {
 
   function itemBuyCancelButtonHtml() {
     itemBuyCancelButtonHtml.__super__.constructor.apply(this, arguments);
-    this.x = 170;
     this.y = 500;
   }
 
@@ -2075,9 +2243,69 @@ itemBuyCancelButtonHtml = (function(_super) {
     return game.pause_scene.removeItemBuySelectMenu();
   };
 
+  itemBuyCancelButtonHtml.prototype.setBuyImpossiblePositon = function() {
+    return this.x = 170;
+  };
+
+  itemBuyCancelButtonHtml.prototype.setBuyPossiblePosition = function() {
+    return this.x = 250;
+  };
+
   return itemBuyCancelButtonHtml;
 
 })(baseCancelButtonHtml);
+
+
+/*
+購入ボタン
+ */
+
+baseByuButtonHtml = (function(_super) {
+  __extends(baseByuButtonHtml, _super);
+
+  function baseByuButtonHtml() {
+    baseByuButtonHtml.__super__.constructor.call(this, 150, 45);
+    this["class"].push('base-buy-button');
+    this.text = '購入';
+    this.setHtml();
+  }
+
+  baseByuButtonHtml.prototype.ontouchend = function(e) {
+    return this.touchendEvent();
+  };
+
+  return baseByuButtonHtml;
+
+})(buttonHtml);
+
+
+/*
+アイテム購入の購入ボタン
+ */
+
+itemBuyBuyButtonHtml = (function(_super) {
+  __extends(itemBuyBuyButtonHtml, _super);
+
+  function itemBuyBuyButtonHtml() {
+    itemBuyBuyButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 500;
+  }
+
+  itemBuyBuyButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.pause_item_buy_select_layer.buyItem();
+  };
+
+  itemBuyBuyButtonHtml.prototype.setBuyImpossiblePositon = function() {
+    return this.x = -200;
+  };
+
+  itemBuyBuyButtonHtml.prototype.setBuyPossiblePosition = function() {
+    return this.x = 70;
+  };
+
+  return itemBuyBuyButtonHtml;
+
+})(baseByuButtonHtml);
 
 
 /*
@@ -2373,6 +2601,36 @@ memberItemBuyDiscription = (function(_super) {
 
 })(titleDiscription);
 
+useSetDiscription = (function(_super) {
+  __extends(useSetDiscription, _super);
+
+  function useSetDiscription() {
+    useSetDiscription.__super__.constructor.apply(this, arguments);
+    this.x = 180;
+    this.y = 170;
+    this.text = 'セット中';
+    this.setHtml();
+  }
+
+  return useSetDiscription;
+
+})(titleDiscription);
+
+useHaveDiscription = (function(_super) {
+  __extends(useHaveDiscription, _super);
+
+  function useHaveDiscription() {
+    useHaveDiscription.__super__.constructor.apply(this, arguments);
+    this.x = 170;
+    this.y = 370;
+    this.text = '所持リスト';
+    this.setHtml();
+  }
+
+  return useHaveDiscription;
+
+})(titleDiscription);
+
 itemNameDiscription = (function(_super) {
   __extends(itemNameDiscription, _super);
 
@@ -2396,7 +2654,7 @@ itemDiscription = (function(_super) {
 
   function itemDiscription() {
     itemDiscription.__super__.constructor.call(this, 400, 190);
-    this.x = 60;
+    this.x = 50;
     this.y = 340;
   }
 
@@ -2408,6 +2666,48 @@ itemDiscription = (function(_super) {
   return itemDiscription;
 
 })(discriptionTextDialogHtml);
+
+longTitleDiscription = (function(_super) {
+  __extends(longTitleDiscription, _super);
+
+  function longTitleDiscription() {
+    longTitleDiscription.__super__.constructor.call(this, 250, 20);
+    this["class"].push('head-title-discription');
+  }
+
+  return longTitleDiscription;
+
+})(discriptionTextDialogHtml);
+
+itemUseDiscription = (function(_super) {
+  __extends(itemUseDiscription, _super);
+
+  function itemUseDiscription() {
+    itemUseDiscription.__super__.constructor.apply(this, arguments);
+    this.x = 130;
+    this.y = 110;
+    this.text = 'アイテムを使う';
+    this.setHtml();
+  }
+
+  return itemUseDiscription;
+
+})(longTitleDiscription);
+
+memberSetDiscription = (function(_super) {
+  __extends(memberSetDiscription, _super);
+
+  function memberSetDiscription() {
+    memberSetDiscription.__super__.constructor.apply(this, arguments);
+    this.x = 120;
+    this.y = 110;
+    this.text = '部員を編成する';
+    this.setHtml();
+  }
+
+  return memberSetDiscription;
+
+})(longTitleDiscription);
 
 imageHtml = (function(_super) {
   __extends(imageHtml, _super);
@@ -2480,10 +2780,13 @@ buyItemHtml = (function(_super) {
   function buyItemHtml(kind) {
     buyItemHtml.__super__.constructor.call(this, kind);
     this.positionY = 160;
+    this.is_exist = true;
   }
 
   buyItemHtml.prototype.ontouchend = function() {
-    return this.dispItemBuySelectDialog(this.item_kind);
+    if (this.is_exist === true) {
+      return this.dispItemBuySelectDialog(this.item_kind);
+    }
   };
 
   return buyItemHtml;
@@ -2495,6 +2798,7 @@ useItemHtml = (function(_super) {
 
   function useItemHtml(kind) {
     useItemHtml.__super__.constructor.call(this, kind);
+    this.positionY = 400;
   }
 
   return useItemHtml;
@@ -2524,10 +2828,13 @@ buyMemberHtml = (function(_super) {
   function buyMemberHtml(kind) {
     buyMemberHtml.__super__.constructor.call(this, kind);
     this.positionY = 400;
+    this.is_exist = true;
   }
 
   buyMemberHtml.prototype.ontouchend = function() {
-    return this.dispItemBuySelectDialog(this.item_kind);
+    if (this.is_exist === true) {
+      return this.dispItemBuySelectDialog(this.item_kind);
+    }
   };
 
   return buyMemberHtml;
@@ -2539,6 +2846,7 @@ useMemberHtml = (function(_super) {
 
   function useMemberHtml(kind) {
     useMemberHtml.__super__.constructor.call(this, kind);
+    this.positionY = 400;
   }
 
   return useMemberHtml;
@@ -2552,6 +2860,7 @@ selectItemImage = (function(_super) {
     selectItemImage.__super__.constructor.call(this, 100, 100);
     this.x = 200;
     this.y = 180;
+    this.is_button = false;
   }
 
   selectItemImage.prototype.setImage = function(image) {
@@ -2709,11 +3018,12 @@ Debug = (function(_super) {
       'combo': 10,
       'tension': 100,
       'past_fever_num': 0,
-      'prev_muse': []
+      'prev_muse': [],
+      'item_have_now': []
     };
     this.lille_flg = false;
     this.lille_array = [[1, 1, 1], [1, 1, 1], [1, 1, 1]];
-    this.item_flg = true;
+    this.item_flg = false;
     this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
     this.fix_tention_item_fall_flg = false;
@@ -3012,13 +3322,13 @@ slotSetting = (function(_super) {
         'durationSec': 2,
         'conditoin': '絶対でないよ',
         'condFunc': function() {
-          return false;
+          return true;
         }
       },
       11: {
         'name': '高坂穂乃果',
         'image': 'test_image',
-        'discription': '部員に穂乃果を追加<br>　できるようになる',
+        'discription': '部員に穂乃果を追加できるようになる',
         'price': 0,
         'conditoin': '穂乃果でスロットを3つ揃える',
         'condFunc': function() {
@@ -3701,6 +4011,7 @@ pauseScene = (function(_super) {
   };
 
   pauseScene.prototype.setItemUseMenu = function() {
+    this.pause_item_use_layer.resetItemList();
     return this.addChild(this.pause_item_use_layer);
   };
 
@@ -3709,6 +4020,7 @@ pauseScene = (function(_super) {
   };
 
   pauseScene.prototype.setMemberSetMenu = function() {
+    this.pause_member_set_layer.resetItemList();
     return this.addChild(this.pause_member_set_layer);
   };
 

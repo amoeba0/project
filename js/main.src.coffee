@@ -160,6 +160,7 @@ class pauseItemBuyLayer extends appDomLayer
         for i in [11..19]
             @member_list[i] = new buyMemberHtml(i)
         @setItemList()
+        @resetItemList()
         @item_title = new itemItemBuyDiscription()
         @addChild(@item_title)
         @member_title = new memberItemBuyDiscription()
@@ -171,12 +172,31 @@ class pauseItemBuyLayer extends appDomLayer
         for member_key, member_val of @member_list
             @addChild(member_val)
             member_val.setPosition()
+    #持ってるアイテムを透明にする、クリックできなくする
+    resetItemList:()->
+        master_list = game.slot_setting.item_list
+        for i in [1..19]
+            if master_list[i] is undefined
+                master_list[i] = master_list[0]
+        @_resetItemList(@item_list, master_list)
+        @_resetItemList(@member_list, master_list)
+    _resetItemList:(item_list, master_list)->
+        for item_key, item_val of item_list
+            if master_list[item_key].condFunc() is false || master_list[item_key].price > game.money
+                item_val.opacity = 0.5
+            else
+                item_val.opacity = 1
+            if game.item_have_now.indexOf(parseInt(item_key)) != -1
+                item_val.opacity = 0
+                item_val.is_exist = false
+                item_val.changeNotButton()
 
 class pauseItemBuySelectLayer extends appDomLayer
     constructor:()->
         super
         @dialog = new itemBuySelectDialogHtml()
         @cancel_button = new itemBuyCancelButtonHtml()
+        @buy_button = new itemBuyBuyButtonHtml()
         @item_name = new itemNameDiscription()
         @item_image = new selectItemImage()
         @item_discription = new itemDiscription()
@@ -186,32 +206,76 @@ class pauseItemBuySelectLayer extends appDomLayer
         @addChild(@item_name)
         @addChild(@item_discription)
         @addChild(@cancel_button)
+        @addChild(@buy_button)
+        @item_kind = 0
+        @item_options = []
     setSelectItem:(kind)->
-        item_options = game.slot_setting.item_list[kind]
-        if item_options is undefined
-            item_options = game.slot_setting.item_list[0]
-        @item_name.setText(item_options.name)
-        @item_image.setImage(item_options.image)
-        discription = @_setDiscription(item_options)
+        @item_kind = kind
+        @item_options = game.slot_setting.item_list[kind]
+        if @item_options is undefined
+            @item_options = game.slot_setting.item_list[0]
+        @item_name.setText(@item_options.name)
+        @item_image.setImage(@item_options.image)
+        discription = @_setDiscription()
         @item_discription.setText(discription)
-    _setDiscription:(item_options)->
-        text = '効果：'+item_options.discription
-        if item_options.durationSec != undefined
-            text += '<br>持続時間：'+item_options.durationSec+'秒'
-        if item_options.condFunc() is true
-            text += '<br>値段：'+item_options.price+'円'
+        @_setButton()
+    _setDiscription:()->
+        text = '効果：'+@item_options.discription
+        if @item_options.durationSec != undefined
+            text += '<br>持続時間：'+@item_options.durationSec+'秒'
+        if @item_options.condFunc() is true
+            text += '<br>値段：'+@item_options.price+'円'+'(所持金'+game.money+'円)'
         else
-            text += '<br>出現条件：'+item_options.conditoin
+            text += '<br>出現条件：'+@item_options.conditoin
         return text
+    _setButton:()->
+        if @item_options.condFunc() is true && game.money >= @item_options.price
+            @cancel_button.setBuyPossiblePosition()
+            @buy_button.setBuyPossiblePosition()
+        else
+            @cancel_button.setBuyImpossiblePositon()
+            @buy_button.setBuyImpossiblePositon()
+    ###
+    アイテムの購入
+    ###
+    buyItem:()->
+        game.money -= @item_options.price
+        game.item_have_now.push(@item_kind)
+        game.pause_scene.removeItemBuySelectMenu()
+        game.pause_scene.pause_item_buy_layer.resetItemList()
+        game.main_scene.gp_system.money_text.setValue()
 
+#TODO 持っていないものは半透明、セット中は透明
 class pauseItemUseLayer extends appDomLayer
     constructor: () ->
         super
         @dialog = new itemUseDialogHtml()
         @close_button = new itemUseDialogCloseButton()
+        @menu_title = new itemUseDiscription()
+        @set_title = new useSetDiscription()
+        @have_title = new useHaveDiscription()
         @addChild(@modal)
         @addChild(@dialog)
         @addChild(@close_button)
+        @addChild(@menu_title)
+        @addChild(@set_title)
+        @addChild(@have_title)
+        @item_list = {}
+        for i in [1..9]
+            @item_list[i] = new useItemHtml(i)
+        @setItemList()
+    setItemList:()->
+        for item_key, item_val of @item_list
+            @addChild(item_val)
+            item_val.setPosition()
+    resetItemList:()->
+        for item_key, item_val of @item_list
+            if game.item_have_now.indexOf(parseInt(item_key)) != -1
+                item_val.opacity = 1
+                item_val.changeIsButton()
+            else
+                item_val.opacity = 0.5
+                item_val.changeNotButton()
 class pauseMainLayer extends appDomLayer
     constructor: () ->
         super
@@ -227,14 +291,37 @@ class pauseMainLayer extends appDomLayer
         @addChild(@set_member_button)
 
 
+#TODO 持っていないものは半透明、セット中は透明
 class pauseMemberSetLayer extends appDomLayer
     constructor: () ->
         super
         @dialog = new memberSetDialogHtml()
         @close_button = new memberSetDialogCloseButton()
+        @menu_title = new memberSetDiscription()
+        @set_title = new useSetDiscription()
+        @have_title = new useHaveDiscription()
         @addChild(@modal)
         @addChild(@dialog)
         @addChild(@close_button)
+        @addChild(@menu_title)
+        @addChild(@set_title)
+        @addChild(@have_title)
+        @member_list = {}
+        for i in [11..19]
+            @member_list[i] = new useMemberHtml(i)
+        @setItemList()
+    setItemList:()->
+        for member_key, member_val of @member_list
+            @addChild(member_val)
+            member_val.setPosition()
+    resetItemList:()->
+        for member_key, member_val of @member_list
+            if game.item_have_now.indexOf(parseInt(member_key)) != -1
+                member_val.opacity = 1
+                member_val.changeIsButton()
+            else
+                member_val.opacity = 0.5
+                member_val.changeNotButton()
 class pauseSaveLayer extends appDomLayer
     constructor: () ->
         super
@@ -271,9 +358,6 @@ class LoveliveGame extends catchAndSlotGame
         @keybind(90, 'z')
         @keybind(88, 'x')
         @preloadAll()
-        #一人目のμ’ｓメンバーを決めて素材をロードする
-        @slot_setting.setMuseMember()
-        @musePreLoad()
 
         #ゲーム中どこからでもアクセスのある数値
         @money_init = 100 #ゲーム開始時の所持金
@@ -288,6 +372,7 @@ class LoveliveGame extends catchAndSlotGame
         @combo = 0 #現在のコンボ
         @tension = 0 #現在のテンション(500がマックス)
         @past_fever_num = 0 #過去にフィーバーになった回数
+        @item_have_now = []
 
         @money = @money_init
 
@@ -295,6 +380,7 @@ class LoveliveGame extends catchAndSlotGame
         @title_scene = new titleScene()
         @main_scene = new mainScene()
         @pause_scene = new pauseScene()
+        #テスト
         if @test.test_exe_flg is true
             @test_scene = new testScene()
             @pushScene(@test_scene)
@@ -307,6 +393,10 @@ class LoveliveGame extends catchAndSlotGame
                     @pushScene(@pause_scene)
             else
                 @pushScene(@title_scene)
+            #一人目のμ’ｓメンバーを決めて素材をロードする
+            if @slot_setting.now_muse_num is 0
+                @slot_setting.setMuseMember()
+            @musePreLoad()
 
     ###
     スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
@@ -389,7 +479,6 @@ class LoveliveGame extends catchAndSlotGame
             @_gameInitSetting()
     ###
     ゲームをセーブする、ブラウザのローカルストレージへ
-    TODO リールの状態もセーブする
     ###
     saveGame:()->
         saveData = {
@@ -397,8 +486,13 @@ class LoveliveGame extends catchAndSlotGame
             'bet'      : @bet,
             'combo'    : @combo,
             'tension'  : @tension,
-            'past_fever_num' : @past_fever_num
-            'prev_muse': JSON.stringify(@slot_setting.prev_muse)
+            'past_fever_num' : @past_fever_num,
+            'prev_muse': JSON.stringify(@slot_setting.prev_muse),
+            'now_muse_num': @slot_setting.now_muse_num,
+            'left_lille': JSON.stringify(@main_scene.gp_slot.left_lille.lilleArray),
+            'middle_lille': JSON.stringify(@main_scene.gp_slot.middle_lille.lilleArray),
+            'right_lille': JSON.stringify(@main_scene.gp_slot.right_lille.lilleArray),
+            'item_have_now':JSON.stringify(@item_have_now)
         }
         for key, val of saveData
             @local_storage.setItem(key, val)
@@ -415,6 +509,11 @@ class LoveliveGame extends catchAndSlotGame
             @tension = @_loadNumber('tension')
             @past_fever_num = @_loadNumber('past_fever_num')
             @slot_setting.prev_muse = JSON.parse(@local_storage.getItem('prev_muse'))
+            @slot_setting.now_muse_num = @_loadNumber('now_muse_num')
+            @main_scene.gp_slot.left_lille.lilleArray = JSON.parse(@local_storage.getItem('left_lille'))
+            @main_scene.gp_slot.middle_lille.lilleArray = JSON.parse(@local_storage.getItem('middle_lille'))
+            @main_scene.gp_slot.right_lille.lilleArray = JSON.parse(@local_storage.getItem('right_lille'))
+            @item_have_now = JSON.parse(@local_storage.getItem('item_have_now'))
     ###
     ローカルストレージから指定のキーの値を取り出して数値に変換する
     ###
@@ -433,6 +532,7 @@ class LoveliveGame extends catchAndSlotGame
         @tension = data.tension
         @past_fever_num = data.past_fever_num
         @slot_setting.prev_muse = data.prev_muse
+        @item_have_now = data.item_have_now
 
     ###
     ゲームロード後の画面表示等の初期値設定
@@ -443,6 +543,7 @@ class LoveliveGame extends catchAndSlotGame
         sys.bet_text.setValue()
         sys.combo_text.setValue()
         sys.tension_gauge.setValue()
+        @pause_scene.pause_item_buy_layer.resetItemList()
 class gpEffect extends appGroup
     constructor: () ->
         super
@@ -831,8 +932,7 @@ class stageFront extends gpStage
         @itemFallFrm = 0 #アイテムを降らせる周期（フレーム）
         @catchItems = [] #キャッチアイテムのインスタンスを格納
         @nowCatchItemsNum = 0
-        #TODO 4
-        @missItemFallSycle = 1 #ハズレアイテムを取る周期
+        @missItemFallSycle = 4 #ハズレアイテムを取る周期
         @missItemFallSycleNow = 0
         @catchMissItems = []
         @nowCatchMissItemsNum = 0
@@ -1204,6 +1304,12 @@ class systemHtml extends appHtml
         if @is_button is true
             tmp_class = 'image-button'
         @_element.innerHTML = '<img src="images/html/'+@image_name+'.png" class="'+tmp_class+'"></img>'
+    changeNotButton:()->
+        @is_button = false
+        @setImageHtml()
+    changeIsButton:()->
+        @is_button = true
+        @setImageHtml()
 class buttonHtml extends systemHtml
     constructor: (width, height) ->
         super width, height
@@ -1314,10 +1420,39 @@ class baseCancelButtonHtml extends buttonHtml
 class itemBuyCancelButtonHtml extends baseCancelButtonHtml
     constructor:()->
         super
-        @x = 170
         @y = 500
     touchendEvent:() ->
         game.pause_scene.removeItemBuySelectMenu()
+    setBuyImpossiblePositon:()->
+        @x = 170
+    setBuyPossiblePosition:()->
+        @x = 250
+
+###
+購入ボタン
+###
+class baseByuButtonHtml extends buttonHtml
+    constructor:()->
+        super 150, 45
+        @class.push('base-buy-button')
+        @text = '購入'
+        @setHtml()
+    ontouchend: (e) ->
+        @touchendEvent()
+
+###
+アイテム購入の購入ボタン
+###
+class itemBuyBuyButtonHtml extends baseByuButtonHtml
+    constructor:()->
+        super
+        @y = 500
+    touchendEvent:() ->
+        game.pause_scene.pause_item_buy_select_layer.buyItem()
+    setBuyImpossiblePositon:()->
+        @x = -200
+    setBuyPossiblePosition:()->
+        @x = 70
 
 ###
 タイトルメニューのボタン
@@ -1451,6 +1586,22 @@ class memberItemBuyDiscription extends titleDiscription
         @text = '部員'
         @setHtml()
 
+class useSetDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 180
+        @y = 170
+        @text = 'セット中'
+        @setHtml()
+
+class useHaveDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 170
+        @y = 370
+        @text = '所持リスト'
+        @setHtml()
+
 class itemNameDiscription extends titleDiscription
     constructor:()->
         super
@@ -1463,10 +1614,31 @@ class itemNameDiscription extends titleDiscription
 class itemDiscription extends discriptionTextDialogHtml
     constructor:()->
         super 400, 190
-        @x = 60
+        @x = 50
         @y = 340
     setText:(text)->
         @text = text
+        @setHtml()
+
+class longTitleDiscription extends discriptionTextDialogHtml
+    constructor:()->
+        super 250, 20
+        @class.push('head-title-discription')
+
+class itemUseDiscription extends longTitleDiscription
+    constructor:()->
+        super
+        @x = 130
+        @y = 110
+        @text = 'アイテムを使う'
+        @setHtml()
+
+class memberSetDiscription extends longTitleDiscription
+    constructor:()->
+        super
+        @x = 120
+        @y = 110
+        @text = '部員を編成する'
         @setHtml()
 class imageHtml extends systemHtml
     constructor: (width, height) ->
@@ -1507,12 +1679,15 @@ class buyItemHtml extends itemHtml
     constructor:(kind)->
         super kind
         @positionY = 160
+        @is_exist = true
     ontouchend: () ->
-        @dispItemBuySelectDialog(@item_kind)
+        if @is_exist is true
+            @dispItemBuySelectDialog(@item_kind)
 
 class useItemHtml extends itemHtml
     constructor:(kind)->
         super kind
+        @positionY = 400
 
 ###
 部員
@@ -1526,18 +1701,22 @@ class buyMemberHtml extends memberHtml
     constructor:(kind)->
         super kind
         @positionY = 400
+        @is_exist = true
     ontouchend: () ->
-        @dispItemBuySelectDialog(@item_kind)
+        if @is_exist is true
+            @dispItemBuySelectDialog(@item_kind)
 
 class useMemberHtml extends memberHtml
     constructor:(kind)->
         super kind
+        @positionY = 400
 
 class selectItemImage extends imageHtml
     constructor:()->
         super 100, 100
         @x = 200
         @y = 180
+        @is_button = false
     setImage:(image)->
         @image_name = image
         @setImageHtml()
@@ -1636,7 +1815,8 @@ class Debug extends appNode
             'combo':10,
             'tension':100,
             'past_fever_num':0,
-            'prev_muse':[]
+            'prev_muse':[],
+            'item_have_now':[]
         }
 
         #デバッグ用リールにすりかえる
@@ -1649,7 +1829,7 @@ class Debug extends appNode
         ]
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上
-        @item_flg = true
+        @item_flg = false
         #アイテムが降ってくる頻度を上げる
         @item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する
@@ -1837,12 +2017,12 @@ class slotSetting extends appNode
                 'durationSec':2,
                 'conditoin':'絶対でないよ',
                 'condFunc':()->
-                    return false
+                    return true
             },
             11:{
                 'name':'高坂穂乃果',
                 'image':'test_image',
-                'discription':'部員に穂乃果を追加<br>　できるようになる',
+                'discription':'部員に穂乃果を追加できるようになる',
                 'price':0,
                 'conditoin':'穂乃果でスロットを3つ揃える',
                 'condFunc':()->
@@ -2314,10 +2494,12 @@ class pauseScene extends appScene
     removeItemBuyMenu:()->
         @removeChild(@pause_item_buy_layer)
     setItemUseMenu:()->
+        @pause_item_use_layer.resetItemList()
         @addChild(@pause_item_use_layer)
     removeItemUseMenu:()->
         @removeChild(@pause_item_use_layer)
     setMemberSetMenu:()->
+        @pause_member_set_layer.resetItemList()
         @addChild(@pause_member_set_layer)
     removeMemberSetMenu:()->
         @removeChild(@pause_member_set_layer)

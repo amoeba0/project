@@ -108,10 +108,39 @@ class baseCancelButtonHtml extends buttonHtml
 class itemBuyCancelButtonHtml extends baseCancelButtonHtml
     constructor:()->
         super
-        @x = 170
         @y = 500
     touchendEvent:() ->
         game.pause_scene.removeItemBuySelectMenu()
+    setBuyImpossiblePositon:()->
+        @x = 170
+    setBuyPossiblePosition:()->
+        @x = 250
+
+###
+購入ボタン
+###
+class baseByuButtonHtml extends buttonHtml
+    constructor:()->
+        super 150, 45
+        @class.push('base-buy-button')
+        @text = '購入'
+        @setHtml()
+    ontouchend: (e) ->
+        @touchendEvent()
+
+###
+アイテム購入の購入ボタン
+###
+class itemBuyBuyButtonHtml extends baseByuButtonHtml
+    constructor:()->
+        super
+        @y = 500
+    touchendEvent:() ->
+        game.pause_scene.pause_item_buy_select_layer.buyItem()
+    setBuyImpossiblePositon:()->
+        @x = -200
+    setBuyPossiblePosition:()->
+        @x = 70
 
 ###
 タイトルメニューのボタン
