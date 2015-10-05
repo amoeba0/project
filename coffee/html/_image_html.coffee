@@ -53,6 +53,8 @@ class useItemHtml extends itemHtml
 class memberHtml extends baseItemHtml
     constructor:(kind)->
         super kind
+        @image_name = 'item_'+kind
+        @setImageHtml()
         @positoin_kind = @item_kind - 10
 
 class buyMemberHtml extends memberHtml

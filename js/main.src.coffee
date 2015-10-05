@@ -1695,6 +1695,8 @@ class useItemHtml extends itemHtml
 class memberHtml extends baseItemHtml
     constructor:(kind)->
         super kind
+        @image_name = 'item_'+kind
+        @setImageHtml()
         @positoin_kind = @item_kind - 10
 
 class buyMemberHtml extends memberHtml
@@ -2021,12 +2023,84 @@ class slotSetting extends appNode
             },
             11:{
                 'name':'高坂穂乃果',
-                'image':'test_image',
+                'image':'item_11',
                 'discription':'部員に穂乃果を追加できるようになる',
                 'price':0,
                 'conditoin':'穂乃果でスロットを3つ揃える',
                 'condFunc':()->
-                    return false
+                    return game.slot_setting.memberItemCondirinon(11)
+            },
+            12:{
+                'name':'南ことり',
+                'image':'item_12',
+                'discription':'部員にことりを追加できるようになる',
+                'price':0,
+                'conditoin':'ことりでスロットを3つ揃える',
+                'condFunc':()->
+                    return game.slot_setting.memberItemCondirinon(12)
+            },
+            13:{
+                'name':'園田海未',
+                'image':'item_13',
+                'discription':'部員に海未を追加できるようになる',
+                'price':0,
+                'conditoin':'海未でスロットを3つ揃える',
+                'condFunc':()->
+                    return game.slot_setting.memberItemCondirinon(13)
+            },
+            14:{
+                'name':'西木野真姫',
+                'image':'item_14',
+                'discription':'部員に真姫を追加できるようになる',
+                'price':0,
+                'conditoin':'真姫でスロットを3つ揃える',
+                'condFunc':()->
+                    return game.slot_setting.memberItemCondirinon(14)
+            },
+            15:{
+                'name':'星空凛',
+                'image':'item_15',
+                'discription':'部員に凛を追加できるようになる',
+                'price':0,
+                'conditoin':'凛でスロットを3つ揃える',
+                'condFunc':()->
+                    return game.slot_setting.memberItemCondirinon(15)
+            },
+            16:{
+                'name':'小泉花陽',
+                'image':'item_16',
+                'discription':'部員に花陽を追加できるようになる',
+                'price':0,
+                'conditoin':'花陽でスロットを3つ揃える',
+                'condFunc':()->
+                    return game.slot_setting.memberItemCondirinon(16)
+            },
+            17:{
+                'name':'矢澤にこ',
+                'image':'item_17',
+                'discription':'部員ににこを追加できるようになる',
+                'price':0,
+                'conditoin':'にこでスロットを3つ揃える',
+                'condFunc':()->
+                    return game.slot_setting.memberItemCondirinon(17)
+            },
+            18:{
+                'name':'東條希',
+                'image':'item_18',
+                'discription':'部員に希を追加できるようになる',
+                'price':0,
+                'conditoin':'希でスロットを3つ揃える',
+                'condFunc':()->
+                    return game.slot_setting.memberItemCondirinon(18)
+            },
+            19:{
+                'name':'絢瀬絵里',
+                'image':'item_19',
+                'discription':'部員に絵里を追加できるようになる',
+                'price':0,
+                'conditoin':'絵里でスロットを3つ揃える',
+                'condFunc':()->
+                    return game.slot_setting.memberItemCondirinon(19)
             }
         }
 
@@ -2343,6 +2417,14 @@ class slotSetting extends appNode
             when '14,17'    then role = 34
             else role = 20
         return role
+
+    ###
+    部員のアイテムの出現条件を返す
+    @param num μ'sメンバーの番号
+    @return boolean
+    ###
+    memberItemCondirinon:(num)->
+        return true
 ###
 テストコード用
 ###
