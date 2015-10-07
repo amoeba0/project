@@ -25,7 +25,9 @@ class pauseItemUseLayer extends appDomLayer
         for item_key, item_val of @item_list
             if game.item_have_now.indexOf(parseInt(item_key)) != -1
                 item_val.opacity = 1
+                item_val.removeClass('grayscale', true)
                 item_val.changeIsButton()
             else
                 item_val.opacity = 0.5
+                item_val.addClass('grayscale', true)
                 item_val.changeNotButton()

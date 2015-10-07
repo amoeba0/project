@@ -32,6 +32,8 @@ class baseItemHtml extends systemHtml
 class itemHtml extends baseItemHtml
     constructor:(kind)->
         super kind
+        @image_name = 'item_'+kind
+        @setImageHtml()
 
 class buyItemHtml extends itemHtml
     constructor:(kind)->

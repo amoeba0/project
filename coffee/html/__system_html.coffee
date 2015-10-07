@@ -10,13 +10,28 @@ class systemHtml extends appHtml
             tmp_cls += val + ' '
         @_element.innerHTML = '<div class="'+tmp_cls+'">'+@text+'</div>'
     setImageHtml:()->
-        tmp_class = ''
+        tmp_cls = ''
+        for val in @class
+            tmp_cls += val + ' '
         if @is_button is true
-            tmp_class = 'image-button'
-        @_element.innerHTML = '<img src="images/html/'+@image_name+'.png" class="'+tmp_class+'"></img>'
+            tmp_cls += 'image-button'
+        @_element.innerHTML = '<img src="images/html/'+@image_name+'.png" class="'+tmp_cls+'"></img>'
     changeNotButton:()->
         @is_button = false
         @setImageHtml()
     changeIsButton:()->
         @is_button = true
         @setImageHtml()
+    addClass:(cls, isImg = false)->
+        @class.push(cls)
+        @_setHtml(isImg)
+    removeClass:(cls, isImg = false)->
+        for val, key in @class
+            if val is cls
+                @class.splice(key, 1)
+        @_setHtml(isImg)
+    _setHtml:(isImg = false)->
+        if isImg is true
+            @setImageHtml()
+        else
+            @setHtml()

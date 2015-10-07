@@ -38,7 +38,12 @@ appGame = (function(_super) {
    */
 
   appGame.prototype.imageload = function(img) {
-    return this.assets["images/" + img + ".png"];
+    var callImg;
+    callImg = this.assets["images/" + img + ".png"];
+    if (callImg === void 0) {
+      callImg = null;
+    }
+    return callImg;
   };
 
 
@@ -332,8 +337,10 @@ pauseItemBuyLayer = (function(_super) {
       item_val = item_list[item_key];
       if (master_list[item_key].condFunc() === false || master_list[item_key].price > game.money) {
         item_val.opacity = 0.5;
+        item_val.addClass('grayscale', true);
       } else {
         item_val.opacity = 1;
+        item_val.removeClass('grayscale', true);
       }
       if (game.item_have_now.indexOf(parseInt(item_key)) !== -1) {
         item_val.opacity = 0;
@@ -471,9 +478,11 @@ pauseItemUseLayer = (function(_super) {
       item_val = _ref[item_key];
       if (game.item_have_now.indexOf(parseInt(item_key)) !== -1) {
         item_val.opacity = 1;
+        item_val.removeClass('grayscale', true);
         _results.push(item_val.changeIsButton());
       } else {
         item_val.opacity = 0.5;
+        item_val.addClass('grayscale', true);
         _results.push(item_val.changeNotButton());
       }
     }
@@ -549,9 +558,11 @@ pauseMemberSetLayer = (function(_super) {
       member_val = _ref[member_key];
       if (game.item_have_now.indexOf(parseInt(member_key)) !== -1) {
         member_val.opacity = 1;
+        member_val.removeClass('grayscale', true);
         _results.push(member_val.changeIsButton());
       } else {
         member_val.opacity = 0.5;
+        member_val.addClass('grayscale', true);
         _results.push(member_val.changeNotButton());
       }
     }
@@ -630,6 +641,7 @@ LoveliveGame = (function(_super) {
     this.tension = 0;
     this.past_fever_num = 0;
     this.item_have_now = [];
+    this.prev_fever_muse = [];
     this.money = this.money_init;
   }
 
@@ -637,24 +649,24 @@ LoveliveGame = (function(_super) {
     this.title_scene = new titleScene();
     this.main_scene = new mainScene();
     this.pause_scene = new pauseScene();
+    this.loadGame();
+    if (this.slot_setting.now_muse_num === 0) {
+      this.slot_setting.setMuseMember();
+    }
+    this.musePreLoad();
     if (this.test.test_exe_flg === true) {
       this.test_scene = new testScene();
       this.pushScene(this.test_scene);
       return this.test.testExe();
     } else {
-      this.loadGame();
       if (this.debug.force_main_flg === true) {
         this.pushScene(this.main_scene);
         if (this.debug.force_pause_flg === true) {
-          this.pushScene(this.pause_scene);
+          return this.pushScene(this.pause_scene);
         }
       } else {
-        this.pushScene(this.title_scene);
+        return this.pushScene(this.title_scene);
       }
-      if (this.slot_setting.now_muse_num === 0) {
-        this.slot_setting.setMuseMember();
-      }
-      return this.musePreLoad();
     }
   };
 
@@ -754,7 +766,8 @@ LoveliveGame = (function(_super) {
 
   LoveliveGame.prototype.setPauseScene = function() {
     this.pause_scene.keyList.pause = true;
-    return this.pushScene(this.pause_scene);
+    this.pushScene(this.pause_scene);
+    return this.pause_scene.pause_item_buy_layer.resetItemList();
   };
 
 
@@ -802,7 +815,8 @@ LoveliveGame = (function(_super) {
       'left_lille': JSON.stringify(this.main_scene.gp_slot.left_lille.lilleArray),
       'middle_lille': JSON.stringify(this.main_scene.gp_slot.middle_lille.lilleArray),
       'right_lille': JSON.stringify(this.main_scene.gp_slot.right_lille.lilleArray),
-      'item_have_now': JSON.stringify(this.item_have_now)
+      'item_have_now': JSON.stringify(this.item_have_now),
+      'prev_fever_muse': JSON.stringify(this.prev_fever_muse)
     };
     _results = [];
     for (key in saveData) {
@@ -831,7 +845,8 @@ LoveliveGame = (function(_super) {
       this.main_scene.gp_slot.left_lille.lilleArray = JSON.parse(this.local_storage.getItem('left_lille'));
       this.main_scene.gp_slot.middle_lille.lilleArray = JSON.parse(this.local_storage.getItem('middle_lille'));
       this.main_scene.gp_slot.right_lille.lilleArray = JSON.parse(this.local_storage.getItem('right_lille'));
-      return this.item_have_now = JSON.parse(this.local_storage.getItem('item_have_now'));
+      this.item_have_now = JSON.parse(this.local_storage.getItem('item_have_now'));
+      return this.prev_fever_muse = JSON.parse(this.local_storage.getItem('prev_fever_muse'));
     }
   };
 
@@ -860,7 +875,8 @@ LoveliveGame = (function(_super) {
     this.tension = data.tension;
     this.past_fever_num = data.past_fever_num;
     this.slot_setting.prev_muse = data.prev_muse;
-    return this.item_have_now = data.item_have_now;
+    this.item_have_now = data.item_have_now;
+    return this.prev_fever_muse = data.prev_fever_muse;
   };
 
 
@@ -875,7 +891,8 @@ LoveliveGame = (function(_super) {
     sys.bet_text.setValue();
     sys.combo_text.setValue();
     sys.tension_gauge.setValue();
-    return this.pause_scene.pause_item_buy_layer.resetItemList();
+    this.pause_scene.pause_item_buy_layer.resetItemList();
+    return this.slot_setting.setMemberItemPrice();
   };
 
   return LoveliveGame;
@@ -1183,6 +1200,10 @@ gpSlot = (function(_super) {
     } else if (left > 10 && middle > 10 && right > 10) {
       hit_flg = true;
       this.hit_role = game.slot_setting.getHitRole(left, middle, right);
+    }
+    if (this.hit_role > 10) {
+      game.prev_fever_muse.push(this.hit_role);
+      game.slot_setting.setMemberItemPrice();
     }
     return hit_flg;
   };
@@ -1999,12 +2020,17 @@ systemHtml = (function(_super) {
   };
 
   systemHtml.prototype.setImageHtml = function() {
-    var tmp_class;
-    tmp_class = '';
-    if (this.is_button === true) {
-      tmp_class = 'image-button';
+    var tmp_cls, val, _i, _len, _ref;
+    tmp_cls = '';
+    _ref = this["class"];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      val = _ref[_i];
+      tmp_cls += val + ' ';
     }
-    return this._element.innerHTML = '<img src="images/html/' + this.image_name + '.png" class="' + tmp_class + '"></img>';
+    if (this.is_button === true) {
+      tmp_cls += 'image-button';
+    }
+    return this._element.innerHTML = '<img src="images/html/' + this.image_name + '.png" class="' + tmp_cls + '"></img>';
   };
 
   systemHtml.prototype.changeNotButton = function() {
@@ -2015,6 +2041,40 @@ systemHtml = (function(_super) {
   systemHtml.prototype.changeIsButton = function() {
     this.is_button = true;
     return this.setImageHtml();
+  };
+
+  systemHtml.prototype.addClass = function(cls, isImg) {
+    if (isImg == null) {
+      isImg = false;
+    }
+    this["class"].push(cls);
+    return this._setHtml(isImg);
+  };
+
+  systemHtml.prototype.removeClass = function(cls, isImg) {
+    var key, val, _i, _len, _ref;
+    if (isImg == null) {
+      isImg = false;
+    }
+    _ref = this["class"];
+    for (key = _i = 0, _len = _ref.length; _i < _len; key = ++_i) {
+      val = _ref[key];
+      if (val === cls) {
+        this["class"].splice(key, 1);
+      }
+    }
+    return this._setHtml(isImg);
+  };
+
+  systemHtml.prototype._setHtml = function(isImg) {
+    if (isImg == null) {
+      isImg = false;
+    }
+    if (isImg === true) {
+      return this.setImageHtml();
+    } else {
+      return this.setHtml();
+    }
   };
 
   return systemHtml;
@@ -2563,7 +2623,7 @@ titleDiscription = (function(_super) {
   __extends(titleDiscription, _super);
 
   function titleDiscription() {
-    titleDiscription.__super__.constructor.call(this, 200, 20);
+    titleDiscription.__super__.constructor.call(this, 400, 20);
     this["class"].push('title-discription');
   }
 
@@ -2636,7 +2696,7 @@ itemNameDiscription = (function(_super) {
 
   function itemNameDiscription() {
     itemNameDiscription.__super__.constructor.apply(this, arguments);
-    this.x = 180;
+    this.x = 50;
     this.y = 290;
   }
 
@@ -2768,6 +2828,8 @@ itemHtml = (function(_super) {
 
   function itemHtml(kind) {
     itemHtml.__super__.constructor.call(this, kind);
+    this.image_name = 'item_' + kind;
+    this.setImageHtml();
   }
 
   return itemHtml;
@@ -3011,20 +3073,21 @@ Debug = (function(_super) {
   function Debug() {
     Debug.__super__.constructor.apply(this, arguments);
     this.force_main_flg = true;
-    this.force_pause_flg = false;
+    this.force_pause_flg = true;
     this.not_load_flg = false;
     this.test_load_flg = false;
     this.test_load_val = {
-      'money': 1000,
+      'money': 10000,
       'bet': 10,
       'combo': 10,
       'tension': 100,
       'past_fever_num': 0,
-      'prev_muse': [],
-      'item_have_now': []
+      'prev_muse': [11],
+      'item_have_now': [],
+      'prev_fever_muse': [11]
     };
     this.lille_flg = false;
-    this.lille_array = [[1, 1, 1], [1, 1, 1], [1, 1, 1]];
+    this.lille_array = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
     this.item_flg = false;
     this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
@@ -3317,14 +3380,102 @@ slotSetting = (function(_super) {
         }
       },
       1: {
-        'name': 'ほげほげ',
-        'image': 'test_image',
-        'discription': 'ほげほげするよ<br>　ほげほげがほげほげになるよ',
-        'price': 1000000000,
-        'durationSec': 2,
-        'conditoin': '絶対でないよ',
+        'name': 'テンション上がるにゃー！',
+        'image': 'item_1',
+        'discription': '移動速度が上がる',
+        'price': 10000,
+        'durationSec': 60,
+        'conditoin': '',
         'condFunc': function() {
-          return true;
+          return game.slot_setting.itemConditinon(1);
+        }
+      },
+      2: {
+        'name': 'チーズケーキ鍋',
+        'image': 'item_2',
+        'discription': 'チーズケーキしか降ってこなくなる<br>ニンニクは降ってこなくなる',
+        'price': 50000,
+        'durationSec': 60,
+        'conditoin': '',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(2);
+        }
+      },
+      3: {
+        'name': 'ぴょんぴょこぴょんぴょん',
+        'image': 'item_3',
+        'discription': 'ジャンプ力が上がる',
+        'price': 100000,
+        'durationSec': 60,
+        'conditoin': '',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(3);
+        }
+      },
+      4: {
+        'name': 'くすくす大明神',
+        'image': 'item_4',
+        'discription': 'コンボ数に関わらず<br>たくさんのコインが降ってくるようになる',
+        'price': 500000,
+        'durationSec': 60,
+        'conditoin': '',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(4);
+        }
+      },
+      5: {
+        'name': '完全にフルハウスね',
+        'image': 'item_5',
+        'discription': 'CHANCE!!状態になる確率が<br>大幅に上がる',
+        'price': 1000000,
+        'durationSec': 30,
+        'conditoin': '',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(5);
+        }
+      },
+      6: {
+        'name': 'チョットマッテテー',
+        'image': 'item_6',
+        'discription': 'おやつがゆっくり<br>降ってくるようになる',
+        'price': 5000000,
+        'durationSec': 30,
+        'conditoin': '',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(6);
+        }
+      },
+      7: {
+        'name': 'ファイトだよっ',
+        'image': 'item_7',
+        'discription': 'アイテムを落としても<br>テンションが下がらなくなる',
+        'price': 10000000,
+        'durationSec': 30,
+        'conditoin': '',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(7);
+        }
+      },
+      8: {
+        'name': 'ラブアローシュート',
+        'image': 'item_8',
+        'discription': 'おやつが頭上に落ちてくる',
+        'price': 100000000,
+        'durationSec': 30,
+        'conditoin': '',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(8);
+        }
+      },
+      9: {
+        'name': 'エリチカおうちに帰る！',
+        'image': 'item_9',
+        'discription': '掛け金を上げても<br>おやつの落下速度が上がらなくなる',
+        'price': 1000000000,
+        'durationSec': 30,
+        'conditoin': '',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(9);
         }
       },
       11: {
@@ -3334,7 +3485,7 @@ slotSetting = (function(_super) {
         'price': 0,
         'conditoin': '穂乃果でスロットを3つ揃える',
         'condFunc': function() {
-          return game.slot_setting.memberItemCondirinon(11);
+          return game.slot_setting.itemConditinon(11);
         }
       },
       12: {
@@ -3344,7 +3495,7 @@ slotSetting = (function(_super) {
         'price': 0,
         'conditoin': 'ことりでスロットを3つ揃える',
         'condFunc': function() {
-          return game.slot_setting.memberItemCondirinon(12);
+          return game.slot_setting.itemConditinon(12);
         }
       },
       13: {
@@ -3354,7 +3505,7 @@ slotSetting = (function(_super) {
         'price': 0,
         'conditoin': '海未でスロットを3つ揃える',
         'condFunc': function() {
-          return game.slot_setting.memberItemCondirinon(13);
+          return game.slot_setting.itemConditinon(13);
         }
       },
       14: {
@@ -3364,7 +3515,7 @@ slotSetting = (function(_super) {
         'price': 0,
         'conditoin': '真姫でスロットを3つ揃える',
         'condFunc': function() {
-          return game.slot_setting.memberItemCondirinon(14);
+          return game.slot_setting.itemConditinon(14);
         }
       },
       15: {
@@ -3374,7 +3525,7 @@ slotSetting = (function(_super) {
         'price': 0,
         'conditoin': '凛でスロットを3つ揃える',
         'condFunc': function() {
-          return game.slot_setting.memberItemCondirinon(15);
+          return game.slot_setting.itemConditinon(15);
         }
       },
       16: {
@@ -3384,7 +3535,7 @@ slotSetting = (function(_super) {
         'price': 0,
         'conditoin': '花陽でスロットを3つ揃える',
         'condFunc': function() {
-          return game.slot_setting.memberItemCondirinon(16);
+          return game.slot_setting.itemConditinon(16);
         }
       },
       17: {
@@ -3394,7 +3545,7 @@ slotSetting = (function(_super) {
         'price': 0,
         'conditoin': 'にこでスロットを3つ揃える',
         'condFunc': function() {
-          return game.slot_setting.memberItemCondirinon(17);
+          return game.slot_setting.itemConditinon(17);
         }
       },
       18: {
@@ -3404,7 +3555,7 @@ slotSetting = (function(_super) {
         'price': 0,
         'conditoin': '希でスロットを3つ揃える',
         'condFunc': function() {
-          return game.slot_setting.memberItemCondirinon(18);
+          return game.slot_setting.itemConditinon(18);
         }
       },
       19: {
@@ -3414,10 +3565,11 @@ slotSetting = (function(_super) {
         'price': 0,
         'conditoin': '絵里でスロットを3つ揃える',
         'condFunc': function() {
-          return game.slot_setting.memberItemCondirinon(19);
+          return game.slot_setting.itemConditinon(19);
         }
       }
     };
+    this.member_item_price = [1000, 10000, 100000, 500000, 1000000, 5000000, 10000000, 50000000, 100000000];
     this.tension_max = 500;
     this.now_muse_num = 0;
     this.isForceSlotHit = false;
@@ -3691,26 +3843,28 @@ slotSetting = (function(_super) {
 
   slotSetting.prototype.changeLilleForTension = function(tension, val) {
     var after, before, slot, stage, tension_33, tension_66;
-    slot = game.main_scene.gp_slot;
-    stage = game.main_scene.gp_stage_front;
-    before = tension;
-    after = tension + val;
-    tension_33 = Math.floor(this.tension_max * 0.33);
-    tension_66 = Math.floor(this.tension_max * 0.66);
-    if (before > 0 && after <= 0) {
-      return slot.slotLilleChange(this.lille_array_0, true);
-    } else if (before > tension_33 && after < tension_33) {
-      slot.slotLilleChange(this.lille_array_0, false);
-      stage.missItemFallSycle = 4;
-      return stage.missItemFallSycleNow = 0;
-    } else if (before < tension_66 && after > tension_66) {
-      slot.slotLilleChange(this.lille_array_2, false);
-      stage.missItemFallSycle = 2;
-      return stage.missItemFallSycleNow = 0;
-    } else if ((before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)) {
-      slot.slotLilleChange(this.lille_array_1, false);
-      stage.missItemFallSycle = 1;
-      return stage.missItemFallSycleNow = 0;
+    if (game.debug.lille_flg === false) {
+      slot = game.main_scene.gp_slot;
+      stage = game.main_scene.gp_stage_front;
+      before = tension;
+      after = tension + val;
+      tension_33 = Math.floor(this.tension_max * 0.33);
+      tension_66 = Math.floor(this.tension_max * 0.66);
+      if (before > 0 && after <= 0) {
+        return slot.slotLilleChange(this.lille_array_0, true);
+      } else if (before > tension_33 && after < tension_33) {
+        slot.slotLilleChange(this.lille_array_0, false);
+        stage.missItemFallSycle = 4;
+        return stage.missItemFallSycleNow = 0;
+      } else if (before < tension_66 && after > tension_66) {
+        slot.slotLilleChange(this.lille_array_2, false);
+        stage.missItemFallSycle = 2;
+        return stage.missItemFallSycleNow = 0;
+      } else if ((before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)) {
+        slot.slotLilleChange(this.lille_array_1, false);
+        stage.missItemFallSycle = 1;
+        return stage.missItemFallSycleNow = 0;
+      }
     }
   };
 
@@ -3848,13 +4002,46 @@ slotSetting = (function(_super) {
 
 
   /*
-  部員のアイテムの出現条件を返す
-  @param num μ'sメンバーの番号
+  アイテムの出現条件を返す
+  @param num アイテムの番号
   @return boolean
    */
 
-  slotSetting.prototype.memberItemCondirinon = function(num) {
-    return true;
+  slotSetting.prototype.itemConditinon = function(num) {
+    var rslt;
+    rslt = false;
+    if (num < 10) {
+      rslt = true;
+    } else {
+      if (game.prev_fever_muse.indexOf(parseInt(num)) !== -1) {
+        rslt = true;
+      }
+    }
+    return rslt;
+  };
+
+
+  /*
+  μ’ｓメンバーの値段を決める
+   */
+
+  slotSetting.prototype.setMemberItemPrice = function() {
+    var cnt, key, list, val, _results;
+    cnt = 0;
+    list = game.getDeduplicationList(game.prev_fever_muse);
+    _results = [];
+    for (key in list) {
+      val = list[key];
+      if (11 <= val && val <= 19) {
+        if (0 === this.item_list[val].price) {
+          this.item_list[val].price = this.member_item_price[cnt];
+        }
+        _results.push(cnt++);
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
   };
 
   return slotSetting;
@@ -3880,7 +4067,7 @@ Test = (function(_super) {
    */
 
   Test.prototype.testExe = function() {
-    return this.testSetGravity();
+    return this.testCutin();
   };
 
   Test.prototype.testGetHitRole = function() {
@@ -3899,6 +4086,22 @@ Test = (function(_super) {
       game.bet = val;
       result = game.slot_setting.setGravity();
       _results.push(console.log('gravity:' + result));
+    }
+    return _results;
+  };
+
+  Test.prototype.viewItemList = function() {
+    game.prev_fever_muse.push(15);
+    game.prev_fever_muse.push(11);
+    game.slot_setting.setMemberItemPrice();
+    return console.log(game.slot_setting.item_list);
+  };
+
+  Test.prototype.testCutin = function() {
+    var i, _i, _results;
+    _results = [];
+    for (i = _i = 1; _i <= 100; i = ++_i) {
+      _results.push(game.main_scene.gp_effect.cutInSet());
     }
     return _results;
   };

@@ -59,7 +59,7 @@ class discriptionTextDialogHtml extends dialogHtml
 
 class titleDiscription extends discriptionTextDialogHtml
     constructor:()->
-        super 200, 20
+        super 400, 20
         @class.push('title-discription')
 
 class itemItemBuyDiscription extends titleDiscription
@@ -97,7 +97,7 @@ class useHaveDiscription extends titleDiscription
 class itemNameDiscription extends titleDiscription
     constructor:()->
         super
-        @x = 180
+        @x = 50
         @y = 290
     setText:(text)->
         @text = text

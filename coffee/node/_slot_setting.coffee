@@ -154,14 +154,94 @@ class slotSetting extends appNode
                     return true
             },
             1:{
-                'name':'ほげほげ',
-                'image':'test_image',
-                'discription':'ほげほげするよ<br>　ほげほげがほげほげになるよ',
-                'price':1000000000,
-                'durationSec':2,
-                'conditoin':'絶対でないよ',
+                'name':'テンション上がるにゃー！',
+                'image':'item_1',
+                'discription':'移動速度が上がる',
+                'price':10000,
+                'durationSec':60,
+                'conditoin':'',
                 'condFunc':()->
-                    return true
+                    return game.slot_setting.itemConditinon(1)
+            },
+            2:{
+                'name':'チーズケーキ鍋',
+                'image':'item_2',
+                'discription':'チーズケーキしか降ってこなくなる<br>ニンニクは降ってこなくなる',
+                'price':50000,
+                'durationSec':60,
+                'conditoin':'',
+                'condFunc':()->
+                    return game.slot_setting.itemConditinon(2)
+            },
+            3:{
+                'name':'ぴょんぴょこぴょんぴょん',
+                'image':'item_3',
+                'discription':'ジャンプ力が上がる',
+                'price':100000,
+                'durationSec':60,
+                'conditoin':'',
+                'condFunc':()->
+                    return game.slot_setting.itemConditinon(3)
+            },
+            4:{
+                'name':'くすくす大明神',
+                'image':'item_4',
+                'discription':'コンボ数に関わらず<br>たくさんのコインが降ってくるようになる',
+                'price':500000,
+                'durationSec':60,
+                'conditoin':'',
+                'condFunc':()->
+                    return game.slot_setting.itemConditinon(4)
+            },
+            5:{
+                'name':'完全にフルハウスね',
+                'image':'item_5',
+                'discription':'CHANCE!!状態になる確率が<br>大幅に上がる',
+                'price':1000000,
+                'durationSec':30,
+                'conditoin':'',
+                'condFunc':()->
+                    return game.slot_setting.itemConditinon(5)
+            },
+            6:{
+                'name':'チョットマッテテー',
+                'image':'item_6',
+                'discription':'おやつがゆっくり<br>降ってくるようになる',
+                'price':5000000,
+                'durationSec':30,
+                'conditoin':'',
+                'condFunc':()->
+                    return game.slot_setting.itemConditinon(6)
+            },
+            7:{
+                'name':'ファイトだよっ',
+                'image':'item_7',
+                'discription':'アイテムを落としても<br>テンションが下がらなくなる',
+                'price':10000000,
+                'durationSec':30,
+                'conditoin':'',
+                'condFunc':()->
+                    return game.slot_setting.itemConditinon(7)
+            },
+            8:{
+                'name':'ラブアローシュート',
+                'image':'item_8',
+                'discription':'おやつが頭上に落ちてくる',
+                'price':100000000,
+                'durationSec':30,
+                'conditoin':'',
+                'condFunc':()->
+                    return game.slot_setting.itemConditinon(8)
+            },
+            9:{
+                'name':'エリチカおうちに帰る！',
+                'image':'item_9',
+                'discription':'掛け金を上げても<br>おやつの落下速度が上がらなくなる',
+                'price':1000000000,
+                'durationSec':30,
+                'conditoin':'',
+                'condFunc':()->
+                    return game.slot_setting.itemConditinon(9)
             },
             11:{
                 'name':'高坂穂乃果',
@@ -170,7 +250,7 @@ class slotSetting extends appNode
                 'price':0,
                 'conditoin':'穂乃果でスロットを3つ揃える',
                 'condFunc':()->
-                    return game.slot_setting.memberItemCondirinon(11)
+                    return game.slot_setting.itemConditinon(11)
             },
             12:{
                 'name':'南ことり',
@@ -179,7 +259,7 @@ class slotSetting extends appNode
                 'price':0,
                 'conditoin':'ことりでスロットを3つ揃える',
                 'condFunc':()->
-                    return game.slot_setting.memberItemCondirinon(12)
+                    return game.slot_setting.itemConditinon(12)
             },
             13:{
                 'name':'園田海未',
@@ -188,7 +268,7 @@ class slotSetting extends appNode
                 'price':0,
                 'conditoin':'海未でスロットを3つ揃える',
                 'condFunc':()->
-                    return game.slot_setting.memberItemCondirinon(13)
+                    return game.slot_setting.itemConditinon(13)
             },
             14:{
                 'name':'西木野真姫',
@@ -197,7 +277,7 @@ class slotSetting extends appNode
                 'price':0,
                 'conditoin':'真姫でスロットを3つ揃える',
                 'condFunc':()->
-                    return game.slot_setting.memberItemCondirinon(14)
+                    return game.slot_setting.itemConditinon(14)
             },
             15:{
                 'name':'星空凛',
@@ -206,7 +286,7 @@ class slotSetting extends appNode
                 'price':0,
                 'conditoin':'凛でスロットを3つ揃える',
                 'condFunc':()->
-                    return game.slot_setting.memberItemCondirinon(15)
+                    return game.slot_setting.itemConditinon(15)
             },
             16:{
                 'name':'小泉花陽',
@@ -215,7 +295,7 @@ class slotSetting extends appNode
                 'price':0,
                 'conditoin':'花陽でスロットを3つ揃える',
                 'condFunc':()->
-                    return game.slot_setting.memberItemCondirinon(16)
+                    return game.slot_setting.itemConditinon(16)
             },
             17:{
                 'name':'矢澤にこ',
@@ -224,7 +304,7 @@ class slotSetting extends appNode
                 'price':0,
                 'conditoin':'にこでスロットを3つ揃える',
                 'condFunc':()->
-                    return game.slot_setting.memberItemCondirinon(17)
+                    return game.slot_setting.itemConditinon(17)
             },
             18:{
                 'name':'東條希',
@@ -233,7 +313,7 @@ class slotSetting extends appNode
                 'price':0,
                 'conditoin':'希でスロットを3つ揃える',
                 'condFunc':()->
-                    return game.slot_setting.memberItemCondirinon(18)
+                    return game.slot_setting.itemConditinon(18)
             },
             19:{
                 'name':'絢瀬絵里',
@@ -242,9 +322,12 @@ class slotSetting extends appNode
                 'price':0,
                 'conditoin':'絵里でスロットを3つ揃える',
                 'condFunc':()->
-                    return game.slot_setting.memberItemCondirinon(19)
+                    return game.slot_setting.itemConditinon(19)
             }
         }
+
+        #μ’ｓメンバーアイテムの値段、フィーバーになった順に
+        @member_item_price = [1000, 10000, 100000, 500000, 1000000, 5000000, 10000000, 50000000, 100000000]
 
         #テンションの最大値
         @tension_max = 500
@@ -322,7 +405,7 @@ class slotSetting extends appNode
                 remain.push(full[key])
         random = Math.floor(Math.random() * remain.length)
         member = remain[random]
-        #member = 11
+        #member = 17
         @now_muse_num = member
         if @prev_muse.indexOf(member) is -1
             @prev_muse.push(member)
@@ -450,26 +533,27 @@ class slotSetting extends appNode
     @param number val     テンションの増減値
     ###
     changeLilleForTension:(tension, val)->
-        slot = game.main_scene.gp_slot
-        stage = game.main_scene.gp_stage_front
-        before = tension
-        after = tension + val
-        tension_33 = Math.floor(@tension_max * 0.33)
-        tension_66 = Math.floor(@tension_max * 0.66)
-        if before > 0 && after <= 0
-            slot.slotLilleChange(@lille_array_0, true)
-        else if before > tension_33 && after < tension_33
-            slot.slotLilleChange(@lille_array_0, false)
-            stage.missItemFallSycle = 4
-            stage.missItemFallSycleNow = 0
-        else if before < tension_66 && after > tension_66
-            slot.slotLilleChange(@lille_array_2, false)
-            stage.missItemFallSycle = 2
-            stage.missItemFallSycleNow = 0
-        else if (before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)
-            slot.slotLilleChange(@lille_array_1, false)
-            stage.missItemFallSycle = 1
-            stage.missItemFallSycleNow = 0
+        if game.debug.lille_flg is false
+            slot = game.main_scene.gp_slot
+            stage = game.main_scene.gp_stage_front
+            before = tension
+            after = tension + val
+            tension_33 = Math.floor(@tension_max * 0.33)
+            tension_66 = Math.floor(@tension_max * 0.66)
+            if before > 0 && after <= 0
+                slot.slotLilleChange(@lille_array_0, true)
+            else if before > tension_33 && after < tension_33
+                slot.slotLilleChange(@lille_array_0, false)
+                stage.missItemFallSycle = 4
+                stage.missItemFallSycleNow = 0
+            else if before < tension_66 && after > tension_66
+                slot.slotLilleChange(@lille_array_2, false)
+                stage.missItemFallSycle = 2
+                stage.missItemFallSycleNow = 0
+            else if (before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)
+                slot.slotLilleChange(@lille_array_1, false)
+                stage.missItemFallSycle = 1
+                stage.missItemFallSycleNow = 0
 
     ###
     落下するアイテムの種類を決める
@@ -561,9 +645,27 @@ class slotSetting extends appNode
         return role
 
     ###
-    部員のアイテムの出現条件を返す
-    @param num μ'sメンバーの番号
+    アイテムの出現条件を返す
+    @param num アイテムの番号
     @return boolean
     ###
-    memberItemCondirinon:(num)->
-        return true
+    itemConditinon:(num)->
+        rslt = false
+        if num < 10
+            rslt = true
+        else
+            if game.prev_fever_muse.indexOf(parseInt(num)) != -1
+                rslt = true
+        return rslt
+
+    ###
+    μ’ｓメンバーの値段を決める
+    ###
+    setMemberItemPrice:()->
+        cnt = 0
+        list = game.getDeduplicationList(game.prev_fever_muse)
+        for key, val of list
+            if 11 <= val && val <= 19
+                if 0 == @item_list[val].price
+                    @item_list[val].price = @member_item_price[cnt]
+                cnt++

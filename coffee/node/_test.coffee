@@ -10,7 +10,9 @@ class Test extends appNode
     ###
     testExe:()->
         #@testGetHitRole()
-        @testSetGravity()
+        #@testSetGravity()
+        #@viewItemList()
+        @testCutin()
 
     #以下、テスト用関数
 
@@ -25,3 +27,13 @@ class Test extends appNode
             game.bet = val
             result = game.slot_setting.setGravity()
             console.log('gravity:'+result)
+
+    viewItemList:()->
+        game.prev_fever_muse.push(15)
+        game.prev_fever_muse.push(11)
+        game.slot_setting.setMemberItemPrice()
+        console.log(game.slot_setting.item_list)
+
+    testCutin:()->
+        for i in [1..100]
+            game.main_scene.gp_effect.cutInSet()

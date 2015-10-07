@@ -34,7 +34,8 @@ class LoveliveGame extends catchAndSlotGame
         @combo = 0 #現在のコンボ
         @tension = 0 #現在のテンション(500がマックス)
         @past_fever_num = 0 #過去にフィーバーになった回数
-        @item_have_now = []
+        @item_have_now = [] #現在所持しているアイテム
+        @prev_fever_muse = [] #過去にフィーバーになったμ’ｓメンバー（ユニット番号も含む）
 
         @money = @money_init
 
@@ -42,23 +43,23 @@ class LoveliveGame extends catchAndSlotGame
         @title_scene = new titleScene()
         @main_scene = new mainScene()
         @pause_scene = new pauseScene()
+        @loadGame()
+        #一人目のμ’ｓメンバーを決めて素材をロードする
+        if @slot_setting.now_muse_num is 0
+            @slot_setting.setMuseMember()
+        @musePreLoad()
         #テスト
         if @test.test_exe_flg is true
             @test_scene = new testScene()
             @pushScene(@test_scene)
             @test.testExe()
         else
-            @loadGame()
             if @debug.force_main_flg is true
                 @pushScene(@main_scene)
                 if @debug.force_pause_flg is true
                     @pushScene(@pause_scene)
             else
                 @pushScene(@title_scene)
-            #一人目のμ’ｓメンバーを決めて素材をロードする
-            if @slot_setting.now_muse_num is 0
-                @slot_setting.setMuseMember()
-            @musePreLoad()
 
     ###
     スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
@@ -121,6 +122,7 @@ class LoveliveGame extends catchAndSlotGame
     setPauseScene:()->
         @pause_scene.keyList.pause = true
         @pushScene(@pause_scene)
+        @pause_scene.pause_item_buy_layer.resetItemList()
     ###
     ポーズシーンをポップする
     ###
@@ -155,6 +157,7 @@ class LoveliveGame extends catchAndSlotGame
             'middle_lille': JSON.stringify(@main_scene.gp_slot.middle_lille.lilleArray),
             'right_lille': JSON.stringify(@main_scene.gp_slot.right_lille.lilleArray),
             'item_have_now':JSON.stringify(@item_have_now)
+            'prev_fever_muse':JSON.stringify(@prev_fever_muse)
         }
         for key, val of saveData
             @local_storage.setItem(key, val)
@@ -176,6 +179,7 @@ class LoveliveGame extends catchAndSlotGame
             @main_scene.gp_slot.middle_lille.lilleArray = JSON.parse(@local_storage.getItem('middle_lille'))
             @main_scene.gp_slot.right_lille.lilleArray = JSON.parse(@local_storage.getItem('right_lille'))
             @item_have_now = JSON.parse(@local_storage.getItem('item_have_now'))
+            @prev_fever_muse = JSON.parse(@local_storage.getItem('prev_fever_muse'))
     ###
     ローカルストレージから指定のキーの値を取り出して数値に変換する
     ###
@@ -195,6 +199,7 @@ class LoveliveGame extends catchAndSlotGame
         @past_fever_num = data.past_fever_num
         @slot_setting.prev_muse = data.prev_muse
         @item_have_now = data.item_have_now
+        @prev_fever_muse = data.prev_fever_muse
 
     ###
     ゲームロード後の画面表示等の初期値設定
@@ -206,3 +211,4 @@ class LoveliveGame extends catchAndSlotGame
         sys.combo_text.setValue()
         sys.tension_gauge.setValue()
         @pause_scene.pause_item_buy_layer.resetItemList()
+        @slot_setting.setMemberItemPrice()

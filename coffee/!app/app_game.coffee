@@ -10,7 +10,10 @@ class appGame extends Game
         画像の呼び出し
     ###
     imageload:(img) ->
-        return @assets["images/"+img+".png"]
+        callImg = @assets["images/"+img+".png"]
+        if callImg is undefined
+            callImg = null
+        return callImg
 
     ###
         音声の呼び出し

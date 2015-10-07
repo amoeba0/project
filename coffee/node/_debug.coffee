@@ -8,7 +8,7 @@ class Debug extends appNode
         #開始後いきなりメイン画面
         @force_main_flg = true
         #開始後いきなりポーズ画面
-        @force_pause_flg = false
+        @force_pause_flg = true
 
         #ゲーム開始時ロードをしない
         @not_load_flg = false
@@ -16,22 +16,23 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':1000,
+            'money':10000,
             'bet':10,
             'combo':10,
             'tension':100,
             'past_fever_num':0,
-            'prev_muse':[],
-            'item_have_now':[]
+            'prev_muse':[11],
+            'item_have_now':[],
+            'prev_fever_muse':[11]
         }
 
         #デバッグ用リールにすりかえる
         @lille_flg = false
         #デバッグ用リール配列
         @lille_array = [
-            [1, 1, 1],
-            [1, 1, 1],
-            [1, 1, 1]
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上

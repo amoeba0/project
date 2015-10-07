@@ -109,6 +109,9 @@ class gpSlot extends appGroup
         else if left > 10 && middle > 10 && right > 10
             hit_flg = true
             @hit_role = game.slot_setting.getHitRole(left, middle, right)
+        if @hit_role > 10
+            game.prev_fever_muse.push(@hit_role)
+            game.slot_setting.setMemberItemPrice()
         return hit_flg
 
     ###
