@@ -25,9 +25,9 @@ class pauseMemberSetLayer extends appDomLayer
         for member_key, member_val of @member_list
             if game.item_have_now.indexOf(parseInt(member_key)) != -1
                 member_val.opacity = 1
-                member_val.removeClass('grayscale', true)
+                member_val.removeDomClass('grayscale', true)
                 member_val.changeIsButton()
             else
                 member_val.opacity = 0.5
-                member_val.addClass('grayscale', true)
+                member_val.addDomClass('grayscale', true)
                 member_val.changeNotButton()

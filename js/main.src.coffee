@@ -148,6 +148,74 @@ class appSprite extends Sprite
         super w, h
         @w = w
         @h = h
+    _makeContext:() ->
+        @surface = new Surface(@w, @h)
+        @context = @surface.context
+
+    ###
+    枠の無い長方形
+    @param color 色
+    ###
+    drawRect: (color) ->
+        @_makeContext()
+        @context.fillStyle = color
+        @context.fillRect(0, 0, @w, @h, 10)
+        @context.fill()
+        return @surface
+    ###
+    枠のある長方形
+    @param string strokeColor 枠の色
+    @param string fillColor   色
+    @param number thick       枠の太さ
+    ###
+    drawStrokeRect:(strokeColor, fillColor, thick)->
+        @_makeContext()
+        @context.fillStyle = strokeColor
+        @context.fillRect(0, 0, @w, @h)
+        @context.fillStyle = fillColor
+        @context.fillRect(thick, thick, @w - (thick * 2), @h - (thick * 2))
+        return @surface
+
+    ###
+    左向きの三角形
+    @param color 色
+    ###
+    drawLeftTriangle: (color) ->
+        @_makeContext()
+        @context.fillStyle = color
+        @context.beginPath()
+        @context.moveTo(0, @h / 2)
+        @context.lineTo(@w, 0)
+        @context.lineTo(@w, @h)
+        @context.closePath()
+        @context.fill()
+        return @surface
+
+    ###
+    上向きの三角形
+    @param color 色
+    ###
+    drawUpTriangle: (color) ->
+        @_makeContext()
+        @context.fillStyle = color
+        @context.beginPath()
+        @context.moveTo(@w / 2, 0)
+        @context.lineTo(@w, @h)
+        @context.lineTo(0, @h)
+        @context.closePath()
+        @context.fill()
+        return @surface
+
+    ###
+    丸
+    @param color 色
+    ###
+    drawCircle: (color) ->
+        @_makeContext()
+        @context.fillStyle = color
+        @context.arc(@w / 2, @h / 2, @w / 2, 0, Math.PI * 2, true)
+        @context.fill()
+        return @surface
 class pauseItemBuyLayer extends appDomLayer
     constructor: () ->
         super
@@ -187,10 +255,10 @@ class pauseItemBuyLayer extends appDomLayer
         for item_key, item_val of item_list
             if master_list[item_key].condFunc() is false || master_list[item_key].price > game.money
                 item_val.opacity = 0.5
-                item_val.addClass('grayscale', true)
+                item_val.addDomClass('grayscale', true)
             else
                 item_val.opacity = 1
-                item_val.removeClass('grayscale', true)
+                item_val.removeDomClass('grayscale', true)
             if game.item_have_now.indexOf(parseInt(item_key)) != -1
                 item_val.opacity = 0
                 item_val.is_exist = false
@@ -277,11 +345,11 @@ class pauseItemUseLayer extends appDomLayer
         for item_key, item_val of @item_list
             if game.item_have_now.indexOf(parseInt(item_key)) != -1
                 item_val.opacity = 1
-                item_val.removeClass('grayscale', true)
+                item_val.removeDomClass('grayscale', true)
                 item_val.changeIsButton()
             else
                 item_val.opacity = 0.5
-                item_val.addClass('grayscale', true)
+                item_val.addDomClass('grayscale', true)
                 item_val.changeNotButton()
 class pauseMainLayer extends appDomLayer
     constructor: () ->
@@ -325,11 +393,11 @@ class pauseMemberSetLayer extends appDomLayer
         for member_key, member_val of @member_list
             if game.item_have_now.indexOf(parseInt(member_key)) != -1
                 member_val.opacity = 1
-                member_val.removeClass('grayscale', true)
+                member_val.removeDomClass('grayscale', true)
                 member_val.changeIsButton()
             else
                 member_val.opacity = 0.5
-                member_val.addClass('grayscale', true)
+                member_val.addDomClass('grayscale', true)
                 member_val.changeNotButton()
 class pauseSaveLayer extends appDomLayer
     constructor: () ->
@@ -488,6 +556,31 @@ class LoveliveGame extends catchAndSlotGame
             else
                 @_loadGameTest()
             @_gameInitSetting()
+
+    ###
+    ロードするデータの空の値
+    ###
+    _defaultLoadData:(key)->
+        data = {
+            'money'    : 0,
+            'bet'      : 0,
+            'combo'    : 0,
+            'tension'  : 0,
+            'past_fever_num' : 0,
+            'prev_muse': '[]',
+            'now_muse_num': 0,
+            'left_lille': '[]',
+            'middle_lille': '[]',
+            'right_lille': '[]',
+            'item_have_now':'[]',
+            'prev_fever_muse':'[]'
+        }
+        ret = null
+        if data[key] is undefined
+            console.error(key+'のデータのロードに失敗しました。')
+            ret = data[key]
+        return ret
+
     ###
     ゲームをセーブする、ブラウザのローカルストレージへ
     ###
@@ -503,7 +596,7 @@ class LoveliveGame extends catchAndSlotGame
             'left_lille': JSON.stringify(@main_scene.gp_slot.left_lille.lilleArray),
             'middle_lille': JSON.stringify(@main_scene.gp_slot.middle_lille.lilleArray),
             'right_lille': JSON.stringify(@main_scene.gp_slot.right_lille.lilleArray),
-            'item_have_now':JSON.stringify(@item_have_now)
+            'item_have_now':JSON.stringify(@item_have_now),
             'prev_fever_muse':JSON.stringify(@prev_fever_muse)
         }
         for key, val of saveData
@@ -516,23 +609,33 @@ class LoveliveGame extends catchAndSlotGame
         money = @local_storage.getItem('money')
         if money != null
             @money = parseInt(money)
-            @bet = @_loadNumber('bet')
-            @combo = @_loadNumber('combo')
-            @tension = @_loadNumber('tension')
-            @past_fever_num = @_loadNumber('past_fever_num')
-            @slot_setting.prev_muse = JSON.parse(@local_storage.getItem('prev_muse'))
-            @slot_setting.now_muse_num = @_loadNumber('now_muse_num')
-            @main_scene.gp_slot.left_lille.lilleArray = JSON.parse(@local_storage.getItem('left_lille'))
-            @main_scene.gp_slot.middle_lille.lilleArray = JSON.parse(@local_storage.getItem('middle_lille'))
-            @main_scene.gp_slot.right_lille.lilleArray = JSON.parse(@local_storage.getItem('right_lille'))
-            @item_have_now = JSON.parse(@local_storage.getItem('item_have_now'))
-            @prev_fever_muse = JSON.parse(@local_storage.getItem('prev_fever_muse'))
+            @bet = @_loadStorage('bet', 'num')
+            @combo = @_loadStorage('combo', 'num')
+            @tension = @_loadStorage('tension', 'num')
+            @past_fever_num = @_loadStorage('past_fever_num', 'num')
+            @slot_setting.prev_muse = @_loadStorage('prev_muse', 'json')
+            @slot_setting.now_muse_num = @_loadStorage('now_muse_num', 'num')
+            @main_scene.gp_slot.left_lille.lilleArray = @_loadStorage('left_lille', 'json')
+            @main_scene.gp_slot.middle_lille.lilleArray = @_loadStorage('middle_lille', 'json')
+            @main_scene.gp_slot.right_lille.lilleArray = @_loadStorage('right_lille', 'json')
+            @item_have_now = @_loadStorage('item_have_now', 'json')
+            @prev_fever_muse = @_loadStorage('prev_fever_muse', 'json')
     ###
-    ローカルストレージから指定のキーの値を取り出して数値に変換する
+    ローカルストレージから指定のキーの値を取り出して返す
+    @param string key ロードするデータのキー
+    @param string type ロードするデータのタイプ（型） num json
     ###
-    _loadNumber:(key)->
+    _loadStorage:(key, type)->
+        ret = null
         val = @local_storage.getItem(key)
-        return parseInt(val)
+        if val is null
+            ret = @_defaultLoadData(key)
+        else
+            switch type
+                when 'num' then ret = parseInt(val)
+                when 'json' then ret = JSON.parse(val)
+                else ret = val
+        return ret
 
     ###
     ゲームのロードテスト用、デバッグの決まった値
@@ -1330,10 +1433,10 @@ class systemHtml extends appHtml
     changeIsButton:()->
         @is_button = true
         @setImageHtml()
-    addClass:(cls, isImg = false)->
+    addDomClass:(cls, isImg = false)->
         @class.push(cls)
         @_setHtml(isImg)
-    removeClass:(cls, isImg = false)->
+    removeDomClass:(cls, isImg = false)->
         for val, key in @class
             if val is cls
                 @class.splice(key, 1)
@@ -1839,7 +1942,7 @@ class Debug extends appNode
         #開始後いきなりメイン画面
         @force_main_flg = true
         #開始後いきなりポーズ画面
-        @force_pause_flg = true
+        @force_pause_flg = false
 
         #ゲーム開始時ロードをしない
         @not_load_flg = false
@@ -2578,7 +2681,7 @@ class Test extends appNode
         #@testGetHitRole()
         #@testSetGravity()
         #@viewItemList()
-        @testCutin()
+        #@testCutin()
 
     #以下、テスト用関数
 
@@ -2790,13 +2893,6 @@ class FrontPanorama extends Panorama
 class effect extends appSprite
     constructor: (w, h) ->
         super w, h
-    drawCircle: (color) ->
-        @surface = new Surface(@w, @h)
-        @context = @surface.context
-        @context.fillStyle = color
-        @context.arc(@w / 2, @h / 2, @w / 2, 0, Math.PI * 2, true)
-        @context.fill()
-        return @surface
 ###
 カットインの画像サイズ、頭の位置で760px
 ###
@@ -3566,16 +3662,6 @@ class HundredThousandMoney extends Money
 class Slot extends appSprite
     constructor: (w, h) ->
         super w, h
-    ###
-    枠の無い長方形
-    @param color 色
-    ###
-    drawRect: (color) ->
-        surface = new Surface(@w, @h)
-        surface.context.fillStyle = color
-        surface.context.fillRect(0, 0, @w, @h, 10)
-        surface.context.fill()
-        return surface
 class Frame extends Slot
     constructor: (w, h) ->
         super w, h
@@ -3653,75 +3739,6 @@ class RightLille extends Lille
 class System extends appSprite
     constructor: (w, h) ->
         super w, h
-
-    _makeContext:() ->
-        @surface = new Surface(@w, @h)
-        @context = @surface.context
-
-    ###
-    枠の無い長方形
-    @param color 色
-    ###
-    drawRect: (color) ->
-        @_makeContext()
-        @context.fillStyle = color
-        @context.fillRect(0, 0, @w, @h, 10)
-        @context.fill()
-        return @surface
-    ###
-    枠のある長方形
-    @param string strokeColor 枠の色
-    @param string fillColor   色
-    @param number thick       枠の太さ
-    ###
-    drawStrokeRect:(strokeColor, fillColor, thick)->
-        @_makeContext()
-        @context.fillStyle = strokeColor
-        @context.fillRect(0, 0, @w, @h)
-        @context.fillStyle = fillColor
-        @context.fillRect(thick, thick, @w - (thick * 2), @h - (thick * 2))
-        return @surface
-
-    ###
-    左向きの三角形
-    @param color 色
-    ###
-    drawLeftTriangle: (color) ->
-        @_makeContext()
-        @context.fillStyle = color
-        @context.beginPath()
-        @context.moveTo(0, @h / 2)
-        @context.lineTo(@w, 0)
-        @context.lineTo(@w, @h)
-        @context.closePath()
-        @context.fill()
-        return @surface
-
-    ###
-    上向きの三角形
-    @param color 色
-    ###
-    drawUpTriangle: (color) ->
-        @_makeContext()
-        @context.fillStyle = color
-        @context.beginPath()
-        @context.moveTo(@w / 2, 0)
-        @context.lineTo(@w, @h)
-        @context.lineTo(0, @h)
-        @context.closePath()
-        @context.fill()
-        return @surface
-
-    ###
-    丸
-    @param color 色
-    ###
-    drawCircle: (color) ->
-        @_makeContext()
-        @context.fillStyle = color
-        @context.arc(@w / 2, @h / 2, @w / 2, 0, Math.PI * 2, true)
-        @context.fill()
-        return @surface
 class Button extends System
     constructor: (w, h) ->
         super w, h

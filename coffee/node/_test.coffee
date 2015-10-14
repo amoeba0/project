@@ -12,7 +12,7 @@ class Test extends appNode
         #@testGetHitRole()
         #@testSetGravity()
         #@viewItemList()
-        @testCutin()
+        #@testCutin()
 
     #以下、テスト用関数
 

@@ -8,7 +8,7 @@ class Debug extends appNode
         #開始後いきなりメイン画面
         @force_main_flg = true
         #開始後いきなりポーズ画面
-        @force_pause_flg = true
+        @force_pause_flg = false
 
         #ゲーム開始時ロードをしない
         @not_load_flg = false

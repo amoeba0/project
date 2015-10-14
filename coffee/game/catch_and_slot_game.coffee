@@ -141,6 +141,31 @@ class LoveliveGame extends catchAndSlotGame
             else
                 @_loadGameTest()
             @_gameInitSetting()
+
+    ###
+    ロードするデータの空の値
+    ###
+    _defaultLoadData:(key)->
+        data = {
+            'money'    : 0,
+            'bet'      : 0,
+            'combo'    : 0,
+            'tension'  : 0,
+            'past_fever_num' : 0,
+            'prev_muse': '[]',
+            'now_muse_num': 0,
+            'left_lille': '[]',
+            'middle_lille': '[]',
+            'right_lille': '[]',
+            'item_have_now':'[]',
+            'prev_fever_muse':'[]'
+        }
+        ret = null
+        if data[key] is undefined
+            console.error(key+'のデータのロードに失敗しました。')
+            ret = data[key]
+        return ret
+
     ###
     ゲームをセーブする、ブラウザのローカルストレージへ
     ###
@@ -156,7 +181,7 @@ class LoveliveGame extends catchAndSlotGame
             'left_lille': JSON.stringify(@main_scene.gp_slot.left_lille.lilleArray),
             'middle_lille': JSON.stringify(@main_scene.gp_slot.middle_lille.lilleArray),
             'right_lille': JSON.stringify(@main_scene.gp_slot.right_lille.lilleArray),
-            'item_have_now':JSON.stringify(@item_have_now)
+            'item_have_now':JSON.stringify(@item_have_now),
             'prev_fever_muse':JSON.stringify(@prev_fever_muse)
         }
         for key, val of saveData
@@ -169,23 +194,33 @@ class LoveliveGame extends catchAndSlotGame
         money = @local_storage.getItem('money')
         if money != null
             @money = parseInt(money)
-            @bet = @_loadNumber('bet')
-            @combo = @_loadNumber('combo')
-            @tension = @_loadNumber('tension')
-            @past_fever_num = @_loadNumber('past_fever_num')
-            @slot_setting.prev_muse = JSON.parse(@local_storage.getItem('prev_muse'))
-            @slot_setting.now_muse_num = @_loadNumber('now_muse_num')
-            @main_scene.gp_slot.left_lille.lilleArray = JSON.parse(@local_storage.getItem('left_lille'))
-            @main_scene.gp_slot.middle_lille.lilleArray = JSON.parse(@local_storage.getItem('middle_lille'))
-            @main_scene.gp_slot.right_lille.lilleArray = JSON.parse(@local_storage.getItem('right_lille'))
-            @item_have_now = JSON.parse(@local_storage.getItem('item_have_now'))
-            @prev_fever_muse = JSON.parse(@local_storage.getItem('prev_fever_muse'))
+            @bet = @_loadStorage('bet', 'num')
+            @combo = @_loadStorage('combo', 'num')
+            @tension = @_loadStorage('tension', 'num')
+            @past_fever_num = @_loadStorage('past_fever_num', 'num')
+            @slot_setting.prev_muse = @_loadStorage('prev_muse', 'json')
+            @slot_setting.now_muse_num = @_loadStorage('now_muse_num', 'num')
+            @main_scene.gp_slot.left_lille.lilleArray = @_loadStorage('left_lille', 'json')
+            @main_scene.gp_slot.middle_lille.lilleArray = @_loadStorage('middle_lille', 'json')
+            @main_scene.gp_slot.right_lille.lilleArray = @_loadStorage('right_lille', 'json')
+            @item_have_now = @_loadStorage('item_have_now', 'json')
+            @prev_fever_muse = @_loadStorage('prev_fever_muse', 'json')
     ###
-    ローカルストレージから指定のキーの値を取り出して数値に変換する
+    ローカルストレージから指定のキーの値を取り出して返す
+    @param string key ロードするデータのキー
+    @param string type ロードするデータのタイプ（型） num json
     ###
-    _loadNumber:(key)->
+    _loadStorage:(key, type)->
+        ret = null
         val = @local_storage.getItem(key)
-        return parseInt(val)
+        if val is null
+            ret = @_defaultLoadData(key)
+        else
+            switch type
+                when 'num' then ret = parseInt(val)
+                when 'json' then ret = JSON.parse(val)
+                else ret = val
+        return ret
 
     ###
     ゲームのロードテスト用、デバッグの決まった値

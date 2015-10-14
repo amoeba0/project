@@ -22,10 +22,10 @@ class systemHtml extends appHtml
     changeIsButton:()->
         @is_button = true
         @setImageHtml()
-    addClass:(cls, isImg = false)->
+    addDomClass:(cls, isImg = false)->
         @class.push(cls)
         @_setHtml(isImg)
-    removeClass:(cls, isImg = false)->
+    removeDomClass:(cls, isImg = false)->
         for val, key in @class
             if val is cls
                 @class.splice(key, 1)

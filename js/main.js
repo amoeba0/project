@@ -269,6 +269,92 @@ appSprite = (function(_super) {
     this.h = h;
   }
 
+  appSprite.prototype._makeContext = function() {
+    this.surface = new Surface(this.w, this.h);
+    return this.context = this.surface.context;
+  };
+
+
+  /*
+  枠の無い長方形
+  @param color 色
+   */
+
+  appSprite.prototype.drawRect = function(color) {
+    this._makeContext();
+    this.context.fillStyle = color;
+    this.context.fillRect(0, 0, this.w, this.h, 10);
+    this.context.fill();
+    return this.surface;
+  };
+
+
+  /*
+  枠のある長方形
+  @param string strokeColor 枠の色
+  @param string fillColor   色
+  @param number thick       枠の太さ
+   */
+
+  appSprite.prototype.drawStrokeRect = function(strokeColor, fillColor, thick) {
+    this._makeContext();
+    this.context.fillStyle = strokeColor;
+    this.context.fillRect(0, 0, this.w, this.h);
+    this.context.fillStyle = fillColor;
+    this.context.fillRect(thick, thick, this.w - (thick * 2), this.h - (thick * 2));
+    return this.surface;
+  };
+
+
+  /*
+  左向きの三角形
+  @param color 色
+   */
+
+  appSprite.prototype.drawLeftTriangle = function(color) {
+    this._makeContext();
+    this.context.fillStyle = color;
+    this.context.beginPath();
+    this.context.moveTo(0, this.h / 2);
+    this.context.lineTo(this.w, 0);
+    this.context.lineTo(this.w, this.h);
+    this.context.closePath();
+    this.context.fill();
+    return this.surface;
+  };
+
+
+  /*
+  上向きの三角形
+  @param color 色
+   */
+
+  appSprite.prototype.drawUpTriangle = function(color) {
+    this._makeContext();
+    this.context.fillStyle = color;
+    this.context.beginPath();
+    this.context.moveTo(this.w / 2, 0);
+    this.context.lineTo(this.w, this.h);
+    this.context.lineTo(0, this.h);
+    this.context.closePath();
+    this.context.fill();
+    return this.surface;
+  };
+
+
+  /*
+  丸
+  @param color 色
+   */
+
+  appSprite.prototype.drawCircle = function(color) {
+    this._makeContext();
+    this.context.fillStyle = color;
+    this.context.arc(this.w / 2, this.h / 2, this.w / 2, 0, Math.PI * 2, true);
+    this.context.fill();
+    return this.surface;
+  };
+
   return appSprite;
 
 })(Sprite);
@@ -337,10 +423,10 @@ pauseItemBuyLayer = (function(_super) {
       item_val = item_list[item_key];
       if (master_list[item_key].condFunc() === false || master_list[item_key].price > game.money) {
         item_val.opacity = 0.5;
-        item_val.addClass('grayscale', true);
+        item_val.addDomClass('grayscale', true);
       } else {
         item_val.opacity = 1;
-        item_val.removeClass('grayscale', true);
+        item_val.removeDomClass('grayscale', true);
       }
       if (game.item_have_now.indexOf(parseInt(item_key)) !== -1) {
         item_val.opacity = 0;
@@ -478,11 +564,11 @@ pauseItemUseLayer = (function(_super) {
       item_val = _ref[item_key];
       if (game.item_have_now.indexOf(parseInt(item_key)) !== -1) {
         item_val.opacity = 1;
-        item_val.removeClass('grayscale', true);
+        item_val.removeDomClass('grayscale', true);
         _results.push(item_val.changeIsButton());
       } else {
         item_val.opacity = 0.5;
-        item_val.addClass('grayscale', true);
+        item_val.addDomClass('grayscale', true);
         _results.push(item_val.changeNotButton());
       }
     }
@@ -558,11 +644,11 @@ pauseMemberSetLayer = (function(_super) {
       member_val = _ref[member_key];
       if (game.item_have_now.indexOf(parseInt(member_key)) !== -1) {
         member_val.opacity = 1;
-        member_val.removeClass('grayscale', true);
+        member_val.removeDomClass('grayscale', true);
         _results.push(member_val.changeIsButton());
       } else {
         member_val.opacity = 0.5;
-        member_val.addClass('grayscale', true);
+        member_val.addDomClass('grayscale', true);
         _results.push(member_val.changeNotButton());
       }
     }
@@ -799,6 +885,35 @@ LoveliveGame = (function(_super) {
 
 
   /*
+  ロードするデータの空の値
+   */
+
+  LoveliveGame.prototype._defaultLoadData = function(key) {
+    var data, ret;
+    data = {
+      'money': 0,
+      'bet': 0,
+      'combo': 0,
+      'tension': 0,
+      'past_fever_num': 0,
+      'prev_muse': '[]',
+      'now_muse_num': 0,
+      'left_lille': '[]',
+      'middle_lille': '[]',
+      'right_lille': '[]',
+      'item_have_now': '[]',
+      'prev_fever_muse': '[]'
+    };
+    ret = null;
+    if (data[key] === void 0) {
+      console.error(key + 'のデータのロードに失敗しました。');
+      ret = data[key];
+    }
+    return ret;
+  };
+
+
+  /*
   ゲームをセーブする、ブラウザのローカルストレージへ
    */
 
@@ -836,29 +951,46 @@ LoveliveGame = (function(_super) {
     money = this.local_storage.getItem('money');
     if (money !== null) {
       this.money = parseInt(money);
-      this.bet = this._loadNumber('bet');
-      this.combo = this._loadNumber('combo');
-      this.tension = this._loadNumber('tension');
-      this.past_fever_num = this._loadNumber('past_fever_num');
-      this.slot_setting.prev_muse = JSON.parse(this.local_storage.getItem('prev_muse'));
-      this.slot_setting.now_muse_num = this._loadNumber('now_muse_num');
-      this.main_scene.gp_slot.left_lille.lilleArray = JSON.parse(this.local_storage.getItem('left_lille'));
-      this.main_scene.gp_slot.middle_lille.lilleArray = JSON.parse(this.local_storage.getItem('middle_lille'));
-      this.main_scene.gp_slot.right_lille.lilleArray = JSON.parse(this.local_storage.getItem('right_lille'));
-      this.item_have_now = JSON.parse(this.local_storage.getItem('item_have_now'));
-      return this.prev_fever_muse = JSON.parse(this.local_storage.getItem('prev_fever_muse'));
+      this.bet = this._loadStorage('bet', 'num');
+      this.combo = this._loadStorage('combo', 'num');
+      this.tension = this._loadStorage('tension', 'num');
+      this.past_fever_num = this._loadStorage('past_fever_num', 'num');
+      this.slot_setting.prev_muse = this._loadStorage('prev_muse', 'json');
+      this.slot_setting.now_muse_num = this._loadStorage('now_muse_num', 'num');
+      this.main_scene.gp_slot.left_lille.lilleArray = this._loadStorage('left_lille', 'json');
+      this.main_scene.gp_slot.middle_lille.lilleArray = this._loadStorage('middle_lille', 'json');
+      this.main_scene.gp_slot.right_lille.lilleArray = this._loadStorage('right_lille', 'json');
+      this.item_have_now = this._loadStorage('item_have_now', 'json');
+      return this.prev_fever_muse = this._loadStorage('prev_fever_muse', 'json');
     }
   };
 
 
   /*
-  ローカルストレージから指定のキーの値を取り出して数値に変換する
+  ローカルストレージから指定のキーの値を取り出して返す
+  @param string key ロードするデータのキー
+  @param string type ロードするデータのタイプ（型） num json
    */
 
-  LoveliveGame.prototype._loadNumber = function(key) {
-    var val;
+  LoveliveGame.prototype._loadStorage = function(key, type) {
+    var ret, val;
+    ret = null;
     val = this.local_storage.getItem(key);
-    return parseInt(val);
+    if (val === null) {
+      ret = this._defaultLoadData(key);
+    } else {
+      switch (type) {
+        case 'num':
+          ret = parseInt(val);
+          break;
+        case 'json':
+          ret = JSON.parse(val);
+          break;
+        default:
+          ret = val;
+      }
+    }
+    return ret;
   };
 
 
@@ -2043,7 +2175,7 @@ systemHtml = (function(_super) {
     return this.setImageHtml();
   };
 
-  systemHtml.prototype.addClass = function(cls, isImg) {
+  systemHtml.prototype.addDomClass = function(cls, isImg) {
     if (isImg == null) {
       isImg = false;
     }
@@ -2051,7 +2183,7 @@ systemHtml = (function(_super) {
     return this._setHtml(isImg);
   };
 
-  systemHtml.prototype.removeClass = function(cls, isImg) {
+  systemHtml.prototype.removeDomClass = function(cls, isImg) {
     var key, val, _i, _len, _ref;
     if (isImg == null) {
       isImg = false;
@@ -3073,7 +3205,7 @@ Debug = (function(_super) {
   function Debug() {
     Debug.__super__.constructor.apply(this, arguments);
     this.force_main_flg = true;
-    this.force_pause_flg = true;
+    this.force_pause_flg = false;
     this.not_load_flg = false;
     this.test_load_flg = false;
     this.test_load_val = {
@@ -4066,9 +4198,7 @@ Test = (function(_super) {
   ここにゲーム呼び出し時に実行するテストを書く
    */
 
-  Test.prototype.testExe = function() {
-    return this.testCutin();
-  };
+  Test.prototype.testExe = function() {};
 
   Test.prototype.testGetHitRole = function() {
     var result;
@@ -4457,15 +4587,6 @@ effect = (function(_super) {
   function effect(w, h) {
     effect.__super__.constructor.call(this, w, h);
   }
-
-  effect.prototype.drawCircle = function(color) {
-    this.surface = new Surface(this.w, this.h);
-    this.context = this.surface.context;
-    this.context.fillStyle = color;
-    this.context.arc(this.w / 2, this.h / 2, this.w / 2, 0, Math.PI * 2, true);
-    this.context.fill();
-    return this.surface;
-  };
 
   return effect;
 
@@ -5677,21 +5798,6 @@ Slot = (function(_super) {
     Slot.__super__.constructor.call(this, w, h);
   }
 
-
-  /*
-  枠の無い長方形
-  @param color 色
-   */
-
-  Slot.prototype.drawRect = function(color) {
-    var surface;
-    surface = new Surface(this.w, this.h);
-    surface.context.fillStyle = color;
-    surface.context.fillRect(0, 0, this.w, this.h, 10);
-    surface.context.fill();
-    return surface;
-  };
-
   return Slot;
 
 })(appSprite);
@@ -5843,92 +5949,6 @@ System = (function(_super) {
   function System(w, h) {
     System.__super__.constructor.call(this, w, h);
   }
-
-  System.prototype._makeContext = function() {
-    this.surface = new Surface(this.w, this.h);
-    return this.context = this.surface.context;
-  };
-
-
-  /*
-  枠の無い長方形
-  @param color 色
-   */
-
-  System.prototype.drawRect = function(color) {
-    this._makeContext();
-    this.context.fillStyle = color;
-    this.context.fillRect(0, 0, this.w, this.h, 10);
-    this.context.fill();
-    return this.surface;
-  };
-
-
-  /*
-  枠のある長方形
-  @param string strokeColor 枠の色
-  @param string fillColor   色
-  @param number thick       枠の太さ
-   */
-
-  System.prototype.drawStrokeRect = function(strokeColor, fillColor, thick) {
-    this._makeContext();
-    this.context.fillStyle = strokeColor;
-    this.context.fillRect(0, 0, this.w, this.h);
-    this.context.fillStyle = fillColor;
-    this.context.fillRect(thick, thick, this.w - (thick * 2), this.h - (thick * 2));
-    return this.surface;
-  };
-
-
-  /*
-  左向きの三角形
-  @param color 色
-   */
-
-  System.prototype.drawLeftTriangle = function(color) {
-    this._makeContext();
-    this.context.fillStyle = color;
-    this.context.beginPath();
-    this.context.moveTo(0, this.h / 2);
-    this.context.lineTo(this.w, 0);
-    this.context.lineTo(this.w, this.h);
-    this.context.closePath();
-    this.context.fill();
-    return this.surface;
-  };
-
-
-  /*
-  上向きの三角形
-  @param color 色
-   */
-
-  System.prototype.drawUpTriangle = function(color) {
-    this._makeContext();
-    this.context.fillStyle = color;
-    this.context.beginPath();
-    this.context.moveTo(this.w / 2, 0);
-    this.context.lineTo(this.w, this.h);
-    this.context.lineTo(0, this.h);
-    this.context.closePath();
-    this.context.fill();
-    return this.surface;
-  };
-
-
-  /*
-  丸
-  @param color 色
-   */
-
-  System.prototype.drawCircle = function(color) {
-    this._makeContext();
-    this.context.fillStyle = color;
-    this.context.arc(this.w / 2, this.h / 2, this.w / 2, 0, Math.PI * 2, true);
-    this.context.fill();
-    return this.surface;
-  };
 
   return System;
 
