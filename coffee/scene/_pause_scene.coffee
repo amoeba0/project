@@ -10,6 +10,8 @@ class pauseScene extends appScene
         @pause_item_use_layer = new pauseItemUseLayer()
         @pause_member_set_layer = new pauseMemberSetLayer()
         @pause_item_buy_select_layer = new pauseItemBuySelectLayer()
+        @pause_item_use_select_layer = new pauseItemUseSelectLayer()
+        @pause_member_use_select_layer = new pauseMemberUseSelectLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
     setSaveMenu: () ->
@@ -36,6 +38,16 @@ class pauseScene extends appScene
         @pause_item_buy_select_layer.setSelectItem(kind)
     removeItemBuySelectMenu:()->
         @removeChild(@pause_item_buy_select_layer)
+    setItemUseSelectMenu:(kind)->
+        @addChild(@pause_item_use_select_layer)
+        @pause_item_use_select_layer.setSelectItem(kind)
+    removeItemUseSelectMenu:()->
+        @removeChild(@pause_item_use_select_layer)
+    setMemberUseSelectMenu:(kind)->
+        @addChild(@pause_member_use_select_layer)
+        @pause_member_use_select_layer.setSelectItem(kind)
+    removeMemberUseSelectMenu:()->
+        @removeChild(@pause_member_use_select_layer)
     onenterframe: (e) ->
         @_pauseKeyPush()
     ###

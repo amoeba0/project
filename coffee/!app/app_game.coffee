@@ -116,3 +116,15 @@ class appGame extends Game
                     return 1
                 return 0
         )
+    ###
+    配列から指定の値を削除して詰めて返す
+    @param arr    対象の配列
+    @param target 削除する値
+    @return array
+    ###
+    arrayValueDel:(arr, target)->
+        arr.some((v, i)->
+            if v == target
+                arr.splice(i, 1)
+        )
+        return arr

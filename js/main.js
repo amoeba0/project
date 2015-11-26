@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseByuButtonHtml, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, explosionEffect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, imageHtml, itemBuyBuyButtonHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemCatchEffect, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseDialogCloseButton, itemUseDialogHtml, itemUseDiscription, jumpButton, kirakiraEffect, leftButton, longTitleDiscription, lowBetButton, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, memberSetDiscription, menuDialogHtml, modal, moneyText, panoramaEffect, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setMemberButtonHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, useHaveDiscription, useItemButtonHtml, useItemHtml, useMemberHtml, useSetDiscription,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseByuButtonHtml, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, baseSetButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, explosionEffect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, imageHtml, itemBuyBuyButtonHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemCatchEffect, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseCancelButtonHtml, itemUseDialogCloseButton, itemUseDialogHtml, itemUseDiscription, itemUseSelectDialogHtml, itemUseSetButtonHtml, jumpButton, kirakiraEffect, leftButton, longTitleDiscription, lowBetButton, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, memberSetDiscription, memberUseCancelButtonHtml, memberUseSelectDialogHtml, memberUseSetButtonHtml, menuDialogHtml, modal, moneyText, panoramaEffect, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseItemUseSelectLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseMemberUseSelectLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setItemHtml, setMemberButtonHtml, setMemberHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, useHaveDiscription, useItemButtonHtml, useItemHtml, useMemberHtml, useSetDiscription,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -196,6 +196,23 @@ appGame = (function(_super) {
       }
       return 0;
     });
+  };
+
+
+  /*
+  配列から指定の値を削除して詰めて返す
+  @param arr    対象の配列
+  @param target 削除する値
+  @return array
+   */
+
+  appGame.prototype.arrayValueDel = function(arr, target) {
+    arr.some(function(v, i) {
+      if (v === target) {
+        return arr.splice(i, 1);
+      }
+    });
+    return arr;
   };
 
   return appGame;
@@ -423,10 +440,8 @@ pauseItemBuyLayer = (function(_super) {
       item_val = item_list[item_key];
       if (master_list[item_key].condFunc() === false || master_list[item_key].price > game.money) {
         item_val.opacity = 0.5;
-        item_val.addDomClass('grayscale', true);
       } else {
         item_val.opacity = 1;
-        item_val.removeDomClass('grayscale', true);
       }
       if (game.item_have_now.indexOf(parseInt(item_key)) !== -1) {
         item_val.opacity = 0;
@@ -524,8 +539,9 @@ pauseItemUseLayer = (function(_super) {
   __extends(pauseItemUseLayer, _super);
 
   function pauseItemUseLayer() {
-    var i, _i;
+    var i, _i, _j, _ref;
     pauseItemUseLayer.__super__.constructor.apply(this, arguments);
+    this.max_set_item_num = 1;
     this.dialog = new itemUseDialogHtml();
     this.close_button = new itemUseDialogCloseButton();
     this.menu_title = new itemUseDiscription();
@@ -538,10 +554,16 @@ pauseItemUseLayer = (function(_super) {
     this.addChild(this.set_title);
     this.addChild(this.have_title);
     this.item_list = {};
+    this.set_item_list = {};
     for (i = _i = 1; _i <= 9; i = ++_i) {
       this.item_list[i] = new useItemHtml(i);
     }
+    for (i = _j = 1, _ref = this.max_set_item_num; 1 <= _ref ? _j <= _ref : _j >= _ref; i = 1 <= _ref ? ++_j : --_j) {
+      this.set_item_list[i] = new setItemHtml(i);
+      this.addChild(this.set_item_list[i]);
+    }
     this.setItemList();
+    this.dspSetItemList();
   }
 
   pauseItemUseLayer.prototype.setItemList = function() {
@@ -562,20 +584,109 @@ pauseItemUseLayer = (function(_super) {
     _results = [];
     for (item_key in _ref) {
       item_val = _ref[item_key];
-      if (game.item_have_now.indexOf(parseInt(item_key)) !== -1) {
+      if (game.item_set_now.indexOf(parseInt(item_key)) !== -1) {
+        item_val.opacity = 0;
+        item_val.changeNotButton();
+        _results.push(item_val.is_exist = false);
+      } else if (game.item_have_now.indexOf(parseInt(item_key)) !== -1) {
         item_val.opacity = 1;
         item_val.removeDomClass('grayscale', true);
-        _results.push(item_val.changeIsButton());
+        item_val.changeIsButton();
+        _results.push(item_val.is_exist = true);
       } else {
         item_val.opacity = 0.5;
         item_val.addDomClass('grayscale', true);
-        _results.push(item_val.changeNotButton());
+        item_val.changeNotButton();
+        _results.push(item_val.is_exist = false);
+      }
+    }
+    return _results;
+  };
+
+  pauseItemUseLayer.prototype.dspSetItemList = function() {
+    var item_key, item_val, _ref, _results;
+    this.resetItemList();
+    _ref = this.set_item_list;
+    _results = [];
+    for (item_key in _ref) {
+      item_val = _ref[item_key];
+      item_val.setPosition();
+      if (game.item_set_now[item_key - 1] !== void 0) {
+        _results.push(item_val.setItemKind(game.item_set_now[item_key - 1]));
+      } else {
+        _results.push(item_val.setItemKind(0));
       }
     }
     return _results;
   };
 
   return pauseItemUseLayer;
+
+})(appDomLayer);
+
+pauseItemUseSelectLayer = (function(_super) {
+  __extends(pauseItemUseSelectLayer, _super);
+
+  function pauseItemUseSelectLayer() {
+    pauseItemUseSelectLayer.__super__.constructor.apply(this, arguments);
+    this.dialog = new itemUseSelectDialogHtml();
+    this.cancel_button = new itemUseCancelButtonHtml();
+    this.set_button = new itemUseSetButtonHtml();
+    this.item_name = new itemNameDiscription();
+    this.item_image = new selectItemImage();
+    this.item_discription = new itemDiscription();
+    this.addChild(this.modal);
+    this.addChild(this.dialog);
+    this.addChild(this.cancel_button);
+    this.addChild(this.set_button);
+    this.addChild(this.item_image);
+    this.addChild(this.item_name);
+    this.addChild(this.item_discription);
+  }
+
+  pauseItemUseSelectLayer.prototype.setSelectItem = function(kind) {
+    var discription;
+    this.set_button.setText(kind);
+    this.item_kind = kind;
+    this.item_options = game.slot_setting.item_list[kind];
+    if (this.item_options === void 0) {
+      this.item_options = game.slot_setting.item_list[0];
+    }
+    this.item_name.setText(this.item_options.name);
+    this.item_image.setImage(this.item_options.image);
+    discription = this._setDiscription();
+    return this.item_discription.setText(discription);
+  };
+
+  pauseItemUseSelectLayer.prototype._setDiscription = function() {
+    var text;
+    text = '効果：' + this.item_options.discription;
+    if (this.item_options.durationSec !== void 0) {
+      text += '<br>持続時間：' + this.item_options.durationSec + '秒';
+    }
+    return text;
+  };
+
+  pauseItemUseSelectLayer.prototype.setItem = function() {
+    this._itemSet(this.item_kind);
+    game.main_scene.gp_system.itemDsp();
+    game.pause_scene.pause_item_use_layer.dspSetItemList();
+    return game.pause_scene.removeItemUseSelectMenu();
+  };
+
+  pauseItemUseSelectLayer.prototype._itemSet = function(kind) {
+    if (game.item_set_now.indexOf(parseInt(kind)) === -1) {
+      if (game.pause_scene.pause_item_use_layer.max_set_item_num <= game.item_set_now.length) {
+        game.item_set_now.shift();
+      }
+      return game.item_set_now.push(kind);
+    } else {
+      game.item_set_now = game.arrayValueDel(game.item_set_now, kind);
+      return game.main_scene.gp_system.prevItem = 0;
+    }
+  };
+
+  return pauseItemUseSelectLayer;
 
 })(appDomLayer);
 
@@ -604,8 +715,9 @@ pauseMemberSetLayer = (function(_super) {
   __extends(pauseMemberSetLayer, _super);
 
   function pauseMemberSetLayer() {
-    var i, _i;
+    var i, _i, _j, _ref;
     pauseMemberSetLayer.__super__.constructor.apply(this, arguments);
+    this.max_set_member_num = 3;
     this.dialog = new memberSetDialogHtml();
     this.close_button = new memberSetDialogCloseButton();
     this.menu_title = new memberSetDiscription();
@@ -618,10 +730,16 @@ pauseMemberSetLayer = (function(_super) {
     this.addChild(this.set_title);
     this.addChild(this.have_title);
     this.member_list = {};
+    this.set_member_list = {};
     for (i = _i = 11; _i <= 19; i = ++_i) {
       this.member_list[i] = new useMemberHtml(i);
     }
+    for (i = _j = 1, _ref = this.max_set_member_num; 1 <= _ref ? _j <= _ref : _j >= _ref; i = 1 <= _ref ? ++_j : --_j) {
+      this.set_member_list[i] = new setMemberHtml(i);
+      this.addChild(this.set_member_list[i]);
+    }
     this.setItemList();
+    this.dispSetMemberList();
   }
 
   pauseMemberSetLayer.prototype.setItemList = function() {
@@ -642,20 +760,104 @@ pauseMemberSetLayer = (function(_super) {
     _results = [];
     for (member_key in _ref) {
       member_val = _ref[member_key];
-      if (game.item_have_now.indexOf(parseInt(member_key)) !== -1) {
+      if (game.member_set_now.indexOf(parseInt(member_key)) !== -1) {
+        member_val.opacity = 0;
+        member_val.changeNotButton();
+        _results.push(member_val.is_exist = false);
+      } else if (game.item_have_now.indexOf(parseInt(member_key)) !== -1) {
         member_val.opacity = 1;
         member_val.removeDomClass('grayscale', true);
-        _results.push(member_val.changeIsButton());
+        member_val.changeIsButton();
+        _results.push(member_val.is_exist = true);
       } else {
         member_val.opacity = 0.5;
         member_val.addDomClass('grayscale', true);
-        _results.push(member_val.changeNotButton());
+        member_val.changeNotButton();
+        _results.push(member_val.is_exist = false);
+      }
+    }
+    return _results;
+  };
+
+  pauseMemberSetLayer.prototype.dispSetMemberList = function() {
+    var member_key, member_val, _ref, _results;
+    this.resetItemList();
+    _ref = this.set_member_list;
+    _results = [];
+    for (member_key in _ref) {
+      member_val = _ref[member_key];
+      member_val.setPosition();
+      if (game.member_set_now[member_key - 1] !== void 0) {
+        _results.push(member_val.setItemKind(game.member_set_now[member_key - 1]));
+      } else {
+        _results.push(member_val.setItemKind(10));
       }
     }
     return _results;
   };
 
   return pauseMemberSetLayer;
+
+})(appDomLayer);
+
+pauseMemberUseSelectLayer = (function(_super) {
+  __extends(pauseMemberUseSelectLayer, _super);
+
+  function pauseMemberUseSelectLayer() {
+    pauseMemberUseSelectLayer.__super__.constructor.apply(this, arguments);
+    this.dialog = new memberUseSelectDialogHtml();
+    this.cancel_button = new memberUseCancelButtonHtml();
+    this.set_button = new memberUseSetButtonHtml();
+    this.item_name = new itemNameDiscription();
+    this.item_image = new selectItemImage();
+    this.item_discription = new itemDiscription();
+    this.addChild(this.modal);
+    this.addChild(this.dialog);
+    this.addChild(this.cancel_button);
+    this.addChild(this.set_button);
+    this.addChild(this.item_image);
+    this.addChild(this.item_name);
+    this.addChild(this.item_discription);
+  }
+
+  pauseMemberUseSelectLayer.prototype.setSelectItem = function(kind) {
+    var discription;
+    this.set_button.setText(kind);
+    this.item_kind = kind;
+    this.item_options = game.slot_setting.item_list[kind];
+    if (this.item_options === void 0) {
+      this.item_options = game.slot_setting.item_list[0];
+    }
+    this.item_name.setText(this.item_options.name);
+    this.item_image.setImage(this.item_options.image);
+    discription = this._setDiscription();
+    return this.item_discription.setText(discription);
+  };
+
+  pauseMemberUseSelectLayer.prototype._setDiscription = function() {
+    var text;
+    text = '効果：' + this.item_options.discription;
+    return text;
+  };
+
+  pauseMemberUseSelectLayer.prototype.setMember = function() {
+    this._memberSet(this.item_kind);
+    game.pause_scene.pause_member_set_layer.dispSetMemberList();
+    return game.pause_scene.removeMemberUseSelectMenu();
+  };
+
+  pauseMemberUseSelectLayer.prototype._memberSet = function(kind) {
+    if (game.member_set_now.indexOf(parseInt(kind)) === -1) {
+      if (game.pause_scene.pause_member_set_layer.max_set_member_num <= game.member_set_now.length) {
+        game.member_set_now.shift();
+      }
+      return game.member_set_now.push(kind);
+    } else {
+      return game.member_set_now = game.arrayValueDel(game.member_set_now, kind);
+    }
+  };
+
+  return pauseMemberUseSelectLayer;
 
 })(appDomLayer);
 
@@ -711,7 +913,7 @@ LoveliveGame = (function(_super) {
     this.width = 480;
     this.height = 720;
     this.fps = 24;
-    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart', 'explosion'];
+    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart', 'explosion', 'items'];
     this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion'];
     this.keybind(90, 'z');
     this.keybind(88, 'x');
@@ -721,12 +923,17 @@ LoveliveGame = (function(_super) {
     this.fever_down_tension = 0;
     this.item_kind = 0;
     this.fever_hit_eye = 0;
+    this.now_item = 0;
+    this.already_added_material = [];
     this.money = 0;
     this.bet = 1;
     this.combo = 0;
     this.tension = 0;
+    this.item_point = 500;
     this.past_fever_num = 0;
     this.item_have_now = [];
+    this.item_set_now = [];
+    this.member_set_now = [];
     this.prev_fever_muse = [];
     this.money = this.money_init;
   }
@@ -764,6 +971,7 @@ LoveliveGame = (function(_super) {
   LoveliveGame.prototype.musePreLoad = function() {
     var key, material, muse_num, val, _ref, _ref1;
     muse_num = this.slot_setting.now_muse_num;
+    this.already_added_material.push(muse_num);
     if (this.slot_setting.muse_material_list[muse_num] !== void 0) {
       material = this.slot_setting.muse_material_list[muse_num];
       _ref = material['cut_in'];
@@ -896,12 +1104,15 @@ LoveliveGame = (function(_super) {
       'combo': 0,
       'tension': 0,
       'past_fever_num': 0,
+      'item_point': 0,
       'prev_muse': '[]',
       'now_muse_num': 0,
       'left_lille': '[]',
       'middle_lille': '[]',
       'right_lille': '[]',
       'item_have_now': '[]',
+      'item_set_now': '[]',
+      'member_set_now': '[]',
       'prev_fever_muse': '[]'
     };
     ret = null;
@@ -925,12 +1136,15 @@ LoveliveGame = (function(_super) {
       'combo': this.combo,
       'tension': this.tension,
       'past_fever_num': this.past_fever_num,
+      'item_point': this.item_point,
       'prev_muse': JSON.stringify(this.slot_setting.prev_muse),
       'now_muse_num': this.slot_setting.now_muse_num,
       'left_lille': JSON.stringify(this.main_scene.gp_slot.left_lille.lilleArray),
       'middle_lille': JSON.stringify(this.main_scene.gp_slot.middle_lille.lilleArray),
       'right_lille': JSON.stringify(this.main_scene.gp_slot.right_lille.lilleArray),
       'item_have_now': JSON.stringify(this.item_have_now),
+      'item_set_now': JSON.stringify(this.item_set_now),
+      'member_set_now': JSON.stringify(this.member_set_now),
       'prev_fever_muse': JSON.stringify(this.prev_fever_muse)
     };
     _results = [];
@@ -955,12 +1169,15 @@ LoveliveGame = (function(_super) {
       this.combo = this._loadStorage('combo', 'num');
       this.tension = this._loadStorage('tension', 'num');
       this.past_fever_num = this._loadStorage('past_fever_num', 'num');
+      this.item_point = this._loadStorage('item_point', 'num');
       this.slot_setting.prev_muse = this._loadStorage('prev_muse', 'json');
       this.slot_setting.now_muse_num = this._loadStorage('now_muse_num', 'num');
       this.main_scene.gp_slot.left_lille.lilleArray = this._loadStorage('left_lille', 'json');
       this.main_scene.gp_slot.middle_lille.lilleArray = this._loadStorage('middle_lille', 'json');
       this.main_scene.gp_slot.right_lille.lilleArray = this._loadStorage('right_lille', 'json');
       this.item_have_now = this._loadStorage('item_have_now', 'json');
+      this.item_set_now = this._loadStorage('item_set_now', 'json');
+      this.member_set_now = this._loadStorage('member_set_now', 'json');
       return this.prev_fever_muse = this._loadStorage('prev_fever_muse', 'json');
     }
   };
@@ -1006,8 +1223,10 @@ LoveliveGame = (function(_super) {
     this.combo = data.combo;
     this.tension = data.tension;
     this.past_fever_num = data.past_fever_num;
+    this.item_point = data.item_point;
     this.slot_setting.prev_muse = data.prev_muse;
     this.item_have_now = data.item_have_now;
+    this.item_set_now = data.item_set_now;
     return this.prev_fever_muse = data.prev_fever_muse;
   };
 
@@ -1023,8 +1242,12 @@ LoveliveGame = (function(_super) {
     sys.bet_text.setValue();
     sys.combo_text.setValue();
     sys.tension_gauge.setValue();
+    sys.itemDsp();
     this.pause_scene.pause_item_buy_layer.resetItemList();
-    return this.slot_setting.setMemberItemPrice();
+    this.pause_scene.pause_item_use_layer.dspSetItemList();
+    this.pause_scene.pause_member_set_layer.dispSetMemberList();
+    this.slot_setting.setMemberItemPrice();
+    return this.slot_setting.setItemPointValue();
   };
 
   return LoveliveGame;
@@ -1303,7 +1526,7 @@ gpSlot = (function(_super) {
       game.tensionSetValueSlotHit(prize_money, this.hit_role);
       this._feverStart(this.hit_role);
       if (this.hit_role === 1) {
-        member = game.slot_setting.now_muse_num;
+        member = game.slot_setting.getAddMuseNum();
         this.slotAddMuse(member);
       } else {
         game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money);
@@ -2022,10 +2245,12 @@ gpSystem = (function(_super) {
       'up': false,
       'down': false
     };
+    this.prevItem = 0;
   }
 
   gpSystem.prototype.onenterframe = function(e) {
-    return this._betSetting();
+    this._betSetting();
+    return this._setItemPoint();
   };
 
 
@@ -2126,6 +2351,59 @@ gpSystem = (function(_super) {
     }
   };
 
+
+  /*
+  セットしているアイテムを表示する
+   */
+
+  gpSystem.prototype.itemDsp = function() {
+    if (game.item_set_now[0] !== void 0) {
+      this.item_slot.frame = game.item_set_now[0];
+      return game.now_item = game.item_set_now[0];
+    } else {
+      this.item_slot.frame = 0;
+      return game.now_item = 0;
+    }
+  };
+
+
+  /*
+  リアルタイムでアイテムゲージの増減をします
+  アイテムスロットが空なら一定時間で回復し、全回復したら前にセットしていたアイテムを自動的にセットします
+  アイテムスロットにアイテムが入っていたら、入っているアイテムによって一定時間で減少し、全てなくなったら自動的にアイテムを解除します
+   */
+
+  gpSystem.prototype._setItemPoint = function() {
+    if (game.now_item === 0) {
+      if (game.item_point < game.slot_setting.item_point_max) {
+        game.item_point = Math.floor(1000 * (game.item_point + game.slot_setting.item_point_value[0])) / 1000;
+        if (game.slot_setting.item_point_max < game.item_point) {
+          game.item_point = game.slot_setting.item_point_max;
+          if (this.prevItem !== 0) {
+            game.item_set_now.push(this.prevItem);
+            this.itemDsp();
+          }
+        }
+      }
+    } else {
+      if (0 < game.item_point) {
+        game.item_point = Math.floor(1000 * (game.item_point - game.slot_setting.item_point_value[game.now_item])) / 1000;
+        if (game.item_point < 0) {
+          game.item_point = 0;
+          this._resetItem();
+        }
+      }
+    }
+    this.item_gauge.scaleX = Math.floor(100 * (game.item_point / game.slot_setting.item_point_max)) / 100;
+    return this.item_gauge.x = this.item_gauge.initX - Math.floor(this.item_gauge.w * (1 - this.item_gauge.scaleX) / 2);
+  };
+
+  gpSystem.prototype._resetItem = function() {
+    this.prevItem = game.now_item;
+    game.item_set_now = [];
+    return this.itemDsp();
+  };
+
   return gpSystem;
 
 })(appGroup);
@@ -2179,8 +2457,10 @@ systemHtml = (function(_super) {
     if (isImg == null) {
       isImg = false;
     }
-    this["class"].push(cls);
-    return this._setHtml(isImg);
+    if (this["class"].indexOf(cls) === -1) {
+      this["class"].push(cls);
+      return this._setHtml(isImg);
+    }
   };
 
   systemHtml.prototype.removeDomClass = function(cls, isImg) {
@@ -2449,6 +2729,50 @@ itemBuyCancelButtonHtml = (function(_super) {
 
 
 /*
+アイテム使用のキャンセルボタン
+ */
+
+itemUseCancelButtonHtml = (function(_super) {
+  __extends(itemUseCancelButtonHtml, _super);
+
+  function itemUseCancelButtonHtml() {
+    itemUseCancelButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 500;
+    this.x = 250;
+  }
+
+  itemUseCancelButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.removeItemUseSelectMenu();
+  };
+
+  return itemUseCancelButtonHtml;
+
+})(baseCancelButtonHtml);
+
+
+/*
+部員使用のキャンセルボタン
+ */
+
+memberUseCancelButtonHtml = (function(_super) {
+  __extends(memberUseCancelButtonHtml, _super);
+
+  function memberUseCancelButtonHtml() {
+    memberUseCancelButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 500;
+    this.x = 250;
+  }
+
+  memberUseCancelButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.removeMemberUseSelectMenu();
+  };
+
+  return memberUseCancelButtonHtml;
+
+})(baseCancelButtonHtml);
+
+
+/*
 購入ボタン
  */
 
@@ -2498,6 +2822,93 @@ itemBuyBuyButtonHtml = (function(_super) {
   return itemBuyBuyButtonHtml;
 
 })(baseByuButtonHtml);
+
+
+/*
+セットボタン
+ */
+
+baseSetButtonHtml = (function(_super) {
+  __extends(baseSetButtonHtml, _super);
+
+  function baseSetButtonHtml() {
+    baseSetButtonHtml.__super__.constructor.call(this, 150, 45);
+    this["class"].push('base-set-button');
+    this.text = 'セット';
+    this.setHtml();
+  }
+
+  baseSetButtonHtml.prototype.ontouchend = function(e) {
+    return this.touchendEvent();
+  };
+
+  return baseSetButtonHtml;
+
+})(buttonHtml);
+
+
+/*
+アイテム使用のセットボタン
+ */
+
+itemUseSetButtonHtml = (function(_super) {
+  __extends(itemUseSetButtonHtml, _super);
+
+  function itemUseSetButtonHtml() {
+    itemUseSetButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 500;
+    this.x = 70;
+  }
+
+  itemUseSetButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.pause_item_use_select_layer.setItem();
+  };
+
+  itemUseSetButtonHtml.prototype.setText = function(kind) {
+    if (game.item_set_now.indexOf(parseInt(kind)) !== -1) {
+      this.text = '解除';
+      return this.setHtml();
+    } else {
+      this.text = 'セット';
+      return this.setHtml();
+    }
+  };
+
+  return itemUseSetButtonHtml;
+
+})(baseSetButtonHtml);
+
+
+/*
+部員使用のセットボタン
+ */
+
+memberUseSetButtonHtml = (function(_super) {
+  __extends(memberUseSetButtonHtml, _super);
+
+  function memberUseSetButtonHtml() {
+    memberUseSetButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 500;
+    this.x = 70;
+  }
+
+  memberUseSetButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.pause_member_use_select_layer.setMember();
+  };
+
+  memberUseSetButtonHtml.prototype.setText = function(kind) {
+    if (game.member_set_now.indexOf(parseInt(kind)) !== -1) {
+      this.text = '解除';
+      return this.setHtml();
+    } else {
+      this.text = 'セット';
+      return this.setHtml();
+    }
+  };
+
+  return memberUseSetButtonHtml;
+
+})(baseSetButtonHtml);
 
 
 /*
@@ -2739,6 +3150,28 @@ itemBuySelectDialogHtml = (function(_super) {
 
 })(selectDialogHtml);
 
+itemUseSelectDialogHtml = (function(_super) {
+  __extends(itemUseSelectDialogHtml, _super);
+
+  function itemUseSelectDialogHtml() {
+    itemUseSelectDialogHtml.__super__.constructor.apply(this, arguments);
+  }
+
+  return itemUseSelectDialogHtml;
+
+})(selectDialogHtml);
+
+memberUseSelectDialogHtml = (function(_super) {
+  __extends(memberUseSelectDialogHtml, _super);
+
+  function memberUseSelectDialogHtml() {
+    memberUseSelectDialogHtml.__super__.constructor.apply(this, arguments);
+  }
+
+  return memberUseSelectDialogHtml;
+
+})(selectDialogHtml);
+
 discriptionTextDialogHtml = (function(_super) {
   __extends(discriptionTextDialogHtml, _super);
 
@@ -2845,7 +3278,7 @@ itemDiscription = (function(_super) {
   __extends(itemDiscription, _super);
 
   function itemDiscription() {
-    itemDiscription.__super__.constructor.call(this, 400, 190);
+    itemDiscription.__super__.constructor.call(this, 390, 150);
     this.x = 50;
     this.y = 340;
   }
@@ -2929,21 +3362,30 @@ baseItemHtml = (function(_super) {
     this.scaleX = 0.7;
     this.scaleY = 0.7;
     this.positionY = 0;
+    this.positionX = 0;
     this.positoin_kind = this.item_kind;
   }
 
   baseItemHtml.prototype.setPosition = function() {
     if (this.positoin_kind <= 4) {
       this.y = this.positionY;
-      return this.x = 80 * (this.positoin_kind - 1) + 70;
+      return this.x = 80 * (this.positoin_kind - 1) + 70 + this.positionX;
     } else {
       this.y = this.positionY + 80;
-      return this.x = 80 * (this.positoin_kind - 5) + 30;
+      return this.x = 80 * (this.positoin_kind - 5) + 30 + this.positionX;
     }
   };
 
   baseItemHtml.prototype.dispItemBuySelectDialog = function(kind) {
     return game.pause_scene.setItemBuySelectMenu(kind);
+  };
+
+  baseItemHtml.prototype.dispItemUseSelectDialog = function(kind) {
+    return game.pause_scene.setItemUseSelectMenu(kind);
+  };
+
+  baseItemHtml.prototype.dispMemberUseSelectDialog = function(kind) {
+    return game.pause_scene.setMemberUseSelectMenu(kind);
   };
 
   return baseItemHtml;
@@ -2993,11 +3435,55 @@ useItemHtml = (function(_super) {
   function useItemHtml(kind) {
     useItemHtml.__super__.constructor.call(this, kind);
     this.positionY = 400;
+    this.is_exist = false;
   }
+
+  useItemHtml.prototype.ontouchend = function() {
+    if (this.is_exist === true) {
+      return this.dispItemUseSelectDialog(this.item_kind);
+    }
+  };
 
   return useItemHtml;
 
 })(itemHtml);
+
+setItemHtml = (function(_super) {
+  __extends(setItemHtml, _super);
+
+  function setItemHtml(position) {
+    setItemHtml.__super__.constructor.call(this, position);
+    this.kind = 0;
+    this.positionY = 210;
+    this.positionX = 200;
+    this.positoin_kind = position - 1;
+    this._setImage(0);
+  }
+
+  setItemHtml.prototype.setItemKind = function(kind) {
+    this.kind = kind;
+    this._setImage(kind);
+    if (kind !== 0) {
+      return this.changeIsButton();
+    } else {
+      return this.changeNotButton();
+    }
+  };
+
+  setItemHtml.prototype._setImage = function(kind) {
+    this.image_name = 'item_' + kind;
+    return this.setImageHtml();
+  };
+
+  setItemHtml.prototype.ontouchend = function() {
+    if (this.kind !== 0) {
+      return game.pause_scene.setItemUseSelectMenu(this.kind);
+    }
+  };
+
+  return setItemHtml;
+
+})(baseItemHtml);
 
 
 /*
@@ -3043,11 +3529,55 @@ useMemberHtml = (function(_super) {
   function useMemberHtml(kind) {
     useMemberHtml.__super__.constructor.call(this, kind);
     this.positionY = 400;
+    this.is_exist = false;
   }
+
+  useMemberHtml.prototype.ontouchend = function() {
+    if (this.is_exist === true) {
+      return this.dispMemberUseSelectDialog(this.item_kind);
+    }
+  };
 
   return useMemberHtml;
 
 })(memberHtml);
+
+setMemberHtml = (function(_super) {
+  __extends(setMemberHtml, _super);
+
+  function setMemberHtml(position) {
+    setMemberHtml.__super__.constructor.call(this, position);
+    this.kind = 0;
+    this.positionY = 210;
+    this.positionX = 120;
+    this.positoin_kind = position - 1;
+    this._setImage(10);
+  }
+
+  setMemberHtml.prototype.setItemKind = function(kind) {
+    this.kind = kind;
+    this._setImage(kind);
+    if (kind !== 10) {
+      return this.changeIsButton();
+    } else {
+      return this.changeNotButton();
+    }
+  };
+
+  setMemberHtml.prototype._setImage = function(kind) {
+    this.image_name = 'item_' + kind;
+    return this.setImageHtml();
+  };
+
+  setMemberHtml.prototype.ontouchend = function() {
+    if (this.kind !== 10) {
+      return game.pause_scene.setMemberUseSelectMenu(this.kind);
+    }
+  };
+
+  return setMemberHtml;
+
+})(baseItemHtml);
 
 selectItemImage = (function(_super) {
   __extends(selectItemImage, _super);
@@ -3209,13 +3739,16 @@ Debug = (function(_super) {
     this.not_load_flg = false;
     this.test_load_flg = false;
     this.test_load_val = {
-      'money': 10000,
+      'money': 10000000,
       'bet': 10,
       'combo': 10,
       'tension': 100,
       'past_fever_num': 0,
+      'item_point': 500,
       'prev_muse': [11],
-      'item_have_now': [],
+      'item_have_now': [1, 2, 9, 11, 12, 13, 14],
+      'item_set_now': [9],
+      'member_set_now': [],
       'prev_fever_muse': [11]
     };
     this.lille_flg = false;
@@ -3233,6 +3766,9 @@ Debug = (function(_super) {
     this.fix_tention_slot_hit_flg = 200;
     if (this.force_pause_flg === true) {
       this.force_main_flg = true;
+    }
+    if (this.test_load_flg === true) {
+      this.not_load_flg = false;
     }
   }
 
@@ -3613,7 +4149,7 @@ slotSetting = (function(_super) {
       11: {
         'name': '高坂穂乃果',
         'image': 'item_11',
-        'discription': '部員に穂乃果を追加できるようになる',
+        'discription': '部員に穂乃果を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
         'price': 0,
         'conditoin': '穂乃果でスロットを3つ揃える',
         'condFunc': function() {
@@ -3623,7 +4159,7 @@ slotSetting = (function(_super) {
       12: {
         'name': '南ことり',
         'image': 'item_12',
-        'discription': '部員にことりを追加できるようになる',
+        'discription': '部員にことりを追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
         'price': 0,
         'conditoin': 'ことりでスロットを3つ揃える',
         'condFunc': function() {
@@ -3633,7 +4169,7 @@ slotSetting = (function(_super) {
       13: {
         'name': '園田海未',
         'image': 'item_13',
-        'discription': '部員に海未を追加できるようになる',
+        'discription': '部員に海未を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
         'price': 0,
         'conditoin': '海未でスロットを3つ揃える',
         'condFunc': function() {
@@ -3643,7 +4179,7 @@ slotSetting = (function(_super) {
       14: {
         'name': '西木野真姫',
         'image': 'item_14',
-        'discription': '部員に真姫を追加できるようになる',
+        'discription': '部員に真姫を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
         'price': 0,
         'conditoin': '真姫でスロットを3つ揃える',
         'condFunc': function() {
@@ -3653,7 +4189,7 @@ slotSetting = (function(_super) {
       15: {
         'name': '星空凛',
         'image': 'item_15',
-        'discription': '部員に凛を追加できるようになる',
+        'discription': '部員に凛を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
         'price': 0,
         'conditoin': '凛でスロットを3つ揃える',
         'condFunc': function() {
@@ -3663,7 +4199,7 @@ slotSetting = (function(_super) {
       16: {
         'name': '小泉花陽',
         'image': 'item_16',
-        'discription': '部員に花陽を追加できるようになる',
+        'discription': '部員に花陽を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
         'price': 0,
         'conditoin': '花陽でスロットを3つ揃える',
         'condFunc': function() {
@@ -3673,7 +4209,7 @@ slotSetting = (function(_super) {
       17: {
         'name': '矢澤にこ',
         'image': 'item_17',
-        'discription': '部員ににこを追加できるようになる',
+        'discription': '部員ににこを追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
         'price': 0,
         'conditoin': 'にこでスロットを3つ揃える',
         'condFunc': function() {
@@ -3683,7 +4219,7 @@ slotSetting = (function(_super) {
       18: {
         'name': '東條希',
         'image': 'item_18',
-        'discription': '部員に希を追加できるようになる',
+        'discription': '部員に希を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
         'price': 0,
         'conditoin': '希でスロットを3つ揃える',
         'condFunc': function() {
@@ -3693,7 +4229,7 @@ slotSetting = (function(_super) {
       19: {
         'name': '絢瀬絵里',
         'image': 'item_19',
-        'discription': '部員に絵里を追加できるようになる',
+        'discription': '部員に絵里を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
         'price': 0,
         'conditoin': '絵里でスロットを3つ揃える',
         'condFunc': function() {
@@ -3706,8 +4242,34 @@ slotSetting = (function(_super) {
     this.now_muse_num = 0;
     this.isForceSlotHit = false;
     this.slotHitRate = 0;
+    this.item_point_max = 500;
+    this.item_point_recovery_sec = 120;
+    this.item_point_value = [
+      {
+        0: 0,
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0
+      }
+    ];
     this.prev_muse = [];
   }
+
+  slotSetting.prototype.setItemPointValue = function() {
+    var i, _i, _results;
+    this.item_point_value[0] = Math.floor(this.item_point_max * 1000 / (this.item_point_recovery_sec * game.fps)) / 1000;
+    _results = [];
+    for (i = _i = 1; _i <= 9; i = ++_i) {
+      _results.push(this.item_point_value[i] = Math.floor(this.item_point_max * 1000 / (this.item_list[i].durationSec * game.fps)) / 1000);
+    }
+    return _results;
+  };
 
 
   /*
@@ -4176,6 +4738,15 @@ slotSetting = (function(_super) {
     return _results;
   };
 
+
+  /*
+  現在セットされているメンバーから次にスロットに挿入するμ’ｓメンバーを決めて返します
+   */
+
+  slotSetting.prototype.getAddMuseNum = function() {
+    return this.now_muse_num;
+  };
+
   return slotSetting;
 
 })(appNode);
@@ -4415,6 +4986,8 @@ pauseScene = (function(_super) {
     this.pause_item_use_layer = new pauseItemUseLayer();
     this.pause_member_set_layer = new pauseMemberSetLayer();
     this.pause_item_buy_select_layer = new pauseItemBuySelectLayer();
+    this.pause_item_use_select_layer = new pauseItemUseSelectLayer();
+    this.pause_member_use_select_layer = new pauseMemberUseSelectLayer();
     this.addChild(this.pause_back);
     this.addChild(this.pause_main_layer);
   }
@@ -4461,6 +5034,24 @@ pauseScene = (function(_super) {
 
   pauseScene.prototype.removeItemBuySelectMenu = function() {
     return this.removeChild(this.pause_item_buy_select_layer);
+  };
+
+  pauseScene.prototype.setItemUseSelectMenu = function(kind) {
+    this.addChild(this.pause_item_use_select_layer);
+    return this.pause_item_use_select_layer.setSelectItem(kind);
+  };
+
+  pauseScene.prototype.removeItemUseSelectMenu = function() {
+    return this.removeChild(this.pause_item_use_select_layer);
+  };
+
+  pauseScene.prototype.setMemberUseSelectMenu = function(kind) {
+    this.addChild(this.pause_member_use_select_layer);
+    return this.pause_member_use_select_layer.setSelectItem(kind);
+  };
+
+  pauseScene.prototype.removeMemberUseSelectMenu = function() {
+    return this.removeChild(this.pause_member_use_select_layer);
   };
 
   pauseScene.prototype.onenterframe = function(e) {
@@ -6289,7 +6880,8 @@ ItemSlot = (function(_super) {
 
   function ItemSlot() {
     ItemSlot.__super__.constructor.call(this, 55, 55);
-    this.image = this.drawCircle('#aaa');
+    this.image = game.imageload("items");
+    this.frame = 0;
     this.x = 5;
     this.y = 70;
   }
@@ -6316,9 +6908,10 @@ ItemGauge = (function(_super) {
   __extends(ItemGauge, _super);
 
   function ItemGauge() {
-    ItemGauge.__super__.constructor.call(this, 50, 8);
+    ItemGauge.__super__.constructor.call(this, 51, 8);
     this.image = this.drawRect('#A6E39D');
-    this.x = 8;
+    this.initX = 7;
+    this.x = this.initX;
     this.y = 112;
   }
 

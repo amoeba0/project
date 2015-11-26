@@ -52,6 +52,14 @@ class itemBuySelectDialogHtml extends selectDialogHtml
     constructor:()->
         super
 
+class itemUseSelectDialogHtml extends selectDialogHtml
+    constructor:()->
+        super
+
+class memberUseSelectDialogHtml extends selectDialogHtml
+    constructor:()->
+        super
+
 class discriptionTextDialogHtml extends dialogHtml
     constructor:(w, h)->
         super w, h
@@ -105,7 +113,7 @@ class itemNameDiscription extends titleDiscription
 
 class itemDiscription extends discriptionTextDialogHtml
     constructor:()->
-        super 400, 190
+        super 390, 150
         @x = 50
         @y = 340
     setText:(text)->

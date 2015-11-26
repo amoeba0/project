@@ -13,7 +13,8 @@ class LoveliveGame extends catchAndSlotGame
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart', 'explosion']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
+                    'heart', 'explosion', 'items']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion']
 
@@ -27,14 +28,19 @@ class LoveliveGame extends catchAndSlotGame
         @fever_down_tension = 0
         @item_kind = 0 #落下アイテムの種類（フレーム）
         @fever_hit_eye = 0 #どの目で当たって今フィーバーになっているか
+        @now_item = 0 #現在セット中のアイテム（１つめ）
+        @already_added_material = [] #ゲームを開いてから現在までにロードしたμ’ｓの画像や楽曲の素材の番号
 
         #セーブする変数(slot_settingにもあるので注意)
         @money = 0 #現在の所持金
         @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
         @tension = 0 #現在のテンション(500がマックス)
+        @item_point = 500 #アイテムのポイント（500がマックス）
         @past_fever_num = 0 #過去にフィーバーになった回数
         @item_have_now = [] #現在所持しているアイテム
+        @item_set_now = [] #現在セットされているアイテム
+        @member_set_now = [] #現在セットされているメンバー
         @prev_fever_muse = [] #過去にフィーバーになったμ’ｓメンバー（ユニット番号も含む）
 
         @money = @money_init
@@ -66,6 +72,7 @@ class LoveliveGame extends catchAndSlotGame
     ###
     musePreLoad:()->
         muse_num = @slot_setting.now_muse_num
+        @already_added_material.push(muse_num)
         if @slot_setting.muse_material_list[muse_num] != undefined
             material = @slot_setting.muse_material_list[muse_num]
             for key, val of material['cut_in']
@@ -152,12 +159,15 @@ class LoveliveGame extends catchAndSlotGame
             'combo'    : 0,
             'tension'  : 0,
             'past_fever_num' : 0,
+            'item_point' : 0,
             'prev_muse': '[]',
             'now_muse_num': 0,
             'left_lille': '[]',
             'middle_lille': '[]',
             'right_lille': '[]',
             'item_have_now':'[]',
+            'item_set_now':'[]',
+            'member_set_now':'[]',
             'prev_fever_muse':'[]'
         }
         ret = null
@@ -176,12 +186,15 @@ class LoveliveGame extends catchAndSlotGame
             'combo'    : @combo,
             'tension'  : @tension,
             'past_fever_num' : @past_fever_num,
+            'item_point' : @item_point,
             'prev_muse': JSON.stringify(@slot_setting.prev_muse),
             'now_muse_num': @slot_setting.now_muse_num,
             'left_lille': JSON.stringify(@main_scene.gp_slot.left_lille.lilleArray),
             'middle_lille': JSON.stringify(@main_scene.gp_slot.middle_lille.lilleArray),
             'right_lille': JSON.stringify(@main_scene.gp_slot.right_lille.lilleArray),
             'item_have_now':JSON.stringify(@item_have_now),
+            'item_set_now':JSON.stringify(@item_set_now),
+            'member_set_now':JSON.stringify(@member_set_now),
             'prev_fever_muse':JSON.stringify(@prev_fever_muse)
         }
         for key, val of saveData
@@ -198,12 +211,15 @@ class LoveliveGame extends catchAndSlotGame
             @combo = @_loadStorage('combo', 'num')
             @tension = @_loadStorage('tension', 'num')
             @past_fever_num = @_loadStorage('past_fever_num', 'num')
+            @item_point = @_loadStorage('item_point', 'num')
             @slot_setting.prev_muse = @_loadStorage('prev_muse', 'json')
             @slot_setting.now_muse_num = @_loadStorage('now_muse_num', 'num')
             @main_scene.gp_slot.left_lille.lilleArray = @_loadStorage('left_lille', 'json')
             @main_scene.gp_slot.middle_lille.lilleArray = @_loadStorage('middle_lille', 'json')
             @main_scene.gp_slot.right_lille.lilleArray = @_loadStorage('right_lille', 'json')
             @item_have_now = @_loadStorage('item_have_now', 'json')
+            @item_set_now = @_loadStorage('item_set_now', 'json')
+            @member_set_now = @_loadStorage('member_set_now', 'json')
             @prev_fever_muse = @_loadStorage('prev_fever_muse', 'json')
     ###
     ローカルストレージから指定のキーの値を取り出して返す
@@ -232,8 +248,10 @@ class LoveliveGame extends catchAndSlotGame
         @combo = data.combo
         @tension = data.tension
         @past_fever_num = data.past_fever_num
+        @item_point = data.item_point
         @slot_setting.prev_muse = data.prev_muse
         @item_have_now = data.item_have_now
+        @item_set_now = data.item_set_now
         @prev_fever_muse = data.prev_fever_muse
 
     ###
@@ -245,5 +263,9 @@ class LoveliveGame extends catchAndSlotGame
         sys.bet_text.setValue()
         sys.combo_text.setValue()
         sys.tension_gauge.setValue()
+        sys.itemDsp()
         @pause_scene.pause_item_buy_layer.resetItemList()
+        @pause_scene.pause_item_use_layer.dspSetItemList()
+        @pause_scene.pause_member_set_layer.dispSetMemberList()
         @slot_setting.setMemberItemPrice()
+        @slot_setting.setItemPointValue()

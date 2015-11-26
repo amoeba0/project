@@ -33,8 +33,10 @@ class gpSystem extends appGroup
         @low_bet_button = new lowBetButton()
         @addChild(@low_bet_button)
         @keyList = {'up':false, 'down':false}
+        @prevItem = 0
     onenterframe: (e) ->
         @_betSetting()
+        @_setItemPoint()
     ###
     キーの上下を押して掛け金を設定する
     TODO スロットの当選金額落下中は変更できないようにする
@@ -109,3 +111,39 @@ class gpSystem extends appGroup
             @heigh_bet_button.opacity = 0
             @low_bet_button.opacity = 0
             @paermit_bet_change_flg = false
+    ###
+    セットしているアイテムを表示する
+    ###
+    itemDsp:()->
+        if game.item_set_now[0] != undefined
+            @item_slot.frame = game.item_set_now[0]
+            game.now_item = game.item_set_now[0]
+        else
+            @item_slot.frame = 0
+            game.now_item = 0
+    ###
+    リアルタイムでアイテムゲージの増減をします
+    アイテムスロットが空なら一定時間で回復し、全回復したら前にセットしていたアイテムを自動的にセットします
+    アイテムスロットにアイテムが入っていたら、入っているアイテムによって一定時間で減少し、全てなくなったら自動的にアイテムを解除します
+    ###
+    _setItemPoint:()->
+        if game.now_item is 0
+            if game.item_point < game.slot_setting.item_point_max
+                game.item_point = Math.floor(1000 * (game.item_point + game.slot_setting.item_point_value[0])) /1000
+                if game.slot_setting.item_point_max < game.item_point
+                    game.item_point = game.slot_setting.item_point_max
+                    if @prevItem != 0
+                        game.item_set_now.push(@prevItem)
+                        @itemDsp()
+        else
+            if 0 < game.item_point
+                game.item_point = Math.floor(1000 * (game.item_point - game.slot_setting.item_point_value[game.now_item])) /1000
+                if game.item_point < 0
+                    game.item_point = 0
+                    @_resetItem()
+        @item_gauge.scaleX = Math.floor(100 * (game.item_point / game.slot_setting.item_point_max)) / 100
+        @item_gauge.x = @item_gauge.initX - Math.floor(@item_gauge.w * (1 - @item_gauge.scaleX) / 2)
+    _resetItem:()->
+        @prevItem = game.now_item
+        game.item_set_now = []
+        @itemDsp()

@@ -46,6 +46,14 @@
     border: solid 3px #cccccc;
     color: white;
 }
+.base-set-button {
+    background-color: #B2CF3E;
+    width: 150px;
+    padding: 7px 0px;
+    font: 37px Consolas Monaco MSゴシック;
+    border: solid 3px #cccccc;
+    color: white;
+}
 .image-button {
     cursor: pointer;
 }

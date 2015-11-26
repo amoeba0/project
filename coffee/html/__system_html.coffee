@@ -23,8 +23,9 @@ class systemHtml extends appHtml
         @is_button = true
         @setImageHtml()
     addDomClass:(cls, isImg = false)->
-        @class.push(cls)
-        @_setHtml(isImg)
+        if (@class.indexOf(cls) == -1)
+            @class.push(cls)
+            @_setHtml(isImg)
     removeDomClass:(cls, isImg = false)->
         for val, key in @class
             if val is cls

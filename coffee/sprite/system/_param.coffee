@@ -37,7 +37,8 @@ class TensionGauge extends Param
 class ItemSlot extends Param
     constructor:()->
         super 55, 55
-        @image = @drawCircle('#aaa')
+        @image = game.imageload("items")
+        @frame = 0
         @x = 5
         @y = 70
 
@@ -50,7 +51,8 @@ class ItemGaugeBack extends Param
 
 class ItemGauge extends Param
     constructor:()->
-        super 50, 8
+        super 51, 8
         @image = @drawRect('#A6E39D')
-        @x = 8
+        @initX = 7
+        @x = @initX
         @y = 112

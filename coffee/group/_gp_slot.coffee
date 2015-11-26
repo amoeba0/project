@@ -87,7 +87,7 @@ class gpSlot extends appGroup
             game.tensionSetValueSlotHit(prize_money, @hit_role)
             @_feverStart(@hit_role)
             if @hit_role is 1
-                member = game.slot_setting.now_muse_num
+                member = game.slot_setting.getAddMuseNum()
                 @slotAddMuse(member)
             else
                 game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)

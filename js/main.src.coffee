@@ -125,6 +125,18 @@ class appGame extends Game
                     return 1
                 return 0
         )
+    ###
+    配列から指定の値を削除して詰めて返す
+    @param arr    対象の配列
+    @param target 削除する値
+    @return array
+    ###
+    arrayValueDel:(arr, target)->
+        arr.some((v, i)->
+            if v == target
+                arr.splice(i, 1)
+        )
+        return arr
 class appGroup extends Group
     constructor: () ->
         super
@@ -255,10 +267,10 @@ class pauseItemBuyLayer extends appDomLayer
         for item_key, item_val of item_list
             if master_list[item_key].condFunc() is false || master_list[item_key].price > game.money
                 item_val.opacity = 0.5
-                item_val.addDomClass('grayscale', true)
+                #item_val.addDomClass('grayscale', true)
             else
                 item_val.opacity = 1
-                item_val.removeDomClass('grayscale', true)
+                #item_val.removeDomClass('grayscale', true)
             if game.item_have_now.indexOf(parseInt(item_key)) != -1
                 item_val.opacity = 0
                 item_val.is_exist = false
@@ -322,6 +334,7 @@ class pauseItemBuySelectLayer extends appDomLayer
 class pauseItemUseLayer extends appDomLayer
     constructor: () ->
         super
+        @max_set_item_num = 1
         @dialog = new itemUseDialogHtml()
         @close_button = new itemUseDialogCloseButton()
         @menu_title = new itemUseDiscription()
@@ -333,24 +346,90 @@ class pauseItemUseLayer extends appDomLayer
         @addChild(@menu_title)
         @addChild(@set_title)
         @addChild(@have_title)
-        @item_list = {}
+        @item_list = {} #アイテム所持リスト
+        @set_item_list = {} #アイテムセット中リスト
         for i in [1..9]
             @item_list[i] = new useItemHtml(i)
+        for i in [1..@max_set_item_num]
+            @set_item_list[i] = new setItemHtml(i)
+            @addChild(@set_item_list[i])
         @setItemList()
+        @dspSetItemList()
     setItemList:()->
         for item_key, item_val of @item_list
             @addChild(item_val)
             item_val.setPosition()
     resetItemList:()->
         for item_key, item_val of @item_list
-            if game.item_have_now.indexOf(parseInt(item_key)) != -1
+            if game.item_set_now.indexOf(parseInt(item_key)) != -1
+                item_val.opacity = 0
+                item_val.changeNotButton()
+                item_val.is_exist = false
+            else if game.item_have_now.indexOf(parseInt(item_key)) != -1
                 item_val.opacity = 1
                 item_val.removeDomClass('grayscale', true)
                 item_val.changeIsButton()
+                item_val.is_exist = true
             else
                 item_val.opacity = 0.5
                 item_val.addDomClass('grayscale', true)
                 item_val.changeNotButton()
+                item_val.is_exist = false
+    #セットされているアイテムをレンダリングする
+    dspSetItemList:()->
+        @resetItemList()
+        for item_key, item_val of @set_item_list
+            item_val.setPosition()
+            if game.item_set_now[item_key - 1] != undefined
+                item_val.setItemKind(game.item_set_now[item_key - 1])
+            else
+                item_val.setItemKind(0)
+
+class pauseItemUseSelectLayer extends appDomLayer
+    constructor:()->
+        super
+        @dialog = new itemUseSelectDialogHtml()
+        @cancel_button = new itemUseCancelButtonHtml()
+        @set_button = new itemUseSetButtonHtml()
+        @item_name = new itemNameDiscription()
+        @item_image = new selectItemImage()
+        @item_discription = new itemDiscription()
+        @addChild(@modal)
+        @addChild(@dialog)
+        @addChild(@cancel_button)
+        @addChild(@set_button)
+        @addChild(@item_image)
+        @addChild(@item_name)
+        @addChild(@item_discription)
+    setSelectItem:(kind)->
+        @set_button.setText(kind)
+        @item_kind = kind
+        @item_options = game.slot_setting.item_list[kind]
+        if @item_options is undefined
+            @item_options = game.slot_setting.item_list[0]
+        @item_name.setText(@item_options.name)
+        @item_image.setImage(@item_options.image)
+        discription = @_setDiscription()
+        @item_discription.setText(discription)
+    _setDiscription:()->
+        text = '効果：'+@item_options.discription
+        if @item_options.durationSec != undefined
+            text += '<br>持続時間：'+@item_options.durationSec+'秒'
+        return text
+    setItem:()->
+        @_itemSet(@item_kind)
+        game.main_scene.gp_system.itemDsp()
+        game.pause_scene.pause_item_use_layer.dspSetItemList()
+        game.pause_scene.removeItemUseSelectMenu()
+    #アイテムをセットする
+    _itemSet:(kind)->
+        if game.item_set_now.indexOf(parseInt(kind)) == -1
+            if (game.pause_scene.pause_item_use_layer.max_set_item_num <= game.item_set_now.length)
+                game.item_set_now.shift()
+            game.item_set_now.push(kind)
+        else
+            game.item_set_now = game.arrayValueDel(game.item_set_now, kind)
+            game.main_scene.gp_system.prevItem = 0
 class pauseMainLayer extends appDomLayer
     constructor: () ->
         super
@@ -370,6 +449,7 @@ class pauseMainLayer extends appDomLayer
 class pauseMemberSetLayer extends appDomLayer
     constructor: () ->
         super
+        @max_set_member_num = 3
         @dialog = new memberSetDialogHtml()
         @close_button = new memberSetDialogCloseButton()
         @menu_title = new memberSetDiscription()
@@ -382,23 +462,84 @@ class pauseMemberSetLayer extends appDomLayer
         @addChild(@set_title)
         @addChild(@have_title)
         @member_list = {}
+        @set_member_list = {}
         for i in [11..19]
             @member_list[i] = new useMemberHtml(i)
+        for i in [1..@max_set_member_num]
+            @set_member_list[i] = new setMemberHtml(i)
+            @addChild(@set_member_list[i])
         @setItemList()
+        @dispSetMemberList()
     setItemList:()->
         for member_key, member_val of @member_list
             @addChild(member_val)
             member_val.setPosition()
     resetItemList:()->
         for member_key, member_val of @member_list
-            if game.item_have_now.indexOf(parseInt(member_key)) != -1
+            if game.member_set_now.indexOf(parseInt(member_key)) != -1
+                member_val.opacity = 0
+                member_val.changeNotButton()
+                member_val.is_exist = false
+            else if game.item_have_now.indexOf(parseInt(member_key)) != -1
                 member_val.opacity = 1
                 member_val.removeDomClass('grayscale', true)
                 member_val.changeIsButton()
+                member_val.is_exist = true
             else
                 member_val.opacity = 0.5
                 member_val.addDomClass('grayscale', true)
                 member_val.changeNotButton()
+                member_val.is_exist = false
+    #セットされている部員をレンダリングする
+    dispSetMemberList:()->
+        @resetItemList()
+        for member_key, member_val of @set_member_list
+            member_val.setPosition()
+            if game.member_set_now[member_key - 1] != undefined
+                member_val.setItemKind(game.member_set_now[member_key - 1])
+            else
+                member_val.setItemKind(10)
+
+class pauseMemberUseSelectLayer extends appDomLayer
+    constructor:()->
+        super
+        @dialog = new memberUseSelectDialogHtml()
+        @cancel_button = new memberUseCancelButtonHtml()
+        @set_button = new memberUseSetButtonHtml()
+        @item_name = new itemNameDiscription()
+        @item_image = new selectItemImage()
+        @item_discription = new itemDiscription()
+        @addChild(@modal)
+        @addChild(@dialog)
+        @addChild(@cancel_button)
+        @addChild(@set_button)
+        @addChild(@item_image)
+        @addChild(@item_name)
+        @addChild(@item_discription)
+    setSelectItem:(kind)->
+        @set_button.setText(kind)
+        @item_kind = kind
+        @item_options = game.slot_setting.item_list[kind]
+        if @item_options is undefined
+            @item_options = game.slot_setting.item_list[0]
+        @item_name.setText(@item_options.name)
+        @item_image.setImage(@item_options.image)
+        discription = @_setDiscription()
+        @item_discription.setText(discription)
+    _setDiscription:()->
+        text = '効果：'+@item_options.discription
+        return text
+    setMember:()->
+        @_memberSet(@item_kind)
+        game.pause_scene.pause_member_set_layer.dispSetMemberList()
+        game.pause_scene.removeMemberUseSelectMenu()
+    _memberSet:(kind)->
+        if game.member_set_now.indexOf(parseInt(kind)) == -1
+            if (game.pause_scene.pause_member_set_layer.max_set_member_num <= game.member_set_now.length)
+                game.member_set_now.shift()
+            game.member_set_now.push(kind)
+        else
+            game.member_set_now = game.arrayValueDel(game.member_set_now, kind)
 class pauseSaveLayer extends appDomLayer
     constructor: () ->
         super
@@ -428,7 +569,8 @@ class LoveliveGame extends catchAndSlotGame
         @height = 720
         @fps = 24
         #画像リスト
-        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart', 'explosion']
+        @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
+                    'heart', 'explosion', 'items']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion']
 
@@ -442,14 +584,19 @@ class LoveliveGame extends catchAndSlotGame
         @fever_down_tension = 0
         @item_kind = 0 #落下アイテムの種類（フレーム）
         @fever_hit_eye = 0 #どの目で当たって今フィーバーになっているか
+        @now_item = 0 #現在セット中のアイテム（１つめ）
+        @already_added_material = [] #ゲームを開いてから現在までにロードしたμ’ｓの画像や楽曲の素材の番号
 
         #セーブする変数(slot_settingにもあるので注意)
         @money = 0 #現在の所持金
         @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
         @tension = 0 #現在のテンション(500がマックス)
+        @item_point = 500 #アイテムのポイント（500がマックス）
         @past_fever_num = 0 #過去にフィーバーになった回数
         @item_have_now = [] #現在所持しているアイテム
+        @item_set_now = [] #現在セットされているアイテム
+        @member_set_now = [] #現在セットされているメンバー
         @prev_fever_muse = [] #過去にフィーバーになったμ’ｓメンバー（ユニット番号も含む）
 
         @money = @money_init
@@ -481,6 +628,7 @@ class LoveliveGame extends catchAndSlotGame
     ###
     musePreLoad:()->
         muse_num = @slot_setting.now_muse_num
+        @already_added_material.push(muse_num)
         if @slot_setting.muse_material_list[muse_num] != undefined
             material = @slot_setting.muse_material_list[muse_num]
             for key, val of material['cut_in']
@@ -567,12 +715,15 @@ class LoveliveGame extends catchAndSlotGame
             'combo'    : 0,
             'tension'  : 0,
             'past_fever_num' : 0,
+            'item_point' : 0,
             'prev_muse': '[]',
             'now_muse_num': 0,
             'left_lille': '[]',
             'middle_lille': '[]',
             'right_lille': '[]',
             'item_have_now':'[]',
+            'item_set_now':'[]',
+            'member_set_now':'[]',
             'prev_fever_muse':'[]'
         }
         ret = null
@@ -591,12 +742,15 @@ class LoveliveGame extends catchAndSlotGame
             'combo'    : @combo,
             'tension'  : @tension,
             'past_fever_num' : @past_fever_num,
+            'item_point' : @item_point,
             'prev_muse': JSON.stringify(@slot_setting.prev_muse),
             'now_muse_num': @slot_setting.now_muse_num,
             'left_lille': JSON.stringify(@main_scene.gp_slot.left_lille.lilleArray),
             'middle_lille': JSON.stringify(@main_scene.gp_slot.middle_lille.lilleArray),
             'right_lille': JSON.stringify(@main_scene.gp_slot.right_lille.lilleArray),
             'item_have_now':JSON.stringify(@item_have_now),
+            'item_set_now':JSON.stringify(@item_set_now),
+            'member_set_now':JSON.stringify(@member_set_now),
             'prev_fever_muse':JSON.stringify(@prev_fever_muse)
         }
         for key, val of saveData
@@ -613,12 +767,15 @@ class LoveliveGame extends catchAndSlotGame
             @combo = @_loadStorage('combo', 'num')
             @tension = @_loadStorage('tension', 'num')
             @past_fever_num = @_loadStorage('past_fever_num', 'num')
+            @item_point = @_loadStorage('item_point', 'num')
             @slot_setting.prev_muse = @_loadStorage('prev_muse', 'json')
             @slot_setting.now_muse_num = @_loadStorage('now_muse_num', 'num')
             @main_scene.gp_slot.left_lille.lilleArray = @_loadStorage('left_lille', 'json')
             @main_scene.gp_slot.middle_lille.lilleArray = @_loadStorage('middle_lille', 'json')
             @main_scene.gp_slot.right_lille.lilleArray = @_loadStorage('right_lille', 'json')
             @item_have_now = @_loadStorage('item_have_now', 'json')
+            @item_set_now = @_loadStorage('item_set_now', 'json')
+            @member_set_now = @_loadStorage('member_set_now', 'json')
             @prev_fever_muse = @_loadStorage('prev_fever_muse', 'json')
     ###
     ローカルストレージから指定のキーの値を取り出して返す
@@ -647,8 +804,10 @@ class LoveliveGame extends catchAndSlotGame
         @combo = data.combo
         @tension = data.tension
         @past_fever_num = data.past_fever_num
+        @item_point = data.item_point
         @slot_setting.prev_muse = data.prev_muse
         @item_have_now = data.item_have_now
+        @item_set_now = data.item_set_now
         @prev_fever_muse = data.prev_fever_muse
 
     ###
@@ -660,8 +819,12 @@ class LoveliveGame extends catchAndSlotGame
         sys.bet_text.setValue()
         sys.combo_text.setValue()
         sys.tension_gauge.setValue()
+        sys.itemDsp()
         @pause_scene.pause_item_buy_layer.resetItemList()
+        @pause_scene.pause_item_use_layer.dspSetItemList()
+        @pause_scene.pause_member_set_layer.dispSetMemberList()
         @slot_setting.setMemberItemPrice()
+        @slot_setting.setItemPointValue()
 class gpEffect extends appGroup
     constructor: () ->
         super
@@ -835,7 +998,7 @@ class gpSlot extends appGroup
             game.tensionSetValueSlotHit(prize_money, @hit_role)
             @_feverStart(@hit_role)
             if @hit_role is 1
-                member = game.slot_setting.now_muse_num
+                member = game.slot_setting.getAddMuseNum()
                 @slotAddMuse(member)
             else
                 game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
@@ -1332,8 +1495,10 @@ class gpSystem extends appGroup
         @low_bet_button = new lowBetButton()
         @addChild(@low_bet_button)
         @keyList = {'up':false, 'down':false}
+        @prevItem = 0
     onenterframe: (e) ->
         @_betSetting()
+        @_setItemPoint()
     ###
     キーの上下を押して掛け金を設定する
     TODO スロットの当選金額落下中は変更できないようにする
@@ -1408,7 +1573,42 @@ class gpSystem extends appGroup
             @heigh_bet_button.opacity = 0
             @low_bet_button.opacity = 0
             @paermit_bet_change_flg = false
-
+    ###
+    セットしているアイテムを表示する
+    ###
+    itemDsp:()->
+        if game.item_set_now[0] != undefined
+            @item_slot.frame = game.item_set_now[0]
+            game.now_item = game.item_set_now[0]
+        else
+            @item_slot.frame = 0
+            game.now_item = 0
+    ###
+    リアルタイムでアイテムゲージの増減をします
+    アイテムスロットが空なら一定時間で回復し、全回復したら前にセットしていたアイテムを自動的にセットします
+    アイテムスロットにアイテムが入っていたら、入っているアイテムによって一定時間で減少し、全てなくなったら自動的にアイテムを解除します
+    ###
+    _setItemPoint:()->
+        if game.now_item is 0
+            if game.item_point < game.slot_setting.item_point_max
+                game.item_point = Math.floor(1000 * (game.item_point + game.slot_setting.item_point_value[0])) /1000
+                if game.slot_setting.item_point_max < game.item_point
+                    game.item_point = game.slot_setting.item_point_max
+                    if @prevItem != 0
+                        game.item_set_now.push(@prevItem)
+                        @itemDsp()
+        else
+            if 0 < game.item_point
+                game.item_point = Math.floor(1000 * (game.item_point - game.slot_setting.item_point_value[game.now_item])) /1000
+                if game.item_point < 0
+                    game.item_point = 0
+                    @_resetItem()
+        @item_gauge.scaleX = Math.floor(100 * (game.item_point / game.slot_setting.item_point_max)) / 100
+        @item_gauge.x = @item_gauge.initX - Math.floor(@item_gauge.w * (1 - @item_gauge.scaleX) / 2)
+    _resetItem:()->
+        @prevItem = game.now_item
+        game.item_set_now = []
+        @itemDsp()
 class systemHtml extends appHtml
     constructor: (width, height) ->
         super width, height
@@ -1434,8 +1634,9 @@ class systemHtml extends appHtml
         @is_button = true
         @setImageHtml()
     addDomClass:(cls, isImg = false)->
-        @class.push(cls)
-        @_setHtml(isImg)
+        if (@class.indexOf(cls) == -1)
+            @class.push(cls)
+            @_setHtml(isImg)
     removeDomClass:(cls, isImg = false)->
         for val, key in @class
             if val is cls
@@ -1565,6 +1766,28 @@ class itemBuyCancelButtonHtml extends baseCancelButtonHtml
         @x = 250
 
 ###
+アイテム使用のキャンセルボタン
+###
+class itemUseCancelButtonHtml extends baseCancelButtonHtml
+    constructor:()->
+        super
+        @y = 500
+        @x = 250
+    touchendEvent:()->
+        game.pause_scene.removeItemUseSelectMenu()
+
+###
+部員使用のキャンセルボタン
+###
+class memberUseCancelButtonHtml extends baseCancelButtonHtml
+    constructor:()->
+        super
+        @y = 500
+        @x = 250
+    touchendEvent:()->
+        game.pause_scene.removeMemberUseSelectMenu()
+
+###
 購入ボタン
 ###
 class baseByuButtonHtml extends buttonHtml
@@ -1589,6 +1812,55 @@ class itemBuyBuyButtonHtml extends baseByuButtonHtml
         @x = -200
     setBuyPossiblePosition:()->
         @x = 70
+
+###
+セットボタン
+###
+class baseSetButtonHtml extends buttonHtml
+    constructor:()->
+        super 150, 45
+        @class.push('base-set-button')
+        @text = 'セット'
+        @setHtml()
+    ontouchend: (e) ->
+        @touchendEvent()
+
+###
+アイテム使用のセットボタン
+###
+class itemUseSetButtonHtml extends baseSetButtonHtml
+    constructor:()->
+        super
+        @y = 500
+        @x = 70
+    touchendEvent:()->
+        game.pause_scene.pause_item_use_select_layer.setItem()
+    setText:(kind)->
+        if game.item_set_now.indexOf(parseInt(kind)) != -1
+            @text = '解除'
+            @setHtml()
+        else
+            @text = 'セット'
+            @setHtml()
+
+
+###
+部員使用のセットボタン
+###
+class memberUseSetButtonHtml extends baseSetButtonHtml
+    constructor:()->
+        super
+        @y = 500
+        @x = 70
+    touchendEvent:()->
+        game.pause_scene.pause_member_use_select_layer.setMember()
+    setText:(kind)->
+        if game.member_set_now.indexOf(parseInt(kind)) != -1
+            @text = '解除'
+            @setHtml()
+        else
+            @text = 'セット'
+            @setHtml()
 
 ###
 タイトルメニューのボタン
@@ -1696,6 +1968,14 @@ class itemBuySelectDialogHtml extends selectDialogHtml
     constructor:()->
         super
 
+class itemUseSelectDialogHtml extends selectDialogHtml
+    constructor:()->
+        super
+
+class memberUseSelectDialogHtml extends selectDialogHtml
+    constructor:()->
+        super
+
 class discriptionTextDialogHtml extends dialogHtml
     constructor:(w, h)->
         super w, h
@@ -1749,7 +2029,7 @@ class itemNameDiscription extends titleDiscription
 
 class itemDiscription extends discriptionTextDialogHtml
     constructor:()->
-        super 400, 190
+        super 390, 150
         @x = 50
         @y = 340
     setText:(text)->
@@ -1793,16 +2073,21 @@ class baseItemHtml extends systemHtml
         @scaleX = 0.7
         @scaleY = 0.7
         @positionY = 0
+        @positionX = 0
         @positoin_kind = @item_kind
     setPosition:()->
         if @positoin_kind <= 4
             @y = @positionY
-            @x = 80 * (@positoin_kind - 1) + 70
+            @x = 80 * (@positoin_kind - 1) + 70 + @positionX
         else
             @y = @positionY + 80
-            @x = 80 * (@positoin_kind - 5) + 30
+            @x = 80 * (@positoin_kind - 5) + 30 + @positionX
     dispItemBuySelectDialog:(kind)->
         game.pause_scene.setItemBuySelectMenu(kind)
+    dispItemUseSelectDialog:(kind)->
+        game.pause_scene.setItemUseSelectMenu(kind)
+    dispMemberUseSelectDialog:(kind)->
+        game.pause_scene.setMemberUseSelectMenu(kind)
 
 ###
 アイテム
@@ -1826,7 +2111,32 @@ class useItemHtml extends itemHtml
     constructor:(kind)->
         super kind
         @positionY = 400
+        @is_exist = false
+    ontouchend:()->
+        if @is_exist is true
+            @dispItemUseSelectDialog(@item_kind)
 
+class setItemHtml extends baseItemHtml
+    constructor:(position)->
+        super position
+        @kind = 0
+        @positionY = 210
+        @positionX = 200
+        @positoin_kind = position - 1
+        @_setImage(0)
+    setItemKind:(kind)->
+        @kind = kind
+        @_setImage(kind)
+        if kind != 0
+            @changeIsButton()
+        else
+            @changeNotButton()
+    _setImage:(kind)->
+        @image_name = 'item_'+kind
+        @setImageHtml()
+    ontouchend: ()->
+        if @kind != 0
+            game.pause_scene.setItemUseSelectMenu(@kind)
 ###
 部員
 ###
@@ -1850,6 +2160,32 @@ class useMemberHtml extends memberHtml
     constructor:(kind)->
         super kind
         @positionY = 400
+        @is_exist = false
+    ontouchend:()->
+        if @is_exist is true
+            @dispMemberUseSelectDialog(@item_kind)
+
+class setMemberHtml extends baseItemHtml
+    constructor:(position)->
+        super position
+        @kind = 0
+        @positionY = 210
+        @positionX = 120
+        @positoin_kind = position - 1
+        @_setImage(10)
+    setItemKind:(kind)->
+        @kind = kind
+        @_setImage(kind)
+        if kind != 10
+            @changeIsButton()
+        else
+            @changeNotButton()
+    _setImage:(kind)->
+        @image_name = 'item_'+kind
+        @setImageHtml()
+    ontouchend: ()->
+        if @kind != 10
+            game.pause_scene.setMemberUseSelectMenu(@kind)
 
 class selectItemImage extends imageHtml
     constructor:()->
@@ -1950,13 +2286,16 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':10000,
+            'money':10000000,
             'bet':10,
             'combo':10,
             'tension':100,
             'past_fever_num':0,
+            'item_point':500,
             'prev_muse':[11],
-            'item_have_now':[],
+            'item_have_now':[1,2,9,11,12,13,14],
+            'item_set_now':[9],
+            'member_set_now':[],
             'prev_fever_muse':[11]
         }
 
@@ -1995,6 +2334,8 @@ class Debug extends appNode
 
         if @force_pause_flg is true
             @force_main_flg = true
+        if @test_load_flg is true
+            @not_load_flg = false
 ###
 スロットのリールの並びや掛け金に対する当選額
 テンションによるリールの変化確率など
@@ -2243,7 +2584,7 @@ class slotSetting extends appNode
             11:{
                 'name':'高坂穂乃果',
                 'image':'item_11',
-                'discription':'部員に穂乃果を追加できるようになる',
+                'discription':'部員に穂乃果を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'穂乃果でスロットを3つ揃える',
                 'condFunc':()->
@@ -2252,7 +2593,7 @@ class slotSetting extends appNode
             12:{
                 'name':'南ことり',
                 'image':'item_12',
-                'discription':'部員にことりを追加できるようになる',
+                'discription':'部員にことりを追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'ことりでスロットを3つ揃える',
                 'condFunc':()->
@@ -2261,7 +2602,7 @@ class slotSetting extends appNode
             13:{
                 'name':'園田海未',
                 'image':'item_13',
-                'discription':'部員に海未を追加できるようになる',
+                'discription':'部員に海未を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'海未でスロットを3つ揃える',
                 'condFunc':()->
@@ -2270,7 +2611,7 @@ class slotSetting extends appNode
             14:{
                 'name':'西木野真姫',
                 'image':'item_14',
-                'discription':'部員に真姫を追加できるようになる',
+                'discription':'部員に真姫を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'真姫でスロットを3つ揃える',
                 'condFunc':()->
@@ -2279,7 +2620,7 @@ class slotSetting extends appNode
             15:{
                 'name':'星空凛',
                 'image':'item_15',
-                'discription':'部員に凛を追加できるようになる',
+                'discription':'部員に凛を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'凛でスロットを3つ揃える',
                 'condFunc':()->
@@ -2288,7 +2629,7 @@ class slotSetting extends appNode
             16:{
                 'name':'小泉花陽',
                 'image':'item_16',
-                'discription':'部員に花陽を追加できるようになる',
+                'discription':'部員に花陽を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'花陽でスロットを3つ揃える',
                 'condFunc':()->
@@ -2297,7 +2638,7 @@ class slotSetting extends appNode
             17:{
                 'name':'矢澤にこ',
                 'image':'item_17',
-                'discription':'部員ににこを追加できるようになる',
+                'discription':'部員ににこを追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'にこでスロットを3つ揃える',
                 'condFunc':()->
@@ -2306,7 +2647,7 @@ class slotSetting extends appNode
             18:{
                 'name':'東條希',
                 'image':'item_18',
-                'discription':'部員に希を追加できるようになる',
+                'discription':'部員に希を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'希でスロットを3つ揃える',
                 'condFunc':()->
@@ -2315,7 +2656,7 @@ class slotSetting extends appNode
             19:{
                 'name':'絢瀬絵里',
                 'image':'item_19',
-                'discription':'部員に絵里を追加できるようになる',
+                'discription':'部員に絵里を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'絵里でスロットを3つ揃える',
                 'condFunc':()->
@@ -2334,9 +2675,21 @@ class slotSetting extends appNode
         @isForceSlotHit = false
         #スロットが強制で当たる確率
         @slotHitRate = 0
+        #アイテムポイントの最大値
+        @item_point_max = 500
+        #アイテムポイントが全回復するまでの秒数
+        @item_point_recovery_sec = 120
+        #アイテムポイントが増える／減るのにかかる値(ポイント／フレーム)
+        #0はアイテムがセットされていない時に増える値、１～は各アイテムをセットしている時に減る値
+        @item_point_value = [0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0]
 
         #セーブする変数
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
+
+    setItemPointValue:()->
+        @item_point_value[0] = Math.floor(@item_point_max * 1000 / (@item_point_recovery_sec * game.fps)) / 1000
+        for i in [1..9]
+            @item_point_value[i] = Math.floor(@item_point_max * 1000 / (@item_list[i].durationSec * game.fps)) / 1000
 
     ###
     落下アイテムの加速度
@@ -2666,6 +3019,11 @@ class slotSetting extends appNode
                 if 0 == @item_list[val].price
                     @item_list[val].price = @member_item_price[cnt]
                 cnt++
+    ###
+    現在セットされているメンバーから次にスロットに挿入するμ’ｓメンバーを決めて返します
+    ###
+    getAddMuseNum:()->
+        return @now_muse_num
 
 ###
 テストコード用
@@ -2818,6 +3176,8 @@ class pauseScene extends appScene
         @pause_item_use_layer = new pauseItemUseLayer()
         @pause_member_set_layer = new pauseMemberSetLayer()
         @pause_item_buy_select_layer = new pauseItemBuySelectLayer()
+        @pause_item_use_select_layer = new pauseItemUseSelectLayer()
+        @pause_member_use_select_layer = new pauseMemberUseSelectLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
     setSaveMenu: () ->
@@ -2844,6 +3204,16 @@ class pauseScene extends appScene
         @pause_item_buy_select_layer.setSelectItem(kind)
     removeItemBuySelectMenu:()->
         @removeChild(@pause_item_buy_select_layer)
+    setItemUseSelectMenu:(kind)->
+        @addChild(@pause_item_use_select_layer)
+        @pause_item_use_select_layer.setSelectItem(kind)
+    removeItemUseSelectMenu:()->
+        @removeChild(@pause_item_use_select_layer)
+    setMemberUseSelectMenu:(kind)->
+        @addChild(@pause_member_use_select_layer)
+        @pause_member_use_select_layer.setSelectItem(kind)
+    removeMemberUseSelectMenu:()->
+        @removeChild(@pause_member_use_select_layer)
     onenterframe: (e) ->
         @_pauseKeyPush()
     ###
@@ -3910,7 +4280,8 @@ class TensionGauge extends Param
 class ItemSlot extends Param
     constructor:()->
         super 55, 55
-        @image = @drawCircle('#aaa')
+        @image = game.imageload("items")
+        @frame = 0
         @x = 5
         @y = 70
 
@@ -3923,7 +4294,8 @@ class ItemGaugeBack extends Param
 
 class ItemGauge extends Param
     constructor:()->
-        super 50, 8
+        super 51, 8
         @image = @drawRect('#A6E39D')
-        @x = 8
+        @initX = 7
+        @x = @initX
         @y = 112

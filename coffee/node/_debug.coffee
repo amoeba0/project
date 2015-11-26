@@ -16,13 +16,16 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':10000,
+            'money':10000000,
             'bet':10,
             'combo':10,
             'tension':100,
             'past_fever_num':0,
+            'item_point':500,
             'prev_muse':[11],
-            'item_have_now':[],
+            'item_have_now':[1,2,9,11,12,13,14],
+            'item_set_now':[9],
+            'member_set_now':[],
             'prev_fever_muse':[11]
         }
 
@@ -61,3 +64,5 @@ class Debug extends appNode
 
         if @force_pause_flg is true
             @force_main_flg = true
+        if @test_load_flg is true
+            @not_load_flg = false

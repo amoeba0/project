@@ -117,6 +117,28 @@ class itemBuyCancelButtonHtml extends baseCancelButtonHtml
         @x = 250
 
 ###
+アイテム使用のキャンセルボタン
+###
+class itemUseCancelButtonHtml extends baseCancelButtonHtml
+    constructor:()->
+        super
+        @y = 500
+        @x = 250
+    touchendEvent:()->
+        game.pause_scene.removeItemUseSelectMenu()
+
+###
+部員使用のキャンセルボタン
+###
+class memberUseCancelButtonHtml extends baseCancelButtonHtml
+    constructor:()->
+        super
+        @y = 500
+        @x = 250
+    touchendEvent:()->
+        game.pause_scene.removeMemberUseSelectMenu()
+
+###
 購入ボタン
 ###
 class baseByuButtonHtml extends buttonHtml
@@ -141,6 +163,55 @@ class itemBuyBuyButtonHtml extends baseByuButtonHtml
         @x = -200
     setBuyPossiblePosition:()->
         @x = 70
+
+###
+セットボタン
+###
+class baseSetButtonHtml extends buttonHtml
+    constructor:()->
+        super 150, 45
+        @class.push('base-set-button')
+        @text = 'セット'
+        @setHtml()
+    ontouchend: (e) ->
+        @touchendEvent()
+
+###
+アイテム使用のセットボタン
+###
+class itemUseSetButtonHtml extends baseSetButtonHtml
+    constructor:()->
+        super
+        @y = 500
+        @x = 70
+    touchendEvent:()->
+        game.pause_scene.pause_item_use_select_layer.setItem()
+    setText:(kind)->
+        if game.item_set_now.indexOf(parseInt(kind)) != -1
+            @text = '解除'
+            @setHtml()
+        else
+            @text = 'セット'
+            @setHtml()
+
+
+###
+部員使用のセットボタン
+###
+class memberUseSetButtonHtml extends baseSetButtonHtml
+    constructor:()->
+        super
+        @y = 500
+        @x = 70
+    touchendEvent:()->
+        game.pause_scene.pause_member_use_select_layer.setMember()
+    setText:(kind)->
+        if game.member_set_now.indexOf(parseInt(kind)) != -1
+            @text = '解除'
+            @setHtml()
+        else
+            @text = 'セット'
+            @setHtml()
 
 ###
 タイトルメニューのボタン

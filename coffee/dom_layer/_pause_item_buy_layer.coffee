@@ -37,10 +37,10 @@ class pauseItemBuyLayer extends appDomLayer
         for item_key, item_val of item_list
             if master_list[item_key].condFunc() is false || master_list[item_key].price > game.money
                 item_val.opacity = 0.5
-                item_val.addDomClass('grayscale', true)
+                #item_val.addDomClass('grayscale', true)
             else
                 item_val.opacity = 1
-                item_val.removeDomClass('grayscale', true)
+                #item_val.removeDomClass('grayscale', true)
             if game.item_have_now.indexOf(parseInt(item_key)) != -1
                 item_val.opacity = 0
                 item_val.is_exist = false

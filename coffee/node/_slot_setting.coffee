@@ -246,7 +246,7 @@ class slotSetting extends appNode
             11:{
                 'name':'高坂穂乃果',
                 'image':'item_11',
-                'discription':'部員に穂乃果を追加できるようになる',
+                'discription':'部員に穂乃果を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'穂乃果でスロットを3つ揃える',
                 'condFunc':()->
@@ -255,7 +255,7 @@ class slotSetting extends appNode
             12:{
                 'name':'南ことり',
                 'image':'item_12',
-                'discription':'部員にことりを追加できるようになる',
+                'discription':'部員にことりを追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'ことりでスロットを3つ揃える',
                 'condFunc':()->
@@ -264,7 +264,7 @@ class slotSetting extends appNode
             13:{
                 'name':'園田海未',
                 'image':'item_13',
-                'discription':'部員に海未を追加できるようになる',
+                'discription':'部員に海未を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'海未でスロットを3つ揃える',
                 'condFunc':()->
@@ -273,7 +273,7 @@ class slotSetting extends appNode
             14:{
                 'name':'西木野真姫',
                 'image':'item_14',
-                'discription':'部員に真姫を追加できるようになる',
+                'discription':'部員に真姫を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'真姫でスロットを3つ揃える',
                 'condFunc':()->
@@ -282,7 +282,7 @@ class slotSetting extends appNode
             15:{
                 'name':'星空凛',
                 'image':'item_15',
-                'discription':'部員に凛を追加できるようになる',
+                'discription':'部員に凛を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'凛でスロットを3つ揃える',
                 'condFunc':()->
@@ -291,7 +291,7 @@ class slotSetting extends appNode
             16:{
                 'name':'小泉花陽',
                 'image':'item_16',
-                'discription':'部員に花陽を追加できるようになる',
+                'discription':'部員に花陽を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'花陽でスロットを3つ揃える',
                 'condFunc':()->
@@ -300,7 +300,7 @@ class slotSetting extends appNode
             17:{
                 'name':'矢澤にこ',
                 'image':'item_17',
-                'discription':'部員ににこを追加できるようになる',
+                'discription':'部員ににこを追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'にこでスロットを3つ揃える',
                 'condFunc':()->
@@ -309,7 +309,7 @@ class slotSetting extends appNode
             18:{
                 'name':'東條希',
                 'image':'item_18',
-                'discription':'部員に希を追加できるようになる',
+                'discription':'部員に希を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'希でスロットを3つ揃える',
                 'condFunc':()->
@@ -318,7 +318,7 @@ class slotSetting extends appNode
             19:{
                 'name':'絢瀬絵里',
                 'image':'item_19',
-                'discription':'部員に絵里を追加できるようになる',
+                'discription':'部員に絵里を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
                 'price':0,
                 'conditoin':'絵里でスロットを3つ揃える',
                 'condFunc':()->
@@ -337,9 +337,21 @@ class slotSetting extends appNode
         @isForceSlotHit = false
         #スロットが強制で当たる確率
         @slotHitRate = 0
+        #アイテムポイントの最大値
+        @item_point_max = 500
+        #アイテムポイントが全回復するまでの秒数
+        @item_point_recovery_sec = 120
+        #アイテムポイントが増える／減るのにかかる値(ポイント／フレーム)
+        #0はアイテムがセットされていない時に増える値、１～は各アイテムをセットしている時に減る値
+        @item_point_value = [0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0]
 
         #セーブする変数
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
+
+    setItemPointValue:()->
+        @item_point_value[0] = Math.floor(@item_point_max * 1000 / (@item_point_recovery_sec * game.fps)) / 1000
+        for i in [1..9]
+            @item_point_value[i] = Math.floor(@item_point_max * 1000 / (@item_list[i].durationSec * game.fps)) / 1000
 
     ###
     落下アイテムの加速度
@@ -669,3 +681,8 @@ class slotSetting extends appNode
                 if 0 == @item_list[val].price
                     @item_list[val].price = @member_item_price[cnt]
                 cnt++
+    ###
+    現在セットされているメンバーから次にスロットに挿入するμ’ｓメンバーを決めて返します
+    ###
+    getAddMuseNum:()->
+        return @now_muse_num
