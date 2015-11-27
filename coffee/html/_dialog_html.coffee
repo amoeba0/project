@@ -73,9 +73,9 @@ class titleDiscription extends discriptionTextDialogHtml
 class itemItemBuyDiscription extends titleDiscription
     constructor:()->
         super
-        @x = 190
+        @x = 220
         @y = 130
-        @text = 'アイテム'
+        @text = '魔法'
         @setHtml()
 
 class memberItemBuyDiscription extends titleDiscription
@@ -128,9 +128,9 @@ class longTitleDiscription extends discriptionTextDialogHtml
 class itemUseDiscription extends longTitleDiscription
     constructor:()->
         super
-        @x = 130
+        @x = 120
         @y = 110
-        @text = 'アイテムを使う'
+        @text = '魔法をセットする'
         @setHtml()
 
 class memberSetDiscription extends longTitleDiscription

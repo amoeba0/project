@@ -9,15 +9,17 @@ class Test extends appNode
     ここにゲーム呼び出し時に実行するテストを書く
     ###
     testExe:()->
-        #@testGetHitRole()
+        @testGetHitRole()
         #@testSetGravity()
         #@viewItemList()
         #@testCutin()
+        #@preLoadMulti()
+        #@addMuse()
 
     #以下、テスト用関数
 
     testGetHitRole:()->
-        result = game.slot_setting.getHitRole(17, 17, 14)
+        result = game.slot_setting.getHitRole(11, 11, 12)
         console.log(result)
 
     testSetGravity:()->
@@ -37,3 +39,14 @@ class Test extends appNode
     testCutin:()->
         for i in [1..100]
             game.main_scene.gp_effect.cutInSet()
+
+    preLoadMulti:()->
+        game.member_set_now = [17,18,19]
+        game.musePreLoadByMemberSetNow()
+        console.log(game.already_added_material)
+
+    addMuse:()->
+        game.member_set_now = []
+        for i in [1..6]
+            num = game.slot_setting.getAddMuseNum()
+            console.log(num)

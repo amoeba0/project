@@ -33,6 +33,7 @@ class pauseScene extends appScene
         @addChild(@pause_member_set_layer)
     removeMemberSetMenu:()->
         @removeChild(@pause_member_set_layer)
+        game.musePreLoadByMemberSetNow()
     setItemBuySelectMenu:(kind)->
         @addChild(@pause_item_buy_select_layer)
         @pause_item_buy_select_layer.setSelectItem(kind)

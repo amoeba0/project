@@ -594,6 +594,7 @@ class LoveliveGame extends catchAndSlotGame
         @tension = 0 #現在のテンション(500がマックス)
         @item_point = 500 #アイテムのポイント（500がマックス）
         @past_fever_num = 0 #過去にフィーバーになった回数
+        @next_add_member_key = 0 #メンバーがセットされている場合、次に挿入されるメンバーの配列のキー
         @item_have_now = [] #現在所持しているアイテム
         @item_set_now = [] #現在セットされているアイテム
         @member_set_now = [] #現在セットされているメンバー
@@ -624,19 +625,56 @@ class LoveliveGame extends catchAndSlotGame
                 @pushScene(@title_scene)
 
     ###
-    スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
+    現在セットされているメンバーをもとに素材をロードします
     ###
-    musePreLoad:()->
-        muse_num = @slot_setting.now_muse_num
+    musePreLoadByMemberSetNow:()->
+        roles = @getRoleByMemberSetNow()
+        @musePreLoadMulti(roles)
+
+    ###
+    現在セットされているメンバーをもとに組み合わせ可能な役の一覧を全て取得します
+    ###
+    getRoleByMemberSetNow:()->
+        roles = game.arrayCopy(@member_set_now)
+        tmp = @member_set_now
+        roles.push(@slot_setting.getHitRole(tmp[0], tmp[1], tmp[2]))
+        roles.push(@slot_setting.getHitRole(tmp[1], tmp[1], tmp[2]))
+        roles.push(@slot_setting.getHitRole(tmp[0], tmp[0], tmp[2]))
+        roles.push(@slot_setting.getHitRole(tmp[0], tmp[0], tmp[1]))
+        roles = @getDeduplicationList(roles)
+        roles = @arrayValueDel(roles, 20)
+        return roles
+
+    ###
+    配列で指定して複数のμ’ｓ素材を一括でロードします
+    @param array nums 配列でロードする素材番号の指定
+    ###
+    musePreLoadMulti:(nums)->
+        for key, val of nums
+            if @already_added_material.indexOf(val) == -1
+                @musePreLoad(val)
+
+
+    ###
+    スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
+    @param number num ロードする素材番号の指定
+    ###
+    musePreLoad:(num = 0)->
+        if num is 0
+            muse_num = @slot_setting.now_muse_num
+        else
+            muse_num = num
         @already_added_material.push(muse_num)
         if @slot_setting.muse_material_list[muse_num] != undefined
             material = @slot_setting.muse_material_list[muse_num]
-            for key, val of material['cut_in']
-                @load('images/cut_in/'+val.name + '.png')
-            if material['voice'].length > 0
+            if material['cut_in'] != undefined && material['cut_in'].length > 0
+                for key, val of material['cut_in']
+                    @load('images/cut_in/'+val.name + '.png')
+            if material['voice'] != undefined && material['voice'].length > 0
                 for key, val of material['voice']
                     @load('sounds/voice/'+val+'.mp3')
-            @load('sounds/bgm/'+material['bgm'][0]['name']+'.mp3')
+            if material['bgm'] != undefined && material['bgm'].length > 0
+                @load('sounds/bgm/'+material['bgm'][0]['name']+'.mp3')
 
     ###
     テンションゲージを増減する
@@ -718,6 +756,7 @@ class LoveliveGame extends catchAndSlotGame
             'item_point' : 0,
             'prev_muse': '[]',
             'now_muse_num': 0,
+            'next_add_member_key': 0,
             'left_lille': '[]',
             'middle_lille': '[]',
             'right_lille': '[]',
@@ -745,6 +784,7 @@ class LoveliveGame extends catchAndSlotGame
             'item_point' : @item_point,
             'prev_muse': JSON.stringify(@slot_setting.prev_muse),
             'now_muse_num': @slot_setting.now_muse_num,
+            'next_add_member_key': @next_add_member_key,
             'left_lille': JSON.stringify(@main_scene.gp_slot.left_lille.lilleArray),
             'middle_lille': JSON.stringify(@main_scene.gp_slot.middle_lille.lilleArray),
             'right_lille': JSON.stringify(@main_scene.gp_slot.right_lille.lilleArray),
@@ -768,6 +808,7 @@ class LoveliveGame extends catchAndSlotGame
             @tension = @_loadStorage('tension', 'num')
             @past_fever_num = @_loadStorage('past_fever_num', 'num')
             @item_point = @_loadStorage('item_point', 'num')
+            @next_add_member_key = @_loadStorage('next_add_member_key', 'num')
             @slot_setting.prev_muse = @_loadStorage('prev_muse', 'json')
             @slot_setting.now_muse_num = @_loadStorage('now_muse_num', 'num')
             @main_scene.gp_slot.left_lille.lilleArray = @_loadStorage('left_lille', 'json')
@@ -805,10 +846,12 @@ class LoveliveGame extends catchAndSlotGame
         @tension = data.tension
         @past_fever_num = data.past_fever_num
         @item_point = data.item_point
+        @next_add_member_key = data.next_add_member_key
         @slot_setting.prev_muse = data.prev_muse
         @item_have_now = data.item_have_now
         @item_set_now = data.item_set_now
         @prev_fever_muse = data.prev_fever_muse
+        @member_set_now = data.member_set_now
 
     ###
     ゲームロード後の画面表示等の初期値設定
@@ -825,6 +868,7 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.pause_member_set_layer.dispSetMemberList()
         @slot_setting.setMemberItemPrice()
         @slot_setting.setItemPointValue()
+        @musePreLoadByMemberSetNow()
 class gpEffect extends appGroup
     constructor: () ->
         super
@@ -835,10 +879,10 @@ class gpEffect extends appGroup
         @kirakira_num = 40
         @item_catch_effect = []
 
-    cutInSet:()->
+    cutInSet:(num = 0)->
         setting = game.slot_setting
         if setting.muse_material_list[setting.now_muse_num] != undefined
-            @cut_in = new cutIn()
+            @cut_in = new cutIn(num)
             @addChild(@cut_in)
             game.main_scene.gp_stage_front.missItemFallSycleNow = 0
     chanceEffectSet:()->
@@ -979,11 +1023,24 @@ class gpSlot extends appGroup
                 target.nowEye = tmp_eye
                 target.frameChange()
 
+    ###
+    スロットが強制的に辺になるようにリールから左のリールの当たり目と同じ目を探して配列のキーを返す
+    左の当たり目がμ’ｓならリールからμ’ｓの目をランダムで取り出して返す
+    ###
     _searchEye:(target)->
         result = 0
-        for key, val of target.lilleArray
-            if result is 0 && val is @leftSlotEye
-                result = key
+        if @leftSlotEye < 10
+            for key, val of target.lilleArray
+                if val is @leftSlotEye
+                    result = key
+        else
+            arr = []
+            for key, val of target.lilleArray
+                if val > 10
+                    arr.push(key)
+            if arr.length > 0
+                random_key = Math.floor(arr.length * Math.random())
+                result = arr[random_key]
         return result
 
 
@@ -993,7 +1050,6 @@ class gpSlot extends appGroup
     slotHitTest: () ->
         if @_isSlotHit() is true
             game.sePlay(@slot_hit_se)
-            @hit_role = @left_lille.lilleArray[@left_lille.nowEye]
             prize_money = game.slot_setting.calcPrizeMoney(@middle_lille.lilleArray[@middle_lille.nowEye])
             game.tensionSetValueSlotHit(prize_money, @hit_role)
             @_feverStart(@hit_role)
@@ -1029,16 +1085,17 @@ class gpSlot extends appGroup
     フィーバーを開始する
     ###
     _feverStart:(hit_eye)->
-        if hit_eye > 10 && game.fever is false
-            game.fever = true
-            game.past_fever_num += 1
-            game.slot_setting.setMuseMember()
-            game.musePreLoad()
-            game.fever_hit_eye = hit_eye
-            game.main_scene.gp_system.changeBetChangeFlg(false)
-            game.main_scene.gp_effect.feverEffectSet()
-            @slotAddMuseAll(hit_eye)
-            @_feverBgmStart(hit_eye)
+        if game.fever is false
+            if (11 <= hit_eye && hit_eye <= 19) || (21 <= hit_eye)
+                game.fever = true
+                game.past_fever_num += 1
+                game.slot_setting.setMuseMember()
+                game.musePreLoad()
+                game.fever_hit_eye = hit_eye
+                game.main_scene.gp_system.changeBetChangeFlg(false)
+                game.main_scene.gp_effect.feverEffectSet()
+                @slotAddMuseAll(hit_eye)
+                @_feverBgmStart(hit_eye)
 
     ###
     フィーバー中のBGMを開始する
@@ -1055,10 +1112,7 @@ class gpSlot extends appGroup
     揃った目の役からフィーバーのBGMを返す
     ###
     _getFeverBgm:(hit_role)->
-        if hit_role <= 19
-            material = game.slot_setting.muse_material_list
-        else
-            material = game.slot_setting.unit_material_list
+        material = game.slot_setting.muse_material_list
         if material[hit_role] is undefined
             hit_role = 20
         bgms = material[hit_role]['bgm']
@@ -1116,7 +1170,7 @@ class gpSlot extends appGroup
         @left_lille.lilleArray = @_slotAddMuseUnit(num, @left_lille)
         @middle_lille.lilleArray = @_slotAddMuseUnit(num, @middle_lille)
         @right_lille.lilleArray = @_slotAddMuseUnit(num, @right_lille)
-        game.main_scene.gp_effect.cutInSet()
+        game.main_scene.gp_effect.cutInSet(num)
 
     ###
     リールにμ’sの誰かを挿入(単体)
@@ -1341,12 +1395,13 @@ class stageBack extends gpStage
         if @isFallPrizeMoney is true && @age % @prizeMoneyFallIntervalFrm is 0
             for i in [1..@oneSetMoney]
                 # TODO バグあり
-                @addChild(@prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum])
-                @prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum].setPosition()
-                @nowPrizeMoneyItemsNum += 1
-                if @nowPrizeMoneyItemsNum is @prizeMoneyItemsInstance.length
-                    @nowPrizeMoneyItemsNum = 0
-                    @isFallPrizeMoney = false
+                if @prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum] != undefined
+                    @addChild(@prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum])
+                    @prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum].setPosition()
+                    @nowPrizeMoneyItemsNum += 1
+                    if @nowPrizeMoneyItemsNum is @prizeMoneyItemsInstance.length
+                        @nowPrizeMoneyItemsNum = 0
+                        @isFallPrizeMoney = false
     ###
     当選金の内訳のコイン枚数を計算する
     @param value   number 金額
@@ -1693,7 +1748,7 @@ class buyItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super
         @y = 300
-        @text = 'アイテム・部員を買う'
+        @text = 'アイテムを買う'
         @setHtml()
     touchendEvent:() ->
         game.pause_scene.setItemBuyMenu()
@@ -1702,7 +1757,7 @@ class useItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super
         @y = 400
-        @text = 'アイテムを使う'
+        @text = '魔法をセットする'
         @setHtml()
     touchendEvent:() ->
         game.pause_scene.setItemUseMenu()
@@ -1989,9 +2044,9 @@ class titleDiscription extends discriptionTextDialogHtml
 class itemItemBuyDiscription extends titleDiscription
     constructor:()->
         super
-        @x = 190
+        @x = 220
         @y = 130
-        @text = 'アイテム'
+        @text = '魔法'
         @setHtml()
 
 class memberItemBuyDiscription extends titleDiscription
@@ -2044,9 +2099,9 @@ class longTitleDiscription extends discriptionTextDialogHtml
 class itemUseDiscription extends longTitleDiscription
     constructor:()->
         super
-        @x = 130
+        @x = 120
         @y = 110
-        @text = 'アイテムを使う'
+        @text = '魔法をセットする'
         @setHtml()
 
 class memberSetDiscription extends longTitleDiscription
@@ -2292,20 +2347,28 @@ class Debug extends appNode
             'tension':100,
             'past_fever_num':0,
             'item_point':500,
+            'next_add_member_key':0,
             'prev_muse':[11],
             'item_have_now':[1,2,9,11,12,13,14],
             'item_set_now':[9],
-            'member_set_now':[],
+            'member_set_now':[11,12,13],
             'prev_fever_muse':[11]
         }
 
         #デバッグ用リールにすりかえる
         @lille_flg = false
         #デバッグ用リール配列
+        ###
         @lille_array = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        ]
+        ###
+        @lille_array = [
+            [11, 11, 11, 11, 11, 11, 11, 11, 1, 4, 4, 1, 5, 5, 1, 4, 5],
+            [12, 12, 12, 12, 12, 12, 12, 12, 5, 1, 4, 4, 1, 5, 5, 1, 4],
+            [13, 13, 13, 13, 13, 13, 13, 13, 5, 4, 1, 4, 1, 5, 5, 1, 4]
         ]
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上
@@ -2368,6 +2431,8 @@ class slotSetting extends appNode
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
         11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
+        20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
+        31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
         direction:キャラクターの向き、left or right
         カットインの画像サイズ、頭の位置で570px
         頭の上に余白がある場合の高さ計算式：(570/(元画像高さ-元画像頭のY座標))*元画像高さ
@@ -2462,15 +2527,63 @@ class slotSetting extends appNode
                     {'name':'arihureta', 'time':93}
                 ],
                 'voice':['19_0', '19_1']
-            }
-        }
-        ###
-        ユニットに関する素材
-        20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
-        31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
-        ###
-        @unit_material_list = {
+            },
             20:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            21:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            22:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            23:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            24:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            25:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            26:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            27:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            28:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            29:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            30:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            31:{
                 'bgm':[
                     {'name':'zenkai_no_lovelive', 'time':30}
                 ]
@@ -2554,7 +2667,7 @@ class slotSetting extends appNode
             7:{
                 'name':'ファイトだよっ',
                 'image':'item_7',
-                'discription':'アイテムを落としても<br>テンションが下がらなくなる',
+                'discription':'おやつを落としてもテンションが<br>下がらず、コンボが途切れなくなる',
                 'price':10000000,
                 'durationSec':30,
                 'conditoin':'',
@@ -3023,7 +3136,15 @@ class slotSetting extends appNode
     現在セットされているメンバーから次にスロットに挿入するμ’ｓメンバーを決めて返します
     ###
     getAddMuseNum:()->
-        return @now_muse_num
+        member = game.member_set_now
+        if member.length is 0
+            ret = @now_muse_num
+        else
+            ret = member[game.next_add_member_key]
+            game.next_add_member_key += 1
+            if member[game.next_add_member_key] is undefined
+                game.next_add_member_key = 0
+        return ret
 
 ###
 テストコード用
@@ -3036,15 +3157,17 @@ class Test extends appNode
     ここにゲーム呼び出し時に実行するテストを書く
     ###
     testExe:()->
-        #@testGetHitRole()
+        @testGetHitRole()
         #@testSetGravity()
         #@viewItemList()
         #@testCutin()
+        #@preLoadMulti()
+        #@addMuse()
 
     #以下、テスト用関数
 
     testGetHitRole:()->
-        result = game.slot_setting.getHitRole(17, 17, 14)
+        result = game.slot_setting.getHitRole(11, 11, 12)
         console.log(result)
 
     testSetGravity:()->
@@ -3064,6 +3187,17 @@ class Test extends appNode
     testCutin:()->
         for i in [1..100]
             game.main_scene.gp_effect.cutInSet()
+
+    preLoadMulti:()->
+        game.member_set_now = [17,18,19]
+        game.musePreLoadByMemberSetNow()
+        console.log(game.already_added_material)
+
+    addMuse:()->
+        game.member_set_now = []
+        for i in [1..6]
+            num = game.slot_setting.getAddMuseNum()
+            console.log(num)
 class mainScene extends appScene
     constructor:()->
         super
@@ -3199,6 +3333,7 @@ class pauseScene extends appScene
         @addChild(@pause_member_set_layer)
     removeMemberSetMenu:()->
         @removeChild(@pause_member_set_layer)
+        game.musePreLoadByMemberSetNow()
     setItemBuySelectMenu:(kind)->
         @addChild(@pause_item_buy_select_layer)
         @pause_item_buy_select_layer.setSelectItem(kind)
@@ -3267,8 +3402,8 @@ class effect extends appSprite
 カットインの画像サイズ、頭の位置で760px
 ###
 class cutIn extends effect
-    constructor: () ->
-        @_callCutIn()
+    constructor: (num = 0) ->
+        @_callCutIn(num)
         super @cut_in['width'], @cut_in['height']
         @_setInit()
 
@@ -3280,10 +3415,13 @@ class cutIn extends effect
         @x += @vx
         if (@cut_in['direction'] is 'left' && @x < -@w) || (@cut_in['direction'] is 'left' is 'right' && @x > game.width)
             game.main_scene.gp_effect.removeChild(@)
-    
-    _callCutIn:()->
+
+    _callCutIn:(num)->
         setting = game.slot_setting
-        muse_num = setting.now_muse_num
+        if num is 0
+            muse_num = setting.now_muse_num
+        else
+            muse_num = num
         cut_in_list = setting.muse_material_list[muse_num]['cut_in']
         cut_in_random = Math.floor(Math.random() * cut_in_list.length)
         @cut_in = cut_in_list[cut_in_random]
@@ -3293,7 +3431,7 @@ class cutIn extends effect
         @image = game.imageload('cut_in/'+@cut_in['name'])
         if @cut_in['direction'] is 'left'
             @x = game.width
-        else 
+        else
             @x = -@w
         @y = game.height - @h
         @vx = @_setVxFast()

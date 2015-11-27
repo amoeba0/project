@@ -8,10 +8,10 @@ class gpEffect extends appGroup
         @kirakira_num = 40
         @item_catch_effect = []
 
-    cutInSet:()->
+    cutInSet:(num = 0)->
         setting = game.slot_setting
         if setting.muse_material_list[setting.now_muse_num] != undefined
-            @cut_in = new cutIn()
+            @cut_in = new cutIn(num)
             @addChild(@cut_in)
             game.main_scene.gp_stage_front.missItemFallSycleNow = 0
     chanceEffectSet:()->

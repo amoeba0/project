@@ -44,7 +44,7 @@ class buyItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super
         @y = 300
-        @text = 'アイテム・部員を買う'
+        @text = 'アイテムを買う'
         @setHtml()
     touchendEvent:() ->
         game.pause_scene.setItemBuyMenu()
@@ -53,7 +53,7 @@ class useItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super
         @y = 400
-        @text = 'アイテムを使う'
+        @text = '魔法をセットする'
         @setHtml()
     touchendEvent:() ->
         game.pause_scene.setItemUseMenu()

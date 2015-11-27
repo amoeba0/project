@@ -2,8 +2,8 @@
 カットインの画像サイズ、頭の位置で760px
 ###
 class cutIn extends effect
-    constructor: () ->
-        @_callCutIn()
+    constructor: (num = 0) ->
+        @_callCutIn(num)
         super @cut_in['width'], @cut_in['height']
         @_setInit()
 
@@ -15,10 +15,13 @@ class cutIn extends effect
         @x += @vx
         if (@cut_in['direction'] is 'left' && @x < -@w) || (@cut_in['direction'] is 'left' is 'right' && @x > game.width)
             game.main_scene.gp_effect.removeChild(@)
-    
-    _callCutIn:()->
+
+    _callCutIn:(num)->
         setting = game.slot_setting
-        muse_num = setting.now_muse_num
+        if num is 0
+            muse_num = setting.now_muse_num
+        else
+            muse_num = num
         cut_in_list = setting.muse_material_list[muse_num]['cut_in']
         cut_in_random = Math.floor(Math.random() * cut_in_list.length)
         @cut_in = cut_in_list[cut_in_random]
@@ -28,7 +31,7 @@ class cutIn extends effect
         @image = game.imageload('cut_in/'+@cut_in['name'])
         if @cut_in['direction'] is 'left'
             @x = game.width
-        else 
+        else
             @x = -@w
         @y = game.height - @h
         @vx = @_setVxFast()

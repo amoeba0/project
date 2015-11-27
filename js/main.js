@@ -931,6 +931,7 @@ LoveliveGame = (function(_super) {
     this.tension = 0;
     this.item_point = 500;
     this.past_fever_num = 0;
+    this.next_add_member_key = 0;
     this.item_have_now = [];
     this.item_set_now = [];
     this.member_set_now = [];
@@ -965,28 +966,89 @@ LoveliveGame = (function(_super) {
 
 
   /*
-  スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
+  現在セットされているメンバーをもとに素材をロードします
    */
 
-  LoveliveGame.prototype.musePreLoad = function() {
+  LoveliveGame.prototype.musePreLoadByMemberSetNow = function() {
+    var roles;
+    roles = this.getRoleByMemberSetNow();
+    return this.musePreLoadMulti(roles);
+  };
+
+
+  /*
+  現在セットされているメンバーをもとに組み合わせ可能な役の一覧を全て取得します
+   */
+
+  LoveliveGame.prototype.getRoleByMemberSetNow = function() {
+    var roles, tmp;
+    roles = game.arrayCopy(this.member_set_now);
+    tmp = this.member_set_now;
+    roles.push(this.slot_setting.getHitRole(tmp[0], tmp[1], tmp[2]));
+    roles.push(this.slot_setting.getHitRole(tmp[1], tmp[1], tmp[2]));
+    roles.push(this.slot_setting.getHitRole(tmp[0], tmp[0], tmp[2]));
+    roles.push(this.slot_setting.getHitRole(tmp[0], tmp[0], tmp[1]));
+    roles = this.getDeduplicationList(roles);
+    roles = this.arrayValueDel(roles, 20);
+    return roles;
+  };
+
+
+  /*
+  配列で指定して複数のμ’ｓ素材を一括でロードします
+  @param array nums 配列でロードする素材番号の指定
+   */
+
+  LoveliveGame.prototype.musePreLoadMulti = function(nums) {
+    var key, val, _results;
+    _results = [];
+    for (key in nums) {
+      val = nums[key];
+      if (this.already_added_material.indexOf(val) === -1) {
+        _results.push(this.musePreLoad(val));
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+
+  /*
+  スロットにμ’ｓを挿入するときに必要なカットイン画像や音楽を予めロードしておく
+  @param number num ロードする素材番号の指定
+   */
+
+  LoveliveGame.prototype.musePreLoad = function(num) {
     var key, material, muse_num, val, _ref, _ref1;
-    muse_num = this.slot_setting.now_muse_num;
+    if (num == null) {
+      num = 0;
+    }
+    if (num === 0) {
+      muse_num = this.slot_setting.now_muse_num;
+    } else {
+      muse_num = num;
+    }
     this.already_added_material.push(muse_num);
     if (this.slot_setting.muse_material_list[muse_num] !== void 0) {
       material = this.slot_setting.muse_material_list[muse_num];
-      _ref = material['cut_in'];
-      for (key in _ref) {
-        val = _ref[key];
-        this.load('images/cut_in/' + val.name + '.png');
+      if (material['cut_in'] !== void 0 && material['cut_in'].length > 0) {
+        _ref = material['cut_in'];
+        for (key in _ref) {
+          val = _ref[key];
+          this.load('images/cut_in/' + val.name + '.png');
+        }
       }
-      if (material['voice'].length > 0) {
+      if (material['voice'] !== void 0 && material['voice'].length > 0) {
         _ref1 = material['voice'];
         for (key in _ref1) {
           val = _ref1[key];
           this.load('sounds/voice/' + val + '.mp3');
         }
       }
-      return this.load('sounds/bgm/' + material['bgm'][0]['name'] + '.mp3');
+      if (material['bgm'] !== void 0 && material['bgm'].length > 0) {
+        return this.load('sounds/bgm/' + material['bgm'][0]['name'] + '.mp3');
+      }
     }
   };
 
@@ -1107,6 +1169,7 @@ LoveliveGame = (function(_super) {
       'item_point': 0,
       'prev_muse': '[]',
       'now_muse_num': 0,
+      'next_add_member_key': 0,
       'left_lille': '[]',
       'middle_lille': '[]',
       'right_lille': '[]',
@@ -1139,6 +1202,7 @@ LoveliveGame = (function(_super) {
       'item_point': this.item_point,
       'prev_muse': JSON.stringify(this.slot_setting.prev_muse),
       'now_muse_num': this.slot_setting.now_muse_num,
+      'next_add_member_key': this.next_add_member_key,
       'left_lille': JSON.stringify(this.main_scene.gp_slot.left_lille.lilleArray),
       'middle_lille': JSON.stringify(this.main_scene.gp_slot.middle_lille.lilleArray),
       'right_lille': JSON.stringify(this.main_scene.gp_slot.right_lille.lilleArray),
@@ -1170,6 +1234,7 @@ LoveliveGame = (function(_super) {
       this.tension = this._loadStorage('tension', 'num');
       this.past_fever_num = this._loadStorage('past_fever_num', 'num');
       this.item_point = this._loadStorage('item_point', 'num');
+      this.next_add_member_key = this._loadStorage('next_add_member_key', 'num');
       this.slot_setting.prev_muse = this._loadStorage('prev_muse', 'json');
       this.slot_setting.now_muse_num = this._loadStorage('now_muse_num', 'num');
       this.main_scene.gp_slot.left_lille.lilleArray = this._loadStorage('left_lille', 'json');
@@ -1224,10 +1289,12 @@ LoveliveGame = (function(_super) {
     this.tension = data.tension;
     this.past_fever_num = data.past_fever_num;
     this.item_point = data.item_point;
+    this.next_add_member_key = data.next_add_member_key;
     this.slot_setting.prev_muse = data.prev_muse;
     this.item_have_now = data.item_have_now;
     this.item_set_now = data.item_set_now;
-    return this.prev_fever_muse = data.prev_fever_muse;
+    this.prev_fever_muse = data.prev_fever_muse;
+    return this.member_set_now = data.member_set_now;
   };
 
 
@@ -1247,7 +1314,8 @@ LoveliveGame = (function(_super) {
     this.pause_scene.pause_item_use_layer.dspSetItemList();
     this.pause_scene.pause_member_set_layer.dispSetMemberList();
     this.slot_setting.setMemberItemPrice();
-    return this.slot_setting.setItemPointValue();
+    this.slot_setting.setItemPointValue();
+    return this.musePreLoadByMemberSetNow();
   };
 
   return LoveliveGame;
@@ -1267,11 +1335,14 @@ gpEffect = (function(_super) {
     this.item_catch_effect = [];
   }
 
-  gpEffect.prototype.cutInSet = function() {
+  gpEffect.prototype.cutInSet = function(num) {
     var setting;
+    if (num == null) {
+      num = 0;
+    }
     setting = game.slot_setting;
     if (setting.muse_material_list[setting.now_muse_num] !== void 0) {
-      this.cut_in = new cutIn();
+      this.cut_in = new cutIn(num);
       this.addChild(this.cut_in);
       return game.main_scene.gp_stage_front.missItemFallSycleNow = 0;
     }
@@ -1499,14 +1570,35 @@ gpSlot = (function(_super) {
     }
   };
 
+
+  /*
+  スロットが強制的に辺になるようにリールから左のリールの当たり目と同じ目を探して配列のキーを返す
+  左の当たり目がμ’ｓならリールからμ’ｓの目をランダムで取り出して返す
+   */
+
   gpSlot.prototype._searchEye = function(target) {
-    var key, result, val, _ref;
+    var arr, key, random_key, result, val, _ref, _ref1;
     result = 0;
-    _ref = target.lilleArray;
-    for (key in _ref) {
-      val = _ref[key];
-      if (result === 0 && val === this.leftSlotEye) {
-        result = key;
+    if (this.leftSlotEye < 10) {
+      _ref = target.lilleArray;
+      for (key in _ref) {
+        val = _ref[key];
+        if (val === this.leftSlotEye) {
+          result = key;
+        }
+      }
+    } else {
+      arr = [];
+      _ref1 = target.lilleArray;
+      for (key in _ref1) {
+        val = _ref1[key];
+        if (val > 10) {
+          arr.push(key);
+        }
+      }
+      if (arr.length > 0) {
+        random_key = Math.floor(arr.length * Math.random());
+        result = arr[random_key];
       }
     }
     return result;
@@ -1521,7 +1613,6 @@ gpSlot = (function(_super) {
     var member, prize_money;
     if (this._isSlotHit() === true) {
       game.sePlay(this.slot_hit_se);
-      this.hit_role = this.left_lille.lilleArray[this.left_lille.nowEye];
       prize_money = game.slot_setting.calcPrizeMoney(this.middle_lille.lilleArray[this.middle_lille.nowEye]);
       game.tensionSetValueSlotHit(prize_money, this.hit_role);
       this._feverStart(this.hit_role);
@@ -1569,16 +1660,18 @@ gpSlot = (function(_super) {
    */
 
   gpSlot.prototype._feverStart = function(hit_eye) {
-    if (hit_eye > 10 && game.fever === false) {
-      game.fever = true;
-      game.past_fever_num += 1;
-      game.slot_setting.setMuseMember();
-      game.musePreLoad();
-      game.fever_hit_eye = hit_eye;
-      game.main_scene.gp_system.changeBetChangeFlg(false);
-      game.main_scene.gp_effect.feverEffectSet();
-      this.slotAddMuseAll(hit_eye);
-      return this._feverBgmStart(hit_eye);
+    if (game.fever === false) {
+      if ((11 <= hit_eye && hit_eye <= 19) || (21 <= hit_eye)) {
+        game.fever = true;
+        game.past_fever_num += 1;
+        game.slot_setting.setMuseMember();
+        game.musePreLoad();
+        game.fever_hit_eye = hit_eye;
+        game.main_scene.gp_system.changeBetChangeFlg(false);
+        game.main_scene.gp_effect.feverEffectSet();
+        this.slotAddMuseAll(hit_eye);
+        return this._feverBgmStart(hit_eye);
+      }
     }
   };
 
@@ -1604,11 +1697,7 @@ gpSlot = (function(_super) {
 
   gpSlot.prototype._getFeverBgm = function(hit_role) {
     var bgms, material, random;
-    if (hit_role <= 19) {
-      material = game.slot_setting.muse_material_list;
-    } else {
-      material = game.slot_setting.unit_material_list;
-    }
+    material = game.slot_setting.muse_material_list;
     if (material[hit_role] === void 0) {
       hit_role = 20;
     }
@@ -1687,7 +1776,7 @@ gpSlot = (function(_super) {
     this.left_lille.lilleArray = this._slotAddMuseUnit(num, this.left_lille);
     this.middle_lille.lilleArray = this._slotAddMuseUnit(num, this.middle_lille);
     this.right_lille.lilleArray = this._slotAddMuseUnit(num, this.right_lille);
-    return game.main_scene.gp_effect.cutInSet();
+    return game.main_scene.gp_effect.cutInSet(num);
   };
 
 
@@ -2034,12 +2123,16 @@ stageBack = (function(_super) {
     if (this.isFallPrizeMoney === true && this.age % this.prizeMoneyFallIntervalFrm === 0) {
       _results = [];
       for (i = _i = 1, _ref = this.oneSetMoney; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
-        this.addChild(this.prizeMoneyItemsInstance[this.nowPrizeMoneyItemsNum]);
-        this.prizeMoneyItemsInstance[this.nowPrizeMoneyItemsNum].setPosition();
-        this.nowPrizeMoneyItemsNum += 1;
-        if (this.nowPrizeMoneyItemsNum === this.prizeMoneyItemsInstance.length) {
-          this.nowPrizeMoneyItemsNum = 0;
-          _results.push(this.isFallPrizeMoney = false);
+        if (this.prizeMoneyItemsInstance[this.nowPrizeMoneyItemsNum] !== void 0) {
+          this.addChild(this.prizeMoneyItemsInstance[this.nowPrizeMoneyItemsNum]);
+          this.prizeMoneyItemsInstance[this.nowPrizeMoneyItemsNum].setPosition();
+          this.nowPrizeMoneyItemsNum += 1;
+          if (this.nowPrizeMoneyItemsNum === this.prizeMoneyItemsInstance.length) {
+            this.nowPrizeMoneyItemsNum = 0;
+            _results.push(this.isFallPrizeMoney = false);
+          } else {
+            _results.push(void 0);
+          }
         } else {
           _results.push(void 0);
         }
@@ -2582,7 +2675,7 @@ buyItemButtonHtml = (function(_super) {
   function buyItemButtonHtml() {
     buyItemButtonHtml.__super__.constructor.apply(this, arguments);
     this.y = 300;
-    this.text = 'アイテム・部員を買う';
+    this.text = 'アイテムを買う';
     this.setHtml();
   }
 
@@ -2600,7 +2693,7 @@ useItemButtonHtml = (function(_super) {
   function useItemButtonHtml() {
     useItemButtonHtml.__super__.constructor.apply(this, arguments);
     this.y = 400;
-    this.text = 'アイテムを使う';
+    this.text = '魔法をセットする';
     this.setHtml();
   }
 
@@ -3201,9 +3294,9 @@ itemItemBuyDiscription = (function(_super) {
 
   function itemItemBuyDiscription() {
     itemItemBuyDiscription.__super__.constructor.apply(this, arguments);
-    this.x = 190;
+    this.x = 220;
     this.y = 130;
-    this.text = 'アイテム';
+    this.text = '魔法';
     this.setHtml();
   }
 
@@ -3309,9 +3402,9 @@ itemUseDiscription = (function(_super) {
 
   function itemUseDiscription() {
     itemUseDiscription.__super__.constructor.apply(this, arguments);
-    this.x = 130;
+    this.x = 120;
     this.y = 110;
-    this.text = 'アイテムを使う';
+    this.text = '魔法をセットする';
     this.setHtml();
   }
 
@@ -3745,14 +3838,23 @@ Debug = (function(_super) {
       'tension': 100,
       'past_fever_num': 0,
       'item_point': 500,
+      'next_add_member_key': 0,
       'prev_muse': [11],
       'item_have_now': [1, 2, 9, 11, 12, 13, 14],
       'item_set_now': [9],
-      'member_set_now': [],
+      'member_set_now': [11, 12, 13],
       'prev_fever_muse': [11]
     };
     this.lille_flg = false;
-    this.lille_array = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
+
+    /*
+    @lille_array = [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    ]
+     */
+    this.lille_array = [[11, 11, 11, 11, 11, 11, 11, 11, 1, 4, 4, 1, 5, 5, 1, 4, 5], [12, 12, 12, 12, 12, 12, 12, 12, 5, 1, 4, 4, 1, 5, 5, 1, 4], [13, 13, 13, 13, 13, 13, 13, 13, 5, 4, 1, 4, 1, 5, 5, 1, 4]];
     this.item_flg = false;
     this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
@@ -3811,6 +3913,8 @@ slotSetting = (function(_super) {
     /*
     カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
     11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
+    20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
+    31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
     direction:キャラクターの向き、left or right
     カットインの画像サイズ、頭の位置で570px
     頭の上に余白がある場合の高さ計算式：(570/(元画像高さ-元画像頭のY座標))*元画像高さ
@@ -4013,16 +4117,96 @@ slotSetting = (function(_super) {
           }
         ],
         'voice': ['19_0', '19_1']
-      }
-    };
-
-    /*
-    ユニットに関する素材
-    20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
-    31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
-     */
-    this.unit_material_list = {
+      },
       20: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30
+          }
+        ]
+      },
+      21: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30
+          }
+        ]
+      },
+      22: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30
+          }
+        ]
+      },
+      23: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30
+          }
+        ]
+      },
+      24: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30
+          }
+        ]
+      },
+      25: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30
+          }
+        ]
+      },
+      26: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30
+          }
+        ]
+      },
+      27: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30
+          }
+        ]
+      },
+      28: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30
+          }
+        ]
+      },
+      29: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30
+          }
+        ]
+      },
+      30: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30
+          }
+        ]
+      },
+      31: {
         'bgm': [
           {
             'name': 'zenkai_no_lovelive',
@@ -4116,7 +4300,7 @@ slotSetting = (function(_super) {
       7: {
         'name': 'ファイトだよっ',
         'image': 'item_7',
-        'discription': 'アイテムを落としても<br>テンションが下がらなくなる',
+        'discription': 'おやつを落としてもテンションが<br>下がらず、コンボが途切れなくなる',
         'price': 10000000,
         'durationSec': 30,
         'conditoin': '',
@@ -4744,7 +4928,18 @@ slotSetting = (function(_super) {
    */
 
   slotSetting.prototype.getAddMuseNum = function() {
-    return this.now_muse_num;
+    var member, ret;
+    member = game.member_set_now;
+    if (member.length === 0) {
+      ret = this.now_muse_num;
+    } else {
+      ret = member[game.next_add_member_key];
+      game.next_add_member_key += 1;
+      if (member[game.next_add_member_key] === void 0) {
+        game.next_add_member_key = 0;
+      }
+    }
+    return ret;
   };
 
   return slotSetting;
@@ -4769,11 +4964,13 @@ Test = (function(_super) {
   ここにゲーム呼び出し時に実行するテストを書く
    */
 
-  Test.prototype.testExe = function() {};
+  Test.prototype.testExe = function() {
+    return this.testGetHitRole();
+  };
 
   Test.prototype.testGetHitRole = function() {
     var result;
-    result = game.slot_setting.getHitRole(17, 17, 14);
+    result = game.slot_setting.getHitRole(11, 11, 12);
     return console.log(result);
   };
 
@@ -4803,6 +5000,23 @@ Test = (function(_super) {
     _results = [];
     for (i = _i = 1; _i <= 100; i = ++_i) {
       _results.push(game.main_scene.gp_effect.cutInSet());
+    }
+    return _results;
+  };
+
+  Test.prototype.preLoadMulti = function() {
+    game.member_set_now = [17, 18, 19];
+    game.musePreLoadByMemberSetNow();
+    return console.log(game.already_added_material);
+  };
+
+  Test.prototype.addMuse = function() {
+    var i, num, _i, _results;
+    game.member_set_now = [];
+    _results = [];
+    for (i = _i = 1; _i <= 6; i = ++_i) {
+      num = game.slot_setting.getAddMuseNum();
+      _results.push(console.log(num));
     }
     return _results;
   };
@@ -5024,7 +5238,8 @@ pauseScene = (function(_super) {
   };
 
   pauseScene.prototype.removeMemberSetMenu = function() {
-    return this.removeChild(this.pause_member_set_layer);
+    this.removeChild(this.pause_member_set_layer);
+    return game.musePreLoadByMemberSetNow();
   };
 
   pauseScene.prototype.setItemBuySelectMenu = function(kind) {
@@ -5191,8 +5406,11 @@ effect = (function(_super) {
 cutIn = (function(_super) {
   __extends(cutIn, _super);
 
-  function cutIn() {
-    this._callCutIn();
+  function cutIn(num) {
+    if (num == null) {
+      num = 0;
+    }
+    this._callCutIn(num);
     cutIn.__super__.constructor.call(this, this.cut_in['width'], this.cut_in['height']);
     this._setInit();
   }
@@ -5210,10 +5428,14 @@ cutIn = (function(_super) {
     }
   };
 
-  cutIn.prototype._callCutIn = function() {
+  cutIn.prototype._callCutIn = function(num) {
     var cut_in_list, cut_in_random, muse_num, setting;
     setting = game.slot_setting;
-    muse_num = setting.now_muse_num;
+    if (num === 0) {
+      muse_num = setting.now_muse_num;
+    } else {
+      muse_num = num;
+    }
     cut_in_list = setting.muse_material_list[muse_num]['cut_in'];
     cut_in_random = Math.floor(Math.random() * cut_in_list.length);
     this.cut_in = cut_in_list[cut_in_random];

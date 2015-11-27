@@ -140,12 +140,13 @@ class stageBack extends gpStage
         if @isFallPrizeMoney is true && @age % @prizeMoneyFallIntervalFrm is 0
             for i in [1..@oneSetMoney]
                 # TODO バグあり
-                @addChild(@prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum])
-                @prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum].setPosition()
-                @nowPrizeMoneyItemsNum += 1
-                if @nowPrizeMoneyItemsNum is @prizeMoneyItemsInstance.length
-                    @nowPrizeMoneyItemsNum = 0
-                    @isFallPrizeMoney = false
+                if @prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum] != undefined
+                    @addChild(@prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum])
+                    @prizeMoneyItemsInstance[@nowPrizeMoneyItemsNum].setPosition()
+                    @nowPrizeMoneyItemsNum += 1
+                    if @nowPrizeMoneyItemsNum is @prizeMoneyItemsInstance.length
+                        @nowPrizeMoneyItemsNum = 0
+                        @isFallPrizeMoney = false
     ###
     当選金の内訳のコイン枚数を計算する
     @param value   number 金額

@@ -68,11 +68,24 @@ class gpSlot extends appGroup
                 target.nowEye = tmp_eye
                 target.frameChange()
 
+    ###
+    スロットが強制的に辺になるようにリールから左のリールの当たり目と同じ目を探して配列のキーを返す
+    左の当たり目がμ’ｓならリールからμ’ｓの目をランダムで取り出して返す
+    ###
     _searchEye:(target)->
         result = 0
-        for key, val of target.lilleArray
-            if result is 0 && val is @leftSlotEye
-                result = key
+        if @leftSlotEye < 10
+            for key, val of target.lilleArray
+                if val is @leftSlotEye
+                    result = key
+        else
+            arr = []
+            for key, val of target.lilleArray
+                if val > 10
+                    arr.push(key)
+            if arr.length > 0
+                random_key = Math.floor(arr.length * Math.random())
+                result = arr[random_key]
         return result
 
 
@@ -82,7 +95,6 @@ class gpSlot extends appGroup
     slotHitTest: () ->
         if @_isSlotHit() is true
             game.sePlay(@slot_hit_se)
-            @hit_role = @left_lille.lilleArray[@left_lille.nowEye]
             prize_money = game.slot_setting.calcPrizeMoney(@middle_lille.lilleArray[@middle_lille.nowEye])
             game.tensionSetValueSlotHit(prize_money, @hit_role)
             @_feverStart(@hit_role)
@@ -118,16 +130,17 @@ class gpSlot extends appGroup
     フィーバーを開始する
     ###
     _feverStart:(hit_eye)->
-        if hit_eye > 10 && game.fever is false
-            game.fever = true
-            game.past_fever_num += 1
-            game.slot_setting.setMuseMember()
-            game.musePreLoad()
-            game.fever_hit_eye = hit_eye
-            game.main_scene.gp_system.changeBetChangeFlg(false)
-            game.main_scene.gp_effect.feverEffectSet()
-            @slotAddMuseAll(hit_eye)
-            @_feverBgmStart(hit_eye)
+        if game.fever is false
+            if (11 <= hit_eye && hit_eye <= 19) || (21 <= hit_eye)
+                game.fever = true
+                game.past_fever_num += 1
+                game.slot_setting.setMuseMember()
+                game.musePreLoad()
+                game.fever_hit_eye = hit_eye
+                game.main_scene.gp_system.changeBetChangeFlg(false)
+                game.main_scene.gp_effect.feverEffectSet()
+                @slotAddMuseAll(hit_eye)
+                @_feverBgmStart(hit_eye)
 
     ###
     フィーバー中のBGMを開始する
@@ -144,10 +157,7 @@ class gpSlot extends appGroup
     揃った目の役からフィーバーのBGMを返す
     ###
     _getFeverBgm:(hit_role)->
-        if hit_role <= 19
-            material = game.slot_setting.muse_material_list
-        else
-            material = game.slot_setting.unit_material_list
+        material = game.slot_setting.muse_material_list
         if material[hit_role] is undefined
             hit_role = 20
         bgms = material[hit_role]['bgm']
@@ -205,7 +215,7 @@ class gpSlot extends appGroup
         @left_lille.lilleArray = @_slotAddMuseUnit(num, @left_lille)
         @middle_lille.lilleArray = @_slotAddMuseUnit(num, @middle_lille)
         @right_lille.lilleArray = @_slotAddMuseUnit(num, @right_lille)
-        game.main_scene.gp_effect.cutInSet()
+        game.main_scene.gp_effect.cutInSet(num)
 
     ###
     リールにμ’sの誰かを挿入(単体)

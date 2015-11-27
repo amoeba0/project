@@ -30,6 +30,8 @@ class slotSetting extends appNode
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
         11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
+        20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
+        31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
         direction:キャラクターの向き、left or right
         カットインの画像サイズ、頭の位置で570px
         頭の上に余白がある場合の高さ計算式：(570/(元画像高さ-元画像頭のY座標))*元画像高さ
@@ -124,15 +126,63 @@ class slotSetting extends appNode
                     {'name':'arihureta', 'time':93}
                 ],
                 'voice':['19_0', '19_1']
-            }
-        }
-        ###
-        ユニットに関する素材
-        20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
-        31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
-        ###
-        @unit_material_list = {
+            },
             20:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            21:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            22:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            23:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            24:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            25:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            26:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            27:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            28:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            29:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            30:{
+                'bgm':[
+                    {'name':'zenkai_no_lovelive', 'time':30}
+                ]
+            },
+            31:{
                 'bgm':[
                     {'name':'zenkai_no_lovelive', 'time':30}
                 ]
@@ -216,7 +266,7 @@ class slotSetting extends appNode
             7:{
                 'name':'ファイトだよっ',
                 'image':'item_7',
-                'discription':'アイテムを落としても<br>テンションが下がらなくなる',
+                'discription':'おやつを落としてもテンションが<br>下がらず、コンボが途切れなくなる',
                 'price':10000000,
                 'durationSec':30,
                 'conditoin':'',
@@ -685,4 +735,12 @@ class slotSetting extends appNode
     現在セットされているメンバーから次にスロットに挿入するμ’ｓメンバーを決めて返します
     ###
     getAddMuseNum:()->
-        return @now_muse_num
+        member = game.member_set_now
+        if member.length is 0
+            ret = @now_muse_num
+        else
+            ret = member[game.next_add_member_key]
+            game.next_add_member_key += 1
+            if member[game.next_add_member_key] is undefined
+                game.next_add_member_key = 0
+        return ret
