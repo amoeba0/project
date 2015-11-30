@@ -98,7 +98,7 @@ class stageBack extends gpStage
     constructor: () ->
         super
         @prizeMoneyItemsInstance = [] #スロット当選金のインスタンスを格納
-        @prizeMoneyItemsNum = {1:0,10:0,100:0,1000:0,10000:0,100000:0} #当選金を降らせる各コイン数の内訳
+        @prizeMoneyItemsNum = {1:0,10:0,100:0,1000:0,10000:0,100000:0,1000000:0,10000000:0} #当選金を降らせる各コイン数の内訳
         @nowPrizeMoneyItemsNum = 0
         @prizeMoneyFallIntervalFrm = 4 #スロットの当選金を降らせる間隔（フレーム）
         @prizeMoneyFallPeriodSec = 5 #スロットの当選金額が振っている時間（秒）
@@ -106,7 +106,7 @@ class stageBack extends gpStage
         @oneSetMoney = 1 #1フレームに設置するコインの数
 
         @returnMoneyItemsInstance = [] #掛け金の戻り分のインスタンスを格納
-        @returnMoneyItemsNum = {1:0,10:0,100:0,1000:0,10000:0,100000:0} #掛け金の戻り分を降らせる各コイン数の内訳
+        @returnMoneyItemsNum = {1:0,10:0,100:0,1000:0,10000:0,100000:0,1000000:0,10000000:0} #掛け金の戻り分を降らせる各コイン数の内訳
         @nowReturnMoneyItemsNum = 0
         @returnMoneyFallIntervalFrm = 4 #掛け金の戻り分を降らせる間隔（フレーム）
     onenterframe: () ->
@@ -118,16 +118,16 @@ class stageBack extends gpStage
     ###
     fallPrizeMoneyStart:(value) ->
         stage = game.main_scene.gp_stage_front
-        if value < 1000000
+        if value < 100000000
             @prizeMoneyFallIntervalFrm = 4
-        else if value < 10000000
+        else if value < 1000000000
             @prizeMoneyFallIntervalFrm = 2
         else
             @prizeMoneyFallIntervalFrm = 1
         @prizeMoneyItemsNum = @_calcMoneyItemsNum(value, true)
         @prizeMoneyItemsInstance = @_setMoneyItemsInstance(@prizeMoneyItemsNum, true)
-        if @prizeMoneyItemsNum[100000] > 1000
-            @oneSetMoney = Math.floor(@prizeMoneyItemsNum[100000] / 1000)
+        if @prizeMoneyItemsNum[10000000] > 1000
+            @oneSetMoney = Math.floor(@prizeMoneyItemsNum[10000000] / 1000)
         @prizeMoneyFallPeriodSec = Math.ceil((@prizeMoneyItemsInstance.length / @oneSetMoney) * @prizeMoneyFallIntervalFrm / game.fps) + stage.itemFallSecInit
         if @prizeMoneyFallPeriodSec > stage.itemFallSecInit
             stage.setItemFallFrm(@prizeMoneyFallPeriodSec)
@@ -153,7 +153,7 @@ class stageBack extends gpStage
     @prize boolean true:当選金額
     ###
     _calcMoneyItemsNum:(value, prize)->
-        ret_data = {1:0,10:0,100:0,1000:0,10000:0,100000:0}
+        ret_data = {1:0,10:0,100:0,1000:0,10000:0,100000:0,1000000:0,10000000:0}
         if value <= 20 #全部1円
             ret_data[1] = value
             ret_data[10] = 0
@@ -161,6 +161,8 @@ class stageBack extends gpStage
             ret_data[1000] = 0
             ret_data[10000] = 0
             ret_data[100000] = 0
+            ret_data[1000000] = 0
+            ret_data[10000000] = 0
         else if value < 100 #1円と10円と端数
             ret_data[1] = game.getDigitNum(value, 1) + 10
             ret_data[10] = game.getDigitNum(value, 2) - 1
@@ -168,6 +170,8 @@ class stageBack extends gpStage
             ret_data[1000] = 0
             ret_data[10000] = 0
             ret_data[100000] = 0
+            ret_data[1000000] = 0
+            ret_data[10000000] = 0
         else if value < 1000 #10円と100円と端数
             ret_data[1] = game.getDigitNum(value, 1)
             ret_data[10] = game.getDigitNum(value, 2) + 10
@@ -175,6 +179,8 @@ class stageBack extends gpStage
             ret_data[1000] = 0
             ret_data[10000] = 0
             ret_data[100000] = 0
+            ret_data[1000000] = 0
+            ret_data[10000000] = 0
         else if value < 10000 #1000円と100円と端数
             ret_data[1] = game.getDigitNum(value, 1)
             ret_data[10] = game.getDigitNum(value, 2)
@@ -182,20 +188,44 @@ class stageBack extends gpStage
             ret_data[1000] = game.getDigitNum(value, 4) - 1
             ret_data[10000] = 0
             ret_data[100000] = 0
+            ret_data[1000000] = 0
+            ret_data[10000000] = 0
         else if value < 100000
-            ret_data[1] = game.getDigitNum(value, 1)
+            ret_data[1] = 0
             ret_data[10] = game.getDigitNum(value, 2)
             ret_data[100] = game.getDigitNum(value, 3)
             ret_data[1000] = game.getDigitNum(value, 4) + 10
             ret_data[10000] = game.getDigitNum(value, 5) - 1
             ret_data[100000] = 0
-        else
-            ret_data[1] = game.getDigitNum(value, 1)
-            ret_data[10] = game.getDigitNum(value, 2)
+            ret_data[1000000] = 0
+            ret_data[10000000] = 0
+        else if value < 1000000
+            ret_data[1] = 0
+            ret_data[10] = 0
             ret_data[100] = game.getDigitNum(value, 3)
             ret_data[1000] = game.getDigitNum(value, 4)
+            ret_data[10000] = game.getDigitNum(value, 5) + 10
+            ret_data[100000] = game.getDigitNum(value, 6) - 1
+            ret_data[1000000] = 0
+            ret_data[10000000] = 0
+        else if value < 10000000
+            ret_data[1] = 0
+            ret_data[10] = 0
+            ret_data[100] = 0
+            ret_data[1000] = game.getDigitNum(value, 4)
             ret_data[10000] = game.getDigitNum(value, 5)
-            ret_data[100000] = Math.floor(value/100000)
+            ret_data[100000] = game.getDigitNum(value, 6) + 10
+            ret_data[1000000] = game.getDigitNum(value, 7) -1
+            ret_data[10000000] = 0
+        else
+            ret_data[1] = 0
+            ret_data[10] = 0
+            ret_data[100] = 0
+            ret_data[1000] = 0
+            ret_data[10000] = game.getDigitNum(value, 5)
+            ret_data[100000] = game.getDigitNum(value, 6)
+            ret_data[1000000] = game.getDigitNum(value, 7) + 10
+            ret_data[10000000] = Math.floor(value/10000000)
         return ret_data
 
     ###
@@ -224,6 +254,12 @@ class stageBack extends gpStage
         if itemsNum[100000] > 0
             for i in [1..itemsNum[100000]]
                 ret_data.push(new HundredThousandMoney(isHoming))
+        if itemsNum[1000000] > 0
+            for i in [1..itemsNum[1000000]]
+                ret_data.push(new OneMillionMoney(isHoming))
+        if itemsNum[10000000] > 0
+            for i in [1..itemsNum[10000000]]
+                ret_data.push(new TenMillionMoney(isHoming))
         return ret_data
 
     ###
@@ -240,8 +276,12 @@ class stageBack extends gpStage
             val = Math.floor(val / 1000) * 1000
         else if val < 100000
             val = Math.floor(val / 10000) * 10000
-        else
+        else if val < 1000000
             val = Math.floor(val / 100000) * 100000
+        else if val < 10000000
+            val = Math.floor(val / 1000000) * 1000000
+        else
+            val = Math.floor(val / 10000000) * 10000000
         @returnMoneyItemsNum = @_calcMoneyItemsNum(val, false)
         @returnMoneyItemsInstance = @_setMoneyItemsInstance(@returnMoneyItemsNum, false)
         stage = game.main_scene.gp_stage_front

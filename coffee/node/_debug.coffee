@@ -16,8 +16,8 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':10000000,
-            'bet':10,
+            'money':1234567890,
+            'bet':100,
             'combo':10,
             'tension':100,
             'past_fever_num':0,

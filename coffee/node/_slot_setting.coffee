@@ -244,7 +244,7 @@ class slotSetting extends appNode
                     return game.slot_setting.itemConditinon(4)
             },
             5:{
-                'name':'完全にフルハウスね',
+                'name':'完っ全にフルハウスね',
                 'image':'item_5',
                 'discription':'CHANCE!!状態になる確率が<br>大幅に上がる',
                 'price':1000000,
@@ -256,7 +256,7 @@ class slotSetting extends appNode
             6:{
                 'name':'チョットマッテテー',
                 'image':'item_6',
-                'discription':'おやつがゆっくり<br>降ってくるようになる',
+                'discription':'おやつが降ってくる速度が<br>ちょっとだけ遅くなる',
                 'price':5000000,
                 'durationSec':30,
                 'conditoin':'',
@@ -266,7 +266,7 @@ class slotSetting extends appNode
             7:{
                 'name':'ファイトだよっ',
                 'image':'item_7',
-                'discription':'おやつを落としてもテンションが<br>下がらず、コンボが途切れなくなる',
+                'discription':'スロットに当たった時に<br>得られる金額が2倍になる',
                 'price':10000000,
                 'durationSec':30,
                 'conditoin':'',
@@ -286,7 +286,7 @@ class slotSetting extends appNode
             9:{
                 'name':'エリチカおうちに帰る！',
                 'image':'item_9',
-                'discription':'掛け金を上げても<br>おやつの落下速度が上がらなくなる',
+                'discription':'掛け金をいくら上げても<br>おやつの落下速度が上がらなくなる',
                 'price':1000000000,
                 'durationSec':30,
                 'conditoin':'',
@@ -394,6 +394,8 @@ class slotSetting extends appNode
         #アイテムポイントが増える／減るのにかかる値(ポイント／フレーム)
         #0はアイテムがセットされていない時に増える値、１～は各アイテムをセットしている時に減る値
         @item_point_value = [0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0]
+        #掛け金が増えると当選金額の割合が減る補正
+        @prize_div = 1
 
         #セーブする変数
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
@@ -410,20 +412,31 @@ class slotSetting extends appNode
     setGravity:()->
         if game.bet < 10
             val = 0.4
+            @prize_div = 1
         else if game.bet < 50
-            val = 0.45
+            val = 0.42
+            @prize_div = 1
         else if game.bet < 100
-            val = 0.5
+            val = 0.46
+            @prize_div = 0.9
         else if game.bet < 500
-            val = 0.55
+            val = 0.48
+            @prize_div = 0.9
         else if game.bet < 1000
-            val = 0.6
+            val = 0.5
+            @prize_div = 0.8
         else if game.bet < 10000
-            val = 0.6 + Math.floor(game.bet / 100) / 100
+            val = 0.5 + Math.floor(game.bet / 1000) / 100
+            @prize_div = Math.floor(800 - (game.bet / 50)) / 1000
         else if game.bet < 100000
-            val = 1.5 + Math.floor(game.bet / 1000) / 100
+            val = 0.6 + Math.floor(game.bet / 10000) / 100
+            @prize_div = Math.floor(600 - (game.bet / 500)) / 1000
+        else if game.bet < 1000000
+            val = 0.7 + Math.floor(game.bet / 10000) / 100
+            @prize_div = Math.floor(400 - (game.bet / 5000)) / 1000
         else
-            val = 3
+            val = 2
+            @prize_div = 0.2
         div = 1 + Math.floor(2 * game.tension / @tension_max) / 10
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
@@ -508,17 +521,17 @@ class slotSetting extends appNode
     スロットが回っている時に降ってくる掛け金の戻り分の額を計算
     ###
     getReturnMoneyFallValue:()->
-        return Math.floor(game.bet * game.combo * 0.05)
+        return Math.floor(game.bet * game.combo * 0.03)
 
     ###
     スロットの当選金額を計算
     @param eye 当たったスロットの目
     ###
     calcPrizeMoney: (eye) ->
-        ret_money = game.bet * @bairitu[eye]
+        ret_money = Math.floor(game.bet * @bairitu[eye] * @prize_div)
         if game.fever is true
             time = @muse_material_list[game.fever_hit_eye]['bgm'][0]['time']
-            div = Math.floor(time / 30)
+            div = Math.floor(time / 90)
             if div < 1
                 div = 1
             ret_money = Math.floor(ret_money / div)

@@ -39,6 +39,10 @@ class memberSetDialogHtml extends menuDialogHtml
     constructor:()->
         super
 
+class recordDialogHtml extends menuDialogHtml
+    constructor:()->
+        super
+
 class selectDialogHtml extends baseDialogHtml
     constructor:()->
         super 300, 400

@@ -9,12 +9,13 @@ class Test extends appNode
     ここにゲーム呼び出し時に実行するテストを書く
     ###
     testExe:()->
-        @testGetHitRole()
+        #@testGetHitRole()
         #@testSetGravity()
         #@viewItemList()
         #@testCutin()
         #@preLoadMulti()
         #@addMuse()
+        #@moneyFormat()
 
     #以下、テスト用関数
 
@@ -23,12 +24,15 @@ class Test extends appNode
         console.log(result)
 
     testSetGravity:()->
-        param = [1, 5, 10, 50, 100, 500, 1000, 2000]
+        param = [1, 5, 10, 50, 100, 500, 1000, 2000, 8000, 9000, 10000, 20000, 80000, 90000, 100000, 200000, 800000, 900000, 1000000]
         for key, val of param
             console.log('bet:'+val)
             game.bet = val
             result = game.slot_setting.setGravity()
-            console.log('gravity:'+result)
+            #console.log('gravity:'+result)
+            #console.log('div:'+game.slot_setting.prize_div)
+            console.log('prize:'+game.slot_setting.prize_div * val * 50)
+
 
     viewItemList:()->
         game.prev_fever_muse.push(15)
@@ -50,3 +54,6 @@ class Test extends appNode
         for i in [1..6]
             num = game.slot_setting.getAddMuseNum()
             console.log(num)
+
+    moneyFormat:()->
+        console.log(game.toJPUnit(12000012340000))

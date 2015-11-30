@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseByuButtonHtml, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, baseSetButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, explosionEffect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, imageHtml, itemBuyBuyButtonHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemCatchEffect, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseCancelButtonHtml, itemUseDialogCloseButton, itemUseDialogHtml, itemUseDiscription, itemUseSelectDialogHtml, itemUseSetButtonHtml, jumpButton, kirakiraEffect, leftButton, longTitleDiscription, lowBetButton, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, memberSetDiscription, memberUseCancelButtonHtml, memberUseSelectDialogHtml, memberUseSetButtonHtml, menuDialogHtml, modal, moneyText, panoramaEffect, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseItemUseSelectLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseMemberUseSelectLayer, pauseSaveLayer, pauseScene, performanceEffect, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setItemHtml, setMemberButtonHtml, setMemberHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, useHaveDiscription, useItemButtonHtml, useItemHtml, useMemberHtml, useSetDiscription,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMillionMoney, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMillionMoney, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseByuButtonHtml, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, baseSetButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, explosionEffect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, imageHtml, itemBuyBuyButtonHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemCatchEffect, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseCancelButtonHtml, itemUseDialogCloseButton, itemUseDialogHtml, itemUseDiscription, itemUseSelectDialogHtml, itemUseSetButtonHtml, jumpButton, kirakiraEffect, leftButton, longTitleDiscription, lowBetButton, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, memberSetDiscription, memberUseCancelButtonHtml, memberUseSelectDialogHtml, memberUseSetButtonHtml, menuDialogHtml, modal, moneyText, panoramaEffect, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseItemUseSelectLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseMemberUseSelectLayer, pauseRecordLayer, pauseSaveLayer, pauseScene, performanceEffect, recordButtonHtml, recordDialogCloseButton, recordDialogHtml, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setItemHtml, setMemberButtonHtml, setMemberHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, useHaveDiscription, useItemButtonHtml, useItemHtml, useMemberHtml, useSetDiscription,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -213,6 +213,38 @@ appGame = (function(_super) {
       }
     });
     return arr;
+  };
+
+
+  /*
+  数値の単位を漢数字で区切る
+   */
+
+  appGame.prototype.toJPUnit = function(num) {
+    var count, i, kName, n, n_, ptr, str;
+    str = num + '';
+    n = '';
+    n_ = '';
+    count = 0;
+    ptr = 0;
+    kName = ['', '万', '億', '兆', '京', '垓'];
+    i = str.length - 1;
+    while (i >= 0) {
+      n_ = str.charAt(i) + n_;
+      count++;
+      if (count % 4 === 0 && i !== 0) {
+        if (n_ !== '0000') {
+          n = n_ + kName[ptr] + n;
+        }
+        n_ = '';
+        ptr += 1;
+      }
+      if (i === 0) {
+        n = n_ + kName[ptr] + n;
+      }
+      i--;
+    }
+    return n;
   };
 
   return appGame;
@@ -501,7 +533,7 @@ pauseItemBuySelectLayer = (function(_super) {
       text += '<br>持続時間：' + this.item_options.durationSec + '秒';
     }
     if (this.item_options.condFunc() === true) {
-      text += '<br>値段：' + this.item_options.price + '円' + '(所持金' + game.money + '円)';
+      text += '<br>値段：' + game.toJPUnit(this.item_options.price) + '円' + '(所持金' + game.toJPUnit(game.money) + '円)';
     } else {
       text += '<br>出現条件：' + this.item_options.conditoin;
     }
@@ -700,11 +732,14 @@ pauseMainLayer = (function(_super) {
     this.buy_item_button = new buyItemButtonHtml();
     this.use_item_button = new useItemButtonHtml();
     this.set_member_button = new setMemberButtonHtml();
+    this.record_button = new recordButtonHtml();
     this.addChild(this.return_game_button);
     this.addChild(this.save_game_button);
     this.addChild(this.buy_item_button);
     this.addChild(this.use_item_button);
     this.addChild(this.set_member_button);
+    this.addChild(this.record_button);
+    this.y = -20;
   }
 
   return pauseMainLayer;
@@ -858,6 +893,22 @@ pauseMemberUseSelectLayer = (function(_super) {
   };
 
   return pauseMemberUseSelectLayer;
+
+})(appDomLayer);
+
+pauseRecordLayer = (function(_super) {
+  __extends(pauseRecordLayer, _super);
+
+  function pauseRecordLayer() {
+    pauseRecordLayer.__super__.constructor.apply(this, arguments);
+    this.dialog = new recordDialogHtml();
+    this.close_button = new recordDialogCloseButton();
+    this.addChild(this.modal);
+    this.addChild(this.dialog);
+    this.addChild(this.close_button);
+  }
+
+  return pauseRecordLayer;
 
 })(appDomLayer);
 
@@ -2060,7 +2111,9 @@ stageBack = (function(_super) {
       100: 0,
       1000: 0,
       10000: 0,
-      100000: 0
+      100000: 0,
+      1000000: 0,
+      10000000: 0
     };
     this.nowPrizeMoneyItemsNum = 0;
     this.prizeMoneyFallIntervalFrm = 4;
@@ -2074,7 +2127,9 @@ stageBack = (function(_super) {
       100: 0,
       1000: 0,
       10000: 0,
-      100000: 0
+      100000: 0,
+      1000000: 0,
+      10000000: 0
     };
     this.nowReturnMoneyItemsNum = 0;
     this.returnMoneyFallIntervalFrm = 4;
@@ -2094,17 +2149,17 @@ stageBack = (function(_super) {
   stageBack.prototype.fallPrizeMoneyStart = function(value) {
     var stage;
     stage = game.main_scene.gp_stage_front;
-    if (value < 1000000) {
+    if (value < 100000000) {
       this.prizeMoneyFallIntervalFrm = 4;
-    } else if (value < 10000000) {
+    } else if (value < 1000000000) {
       this.prizeMoneyFallIntervalFrm = 2;
     } else {
       this.prizeMoneyFallIntervalFrm = 1;
     }
     this.prizeMoneyItemsNum = this._calcMoneyItemsNum(value, true);
     this.prizeMoneyItemsInstance = this._setMoneyItemsInstance(this.prizeMoneyItemsNum, true);
-    if (this.prizeMoneyItemsNum[100000] > 1000) {
-      this.oneSetMoney = Math.floor(this.prizeMoneyItemsNum[100000] / 1000);
+    if (this.prizeMoneyItemsNum[10000000] > 1000) {
+      this.oneSetMoney = Math.floor(this.prizeMoneyItemsNum[10000000] / 1000);
     }
     this.prizeMoneyFallPeriodSec = Math.ceil((this.prizeMoneyItemsInstance.length / this.oneSetMoney) * this.prizeMoneyFallIntervalFrm / game.fps) + stage.itemFallSecInit;
     if (this.prizeMoneyFallPeriodSec > stage.itemFallSecInit) {
@@ -2156,7 +2211,9 @@ stageBack = (function(_super) {
       100: 0,
       1000: 0,
       10000: 0,
-      100000: 0
+      100000: 0,
+      1000000: 0,
+      10000000: 0
     };
     if (value <= 20) {
       ret_data[1] = value;
@@ -2165,6 +2222,8 @@ stageBack = (function(_super) {
       ret_data[1000] = 0;
       ret_data[10000] = 0;
       ret_data[100000] = 0;
+      ret_data[1000000] = 0;
+      ret_data[10000000] = 0;
     } else if (value < 100) {
       ret_data[1] = game.getDigitNum(value, 1) + 10;
       ret_data[10] = game.getDigitNum(value, 2) - 1;
@@ -2172,6 +2231,8 @@ stageBack = (function(_super) {
       ret_data[1000] = 0;
       ret_data[10000] = 0;
       ret_data[100000] = 0;
+      ret_data[1000000] = 0;
+      ret_data[10000000] = 0;
     } else if (value < 1000) {
       ret_data[1] = game.getDigitNum(value, 1);
       ret_data[10] = game.getDigitNum(value, 2) + 10;
@@ -2179,6 +2240,8 @@ stageBack = (function(_super) {
       ret_data[1000] = 0;
       ret_data[10000] = 0;
       ret_data[100000] = 0;
+      ret_data[1000000] = 0;
+      ret_data[10000000] = 0;
     } else if (value < 10000) {
       ret_data[1] = game.getDigitNum(value, 1);
       ret_data[10] = game.getDigitNum(value, 2);
@@ -2186,20 +2249,44 @@ stageBack = (function(_super) {
       ret_data[1000] = game.getDigitNum(value, 4) - 1;
       ret_data[10000] = 0;
       ret_data[100000] = 0;
+      ret_data[1000000] = 0;
+      ret_data[10000000] = 0;
     } else if (value < 100000) {
-      ret_data[1] = game.getDigitNum(value, 1);
+      ret_data[1] = 0;
       ret_data[10] = game.getDigitNum(value, 2);
       ret_data[100] = game.getDigitNum(value, 3);
       ret_data[1000] = game.getDigitNum(value, 4) + 10;
       ret_data[10000] = game.getDigitNum(value, 5) - 1;
       ret_data[100000] = 0;
-    } else {
-      ret_data[1] = game.getDigitNum(value, 1);
-      ret_data[10] = game.getDigitNum(value, 2);
+      ret_data[1000000] = 0;
+      ret_data[10000000] = 0;
+    } else if (value < 1000000) {
+      ret_data[1] = 0;
+      ret_data[10] = 0;
       ret_data[100] = game.getDigitNum(value, 3);
       ret_data[1000] = game.getDigitNum(value, 4);
+      ret_data[10000] = game.getDigitNum(value, 5) + 10;
+      ret_data[100000] = game.getDigitNum(value, 6) - 1;
+      ret_data[1000000] = 0;
+      ret_data[10000000] = 0;
+    } else if (value < 10000000) {
+      ret_data[1] = 0;
+      ret_data[10] = 0;
+      ret_data[100] = 0;
+      ret_data[1000] = game.getDigitNum(value, 4);
       ret_data[10000] = game.getDigitNum(value, 5);
-      ret_data[100000] = Math.floor(value / 100000);
+      ret_data[100000] = game.getDigitNum(value, 6) + 10;
+      ret_data[1000000] = game.getDigitNum(value, 7)(-1);
+      ret_data[10000000] = 0;
+    } else {
+      ret_data[1] = 0;
+      ret_data[10] = 0;
+      ret_data[100] = 0;
+      ret_data[1000] = 0;
+      ret_data[10000] = game.getDigitNum(value, 5);
+      ret_data[100000] = game.getDigitNum(value, 6);
+      ret_data[1000000] = game.getDigitNum(value, 7) + 10;
+      ret_data[10000000] = Math.floor(value / 10000000);
     }
     return ret_data;
   };
@@ -2213,7 +2300,7 @@ stageBack = (function(_super) {
    */
 
   stageBack.prototype._setMoneyItemsInstance = function(itemsNum, isHoming) {
-    var i, ret_data, _i, _j, _k, _l, _m, _n, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+    var i, ret_data, _i, _j, _k, _l, _m, _n, _o, _p, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
     ret_data = [];
     if (itemsNum[1] > 0) {
       for (i = _i = 1, _ref = itemsNum[1]; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
@@ -2245,6 +2332,16 @@ stageBack = (function(_super) {
         ret_data.push(new HundredThousandMoney(isHoming));
       }
     }
+    if (itemsNum[1000000] > 0) {
+      for (i = _o = 1, _ref6 = itemsNum[1000000]; 1 <= _ref6 ? _o <= _ref6 : _o >= _ref6; i = 1 <= _ref6 ? ++_o : --_o) {
+        ret_data.push(new OneMillionMoney(isHoming));
+      }
+    }
+    if (itemsNum[10000000] > 0) {
+      for (i = _p = 1, _ref7 = itemsNum[10000000]; 1 <= _ref7 ? _p <= _ref7 : _p >= _ref7; i = 1 <= _ref7 ? ++_p : --_p) {
+        ret_data.push(new TenMillionMoney(isHoming));
+      }
+    }
     return ret_data;
   };
 
@@ -2266,8 +2363,12 @@ stageBack = (function(_super) {
       val = Math.floor(val / 1000) * 1000;
     } else if (val < 100000) {
       val = Math.floor(val / 10000) * 10000;
-    } else {
+    } else if (val < 1000000) {
       val = Math.floor(val / 100000) * 100000;
+    } else if (val < 10000000) {
+      val = Math.floor(val / 1000000) * 1000000;
+    } else {
+      val = Math.floor(val / 10000000) * 10000000;
     }
     this.returnMoneyItemsNum = this._calcMoneyItemsNum(val, false);
     this.returnMoneyItemsInstance = this._setMoneyItemsInstance(this.returnMoneyItemsNum, false);
@@ -2592,6 +2693,8 @@ buttonHtml = (function(_super) {
   function buttonHtml(width, height) {
     buttonHtml.__super__.constructor.call(this, width, height);
     this["class"] = ['base-button'];
+    this.dicisionSe = game.soundload('dicision');
+    this.cancelSe = game.soundload('cancel');
   }
 
   buttonHtml.prototype.touchendEvent = function() {};
@@ -2639,6 +2742,7 @@ returnGameButtonHtml = (function(_super) {
   }
 
   returnGameButtonHtml.prototype.touchendEvent = function() {
+    game.sePlay(this.cancelSe);
     return game.pause_scene.buttonList.pause = true;
   };
 
@@ -2662,6 +2766,7 @@ saveGameButtonHtml = (function(_super) {
   }
 
   saveGameButtonHtml.prototype.touchendEvent = function() {
+    game.sePlay(this.dicisionSe);
     return game.pause_scene.setSaveMenu();
   };
 
@@ -2680,6 +2785,7 @@ buyItemButtonHtml = (function(_super) {
   }
 
   buyItemButtonHtml.prototype.touchendEvent = function() {
+    game.sePlay(this.dicisionSe);
     return game.pause_scene.setItemBuyMenu();
   };
 
@@ -2698,6 +2804,7 @@ useItemButtonHtml = (function(_super) {
   }
 
   useItemButtonHtml.prototype.touchendEvent = function() {
+    game.sePlay(this.dicisionSe);
     return game.pause_scene.setItemUseMenu();
   };
 
@@ -2716,10 +2823,30 @@ setMemberButtonHtml = (function(_super) {
   }
 
   setMemberButtonHtml.prototype.touchendEvent = function() {
+    game.sePlay(this.dicisionSe);
     return game.pause_scene.setMemberSetMenu();
   };
 
   return setMemberButtonHtml;
+
+})(pauseMainMenuButtonHtml);
+
+recordButtonHtml = (function(_super) {
+  __extends(recordButtonHtml, _super);
+
+  function recordButtonHtml() {
+    recordButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 600;
+    this.text = '実績を確認する';
+    this.setHtml();
+  }
+
+  recordButtonHtml.prototype.touchendEvent = function() {
+    game.sePlay(this.dicisionSe);
+    return game.pause_scene.setRecordMenu();
+  };
+
+  return recordButtonHtml;
 
 })(pauseMainMenuButtonHtml);
 
@@ -2739,6 +2866,7 @@ baseOkButtonHtml = (function(_super) {
   }
 
   baseOkButtonHtml.prototype.ontouchend = function(e) {
+    game.sePlay(this.dicisionSe);
     return this.touchendEvent();
   };
 
@@ -2784,6 +2912,7 @@ baseCancelButtonHtml = (function(_super) {
   }
 
   baseCancelButtonHtml.prototype.ontouchend = function(e) {
+    game.sePlay(this.cancelSe);
     return this.touchendEvent();
   };
 
@@ -2880,6 +3009,7 @@ baseByuButtonHtml = (function(_super) {
   }
 
   baseByuButtonHtml.prototype.ontouchend = function(e) {
+    game.sePlay(this.dicisionSe);
     return this.touchendEvent();
   };
 
@@ -2932,6 +3062,7 @@ baseSetButtonHtml = (function(_super) {
   }
 
   baseSetButtonHtml.prototype.ontouchend = function(e) {
+    game.sePlay(this.dicisionSe);
     return this.touchendEvent();
   };
 
@@ -3019,6 +3150,7 @@ titleMenuButtonHtml = (function(_super) {
   }
 
   titleMenuButtonHtml.prototype.ontouchend = function(e) {
+    game.sePlay(this.dicisionSe);
     return this.touchendEvent();
   };
 
@@ -3063,6 +3195,7 @@ dialogCloseButton = (function(_super) {
     this.x = 400;
     this.y = 100;
     this.setImageHtml();
+    this.cancelSe = game.soundload('cancel');
   }
 
   return dialogCloseButton;
@@ -3077,6 +3210,7 @@ itemBuyDialogCloseButton = (function(_super) {
   }
 
   itemBuyDialogCloseButton.prototype.ontouchend = function() {
+    game.sePlay(this.cancelSe);
     return game.pause_scene.removeItemBuyMenu();
   };
 
@@ -3092,6 +3226,7 @@ itemUseDialogCloseButton = (function(_super) {
   }
 
   itemUseDialogCloseButton.prototype.ontouchend = function() {
+    game.sePlay(this.cancelSe);
     return game.pause_scene.removeItemUseMenu();
   };
 
@@ -3107,10 +3242,27 @@ memberSetDialogCloseButton = (function(_super) {
   }
 
   memberSetDialogCloseButton.prototype.ontouchend = function() {
+    game.sePlay(this.cancelSe);
     return game.pause_scene.removeMemberSetMenu();
   };
 
   return memberSetDialogCloseButton;
+
+})(dialogCloseButton);
+
+recordDialogCloseButton = (function(_super) {
+  __extends(recordDialogCloseButton, _super);
+
+  function recordDialogCloseButton() {
+    recordDialogCloseButton.__super__.constructor.apply(this, arguments);
+  }
+
+  recordDialogCloseButton.prototype.ontouchend = function() {
+    game.sePlay(this.cancelSe);
+    return game.pause_scene.removeRecordMenu();
+  };
+
+  return recordDialogCloseButton;
 
 })(dialogCloseButton);
 
@@ -3213,6 +3365,17 @@ memberSetDialogHtml = (function(_super) {
   }
 
   return memberSetDialogHtml;
+
+})(menuDialogHtml);
+
+recordDialogHtml = (function(_super) {
+  __extends(recordDialogHtml, _super);
+
+  function recordDialogHtml() {
+    recordDialogHtml.__super__.constructor.apply(this, arguments);
+  }
+
+  return recordDialogHtml;
 
 })(menuDialogHtml);
 
@@ -3457,6 +3620,7 @@ baseItemHtml = (function(_super) {
     this.positionY = 0;
     this.positionX = 0;
     this.positoin_kind = this.item_kind;
+    this.dicisionSe = game.soundload('dicision');
   }
 
   baseItemHtml.prototype.setPosition = function() {
@@ -3514,6 +3678,7 @@ buyItemHtml = (function(_super) {
 
   buyItemHtml.prototype.ontouchend = function() {
     if (this.is_exist === true) {
+      game.sePlay(this.dicisionSe);
       return this.dispItemBuySelectDialog(this.item_kind);
     }
   };
@@ -3533,6 +3698,7 @@ useItemHtml = (function(_super) {
 
   useItemHtml.prototype.ontouchend = function() {
     if (this.is_exist === true) {
+      game.sePlay(this.dicisionSe);
       return this.dispItemUseSelectDialog(this.item_kind);
     }
   };
@@ -3570,6 +3736,7 @@ setItemHtml = (function(_super) {
 
   setItemHtml.prototype.ontouchend = function() {
     if (this.kind !== 0) {
+      game.sePlay(this.dicisionSe);
       return game.pause_scene.setItemUseSelectMenu(this.kind);
     }
   };
@@ -3608,6 +3775,7 @@ buyMemberHtml = (function(_super) {
 
   buyMemberHtml.prototype.ontouchend = function() {
     if (this.is_exist === true) {
+      game.sePlay(this.dicisionSe);
       return this.dispItemBuySelectDialog(this.item_kind);
     }
   };
@@ -3627,6 +3795,7 @@ useMemberHtml = (function(_super) {
 
   useMemberHtml.prototype.ontouchend = function() {
     if (this.is_exist === true) {
+      game.sePlay(this.dicisionSe);
       return this.dispMemberUseSelectDialog(this.item_kind);
     }
   };
@@ -3664,6 +3833,7 @@ setMemberHtml = (function(_super) {
 
   setMemberHtml.prototype.ontouchend = function() {
     if (this.kind !== 10) {
+      game.sePlay(this.dicisionSe);
       return game.pause_scene.setMemberUseSelectMenu(this.kind);
     }
   };
@@ -3730,7 +3900,7 @@ moneyText = (function(_super) {
    */
 
   moneyText.prototype.setValue = function() {
-    this.text = this.zandaka_text + game.money + this.yen_text;
+    this.text = this.zandaka_text + game.toJPUnit(game.money) + this.yen_text;
     return this.setXposition();
   };
 
@@ -3760,11 +3930,11 @@ betText = (function(_super) {
     this.y = 7;
     this.kakekin_text = '掛金';
     this.yen_text = '円';
-    this.text = this.kakekin_text + game.bet + this.yen_text;
+    this.text = this.kakekin_text + game.toJPUnit(game.bet) + this.yen_text;
   }
 
   betText.prototype.setValue = function() {
-    this.text = this.kakekin_text + game.bet + this.yen_text;
+    this.text = this.kakekin_text + game.toJPUnit(game.bet) + this.yen_text;
     return game.main_scene.gp_system.low_bet_button.setXposition();
   };
 
@@ -3832,8 +4002,8 @@ Debug = (function(_super) {
     this.not_load_flg = false;
     this.test_load_flg = false;
     this.test_load_val = {
-      'money': 10000000,
-      'bet': 10,
+      'money': 1234567890,
+      'bet': 100,
       'combo': 10,
       'tension': 100,
       'past_fever_num': 0,
@@ -4276,7 +4446,7 @@ slotSetting = (function(_super) {
         }
       },
       5: {
-        'name': '完全にフルハウスね',
+        'name': '完っ全にフルハウスね',
         'image': 'item_5',
         'discription': 'CHANCE!!状態になる確率が<br>大幅に上がる',
         'price': 1000000,
@@ -4289,7 +4459,7 @@ slotSetting = (function(_super) {
       6: {
         'name': 'チョットマッテテー',
         'image': 'item_6',
-        'discription': 'おやつがゆっくり<br>降ってくるようになる',
+        'discription': 'おやつが降ってくる速度が<br>ちょっとだけ遅くなる',
         'price': 5000000,
         'durationSec': 30,
         'conditoin': '',
@@ -4300,7 +4470,7 @@ slotSetting = (function(_super) {
       7: {
         'name': 'ファイトだよっ',
         'image': 'item_7',
-        'discription': 'おやつを落としてもテンションが<br>下がらず、コンボが途切れなくなる',
+        'discription': 'スロットに当たった時に<br>得られる金額が2倍になる',
         'price': 10000000,
         'durationSec': 30,
         'conditoin': '',
@@ -4322,7 +4492,7 @@ slotSetting = (function(_super) {
       9: {
         'name': 'エリチカおうちに帰る！',
         'image': 'item_9',
-        'discription': '掛け金を上げても<br>おやつの落下速度が上がらなくなる',
+        'discription': '掛け金をいくら上げても<br>おやつの落下速度が上がらなくなる',
         'price': 1000000000,
         'durationSec': 30,
         'conditoin': '',
@@ -4442,6 +4612,7 @@ slotSetting = (function(_super) {
         9: 0
       }
     ];
+    this.prize_div = 1;
     this.prev_muse = [];
   }
 
@@ -4465,20 +4636,31 @@ slotSetting = (function(_super) {
     var div, val;
     if (game.bet < 10) {
       val = 0.4;
+      this.prize_div = 1;
     } else if (game.bet < 50) {
-      val = 0.45;
+      val = 0.42;
+      this.prize_div = 1;
     } else if (game.bet < 100) {
-      val = 0.5;
+      val = 0.46;
+      this.prize_div = 0.9;
     } else if (game.bet < 500) {
-      val = 0.55;
+      val = 0.48;
+      this.prize_div = 0.9;
     } else if (game.bet < 1000) {
-      val = 0.6;
+      val = 0.5;
+      this.prize_div = 0.8;
     } else if (game.bet < 10000) {
-      val = 0.6 + Math.floor(game.bet / 100) / 100;
+      val = 0.5 + Math.floor(game.bet / 1000) / 100;
+      this.prize_div = Math.floor(800 - (game.bet / 50)) / 1000;
     } else if (game.bet < 100000) {
-      val = 1.5 + Math.floor(game.bet / 1000) / 100;
+      val = 0.6 + Math.floor(game.bet / 10000) / 100;
+      this.prize_div = Math.floor(600 - (game.bet / 500)) / 1000;
+    } else if (game.bet < 1000000) {
+      val = 0.7 + Math.floor(game.bet / 10000) / 100;
+      this.prize_div = Math.floor(400 - (game.bet / 5000)) / 1000;
     } else {
-      val = 3;
+      val = 2;
+      this.prize_div = 0.2;
     }
     div = 1 + Math.floor(2 * game.tension / this.tension_max) / 10;
     val = Math.floor(val * div * 100) / 100;
@@ -4597,7 +4779,7 @@ slotSetting = (function(_super) {
    */
 
   slotSetting.prototype.getReturnMoneyFallValue = function() {
-    return Math.floor(game.bet * game.combo * 0.05);
+    return Math.floor(game.bet * game.combo * 0.03);
   };
 
 
@@ -4608,10 +4790,10 @@ slotSetting = (function(_super) {
 
   slotSetting.prototype.calcPrizeMoney = function(eye) {
     var div, ret_money, time;
-    ret_money = game.bet * this.bairitu[eye];
+    ret_money = Math.floor(game.bet * this.bairitu[eye] * this.prize_div);
     if (game.fever === true) {
       time = this.muse_material_list[game.fever_hit_eye]['bgm'][0]['time'];
-      div = Math.floor(time / 30);
+      div = Math.floor(time / 90);
       if (div < 1) {
         div = 1;
       }
@@ -4964,9 +5146,7 @@ Test = (function(_super) {
   ここにゲーム呼び出し時に実行するテストを書く
    */
 
-  Test.prototype.testExe = function() {
-    return this.testGetHitRole();
-  };
+  Test.prototype.testExe = function() {};
 
   Test.prototype.testGetHitRole = function() {
     var result;
@@ -4976,14 +5156,14 @@ Test = (function(_super) {
 
   Test.prototype.testSetGravity = function() {
     var key, param, result, val, _results;
-    param = [1, 5, 10, 50, 100, 500, 1000, 2000];
+    param = [1, 5, 10, 50, 100, 500, 1000, 2000, 8000, 9000, 10000, 20000, 80000, 90000, 100000, 200000, 800000, 900000, 1000000];
     _results = [];
     for (key in param) {
       val = param[key];
       console.log('bet:' + val);
       game.bet = val;
       result = game.slot_setting.setGravity();
-      _results.push(console.log('gravity:' + result));
+      _results.push(console.log('prize:' + game.slot_setting.prize_div * val * 50));
     }
     return _results;
   };
@@ -5019,6 +5199,10 @@ Test = (function(_super) {
       _results.push(console.log(num));
     }
     return _results;
+  };
+
+  Test.prototype.moneyFormat = function() {
+    return console.log(game.toJPUnit(12000012340000));
   };
 
   return Test;
@@ -5202,6 +5386,7 @@ pauseScene = (function(_super) {
     this.pause_item_buy_select_layer = new pauseItemBuySelectLayer();
     this.pause_item_use_select_layer = new pauseItemUseSelectLayer();
     this.pause_member_use_select_layer = new pauseMemberUseSelectLayer();
+    this.pause_record_layer = new pauseRecordLayer();
     this.addChild(this.pause_back);
     this.addChild(this.pause_main_layer);
   }
@@ -5267,6 +5452,14 @@ pauseScene = (function(_super) {
 
   pauseScene.prototype.removeMemberUseSelectMenu = function() {
     return this.removeChild(this.pause_member_use_select_layer);
+  };
+
+  pauseScene.prototype.setRecordMenu = function() {
+    return this.addChild(this.pause_record_layer);
+  };
+
+  pauseScene.prototype.removeRecordMenu = function() {
+    return this.removeChild(this.pause_record_layer);
   };
 
   pauseScene.prototype.onenterframe = function(e) {
@@ -6601,6 +6794,46 @@ HundredThousandMoney = (function(_super) {
   }
 
   return HundredThousandMoney;
+
+})(Money);
+
+
+/*
+100万円
+@param boolean isHoming trueならコインがホーミングする
+ */
+
+OneMillionMoney = (function(_super) {
+  __extends(OneMillionMoney, _super);
+
+  function OneMillionMoney(isHoming) {
+    OneMillionMoney.__super__.constructor.call(this, isHoming);
+    this.price = 1000000;
+    this.frame = 8;
+    this.frame_init = 8;
+  }
+
+  return OneMillionMoney;
+
+})(Money);
+
+
+/*
+1000万円
+@param boolean isHoming trueならコインがホーミングする
+ */
+
+TenMillionMoney = (function(_super) {
+  __extends(TenMillionMoney, _super);
+
+  function TenMillionMoney(isHoming) {
+    TenMillionMoney.__super__.constructor.call(this, isHoming);
+    this.price = 10000000;
+    this.frame = 8;
+    this.frame_init = 8;
+  }
+
+  return TenMillionMoney;
 
 })(Money);
 

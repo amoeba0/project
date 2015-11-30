@@ -17,6 +17,7 @@ class baseItemHtml extends systemHtml
         @positionY = 0
         @positionX = 0
         @positoin_kind = @item_kind
+        @dicisionSe = game.soundload('dicision')
     setPosition:()->
         if @positoin_kind <= 4
             @y = @positionY
@@ -47,6 +48,7 @@ class buyItemHtml extends itemHtml
         @is_exist = true
     ontouchend: () ->
         if @is_exist is true
+            game.sePlay(@dicisionSe)
             @dispItemBuySelectDialog(@item_kind)
 
 class useItemHtml extends itemHtml
@@ -56,6 +58,7 @@ class useItemHtml extends itemHtml
         @is_exist = false
     ontouchend:()->
         if @is_exist is true
+            game.sePlay(@dicisionSe)
             @dispItemUseSelectDialog(@item_kind)
 
 class setItemHtml extends baseItemHtml
@@ -78,6 +81,7 @@ class setItemHtml extends baseItemHtml
         @setImageHtml()
     ontouchend: ()->
         if @kind != 0
+            game.sePlay(@dicisionSe)
             game.pause_scene.setItemUseSelectMenu(@kind)
 ###
 部員
@@ -96,6 +100,7 @@ class buyMemberHtml extends memberHtml
         @is_exist = true
     ontouchend: () ->
         if @is_exist is true
+            game.sePlay(@dicisionSe)
             @dispItemBuySelectDialog(@item_kind)
 
 class useMemberHtml extends memberHtml
@@ -105,6 +110,7 @@ class useMemberHtml extends memberHtml
         @is_exist = false
     ontouchend:()->
         if @is_exist is true
+            game.sePlay(@dicisionSe)
             @dispMemberUseSelectDialog(@item_kind)
 
 class setMemberHtml extends baseItemHtml
@@ -127,6 +133,7 @@ class setMemberHtml extends baseItemHtml
         @setImageHtml()
     ontouchend: ()->
         if @kind != 10
+            game.sePlay(@dicisionSe)
             game.pause_scene.setMemberUseSelectMenu(@kind)
 
 class selectItemImage extends imageHtml

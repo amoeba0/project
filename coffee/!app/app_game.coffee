@@ -128,3 +128,27 @@ class appGame extends Game
                 arr.splice(i, 1)
         )
         return arr
+
+    ###
+    数値の単位を漢数字で区切る
+    ###
+    toJPUnit:(num)->
+        str = num + ''
+        n = ''
+        n_ = ''
+        count = 0
+        ptr = 0
+        kName = ['', '万', '億', '兆', '京', '垓']
+        i = str.length - 1
+        while i >= 0
+            n_ = str.charAt(i) + n_
+            count++
+            if count % 4 == 0 and i != 0
+                if n_ != '0000'
+                    n = n_ + kName[ptr] + n
+                n_ = ''
+                ptr += 1
+            if i == 0
+                n = n_ + kName[ptr] + n
+            i--
+        return n

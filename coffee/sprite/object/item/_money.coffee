@@ -144,3 +144,25 @@ class HundredThousandMoney extends Money
         @price = 100000
         @frame = 8
         @frame_init = 8
+
+###
+100万円
+@param boolean isHoming trueならコインがホーミングする
+###
+class OneMillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming
+        @price = 1000000
+        @frame = 8
+        @frame_init = 8
+
+###
+1000万円
+@param boolean isHoming trueならコインがホーミングする
+###
+class TenMillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming
+        @price = 10000000
+        @frame = 8
+        @frame_init = 8

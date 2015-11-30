@@ -79,7 +79,7 @@ class pauseItemBuySelectLayer extends appDomLayer
         if @item_options.durationSec != undefined
             text += '<br>持続時間：'+@item_options.durationSec+'秒'
         if @item_options.condFunc() is true
-            text += '<br>値段：'+@item_options.price+'円'+'(所持金'+game.money+'円)'
+            text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'+'(所持金'+game.toJPUnit(game.money)+'円)'
         else
             text += '<br>出現条件：'+@item_options.conditoin
         return text

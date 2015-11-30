@@ -21,7 +21,7 @@ class moneyText extends text
     @param number val 所持金
     ###
     setValue: ()->
-        @text = @zandaka_text + game.money + @yen_text
+        @text = @zandaka_text + game.toJPUnit(game.money) + @yen_text
         @setXposition()
     ###
     X座標の位置を設定
@@ -40,9 +40,9 @@ class betText extends text
         @y = 7
         @kakekin_text = '掛金'
         @yen_text = '円'
-        @text = @kakekin_text + game.bet + @yen_text
+        @text = @kakekin_text + game.toJPUnit(game.bet) + @yen_text
     setValue: () ->
-        @text = @kakekin_text + game.bet + @yen_text
+        @text = @kakekin_text + game.toJPUnit(game.bet) + @yen_text
         game.main_scene.gp_system.low_bet_button.setXposition()
 
 class comboText extends text
