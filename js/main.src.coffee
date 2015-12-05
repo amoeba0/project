@@ -10,11 +10,13 @@ class appDomLayer extends DomLayer
 class appGame extends Game
     constructor:(w, h)->
         super w, h
-        #ミュート（消音）フラグ
-        @scale = 1
-        @mute = false
+        if @isSumaho() is false
+            @scale = 1
+        @mute = false #ミュート（消音）フラグ
         @imgList = []
         @soundList = []
+        @nowPlayBgm = null
+        @loadedFile = [] #ロード済みのファイル
     ###
         画像の呼び出し
     ###
@@ -39,9 +41,10 @@ class appGame extends Game
     ###
     BGMをならす
     ###
-    bgmPlay:(bgm, bgm_loop)->
+    bgmPlay:(bgm, bgm_loop = false)->
         if bgm != undefined
             bgm.play()
+            @nowPlayBgm = bgm
             if bgm_loop is true
                 bgm._element.loop = true
                 #bgm.src.loop = true
@@ -52,6 +55,28 @@ class appGame extends Game
     bgmStop:(bgm)->
         if bgm != undefined
             bgm.stop()
+            @nowPlayBgm = null
+
+    ###
+    BGMの中断
+    ###
+    bgmPause:(bgm)->
+        if bgm != undefined
+            bgm.pause()
+
+    ###
+    現在再生中のBGMを一時停止する
+    ###
+    nowPlayBgmPause:()->
+        if @nowPlayBgm != null
+            @bgmPause(@nowPlayBgm)
+
+    ###
+    現在再生中のBGMを再開する
+    ###
+    nowPlayBgmRestart:(bgm_loop = false)->
+        if @nowPlayBgm != null
+            @bgmPlay(@nowPlayBgm, bgm_loop)
 
     ###
         素材をすべて読み込む
@@ -65,6 +90,21 @@ class appGame extends Game
             for val in @soundList
                 tmp.push "sounds/"+val+".mp3"
         @preload(tmp)
+
+    ###
+    enchant.jsのload関数をラッピング
+    ロード終了後にloadedFileにロードしたファイルを置いておいて、ロード済みかどうかの判別に使う
+    ###
+    appLoad:(file)->
+        @load(file)
+        #if @loadedFile.indexOf(file) is -1
+        #@load(file, @setLoadedFile(file))
+
+    ###
+    ロード済みのファイルを記憶しておく
+    ###
+    setLoadedFile:(file)->
+        @loadedFile.push(file)
 
     ###
     数値から右から数えた特定の桁を取り出して数値で返す
@@ -162,6 +202,32 @@ class appGame extends Game
             i--
         return n
 
+    ###
+    ユーザーエージェントの判定
+    ###
+    userAgent:()->
+        u = window.navigator.userAgent.toLowerCase()
+        mobile = {
+            0: u.indexOf('windows') != -1 and u.indexOf('phone') != -1 or u.indexOf('iphone') != -1 or u.indexOf('ipod') != -1 or u.indexOf('android') != -1 and u.indexOf('mobile') != -1 or u.indexOf('firefox') != -1 and u.indexOf('mobile') != -1 or u.indexOf('blackberry') != -1
+            iPhone: u.indexOf('iphone') != -1
+            Android: u.indexOf('android') != -1 and u.indexOf('mobile') != -1
+        }
+        tablet = u.indexOf('windows') != -1 and u.indexOf('touch') != -1 or u.indexOf('ipad') != -1 or u.indexOf('android') != -1 and u.indexOf('mobile') == -1 or u.indexOf('firefox') != -1 and u.indexOf('tablet') != -1 or u.indexOf('kindle') != -1 or u.indexOf('silk') != -1 or u.indexOf('playbook') != -1
+        pc = !mobile[0] and !tablet
+        return {
+            Mobile: mobile
+            Tablet: tablet
+            PC: pc
+        }
+    ###
+    スマホかタブレットならtrueを返す
+    ###
+    isSumaho:()->
+        ua = @userAgent()
+        rslt = false
+        if ua.Mobile[0] is true || ua.Tablet is true
+            rslt = true
+        return rslt
 class appGroup extends Group
     constructor: () ->
         super
@@ -592,6 +658,7 @@ class catchAndSlotGame extends appGame
     constructor:(w, h)->
         super w, h
 
+#TODO フィーバー中はセーブ出来ないようにする
 class LoveliveGame extends catchAndSlotGame
     constructor:()->
         super @width, @height
@@ -606,7 +673,7 @@ class LoveliveGame extends catchAndSlotGame
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
                     'heart', 'explosion', 'items']
         #音声リスト
-        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion']
+        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm/bgm1']
 
         @keybind(90, 'z')
         @keybind(88, 'x')
@@ -652,6 +719,7 @@ class LoveliveGame extends catchAndSlotGame
             @test.testExe()
         else
             if @debug.force_main_flg is true
+                @bgmPlay(@main_scene.bgm, true)
                 @pushScene(@main_scene)
                 if @debug.force_pause_flg is true
                     @pushScene(@pause_scene)
@@ -703,12 +771,12 @@ class LoveliveGame extends catchAndSlotGame
             material = @slot_setting.muse_material_list[muse_num]
             if material['cut_in'] != undefined && material['cut_in'].length > 0
                 for key, val of material['cut_in']
-                    @load('images/cut_in/'+val.name + '.png')
+                    @appLoad('images/cut_in/'+val.name + '.png')
             if material['voice'] != undefined && material['voice'].length > 0
                 for key, val of material['voice']
-                    @load('sounds/voice/'+val+'.mp3')
+                    @appLoad('sounds/voice/'+val+'.mp3')
             if material['bgm'] != undefined && material['bgm'].length > 0
-                @load('sounds/bgm/'+material['bgm'][0]['name']+'.mp3')
+                @appLoad('sounds/bgm/'+material['bgm'][0]['name']+'.mp3')
 
     ###
     テンションゲージを増減する
@@ -758,6 +826,7 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.keyList.pause = true
         @pushScene(@pause_scene)
         @pause_scene.pause_item_buy_layer.resetItemList()
+        @nowPlayBgmPause()
     ###
     ポーズシーンをポップする
     ###
@@ -765,6 +834,7 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.buttonList.pause = false
         @main_scene.keyList.pause = true
         @popScene(@pause_scene)
+        @nowPlayBgmRestart()
 
     ###
     ゲームをロードする
@@ -1019,6 +1089,7 @@ class gpSlot extends appGroup
                 @forceHitStart()
                 game.sePlay(@lille_stop_se)
                 @left_lille.isRotation = false
+                @forceHitLeftLille()
                 @saveLeftSlotEye()
                 @setIntervalFrame()
             if @age is @stopStartAge + @stopIntervalFrame + @slotIntervalFrameRandom
@@ -1058,6 +1129,17 @@ class gpSlot extends appGroup
                 target.frameChange()
 
     ###
+    確率で左のスロットを強制的にμ'sにする
+    ###
+    forceHitLeftLille:()->
+        target = @left_lille
+        if @isForceSlotHit is true && game.slot_setting.isForceFever() is true
+            tmp_eye = @_searchMuseEye(target)
+            if tmp_eye != 0
+                target.nowEye = tmp_eye
+                target.frameChange()
+
+    ###
     スロットが強制的に辺になるようにリールから左のリールの当たり目と同じ目を探して配列のキーを返す
     左の当たり目がμ’ｓならリールからμ’ｓの目をランダムで取り出して返す
     ###
@@ -1068,13 +1150,24 @@ class gpSlot extends appGroup
                 if val is @leftSlotEye
                     result = key
         else
-            arr = []
-            for key, val of target.lilleArray
-                if val > 10
-                    arr.push(key)
-            if arr.length > 0
-                random_key = Math.floor(arr.length * Math.random())
-                result = arr[random_key]
+            result = @_searchMuseEye(target)
+        return result
+
+    ###
+    リールからμ'sを探してきてそのキーを返します
+    リールにμ'sがいなければランダムでキーを返します
+    @pram target
+    ###
+    _searchMuseEye:(target)->
+        arr = []
+        for key, val of target.lilleArray
+            if val > 10
+                arr.push(key)
+        if arr.length > 0
+            random_key = Math.floor(arr.length * Math.random())
+            result = arr[random_key]
+        else
+            result = Math.floor(@left_lille.lilleArray.length * Math.random())
         return result
 
 
@@ -1140,6 +1233,7 @@ class gpSlot extends appGroup
         @fever_bgm = game.soundload('bgm/'+bgm['name'])
         game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (@feverSec * game.fps)) / 100
         game.fever_down_tension *= -1
+        game.bgmStop(game.main_scene.bgm)
         game.bgmPlay(@fever_bgm, false)
 
     ###
@@ -1228,9 +1322,9 @@ class gpSlot extends appGroup
     @param number num メンバーの指定
     ###
     slotAddMuseAll:(num)->
-        @left_lille.lilleArray = @_slotAddMuseAllUnit(num, @left_lille)
-        @middle_lille.lilleArray = @_slotAddMuseAllUnit(num, @middle_lille)
-        @right_lille.lilleArray = @_slotAddMuseAllUnit(num, @right_lille)
+        @left_lille.lilleArray = @_slotAddMuseAllUnit(@left_lille.lilleArray[@left_lille.nowEye], @left_lille)
+        @middle_lille.lilleArray = @_slotAddMuseAllUnit(@middle_lille.lilleArray[@middle_lille.nowEye], @middle_lille)
+        @right_lille.lilleArray = @_slotAddMuseAllUnit(@right_lille.lilleArray[@right_lille.nowEye], @right_lille)
 
     _slotAddMuseAllUnit:(num, lille)->
         for key, val of lille.lilleArray
@@ -1738,6 +1832,7 @@ class gpSystem extends appGroup
         @prevItem = game.now_item
         game.item_set_now = []
         @itemDsp()
+        game.pause_scene.pause_item_use_layer.dspSetItemList()
 class systemHtml extends appHtml
     constructor: (width, height) ->
         super width, height
@@ -2464,7 +2559,7 @@ class Debug extends appNode
             'combo':10,
             'tension':100,
             'past_fever_num':0,
-            'item_point':500,
+            'item_point':10,
             'next_add_member_key':0,
             'prev_muse':[11],
             'item_have_now':[1,2,9,11,12,13,14],
@@ -2484,9 +2579,9 @@ class Debug extends appNode
         ]
         ###
         @lille_array = [
-            [11, 11, 11, 11, 11, 11, 11, 11, 1, 4, 4, 1, 5, 5, 1, 4, 5],
-            [12, 12, 12, 12, 12, 12, 12, 12, 5, 1, 4, 4, 1, 5, 5, 1, 4],
-            [13, 13, 13, 13, 13, 13, 13, 13, 5, 4, 1, 4, 1, 5, 5, 1, 4]
+            [11, 11, 11, 11, 11, 11, 11, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [12, 12, 12, 12, 12, 12, 12, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [13, 13, 13, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上
@@ -2505,6 +2600,8 @@ class Debug extends appNode
         @force_slot_hit = false
         #スロットが2回に1回当たる
         @half_slot_hit = false
+        #スロットが強制的に当たるときに必ずフィーバーになる
+        @force_fever = false
 
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
@@ -2653,17 +2750,17 @@ class slotSetting extends appNode
             },
             21:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'hello_hoshi', 'time':93}
                 ]
             },
             22:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'future_style', 'time':94}
                 ]
             },
             23:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'hatena_heart', 'time':84}
                 ]
             },
             24:{
@@ -2915,6 +3012,7 @@ class slotSetting extends appNode
         @item_point_value = [0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0]
         #掛け金が増えると当選金額の割合が減る補正
         @prize_div = 1
+        @item_gravity = 0
 
         #セーブする変数
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
@@ -2930,13 +3028,13 @@ class slotSetting extends appNode
     ###
     setGravity:()->
         if game.bet < 10
-            val = 0.4
+            val = 0.35
             @prize_div = 1
         else if game.bet < 50
-            val = 0.42
+            val = 0.40
             @prize_div = 1
         else if game.bet < 100
-            val = 0.46
+            val = 0.44
             @prize_div = 0.9
         else if game.bet < 500
             val = 0.48
@@ -2956,13 +3054,15 @@ class slotSetting extends appNode
         else
             val = 2
             @prize_div = 0.2
-        div = 1 + Math.floor(2 * game.tension / @tension_max) / 10
+        #div = 1 + Math.floor(2 * game.tension / @tension_max) / 10
+        div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
             div = Math.floor((game.combo - 100) / 20) / 10
             if 2 < div
                 div = 2
             val += div
+        @item_gravity = val
         return val
 
     ###
@@ -3013,20 +3113,20 @@ class slotSetting extends appNode
 
     ###
     スロットを強制的に当たりにするかどうかを決める
-    コンボ数 * 0.06 ％
-    テンションMAXで+5補正
-    過去のフィーバー回数が少ないほど上方補正かける 0回:+9,1回:+6,2回:+3
-    最大値は20％
+    コンボ数 * 0.1 ％
+    テンションMAXで+10補正
+    過去のフィーバー回数が少ないほど上方補正かける 0回:+12,1回:+8,2回:+4
+    最大値は30％
     フィーバー中は強制的に当たり
     @return boolean true:当たり
     ###
     getIsForceSlotHit:()->
         result = false
-        rate = Math.floor((game.combo * 0.06) + ((game.tension / @tension_max) * 5))
+        rate = Math.floor((game.combo * 0.1) + ((game.tension / @tension_max) * 10))
         if game.past_fever_num <= 2
-            rate += ((3 - game.past_fever_num)) * 3
-        if rate > 20
-            rate = 20
+            rate += ((3 - game.past_fever_num)) * 4
+        if rate > 30
+            rate = 30
         if game.debug.half_slot_hit is true
             rate = 50
         @slotHitRate = rate
@@ -3062,7 +3162,10 @@ class slotSetting extends appNode
     アイテムを取った時のテンションゲージの増減値を決める
     ###
     setTensionItemCatch:()->
-        val = (@tension_max - game.tension) * 0.005 * (game.item_kind + 1)
+        base = 0.005
+        if game.past_fever_num <= 2
+            base += ((2 - game.past_fever_num)) * 0.005
+        val = (@tension_max - (game.tension / 2)) * base * (game.item_kind + 1)
         if game.main_scene.gp_stage_front.player.isAir is true
             val *= 1.5
         if val >= 1
@@ -3078,13 +3181,13 @@ class slotSetting extends appNode
     アイテムを落とした時のテンションゲージの増減値を決める
     ###
     setTensionItemFall:()->
-        val = @tension_max * -0.2
+        val = @tension_max * -0.1
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
         return val
 
     setTensionMissItem:()->
-        val = @tension_max * -0.6
+        val = @tension_max * -0.3
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
         return val
@@ -3202,13 +3305,15 @@ class slotSetting extends appNode
         if @slotHitRate <= 10
             fixTime = 2
             randomTime = 5
-        else if @slotHitRate <= 15
+        else if @slotHitRate <= 20
             fixTime = 1.5
             randomTime = 10
         else
             fixTime = 1
             randomTime = 15
-        return fixTime + Math.floor(Math.random() * randomTime) / 10
+        fixTime += Math.floor((1 - @item_gravity) * 10) / 10
+        ret = fixTime + Math.floor(Math.random() * randomTime) / 10
+        return ret
     ###
     スロットの揃った目が全てμ’sなら役を判定して返します
     メンバー:11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
@@ -3277,6 +3382,27 @@ class slotSetting extends appNode
                 game.next_add_member_key = 0
         return ret
 
+    ###
+    チャンスの時に強制的にフィーバーにする
+    ###
+    isForceFever:()->
+        rate = Math.floor(game.combo / 4) + 10
+        if game.past_fever_num is 0 && rate >= 50
+            rate = 50
+        else if game.past_fever_num is 1 && rate >= 40
+            rate = 40
+        else if game.past_fever_num is 2 && rate >= 30
+            rate = 30
+        else if game.past_fever_num is 3 && rate >= 20
+            rate = 20
+        else
+            rate = 5
+        result = false
+        random = Math.floor(Math.random() * 100)
+        if game.debug.foece_fever is true || random <= rate
+            result = true
+        return result
+
 ###
 テストコード用
 ###
@@ -3295,6 +3421,9 @@ class Test extends appNode
         #@preLoadMulti()
         #@addMuse()
         #@moneyFormat()
+        #@itemCatchTension()
+        #@chanceTime()
+        #@forceFever()
 
     #以下、テスト用関数
 
@@ -3336,6 +3465,20 @@ class Test extends appNode
 
     moneyFormat:()->
         console.log(game.toJPUnit(12000012340000))
+
+    itemCatchTension:()->
+        game.past_fever_num = 0
+        game.tension = 400
+        val = game.slot_setting.setTensionItemCatch()
+        console.log(val)
+
+    chanceTime:()->
+        val = game.slot_setting.setChanceTime()
+        console.log(val)
+
+    forceFever:()->
+        game.combo = 200
+        game.slot_setting.isForceFever()
 class mainScene extends appScene
     constructor:()->
         super
@@ -3344,6 +3487,7 @@ class mainScene extends appScene
         @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         #ソフトキーのリスト
         @buttonList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
+        @bgm = game.soundload("bgm/bgm1")
         @initial()
     initial:()->
         @setGroup()
@@ -3433,6 +3577,7 @@ class mainScene extends appScene
             if game.tension <= 0
                 game.main_scene.gp_slot.upperFrame.frame = 0
                 game.bgmStop(game.main_scene.gp_slot.fever_bgm)
+                game.bgmPlay(@bgm, true)
                 @gp_system.changeBetChangeFlg(true)
                 @gp_effect.feverEffectEnd()
                 game.fever = false

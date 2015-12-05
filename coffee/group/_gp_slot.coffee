@@ -30,6 +30,7 @@ class gpSlot extends appGroup
                 @forceHitStart()
                 game.sePlay(@lille_stop_se)
                 @left_lille.isRotation = false
+                @forceHitLeftLille()
                 @saveLeftSlotEye()
                 @setIntervalFrame()
             if @age is @stopStartAge + @stopIntervalFrame + @slotIntervalFrameRandom
@@ -69,6 +70,17 @@ class gpSlot extends appGroup
                 target.frameChange()
 
     ###
+    確率で左のスロットを強制的にμ'sにする
+    ###
+    forceHitLeftLille:()->
+        target = @left_lille
+        if @isForceSlotHit is true && game.slot_setting.isForceFever() is true
+            tmp_eye = @_searchMuseEye(target)
+            if tmp_eye != 0
+                target.nowEye = tmp_eye
+                target.frameChange()
+
+    ###
     スロットが強制的に辺になるようにリールから左のリールの当たり目と同じ目を探して配列のキーを返す
     左の当たり目がμ’ｓならリールからμ’ｓの目をランダムで取り出して返す
     ###
@@ -79,13 +91,24 @@ class gpSlot extends appGroup
                 if val is @leftSlotEye
                     result = key
         else
-            arr = []
-            for key, val of target.lilleArray
-                if val > 10
-                    arr.push(key)
-            if arr.length > 0
-                random_key = Math.floor(arr.length * Math.random())
-                result = arr[random_key]
+            result = @_searchMuseEye(target)
+        return result
+
+    ###
+    リールからμ'sを探してきてそのキーを返します
+    リールにμ'sがいなければランダムでキーを返します
+    @pram target
+    ###
+    _searchMuseEye:(target)->
+        arr = []
+        for key, val of target.lilleArray
+            if val > 10
+                arr.push(key)
+        if arr.length > 0
+            random_key = Math.floor(arr.length * Math.random())
+            result = arr[random_key]
+        else
+            result = Math.floor(@left_lille.lilleArray.length * Math.random())
         return result
 
 
@@ -151,6 +174,7 @@ class gpSlot extends appGroup
         @fever_bgm = game.soundload('bgm/'+bgm['name'])
         game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (@feverSec * game.fps)) / 100
         game.fever_down_tension *= -1
+        game.bgmStop(game.main_scene.bgm)
         game.bgmPlay(@fever_bgm, false)
 
     ###
@@ -239,9 +263,9 @@ class gpSlot extends appGroup
     @param number num メンバーの指定
     ###
     slotAddMuseAll:(num)->
-        @left_lille.lilleArray = @_slotAddMuseAllUnit(num, @left_lille)
-        @middle_lille.lilleArray = @_slotAddMuseAllUnit(num, @middle_lille)
-        @right_lille.lilleArray = @_slotAddMuseAllUnit(num, @right_lille)
+        @left_lille.lilleArray = @_slotAddMuseAllUnit(@left_lille.lilleArray[@left_lille.nowEye], @left_lille)
+        @middle_lille.lilleArray = @_slotAddMuseAllUnit(@middle_lille.lilleArray[@middle_lille.nowEye], @middle_lille)
+        @right_lille.lilleArray = @_slotAddMuseAllUnit(@right_lille.lilleArray[@right_lille.nowEye], @right_lille)
 
     _slotAddMuseAllUnit:(num, lille)->
         for key, val of lille.lilleArray

@@ -21,7 +21,7 @@ class Debug extends appNode
             'combo':10,
             'tension':100,
             'past_fever_num':0,
-            'item_point':500,
+            'item_point':10,
             'next_add_member_key':0,
             'prev_muse':[11],
             'item_have_now':[1,2,9,11,12,13,14],
@@ -41,9 +41,9 @@ class Debug extends appNode
         ]
         ###
         @lille_array = [
-            [11, 11, 11, 11, 11, 11, 11, 11, 1, 4, 4, 1, 5, 5, 1, 4, 5],
-            [12, 12, 12, 12, 12, 12, 12, 12, 5, 1, 4, 4, 1, 5, 5, 1, 4],
-            [13, 13, 13, 13, 13, 13, 13, 13, 5, 4, 1, 4, 1, 5, 5, 1, 4]
+            [11, 11, 11, 11, 11, 11, 11, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [12, 12, 12, 12, 12, 12, 12, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [13, 13, 13, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上
@@ -62,6 +62,8 @@ class Debug extends appNode
         @force_slot_hit = false
         #スロットが2回に1回当たる
         @half_slot_hit = false
+        #スロットが強制的に当たるときに必ずフィーバーになる
+        @force_fever = false
 
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50

@@ -147,3 +147,4 @@ class gpSystem extends appGroup
         @prevItem = game.now_item
         game.item_set_now = []
         @itemDsp()
+        game.pause_scene.pause_item_use_layer.dspSetItemList()

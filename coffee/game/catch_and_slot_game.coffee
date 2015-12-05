@@ -2,6 +2,7 @@ class catchAndSlotGame extends appGame
     constructor:(w, h)->
         super w, h
 
+#TODO フィーバー中はセーブ出来ないようにする
 class LoveliveGame extends catchAndSlotGame
     constructor:()->
         super @width, @height
@@ -16,7 +17,7 @@ class LoveliveGame extends catchAndSlotGame
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
                     'heart', 'explosion', 'items']
         #音声リスト
-        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion']
+        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm/bgm1']
 
         @keybind(90, 'z')
         @keybind(88, 'x')
@@ -62,6 +63,7 @@ class LoveliveGame extends catchAndSlotGame
             @test.testExe()
         else
             if @debug.force_main_flg is true
+                @bgmPlay(@main_scene.bgm, true)
                 @pushScene(@main_scene)
                 if @debug.force_pause_flg is true
                     @pushScene(@pause_scene)
@@ -113,12 +115,12 @@ class LoveliveGame extends catchAndSlotGame
             material = @slot_setting.muse_material_list[muse_num]
             if material['cut_in'] != undefined && material['cut_in'].length > 0
                 for key, val of material['cut_in']
-                    @load('images/cut_in/'+val.name + '.png')
+                    @appLoad('images/cut_in/'+val.name + '.png')
             if material['voice'] != undefined && material['voice'].length > 0
                 for key, val of material['voice']
-                    @load('sounds/voice/'+val+'.mp3')
+                    @appLoad('sounds/voice/'+val+'.mp3')
             if material['bgm'] != undefined && material['bgm'].length > 0
-                @load('sounds/bgm/'+material['bgm'][0]['name']+'.mp3')
+                @appLoad('sounds/bgm/'+material['bgm'][0]['name']+'.mp3')
 
     ###
     テンションゲージを増減する
@@ -168,6 +170,7 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.keyList.pause = true
         @pushScene(@pause_scene)
         @pause_scene.pause_item_buy_layer.resetItemList()
+        @nowPlayBgmPause()
     ###
     ポーズシーンをポップする
     ###
@@ -175,6 +178,7 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.buttonList.pause = false
         @main_scene.keyList.pause = true
         @popScene(@pause_scene)
+        @nowPlayBgmRestart()
 
     ###
     ゲームをロードする

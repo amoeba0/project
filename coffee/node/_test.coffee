@@ -16,6 +16,9 @@ class Test extends appNode
         #@preLoadMulti()
         #@addMuse()
         #@moneyFormat()
+        #@itemCatchTension()
+        #@chanceTime()
+        #@forceFever()
 
     #以下、テスト用関数
 
@@ -57,3 +60,17 @@ class Test extends appNode
 
     moneyFormat:()->
         console.log(game.toJPUnit(12000012340000))
+
+    itemCatchTension:()->
+        game.past_fever_num = 0
+        game.tension = 400
+        val = game.slot_setting.setTensionItemCatch()
+        console.log(val)
+
+    chanceTime:()->
+        val = game.slot_setting.setChanceTime()
+        console.log(val)
+
+    forceFever:()->
+        game.combo = 200
+        game.slot_setting.isForceFever()

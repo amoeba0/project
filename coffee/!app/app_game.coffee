@@ -1,11 +1,13 @@
 class appGame extends Game
     constructor:(w, h)->
         super w, h
-        #ミュート（消音）フラグ
-        @scale = 1
-        @mute = false
+        if @isSumaho() is false
+            @scale = 1
+        @mute = false #ミュート（消音）フラグ
         @imgList = []
         @soundList = []
+        @nowPlayBgm = null
+        @loadedFile = [] #ロード済みのファイル
     ###
         画像の呼び出し
     ###
@@ -30,9 +32,10 @@ class appGame extends Game
     ###
     BGMをならす
     ###
-    bgmPlay:(bgm, bgm_loop)->
+    bgmPlay:(bgm, bgm_loop = false)->
         if bgm != undefined
             bgm.play()
+            @nowPlayBgm = bgm
             if bgm_loop is true
                 bgm._element.loop = true
                 #bgm.src.loop = true
@@ -43,6 +46,28 @@ class appGame extends Game
     bgmStop:(bgm)->
         if bgm != undefined
             bgm.stop()
+            @nowPlayBgm = null
+
+    ###
+    BGMの中断
+    ###
+    bgmPause:(bgm)->
+        if bgm != undefined
+            bgm.pause()
+
+    ###
+    現在再生中のBGMを一時停止する
+    ###
+    nowPlayBgmPause:()->
+        if @nowPlayBgm != null
+            @bgmPause(@nowPlayBgm)
+
+    ###
+    現在再生中のBGMを再開する
+    ###
+    nowPlayBgmRestart:(bgm_loop = false)->
+        if @nowPlayBgm != null
+            @bgmPlay(@nowPlayBgm, bgm_loop)
 
     ###
         素材をすべて読み込む
@@ -56,6 +81,21 @@ class appGame extends Game
             for val in @soundList
                 tmp.push "sounds/"+val+".mp3"
         @preload(tmp)
+
+    ###
+    enchant.jsのload関数をラッピング
+    ロード終了後にloadedFileにロードしたファイルを置いておいて、ロード済みかどうかの判別に使う
+    ###
+    appLoad:(file)->
+        @load(file)
+        #if @loadedFile.indexOf(file) is -1
+        #@load(file, @setLoadedFile(file))
+
+    ###
+    ロード済みのファイルを記憶しておく
+    ###
+    setLoadedFile:(file)->
+        @loadedFile.push(file)
 
     ###
     数値から右から数えた特定の桁を取り出して数値で返す
@@ -152,3 +192,30 @@ class appGame extends Game
                 n = n_ + kName[ptr] + n
             i--
         return n
+
+    ###
+    ユーザーエージェントの判定
+    ###
+    userAgent:()->
+        u = window.navigator.userAgent.toLowerCase()
+        mobile = {
+            0: u.indexOf('windows') != -1 and u.indexOf('phone') != -1 or u.indexOf('iphone') != -1 or u.indexOf('ipod') != -1 or u.indexOf('android') != -1 and u.indexOf('mobile') != -1 or u.indexOf('firefox') != -1 and u.indexOf('mobile') != -1 or u.indexOf('blackberry') != -1
+            iPhone: u.indexOf('iphone') != -1
+            Android: u.indexOf('android') != -1 and u.indexOf('mobile') != -1
+        }
+        tablet = u.indexOf('windows') != -1 and u.indexOf('touch') != -1 or u.indexOf('ipad') != -1 or u.indexOf('android') != -1 and u.indexOf('mobile') == -1 or u.indexOf('firefox') != -1 and u.indexOf('tablet') != -1 or u.indexOf('kindle') != -1 or u.indexOf('silk') != -1 or u.indexOf('playbook') != -1
+        pc = !mobile[0] and !tablet
+        return {
+            Mobile: mobile
+            Tablet: tablet
+            PC: pc
+        }
+    ###
+    スマホかタブレットならtrueを返す
+    ###
+    isSumaho:()->
+        ua = @userAgent()
+        rslt = false
+        if ua.Mobile[0] is true || ua.Tablet is true
+            rslt = true
+        return rslt

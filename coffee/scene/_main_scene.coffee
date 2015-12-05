@@ -6,6 +6,7 @@ class mainScene extends appScene
         @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         #ソフトキーのリスト
         @buttonList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
+        @bgm = game.soundload("bgm/bgm1")
         @initial()
     initial:()->
         @setGroup()
@@ -95,6 +96,7 @@ class mainScene extends appScene
             if game.tension <= 0
                 game.main_scene.gp_slot.upperFrame.frame = 0
                 game.bgmStop(game.main_scene.gp_slot.fever_bgm)
+                game.bgmPlay(@bgm, true)
                 @gp_system.changeBetChangeFlg(true)
                 @gp_effect.feverEffectEnd()
                 game.fever = false

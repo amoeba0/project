@@ -26,10 +26,14 @@ appGame = (function(_super) {
 
   function appGame(w, h) {
     appGame.__super__.constructor.call(this, w, h);
-    this.scale = 1;
+    if (this.isSumaho() === false) {
+      this.scale = 1;
+    }
     this.mute = false;
     this.imgList = [];
     this.soundList = [];
+    this.nowPlayBgm = null;
+    this.loadedFile = [];
   }
 
 
@@ -70,8 +74,12 @@ appGame = (function(_super) {
    */
 
   appGame.prototype.bgmPlay = function(bgm, bgm_loop) {
+    if (bgm_loop == null) {
+      bgm_loop = false;
+    }
     if (bgm !== void 0) {
       bgm.play();
+      this.nowPlayBgm = bgm;
       if (bgm_loop === true) {
         return bgm._element.loop = true;
       }
@@ -85,7 +93,44 @@ appGame = (function(_super) {
 
   appGame.prototype.bgmStop = function(bgm) {
     if (bgm !== void 0) {
-      return bgm.stop();
+      bgm.stop();
+      return this.nowPlayBgm = null;
+    }
+  };
+
+
+  /*
+  BGMの中断
+   */
+
+  appGame.prototype.bgmPause = function(bgm) {
+    if (bgm !== void 0) {
+      return bgm.pause();
+    }
+  };
+
+
+  /*
+  現在再生中のBGMを一時停止する
+   */
+
+  appGame.prototype.nowPlayBgmPause = function() {
+    if (this.nowPlayBgm !== null) {
+      return this.bgmPause(this.nowPlayBgm);
+    }
+  };
+
+
+  /*
+  現在再生中のBGMを再開する
+   */
+
+  appGame.prototype.nowPlayBgmRestart = function(bgm_loop) {
+    if (bgm_loop == null) {
+      bgm_loop = false;
+    }
+    if (this.nowPlayBgm !== null) {
+      return this.bgmPlay(this.nowPlayBgm, bgm_loop);
     }
   };
 
@@ -112,6 +157,25 @@ appGame = (function(_super) {
       }
     }
     return this.preload(tmp);
+  };
+
+
+  /*
+  enchant.jsのload関数をラッピング
+  ロード終了後にloadedFileにロードしたファイルを置いておいて、ロード済みかどうかの判別に使う
+   */
+
+  appGame.prototype.appLoad = function(file) {
+    return this.load(file);
+  };
+
+
+  /*
+  ロード済みのファイルを記憶しておく
+   */
+
+  appGame.prototype.setLoadedFile = function(file) {
+    return this.loadedFile.push(file);
   };
 
 
@@ -245,6 +309,43 @@ appGame = (function(_super) {
       i--;
     }
     return n;
+  };
+
+
+  /*
+  ユーザーエージェントの判定
+   */
+
+  appGame.prototype.userAgent = function() {
+    var mobile, pc, tablet, u;
+    u = window.navigator.userAgent.toLowerCase();
+    mobile = {
+      0: u.indexOf('windows') !== -1 && u.indexOf('phone') !== -1 || u.indexOf('iphone') !== -1 || u.indexOf('ipod') !== -1 || u.indexOf('android') !== -1 && u.indexOf('mobile') !== -1 || u.indexOf('firefox') !== -1 && u.indexOf('mobile') !== -1 || u.indexOf('blackberry') !== -1,
+      iPhone: u.indexOf('iphone') !== -1,
+      Android: u.indexOf('android') !== -1 && u.indexOf('mobile') !== -1
+    };
+    tablet = u.indexOf('windows') !== -1 && u.indexOf('touch') !== -1 || u.indexOf('ipad') !== -1 || u.indexOf('android') !== -1 && u.indexOf('mobile') === -1 || u.indexOf('firefox') !== -1 && u.indexOf('tablet') !== -1 || u.indexOf('kindle') !== -1 || u.indexOf('silk') !== -1 || u.indexOf('playbook') !== -1;
+    pc = !mobile[0] && !tablet;
+    return {
+      Mobile: mobile,
+      Tablet: tablet,
+      PC: pc
+    };
+  };
+
+
+  /*
+  スマホかタブレットならtrueを返す
+   */
+
+  appGame.prototype.isSumaho = function() {
+    var rslt, ua;
+    ua = this.userAgent();
+    rslt = false;
+    if (ua.Mobile[0] === true || ua.Tablet === true) {
+      rslt = true;
+    }
+    return rslt;
   };
 
   return appGame;
@@ -965,7 +1066,7 @@ LoveliveGame = (function(_super) {
     this.height = 720;
     this.fps = 24;
     this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart', 'explosion', 'items'];
-    this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion'];
+    this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm/bgm1'];
     this.keybind(90, 'z');
     this.keybind(88, 'x');
     this.preloadAll();
@@ -1005,6 +1106,7 @@ LoveliveGame = (function(_super) {
       return this.test.testExe();
     } else {
       if (this.debug.force_main_flg === true) {
+        this.bgmPlay(this.main_scene.bgm, true);
         this.pushScene(this.main_scene);
         if (this.debug.force_pause_flg === true) {
           return this.pushScene(this.pause_scene);
@@ -1087,18 +1189,18 @@ LoveliveGame = (function(_super) {
         _ref = material['cut_in'];
         for (key in _ref) {
           val = _ref[key];
-          this.load('images/cut_in/' + val.name + '.png');
+          this.appLoad('images/cut_in/' + val.name + '.png');
         }
       }
       if (material['voice'] !== void 0 && material['voice'].length > 0) {
         _ref1 = material['voice'];
         for (key in _ref1) {
           val = _ref1[key];
-          this.load('sounds/voice/' + val + '.mp3');
+          this.appLoad('sounds/voice/' + val + '.mp3');
         }
       }
       if (material['bgm'] !== void 0 && material['bgm'].length > 0) {
-        return this.load('sounds/bgm/' + material['bgm'][0]['name'] + '.mp3');
+        return this.appLoad('sounds/bgm/' + material['bgm'][0]['name'] + '.mp3');
       }
     }
   };
@@ -1174,7 +1276,8 @@ LoveliveGame = (function(_super) {
   LoveliveGame.prototype.setPauseScene = function() {
     this.pause_scene.keyList.pause = true;
     this.pushScene(this.pause_scene);
-    return this.pause_scene.pause_item_buy_layer.resetItemList();
+    this.pause_scene.pause_item_buy_layer.resetItemList();
+    return this.nowPlayBgmPause();
   };
 
 
@@ -1185,7 +1288,8 @@ LoveliveGame = (function(_super) {
   LoveliveGame.prototype.popPauseScene = function() {
     this.pause_scene.buttonList.pause = false;
     this.main_scene.keyList.pause = true;
-    return this.popScene(this.pause_scene);
+    this.popScene(this.pause_scene);
+    return this.nowPlayBgmRestart();
   };
 
 
@@ -1566,6 +1670,7 @@ gpSlot = (function(_super) {
         this.forceHitStart();
         game.sePlay(this.lille_stop_se);
         this.left_lille.isRotation = false;
+        this.forceHitLeftLille();
         this.saveLeftSlotEye();
         this.setIntervalFrame();
       }
@@ -1623,12 +1728,29 @@ gpSlot = (function(_super) {
 
 
   /*
+  確率で左のスロットを強制的にμ'sにする
+   */
+
+  gpSlot.prototype.forceHitLeftLille = function() {
+    var target, tmp_eye;
+    target = this.left_lille;
+    if (this.isForceSlotHit === true && game.slot_setting.isForceFever() === true) {
+      tmp_eye = this._searchMuseEye(target);
+      if (tmp_eye !== 0) {
+        target.nowEye = tmp_eye;
+        return target.frameChange();
+      }
+    }
+  };
+
+
+  /*
   スロットが強制的に辺になるようにリールから左のリールの当たり目と同じ目を探して配列のキーを返す
   左の当たり目がμ’ｓならリールからμ’ｓの目をランダムで取り出して返す
    */
 
   gpSlot.prototype._searchEye = function(target) {
-    var arr, key, random_key, result, val, _ref, _ref1;
+    var key, result, val, _ref;
     result = 0;
     if (this.leftSlotEye < 10) {
       _ref = target.lilleArray;
@@ -1639,18 +1761,33 @@ gpSlot = (function(_super) {
         }
       }
     } else {
-      arr = [];
-      _ref1 = target.lilleArray;
-      for (key in _ref1) {
-        val = _ref1[key];
-        if (val > 10) {
-          arr.push(key);
-        }
+      result = this._searchMuseEye(target);
+    }
+    return result;
+  };
+
+
+  /*
+  リールからμ'sを探してきてそのキーを返します
+  リールにμ'sがいなければランダムでキーを返します
+  @pram target
+   */
+
+  gpSlot.prototype._searchMuseEye = function(target) {
+    var arr, key, random_key, result, val, _ref;
+    arr = [];
+    _ref = target.lilleArray;
+    for (key in _ref) {
+      val = _ref[key];
+      if (val > 10) {
+        arr.push(key);
       }
-      if (arr.length > 0) {
-        random_key = Math.floor(arr.length * Math.random());
-        result = arr[random_key];
-      }
+    }
+    if (arr.length > 0) {
+      random_key = Math.floor(arr.length * Math.random());
+      result = arr[random_key];
+    } else {
+      result = Math.floor(this.left_lille.lilleArray.length * Math.random());
     }
     return result;
   };
@@ -1738,6 +1875,7 @@ gpSlot = (function(_super) {
     this.fever_bgm = game.soundload('bgm/' + bgm['name']);
     game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (this.feverSec * game.fps)) / 100;
     game.fever_down_tension *= -1;
+    game.bgmStop(game.main_scene.bgm);
     return game.bgmPlay(this.fever_bgm, false);
   };
 
@@ -1863,9 +2001,9 @@ gpSlot = (function(_super) {
    */
 
   gpSlot.prototype.slotAddMuseAll = function(num) {
-    this.left_lille.lilleArray = this._slotAddMuseAllUnit(num, this.left_lille);
-    this.middle_lille.lilleArray = this._slotAddMuseAllUnit(num, this.middle_lille);
-    return this.right_lille.lilleArray = this._slotAddMuseAllUnit(num, this.right_lille);
+    this.left_lille.lilleArray = this._slotAddMuseAllUnit(this.left_lille.lilleArray[this.left_lille.nowEye], this.left_lille);
+    this.middle_lille.lilleArray = this._slotAddMuseAllUnit(this.middle_lille.lilleArray[this.middle_lille.nowEye], this.middle_lille);
+    return this.right_lille.lilleArray = this._slotAddMuseAllUnit(this.right_lille.lilleArray[this.right_lille.nowEye], this.right_lille);
   };
 
   gpSlot.prototype._slotAddMuseAllUnit = function(num, lille) {
@@ -2595,7 +2733,8 @@ gpSystem = (function(_super) {
   gpSystem.prototype._resetItem = function() {
     this.prevItem = game.now_item;
     game.item_set_now = [];
-    return this.itemDsp();
+    this.itemDsp();
+    return game.pause_scene.pause_item_use_layer.dspSetItemList();
   };
 
   return gpSystem;
@@ -4007,7 +4146,7 @@ Debug = (function(_super) {
       'combo': 10,
       'tension': 100,
       'past_fever_num': 0,
-      'item_point': 500,
+      'item_point': 10,
       'next_add_member_key': 0,
       'prev_muse': [11],
       'item_have_now': [1, 2, 9, 11, 12, 13, 14],
@@ -4024,7 +4163,7 @@ Debug = (function(_super) {
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     ]
      */
-    this.lille_array = [[11, 11, 11, 11, 11, 11, 11, 11, 1, 4, 4, 1, 5, 5, 1, 4, 5], [12, 12, 12, 12, 12, 12, 12, 12, 5, 1, 4, 4, 1, 5, 5, 1, 4], [13, 13, 13, 13, 13, 13, 13, 13, 5, 4, 1, 4, 1, 5, 5, 1, 4]];
+    this.lille_array = [[11, 11, 11, 11, 11, 11, 11, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1], [12, 12, 12, 12, 12, 12, 12, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1], [13, 13, 13, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
     this.item_flg = false;
     this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
@@ -4033,6 +4172,7 @@ Debug = (function(_super) {
     this.force_insert_muse = false;
     this.force_slot_hit = false;
     this.half_slot_hit = false;
+    this.force_fever = false;
     this.fix_tention_item_catch_val = 50;
     this.fix_tention_item_fall_val = 0;
     this.fix_tention_slot_hit_flg = 200;
@@ -4299,24 +4439,24 @@ slotSetting = (function(_super) {
       21: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30
+            'name': 'hello_hoshi',
+            'time': 93
           }
         ]
       },
       22: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30
+            'name': 'future_style',
+            'time': 94
           }
         ]
       },
       23: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30
+            'name': 'hatena_heart',
+            'time': 84
           }
         ]
       },
@@ -4613,6 +4753,7 @@ slotSetting = (function(_super) {
       }
     ];
     this.prize_div = 1;
+    this.item_gravity = 0;
     this.prev_muse = [];
   }
 
@@ -4635,13 +4776,13 @@ slotSetting = (function(_super) {
   slotSetting.prototype.setGravity = function() {
     var div, val;
     if (game.bet < 10) {
-      val = 0.4;
+      val = 0.35;
       this.prize_div = 1;
     } else if (game.bet < 50) {
-      val = 0.42;
+      val = 0.40;
       this.prize_div = 1;
     } else if (game.bet < 100) {
-      val = 0.46;
+      val = 0.44;
       this.prize_div = 0.9;
     } else if (game.bet < 500) {
       val = 0.48;
@@ -4662,7 +4803,7 @@ slotSetting = (function(_super) {
       val = 2;
       this.prize_div = 0.2;
     }
-    div = 1 + Math.floor(2 * game.tension / this.tension_max) / 10;
+    div = 1;
     val = Math.floor(val * div * 100) / 100;
     if (100 < game.combo) {
       div = Math.floor((game.combo - 100) / 20) / 10;
@@ -4671,6 +4812,7 @@ slotSetting = (function(_super) {
       }
       val += div;
     }
+    this.item_gravity = val;
     return val;
   };
 
@@ -4743,10 +4885,10 @@ slotSetting = (function(_super) {
 
   /*
   スロットを強制的に当たりにするかどうかを決める
-  コンボ数 * 0.06 ％
-  テンションMAXで+5補正
-  過去のフィーバー回数が少ないほど上方補正かける 0回:+9,1回:+6,2回:+3
-  最大値は20％
+  コンボ数 * 0.1 ％
+  テンションMAXで+10補正
+  過去のフィーバー回数が少ないほど上方補正かける 0回:+12,1回:+8,2回:+4
+  最大値は30％
   フィーバー中は強制的に当たり
   @return boolean true:当たり
    */
@@ -4754,12 +4896,12 @@ slotSetting = (function(_super) {
   slotSetting.prototype.getIsForceSlotHit = function() {
     var random, rate, result;
     result = false;
-    rate = Math.floor((game.combo * 0.06) + ((game.tension / this.tension_max) * 5));
+    rate = Math.floor((game.combo * 0.1) + ((game.tension / this.tension_max) * 10));
     if (game.past_fever_num <= 2) {
-      rate += (3 - game.past_fever_num) * 3;
+      rate += (3 - game.past_fever_num) * 4;
     }
-    if (rate > 20) {
-      rate = 20;
+    if (rate > 30) {
+      rate = 30;
     }
     if (game.debug.half_slot_hit === true) {
       rate = 50;
@@ -4811,8 +4953,12 @@ slotSetting = (function(_super) {
    */
 
   slotSetting.prototype.setTensionItemCatch = function() {
-    var val;
-    val = (this.tension_max - game.tension) * 0.005 * (game.item_kind + 1);
+    var base, val;
+    base = 0.005;
+    if (game.past_fever_num <= 2) {
+      base += (2 - game.past_fever_num) * 0.005;
+    }
+    val = (this.tension_max - (game.tension / 2)) * base * (game.item_kind + 1);
     if (game.main_scene.gp_stage_front.player.isAir === true) {
       val *= 1.5;
     }
@@ -4837,7 +4983,7 @@ slotSetting = (function(_super) {
 
   slotSetting.prototype.setTensionItemFall = function() {
     var val;
-    val = this.tension_max * -0.2;
+    val = this.tension_max * -0.1;
     if (game.debug.fix_tention_item_fall_flg === true) {
       val = game.debug.fix_tention_item_fall_val;
     }
@@ -4846,7 +4992,7 @@ slotSetting = (function(_super) {
 
   slotSetting.prototype.setTensionMissItem = function() {
     var val;
-    val = this.tension_max * -0.6;
+    val = this.tension_max * -0.3;
     if (game.debug.fix_tention_item_fall_flg === true) {
       val = game.debug.fix_tention_item_fall_val;
     }
@@ -4987,18 +5133,20 @@ slotSetting = (function(_super) {
    */
 
   slotSetting.prototype.setChanceTime = function() {
-    var fixTime, randomTime;
+    var fixTime, randomTime, ret;
     if (this.slotHitRate <= 10) {
       fixTime = 2;
       randomTime = 5;
-    } else if (this.slotHitRate <= 15) {
+    } else if (this.slotHitRate <= 20) {
       fixTime = 1.5;
       randomTime = 10;
     } else {
       fixTime = 1;
       randomTime = 15;
     }
-    return fixTime + Math.floor(Math.random() * randomTime) / 10;
+    fixTime += Math.floor((1 - this.item_gravity) * 10) / 10;
+    ret = fixTime + Math.floor(Math.random() * randomTime) / 10;
+    return ret;
   };
 
 
@@ -5124,6 +5272,33 @@ slotSetting = (function(_super) {
     return ret;
   };
 
+
+  /*
+  チャンスの時に強制的にフィーバーにする
+   */
+
+  slotSetting.prototype.isForceFever = function() {
+    var random, rate, result;
+    rate = Math.floor(game.combo / 4) + 10;
+    if (game.past_fever_num === 0 && rate >= 50) {
+      rate = 50;
+    } else if (game.past_fever_num === 1 && rate >= 40) {
+      rate = 40;
+    } else if (game.past_fever_num === 2 && rate >= 30) {
+      rate = 30;
+    } else if (game.past_fever_num === 3 && rate >= 20) {
+      rate = 20;
+    } else {
+      rate = 5;
+    }
+    result = false;
+    random = Math.floor(Math.random() * 100);
+    if (game.debug.foece_fever === true || random <= rate) {
+      result = true;
+    }
+    return result;
+  };
+
   return slotSetting;
 
 })(appNode);
@@ -5205,6 +5380,25 @@ Test = (function(_super) {
     return console.log(game.toJPUnit(12000012340000));
   };
 
+  Test.prototype.itemCatchTension = function() {
+    var val;
+    game.past_fever_num = 0;
+    game.tension = 400;
+    val = game.slot_setting.setTensionItemCatch();
+    return console.log(val);
+  };
+
+  Test.prototype.chanceTime = function() {
+    var val;
+    val = game.slot_setting.setChanceTime();
+    return console.log(val);
+  };
+
+  Test.prototype.forceFever = function() {
+    game.combo = 200;
+    return game.slot_setting.isForceFever();
+  };
+
   return Test;
 
 })(appNode);
@@ -5231,6 +5425,7 @@ mainScene = (function(_super) {
       'down': false,
       'pause': false
     };
+    this.bgm = game.soundload("bgm/bgm1");
     this.initial();
   }
 
@@ -5345,6 +5540,7 @@ mainScene = (function(_super) {
       if (game.tension <= 0) {
         game.main_scene.gp_slot.upperFrame.frame = 0;
         game.bgmStop(game.main_scene.gp_slot.fever_bgm);
+        game.bgmPlay(this.bgm, true);
         this.gp_system.changeBetChangeFlg(true);
         this.gp_effect.feverEffectEnd();
         return game.fever = false;

@@ -134,17 +134,17 @@ class slotSetting extends appNode
             },
             21:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'hello_hoshi', 'time':93}
                 ]
             },
             22:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'future_style', 'time':94}
                 ]
             },
             23:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30}
+                    {'name':'hatena_heart', 'time':84}
                 ]
             },
             24:{
@@ -396,6 +396,7 @@ class slotSetting extends appNode
         @item_point_value = [0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0]
         #掛け金が増えると当選金額の割合が減る補正
         @prize_div = 1
+        @item_gravity = 0
 
         #セーブする変数
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
@@ -411,13 +412,13 @@ class slotSetting extends appNode
     ###
     setGravity:()->
         if game.bet < 10
-            val = 0.4
+            val = 0.35
             @prize_div = 1
         else if game.bet < 50
-            val = 0.42
+            val = 0.40
             @prize_div = 1
         else if game.bet < 100
-            val = 0.46
+            val = 0.44
             @prize_div = 0.9
         else if game.bet < 500
             val = 0.48
@@ -437,13 +438,15 @@ class slotSetting extends appNode
         else
             val = 2
             @prize_div = 0.2
-        div = 1 + Math.floor(2 * game.tension / @tension_max) / 10
+        #div = 1 + Math.floor(2 * game.tension / @tension_max) / 10
+        div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
             div = Math.floor((game.combo - 100) / 20) / 10
             if 2 < div
                 div = 2
             val += div
+        @item_gravity = val
         return val
 
     ###
@@ -494,20 +497,20 @@ class slotSetting extends appNode
 
     ###
     スロットを強制的に当たりにするかどうかを決める
-    コンボ数 * 0.06 ％
-    テンションMAXで+5補正
-    過去のフィーバー回数が少ないほど上方補正かける 0回:+9,1回:+6,2回:+3
-    最大値は20％
+    コンボ数 * 0.1 ％
+    テンションMAXで+10補正
+    過去のフィーバー回数が少ないほど上方補正かける 0回:+12,1回:+8,2回:+4
+    最大値は30％
     フィーバー中は強制的に当たり
     @return boolean true:当たり
     ###
     getIsForceSlotHit:()->
         result = false
-        rate = Math.floor((game.combo * 0.06) + ((game.tension / @tension_max) * 5))
+        rate = Math.floor((game.combo * 0.1) + ((game.tension / @tension_max) * 10))
         if game.past_fever_num <= 2
-            rate += ((3 - game.past_fever_num)) * 3
-        if rate > 20
-            rate = 20
+            rate += ((3 - game.past_fever_num)) * 4
+        if rate > 30
+            rate = 30
         if game.debug.half_slot_hit is true
             rate = 50
         @slotHitRate = rate
@@ -543,7 +546,10 @@ class slotSetting extends appNode
     アイテムを取った時のテンションゲージの増減値を決める
     ###
     setTensionItemCatch:()->
-        val = (@tension_max - game.tension) * 0.005 * (game.item_kind + 1)
+        base = 0.005
+        if game.past_fever_num <= 2
+            base += ((2 - game.past_fever_num)) * 0.005
+        val = (@tension_max - (game.tension / 2)) * base * (game.item_kind + 1)
         if game.main_scene.gp_stage_front.player.isAir is true
             val *= 1.5
         if val >= 1
@@ -559,13 +565,13 @@ class slotSetting extends appNode
     アイテムを落とした時のテンションゲージの増減値を決める
     ###
     setTensionItemFall:()->
-        val = @tension_max * -0.2
+        val = @tension_max * -0.1
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
         return val
 
     setTensionMissItem:()->
-        val = @tension_max * -0.6
+        val = @tension_max * -0.3
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
         return val
@@ -683,13 +689,15 @@ class slotSetting extends appNode
         if @slotHitRate <= 10
             fixTime = 2
             randomTime = 5
-        else if @slotHitRate <= 15
+        else if @slotHitRate <= 20
             fixTime = 1.5
             randomTime = 10
         else
             fixTime = 1
             randomTime = 15
-        return fixTime + Math.floor(Math.random() * randomTime) / 10
+        fixTime += Math.floor((1 - @item_gravity) * 10) / 10
+        ret = fixTime + Math.floor(Math.random() * randomTime) / 10
+        return ret
     ###
     スロットの揃った目が全てμ’sなら役を判定して返します
     メンバー:11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
@@ -757,3 +765,24 @@ class slotSetting extends appNode
             if member[game.next_add_member_key] is undefined
                 game.next_add_member_key = 0
         return ret
+
+    ###
+    チャンスの時に強制的にフィーバーにする
+    ###
+    isForceFever:()->
+        rate = Math.floor(game.combo / 4) + 10
+        if game.past_fever_num is 0 && rate >= 50
+            rate = 50
+        else if game.past_fever_num is 1 && rate >= 40
+            rate = 40
+        else if game.past_fever_num is 2 && rate >= 30
+            rate = 30
+        else if game.past_fever_num is 3 && rate >= 20
+            rate = 20
+        else
+            rate = 5
+        result = false
+        random = Math.floor(Math.random() * 100)
+        if game.debug.foece_fever is true || random <= rate
+            result = true
+        return result
