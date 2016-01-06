@@ -15,7 +15,7 @@ class LoveliveGame extends catchAndSlotGame
         @fps = 24
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
-                    'heart', 'explosion', 'items']
+                    'heart', 'explosion', 'items', 'coin_pla']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm/bgm1']
 
@@ -52,10 +52,6 @@ class LoveliveGame extends catchAndSlotGame
         @main_scene = new mainScene()
         @pause_scene = new pauseScene()
         @loadGame()
-        #一人目のμ’ｓメンバーを決めて素材をロードする
-        if @slot_setting.now_muse_num is 0
-            @slot_setting.setMuseMember()
-        @musePreLoad()
         #テスト
         if @test.test_exe_flg is true
             @test_scene = new testScene()
@@ -136,6 +132,28 @@ class LoveliveGame extends catchAndSlotGame
         @main_scene.gp_system.tension_gauge.setValue()
 
     ###
+    現在アイテムがセットされているかを確認する
+    ###
+    isItemSet:(kind)->
+        rslt = false
+        if game.item_set_now.indexOf(kind) != -1
+            rslt = true
+        return rslt
+
+    ###
+    アイテムの効果を発動する
+    ###
+    itemUseExe:()->
+        if @isItemSet(1)
+            @main_scene.gp_stage_front.player.setMxUp()
+        else
+            @main_scene.gp_stage_front.player.resetMxUp()
+        if @isItemSet(3)
+            @main_scene.gp_stage_front.player.setMyUp()
+        else
+            @main_scene.gp_stage_front.player.resetMyUp()
+
+    ###
     アイテムを取った時にテンションゲージを増減する
     ###
     tensionSetValueItemCatch:()->
@@ -157,11 +175,10 @@ class LoveliveGame extends catchAndSlotGame
 
     ###
     スロットが当たった時にテンションゲージを増減する
-    @param number prize_money 当選金額
     @param number hit_eye     当たった目の番号
     ###
-    tensionSetValueSlotHit:(prize_money, hit_eye)->
-        val = @slot_setting.setTensionSlotHit(prize_money, hit_eye)
+    tensionSetValueSlotHit:(hit_eye)->
+        val = @slot_setting.setTensionSlotHit(hit_eye)
         @tensionSetValue(val)
     ###
     ポーズシーンをセットする
@@ -189,7 +206,7 @@ class LoveliveGame extends catchAndSlotGame
                 @_loadGameProduct()
             else
                 @_loadGameTest()
-            @_gameInitSetting()
+        @_gameInitSetting()
 
     ###
     ロードするデータの空の値
@@ -296,6 +313,7 @@ class LoveliveGame extends catchAndSlotGame
         @item_point = data.item_point
         @next_add_member_key = data.next_add_member_key
         @slot_setting.prev_muse = data.prev_muse
+        @slot_setting.now_muse_num = data.now_muse_num
         @item_have_now = data.item_have_now
         @item_set_now = data.item_set_now
         @prev_fever_muse = data.prev_fever_muse
@@ -305,6 +323,10 @@ class LoveliveGame extends catchAndSlotGame
     ゲームロード後の画面表示等の初期値設定
     ###
     _gameInitSetting:()->
+        #一人目のμ’ｓメンバーを決めて素材をロードする
+        if @slot_setting.now_muse_num is 0
+            @slot_setting.setMuseMember()
+        @musePreLoad()
         sys = @main_scene.gp_system
         sys.money_text.setValue()
         sys.bet_text.setValue()
@@ -317,3 +339,4 @@ class LoveliveGame extends catchAndSlotGame
         @slot_setting.setMemberItemPrice()
         @slot_setting.setItemPointValue()
         @musePreLoadByMemberSetNow()
+        @itemUseExe()

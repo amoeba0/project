@@ -20,16 +20,21 @@ class saveDialogHtml extends baseDialogHtml
         @y = 150
         @setHtml()
 class menuDialogHtml extends baseDialogHtml
-    constructor:()->
-        super 420, 460
+    constructor:(width=420, height=460)->
+        super width, height
         @text = '　'
-        @class.push('base-dialog-menu')
+        @classPush()
         @x = 25
         @y = 80
         @setHtml()
+    classPush:()->
+        @class.push('base-dialog-menu')
 class itemBuyDialogHtml extends menuDialogHtml
     constructor:()->
-        super
+        super 420, 500
+        @y = 50
+    classPush:()->
+        @class.push('base-dialog-high')
 
 class itemUseDialogHtml extends menuDialogHtml
     constructor:()->
@@ -41,7 +46,10 @@ class memberSetDialogHtml extends menuDialogHtml
 
 class recordDialogHtml extends menuDialogHtml
     constructor:()->
-        super
+        super 420, 500
+        @y = 50
+    classPush:()->
+        @class.push('base-dialog-high')
 
 class selectDialogHtml extends baseDialogHtml
     constructor:()->
@@ -64,21 +72,25 @@ class memberUseSelectDialogHtml extends selectDialogHtml
     constructor:()->
         super
 
+class recordSelectDialogHtml extends selectDialogHtml
+    constructor:()->
+        super
+
 class discriptionTextDialogHtml extends dialogHtml
     constructor:(w, h)->
         super w, h
         @class.push('base-discription')
 
 class titleDiscription extends discriptionTextDialogHtml
-    constructor:()->
-        super 400, 20
+    constructor:(width=400, height=20)->
+        super width, height
         @class.push('title-discription')
 
 class itemItemBuyDiscription extends titleDiscription
     constructor:()->
-        super
+        super 100, 20
         @x = 220
-        @y = 130
+        @y = 80
         @text = '魔法'
         @setHtml()
 
@@ -86,8 +98,16 @@ class memberItemBuyDiscription extends titleDiscription
     constructor:()->
         super
         @x = 220
-        @y = 370
+        @y = 310
         @text = '部員'
+        @setHtml()
+
+class trophyItemBuyDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 200
+        @y = 530
+        @text = 'トロフィー'
         @setHtml()
 
 class useSetDiscription extends titleDiscription
@@ -104,6 +124,22 @@ class useHaveDiscription extends titleDiscription
         @x = 170
         @y = 370
         @text = '所持リスト'
+        @setHtml()
+
+class recordDiscription extends titleDiscription
+    constructor:()->
+        super 100, 200
+        @x = 200
+        @y = 80
+        @text = '楽曲'
+        @setHtml()
+
+class trophyDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 170
+        @y = 520
+        @text = 'トロフィー'
         @setHtml()
 
 class itemNameDiscription extends titleDiscription

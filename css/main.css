@@ -74,6 +74,10 @@
     padding: 200px 0px 300px 0px;
     width: 420px;
 }
+.base-dialog-high {
+    padding: 200px 0px 390px 0px;
+    width: 420px;
+}
 .base-dialog-select {
     padding: 200px 0px 200px 0px;
     width: 400px;

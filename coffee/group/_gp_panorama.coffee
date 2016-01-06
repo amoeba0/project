@@ -8,7 +8,7 @@ class gpBackPanorama extends gpPanorama
         @back_panorama = new BackPanorama()
         @big_kotori = new bigKotori()
         @now_back_effect_flg = false #背景レイヤーのエフェクトを表示中ならtrue
-        @back_effect_rate = 100 #背景レイヤーのエフェクトが表示される確率
+        @back_effect_rate = 200 #背景レイヤーのエフェクトが表示される確率
         @addChild(@back_panorama)
     ###
     背景レイヤーのエフェクト表示を開始

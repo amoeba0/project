@@ -29,7 +29,8 @@ class Catch extends Item
         if @y > game.height + @h
             game.sePlay(@miss_se)
             game.main_scene.gp_stage_front.removeChild(@)
-            game.combo = 0
+            if game.isItemSet(9) is false
+                game.combo = 0
             game.main_scene.gp_system.combo_text.setValue()
             game.tensionSetValueItemFall()
 
@@ -51,6 +52,12 @@ class Catch extends Item
             ret_x = game.main_scene.gp_stage_front.player.x
         else
             ret_x = Math.floor((game.width - @w) * Math.random())
+        if game.isItemSet(8)
+            ret_x = Math.floor(game.main_scene.gp_stage_front.player.x + (game.width * 0.5 * Math.random()) - (game.width * 0.25))
+            if ret_x < 0
+                ret_x = 0
+            if ret_x > (game.width - @w)
+                ret_x = game.width - @w
         return ret_x
 
 ###

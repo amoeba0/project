@@ -1,4 +1,4 @@
-var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMillionMoney, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMillionMoney, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseByuButtonHtml, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, baseSetButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, explosionEffect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, imageHtml, itemBuyBuyButtonHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemCatchEffect, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseCancelButtonHtml, itemUseDialogCloseButton, itemUseDialogHtml, itemUseDiscription, itemUseSelectDialogHtml, itemUseSetButtonHtml, jumpButton, kirakiraEffect, leftButton, longTitleDiscription, lowBetButton, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, memberSetDiscription, memberUseCancelButtonHtml, memberUseSelectDialogHtml, memberUseSetButtonHtml, menuDialogHtml, modal, moneyText, panoramaEffect, pauseBack, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseItemUseSelectLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseMemberUseSelectLayer, pauseRecordLayer, pauseSaveLayer, pauseScene, performanceEffect, recordButtonHtml, recordDialogCloseButton, recordDialogHtml, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setItemHtml, setMemberButtonHtml, setMemberHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, useHaveDiscription, useItemButtonHtml, useItemHtml, useMemberHtml, useSetDiscription,
+var BackPanorama, Bear, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneMillionMoney, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenMillionMoney, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseByuButtonHtml, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, baseRecordItemHtml, baseSetButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, buyTrophyItemHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, explosionEffect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, imageHtml, itemBuyBuyButtonHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemCatchEffect, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseCancelButtonHtml, itemUseDialogCloseButton, itemUseDialogHtml, itemUseDiscription, itemUseSelectDialogHtml, itemUseSetButtonHtml, jumpButton, kirakiraEffect, leftButton, longTitleDiscription, lowBetButton, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, memberSetDiscription, memberUseCancelButtonHtml, memberUseSelectDialogHtml, memberUseSetButtonHtml, menuDialogHtml, modal, moneyText, panoramaEffect, pauseBack, pauseBaseRecordSelectLayer, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseItemUseSelectLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseMemberUseSelectLayer, pauseRecordLayer, pauseRecordSelectLayer, pauseSaveLayer, pauseScene, pauseTrophySelectLayer, performanceEffect, recordButtonHtml, recordDialogCloseButton, recordDialogHtml, recordDiscription, recordItemHtml, recordOkButtonHtml, recordSelectDialogHtml, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setItemHtml, setMemberButtonHtml, setMemberHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, trophyDiscription, trophyItemBuyDiscription, trophyItemHtml, trophyOkButtonHtml, useHaveDiscription, useItemButtonHtml, useItemHtml, useMemberHtml, useSetDiscription,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -29,6 +29,7 @@ appGame = (function(_super) {
     if (this.isSumaho() === false) {
       this.scale = 1;
     }
+    this.is_server = false;
     this.mute = false;
     this.imgList = [];
     this.soundList = [];
@@ -81,7 +82,11 @@ appGame = (function(_super) {
       bgm.play();
       this.nowPlayBgm = bgm;
       if (bgm_loop === true) {
-        return bgm._element.loop = true;
+        if (this.is_server === true) {
+          return bgm.src.loop = true;
+        } else {
+          return bgm._element.loop = true;
+        }
       }
     }
   };
@@ -513,7 +518,7 @@ pauseItemBuyLayer = (function(_super) {
   __extends(pauseItemBuyLayer, _super);
 
   function pauseItemBuyLayer() {
-    var i, _i, _j;
+    var i, _i, _j, _k;
     pauseItemBuyLayer.__super__.constructor.apply(this, arguments);
     this.dialog = new itemBuyDialogHtml();
     this.close_button = new itemBuyDialogCloseButton();
@@ -528,16 +533,22 @@ pauseItemBuyLayer = (function(_super) {
     for (i = _j = 11; _j <= 19; i = ++_j) {
       this.member_list[i] = new buyMemberHtml(i);
     }
+    this.trophy_list = {};
+    for (i = _k = 21; _k <= 24; i = ++_k) {
+      this.trophy_list[i] = new buyTrophyItemHtml(i - 21, i);
+    }
     this.setItemList();
     this.resetItemList();
     this.item_title = new itemItemBuyDiscription();
     this.addChild(this.item_title);
     this.member_title = new memberItemBuyDiscription();
     this.addChild(this.member_title);
+    this.trophy_title = new trophyItemBuyDiscription();
+    this.addChild(this.trophy_title);
   }
 
   pauseItemBuyLayer.prototype.setItemList = function() {
-    var item_key, item_val, member_key, member_val, _ref, _ref1, _results;
+    var item_key, item_val, member_key, member_val, trophy_key, trophy_val, _ref, _ref1, _ref2, _results;
     _ref = this.item_list;
     for (item_key in _ref) {
       item_val = _ref[item_key];
@@ -545,11 +556,17 @@ pauseItemBuyLayer = (function(_super) {
       item_val.setPosition();
     }
     _ref1 = this.member_list;
-    _results = [];
     for (member_key in _ref1) {
       member_val = _ref1[member_key];
       this.addChild(member_val);
-      _results.push(member_val.setPosition());
+      member_val.setPosition();
+    }
+    _ref2 = this.trophy_list;
+    _results = [];
+    for (trophy_key in _ref2) {
+      trophy_val = _ref2[trophy_key];
+      this.addChild(trophy_val);
+      _results.push(trophy_val.setPosition());
     }
     return _results;
   };
@@ -633,9 +650,10 @@ pauseItemBuySelectLayer = (function(_super) {
     if (this.item_options.durationSec !== void 0) {
       text += '<br>持続時間：' + this.item_options.durationSec + '秒';
     }
-    if (this.item_options.condFunc() === true) {
+    if (this.item_options.condFunc() === true || 20 < this.item_kind) {
       text += '<br>値段：' + game.toJPUnit(this.item_options.price) + '円' + '(所持金' + game.toJPUnit(game.money) + '円)';
-    } else {
+    }
+    if (this.item_options.condFunc() === false || 20 < this.item_kind) {
       text += '<br>出現条件：' + this.item_options.conditoin;
     }
     return text;
@@ -924,9 +942,20 @@ pauseMemberSetLayer = (function(_super) {
       member_val = _ref[member_key];
       member_val.setPosition();
       if (game.member_set_now[member_key - 1] !== void 0) {
-        _results.push(member_val.setItemKind(game.member_set_now[member_key - 1]));
+        member_val.setItemKind(game.member_set_now[member_key - 1]);
+        member_val.opacity = 1;
+        _results.push(member_val.disabled = false);
       } else {
-        _results.push(member_val.setItemKind(10));
+        if (member_key === '1' && game.slot_setting.now_muse_num !== 0) {
+          member_val.setItemKind(game.slot_setting.now_muse_num);
+          member_val.opacity = 0.5;
+          member_val.disabled = true;
+          _results.push(member_val.changeNotButton());
+        } else {
+          member_val.setItemKind(10);
+          member_val.opacity = 1;
+          _results.push(member_val.disabled = false);
+        }
       }
     }
     return _results;
@@ -1001,17 +1030,143 @@ pauseRecordLayer = (function(_super) {
   __extends(pauseRecordLayer, _super);
 
   function pauseRecordLayer() {
+    var i, kind, position, _i, _j, _len, _ref;
     pauseRecordLayer.__super__.constructor.apply(this, arguments);
     this.dialog = new recordDialogHtml();
     this.close_button = new recordDialogCloseButton();
+    this.record_title = new recordDiscription();
+    this.trophy_title = new trophyDiscription();
     this.addChild(this.modal);
     this.addChild(this.dialog);
     this.addChild(this.close_button);
+    this.addChild(this.record_title);
+    this.addChild(this.trophy_title);
+    this.recordList = {};
+    this.trophyList = {};
+    this.bgmList = game.slot_setting.bgm_list;
+    this.bgmList = game.slot_setting.bgm_list;
+    _ref = this.bgmList;
+    for (position = _i = 0, _len = _ref.length; _i < _len; position = ++_i) {
+      kind = _ref[position];
+      this.recordList[position] = new recordItemHtml(position, kind);
+    }
+    for (i = _j = 21; _j <= 24; i = ++_j) {
+      this.trophyList[i] = new trophyItemHtml(i - 21, i);
+    }
+    this.setRecordList();
+    this.setTrophyList();
   }
+
+  pauseRecordLayer.prototype.setRecordList = function() {
+    var record_key, record_val, _ref, _results;
+    _ref = this.recordList;
+    _results = [];
+    for (record_key in _ref) {
+      record_val = _ref[record_key];
+      this.addChild(record_val);
+      _results.push(record_val.setPosition());
+    }
+    return _results;
+  };
+
+  pauseRecordLayer.prototype.setTrophyList = function() {
+    var trophy_key, trophy_val, _ref, _results;
+    _ref = this.trophyList;
+    _results = [];
+    for (trophy_key in _ref) {
+      trophy_val = _ref[trophy_key];
+      this.addChild(trophy_val);
+      _results.push(trophy_val.setPosition());
+    }
+    return _results;
+  };
 
   return pauseRecordLayer;
 
 })(appDomLayer);
+
+pauseBaseRecordSelectLayer = (function(_super) {
+  __extends(pauseBaseRecordSelectLayer, _super);
+
+  function pauseBaseRecordSelectLayer() {
+    pauseBaseRecordSelectLayer.__super__.constructor.apply(this, arguments);
+    this.dialog = new recordSelectDialogHtml();
+    this.item_name = new itemNameDiscription();
+    this.item_image = new selectItemImage();
+    this.item_discription = new itemDiscription();
+  }
+
+  return pauseBaseRecordSelectLayer;
+
+})(appDomLayer);
+
+pauseRecordSelectLayer = (function(_super) {
+  __extends(pauseRecordSelectLayer, _super);
+
+  function pauseRecordSelectLayer() {
+    pauseRecordSelectLayer.__super__.constructor.apply(this, arguments);
+    this.ok_button = new recordOkButtonHtml();
+    this.addChild(this.modal);
+    this.addChild(this.dialog);
+    this.addChild(this.ok_button);
+    this.addChild(this.item_image);
+    this.addChild(this.item_name);
+    this.addChild(this.item_discription);
+  }
+
+  pauseRecordSelectLayer.prototype.setSelectItem = function(kind) {
+    var discription;
+    this.item_options = game.slot_setting.muse_material_list[kind].bgm[0];
+    this.item_name.setText(this.item_options.title);
+    this.item_image.setImage(this.item_options.image);
+    discription = this._setDiscription();
+    return this.item_discription.setText(discription);
+  };
+
+  pauseRecordSelectLayer.prototype._setDiscription = function() {
+    var text;
+    text = 'ユニット：' + this.item_options.unit;
+    return text;
+  };
+
+  return pauseRecordSelectLayer;
+
+})(pauseBaseRecordSelectLayer);
+
+pauseTrophySelectLayer = (function(_super) {
+  __extends(pauseTrophySelectLayer, _super);
+
+  function pauseTrophySelectLayer() {
+    pauseTrophySelectLayer.__super__.constructor.apply(this, arguments);
+    this.ok_button = new trophyOkButtonHtml();
+    this.addChild(this.modal);
+    this.addChild(this.dialog);
+    this.addChild(this.ok_button);
+    this.addChild(this.item_image);
+    this.addChild(this.item_name);
+    this.addChild(this.item_discription);
+  }
+
+  pauseTrophySelectLayer.prototype.setSelectItem = function(kind) {
+    var discription;
+    this.item_options = game.slot_setting.item_list[kind];
+    this.item_name.setText(this.item_options.name);
+    this.item_image.setImage(this.item_options.image);
+    discription = this._setDiscription();
+    return this.item_discription.setText(discription);
+  };
+
+  pauseTrophySelectLayer.prototype._setDiscription = function() {
+    var text;
+    text = '効果：' + this.item_options.discription;
+    text += '<br>値段：' + game.toJPUnit(this.item_options.price) + '円';
+    text += '<br>出現条件：' + this.item_options.conditoin;
+    return text;
+  };
+
+  return pauseTrophySelectLayer;
+
+})(pauseBaseRecordSelectLayer);
 
 pauseSaveLayer = (function(_super) {
   __extends(pauseSaveLayer, _super);
@@ -1065,7 +1220,7 @@ LoveliveGame = (function(_super) {
     this.width = 480;
     this.height = 720;
     this.fps = 24;
-    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart', 'explosion', 'items'];
+    this.imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori', 'heart', 'explosion', 'items', 'coin_pla'];
     this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm/bgm1'];
     this.keybind(90, 'z');
     this.keybind(88, 'x');
@@ -1096,10 +1251,6 @@ LoveliveGame = (function(_super) {
     this.main_scene = new mainScene();
     this.pause_scene = new pauseScene();
     this.loadGame();
-    if (this.slot_setting.now_muse_num === 0) {
-      this.slot_setting.setMuseMember();
-    }
-    this.musePreLoad();
     if (this.test.test_exe_flg === true) {
       this.test_scene = new testScene();
       this.pushScene(this.test_scene);
@@ -1224,6 +1375,38 @@ LoveliveGame = (function(_super) {
 
 
   /*
+  現在アイテムがセットされているかを確認する
+   */
+
+  LoveliveGame.prototype.isItemSet = function(kind) {
+    var rslt;
+    rslt = false;
+    if (game.item_set_now.indexOf(kind) !== -1) {
+      rslt = true;
+    }
+    return rslt;
+  };
+
+
+  /*
+  アイテムの効果を発動する
+   */
+
+  LoveliveGame.prototype.itemUseExe = function() {
+    if (this.isItemSet(1)) {
+      this.main_scene.gp_stage_front.player.setMxUp();
+    } else {
+      this.main_scene.gp_stage_front.player.resetMxUp();
+    }
+    if (this.isItemSet(3)) {
+      return this.main_scene.gp_stage_front.player.setMyUp();
+    } else {
+      return this.main_scene.gp_stage_front.player.resetMyUp();
+    }
+  };
+
+
+  /*
   アイテムを取った時にテンションゲージを増減する
    */
 
@@ -1258,13 +1441,12 @@ LoveliveGame = (function(_super) {
 
   /*
   スロットが当たった時にテンションゲージを増減する
-  @param number prize_money 当選金額
   @param number hit_eye     当たった目の番号
    */
 
-  LoveliveGame.prototype.tensionSetValueSlotHit = function(prize_money, hit_eye) {
+  LoveliveGame.prototype.tensionSetValueSlotHit = function(hit_eye) {
     var val;
-    val = this.slot_setting.setTensionSlotHit(prize_money, hit_eye);
+    val = this.slot_setting.setTensionSlotHit(hit_eye);
     return this.tensionSetValue(val);
   };
 
@@ -1304,8 +1486,8 @@ LoveliveGame = (function(_super) {
       } else {
         this._loadGameTest();
       }
-      return this._gameInitSetting();
     }
+    return this._gameInitSetting();
   };
 
 
@@ -1446,6 +1628,7 @@ LoveliveGame = (function(_super) {
     this.item_point = data.item_point;
     this.next_add_member_key = data.next_add_member_key;
     this.slot_setting.prev_muse = data.prev_muse;
+    this.slot_setting.now_muse_num = data.now_muse_num;
     this.item_have_now = data.item_have_now;
     this.item_set_now = data.item_set_now;
     this.prev_fever_muse = data.prev_fever_muse;
@@ -1459,6 +1642,10 @@ LoveliveGame = (function(_super) {
 
   LoveliveGame.prototype._gameInitSetting = function() {
     var sys;
+    if (this.slot_setting.now_muse_num === 0) {
+      this.slot_setting.setMuseMember();
+    }
+    this.musePreLoad();
     sys = this.main_scene.gp_system;
     sys.money_text.setValue();
     sys.bet_text.setValue();
@@ -1470,7 +1657,8 @@ LoveliveGame = (function(_super) {
     this.pause_scene.pause_member_set_layer.dispSetMemberList();
     this.slot_setting.setMemberItemPrice();
     this.slot_setting.setItemPointValue();
-    return this.musePreLoadByMemberSetNow();
+    this.musePreLoadByMemberSetNow();
+    return this.itemUseExe();
   };
 
   return LoveliveGame;
@@ -1574,7 +1762,7 @@ gpBackPanorama = (function(_super) {
     this.back_panorama = new BackPanorama();
     this.big_kotori = new bigKotori();
     this.now_back_effect_flg = false;
-    this.back_effect_rate = 100;
+    this.back_effect_rate = 200;
     this.addChild(this.back_panorama);
   }
 
@@ -1745,7 +1933,7 @@ gpSlot = (function(_super) {
 
 
   /*
-  スロットが強制的に辺になるようにリールから左のリールの当たり目と同じ目を探して配列のキーを返す
+  スロットが強制的に当たりになるようにリールから左のリールの当たり目と同じ目を探して配列のキーを返す
   左の当たり目がμ’ｓならリールからμ’ｓの目をランダムで取り出して返す
    */
 
@@ -1802,7 +1990,7 @@ gpSlot = (function(_super) {
     if (this._isSlotHit() === true) {
       game.sePlay(this.slot_hit_se);
       prize_money = game.slot_setting.calcPrizeMoney(this.middle_lille.lilleArray[this.middle_lille.nowEye]);
-      game.tensionSetValueSlotHit(prize_money, this.hit_role);
+      game.tensionSetValueSlotHit(this.hit_role);
       this._feverStart(this.hit_role);
       if (this.hit_role === 1) {
         member = game.slot_setting.getAddMuseNum();
@@ -2183,7 +2371,9 @@ stageFront = (function(_super) {
       }
     }
     if (this.missItemFallSycleNow === this.missItemFallSycle && this.age % this.itemFallFrm === this.itemFallFrm / 2) {
-      this._missCatchFall();
+      if (game.isItemSet(2) === false) {
+        this._missCatchFall();
+      }
       return this.missItemFallSycleNow = 0;
     }
   };
@@ -2194,15 +2384,16 @@ stageFront = (function(_super) {
    */
 
   stageFront.prototype._catchFall = function() {
+    if (game.bet > game.money) {
+      game.bet = 1;
+      game.main_scene.gp_system.bet_text.setValue();
+    }
     if (game.money >= game.bet) {
       this.catchItems.push(new MacaroonCatch());
       this.addChild(this.catchItems[this.nowCatchItemsNum]);
       this.catchItems[this.nowCatchItemsNum].setPosition();
       this.nowCatchItemsNum += 1;
       game.money -= game.bet;
-      if (game.bet > game.money) {
-        game.bet = game.money;
-      }
       game.main_scene.gp_system.money_text.setValue();
       game.main_scene.gp_slot.slotStart();
       if (game.slot_setting.getIsForceSlotHit() === true) {
@@ -2414,7 +2605,7 @@ stageBack = (function(_super) {
       ret_data[1000] = game.getDigitNum(value, 4);
       ret_data[10000] = game.getDigitNum(value, 5);
       ret_data[100000] = game.getDigitNum(value, 6) + 10;
-      ret_data[1000000] = game.getDigitNum(value, 7)(-1);
+      ret_data[1000000] = game.getDigitNum(value, 7) - 1;
       ret_data[10000000] = 0;
     } else {
       ret_data[1] = 0;
@@ -2588,7 +2779,6 @@ gpSystem = (function(_super) {
 
   /*
   キーの上下を押して掛け金を設定する
-  TODO スロットの当選金額落下中は変更できないようにする
    */
 
   gpSystem.prototype._betSetting = function() {
@@ -2636,8 +2826,14 @@ gpSystem = (function(_super) {
         val = 1000;
       } else if (bet < 100000) {
         val = 10000;
-      } else {
+      } else if (bet < 1000000) {
         val = 100000;
+      } else if (bet < 10000000) {
+        val = 1000000;
+      } else if (bet < 100000000) {
+        val = 10000000;
+      } else {
+        val = 100000000;
       }
     } else {
       if (bet <= 10) {
@@ -2650,17 +2846,23 @@ gpSystem = (function(_super) {
         val = -1000;
       } else if (bet <= 100000) {
         val = -10000;
-      } else {
+      } else if (bet <= 1000000) {
         val = -100000;
+      } else if (bet <= 10000000) {
+        val = -1000000;
+      } else if (bet <= 100000000) {
+        val = -10000000;
+      } else {
+        val = -100000000;
       }
     }
     game.bet += val;
     if (game.bet < 1) {
       game.bet = 1;
     } else if (game.bet > game.money) {
-      game.bet = game.money;
-    } else if (game.bet > 10000000) {
-      game.bet = 10000000;
+      game.bet -= val;
+    } else if (game.bet > 100000000000) {
+      game.bet = 100000000000;
     }
     return this.bet_text.setValue();
   };
@@ -2714,6 +2916,8 @@ gpSystem = (function(_super) {
           if (this.prevItem !== 0) {
             game.item_set_now.push(this.prevItem);
             this.itemDsp();
+            game.pause_scene.pause_item_use_layer.dspSetItemList();
+            game.itemUseExe();
           }
         }
       }
@@ -2734,7 +2938,8 @@ gpSystem = (function(_super) {
     this.prevItem = game.now_item;
     game.item_set_now = [];
     this.itemDsp();
-    return game.pause_scene.pause_item_use_layer.dspSetItemList();
+    game.pause_scene.pause_item_use_layer.dspSetItemList();
+    return game.itemUseExe();
   };
 
   return gpSystem;
@@ -3032,6 +3237,40 @@ saveOkButtonHtml = (function(_super) {
   };
 
   return saveOkButtonHtml;
+
+})(baseOkButtonHtml);
+
+recordOkButtonHtml = (function(_super) {
+  __extends(recordOkButtonHtml, _super);
+
+  function recordOkButtonHtml() {
+    recordOkButtonHtml.__super__.constructor.apply(this, arguments);
+    this.x = 170;
+    this.y = 480;
+  }
+
+  recordOkButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.removeRecordSelectMenu();
+  };
+
+  return recordOkButtonHtml;
+
+})(baseOkButtonHtml);
+
+trophyOkButtonHtml = (function(_super) {
+  __extends(trophyOkButtonHtml, _super);
+
+  function trophyOkButtonHtml() {
+    trophyOkButtonHtml.__super__.constructor.apply(this, arguments);
+    this.x = 170;
+    this.y = 480;
+  }
+
+  trophyOkButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.removeTrophySelectmenu();
+  };
+
+  return trophyOkButtonHtml;
 
 })(baseOkButtonHtml);
 
@@ -3346,6 +3585,7 @@ itemBuyDialogCloseButton = (function(_super) {
 
   function itemBuyDialogCloseButton() {
     itemBuyDialogCloseButton.__super__.constructor.apply(this, arguments);
+    this.y = 70;
   }
 
   itemBuyDialogCloseButton.prototype.ontouchend = function() {
@@ -3394,6 +3634,7 @@ recordDialogCloseButton = (function(_super) {
 
   function recordDialogCloseButton() {
     recordDialogCloseButton.__super__.constructor.apply(this, arguments);
+    this.y = 70;
   }
 
   recordDialogCloseButton.prototype.ontouchend = function() {
@@ -3461,14 +3702,24 @@ saveDialogHtml = (function(_super) {
 menuDialogHtml = (function(_super) {
   __extends(menuDialogHtml, _super);
 
-  function menuDialogHtml() {
-    menuDialogHtml.__super__.constructor.call(this, 420, 460);
+  function menuDialogHtml(width, height) {
+    if (width == null) {
+      width = 420;
+    }
+    if (height == null) {
+      height = 460;
+    }
+    menuDialogHtml.__super__.constructor.call(this, width, height);
     this.text = '　';
-    this["class"].push('base-dialog-menu');
+    this.classPush();
     this.x = 25;
     this.y = 80;
     this.setHtml();
   }
+
+  menuDialogHtml.prototype.classPush = function() {
+    return this["class"].push('base-dialog-menu');
+  };
 
   return menuDialogHtml;
 
@@ -3478,8 +3729,13 @@ itemBuyDialogHtml = (function(_super) {
   __extends(itemBuyDialogHtml, _super);
 
   function itemBuyDialogHtml() {
-    itemBuyDialogHtml.__super__.constructor.apply(this, arguments);
+    itemBuyDialogHtml.__super__.constructor.call(this, 420, 500);
+    this.y = 50;
   }
+
+  itemBuyDialogHtml.prototype.classPush = function() {
+    return this["class"].push('base-dialog-high');
+  };
 
   return itemBuyDialogHtml;
 
@@ -3511,8 +3767,13 @@ recordDialogHtml = (function(_super) {
   __extends(recordDialogHtml, _super);
 
   function recordDialogHtml() {
-    recordDialogHtml.__super__.constructor.apply(this, arguments);
+    recordDialogHtml.__super__.constructor.call(this, 420, 500);
+    this.y = 50;
   }
+
+  recordDialogHtml.prototype.classPush = function() {
+    return this["class"].push('base-dialog-high');
+  };
 
   return recordDialogHtml;
 
@@ -3567,6 +3828,17 @@ memberUseSelectDialogHtml = (function(_super) {
 
 })(selectDialogHtml);
 
+recordSelectDialogHtml = (function(_super) {
+  __extends(recordSelectDialogHtml, _super);
+
+  function recordSelectDialogHtml() {
+    recordSelectDialogHtml.__super__.constructor.apply(this, arguments);
+  }
+
+  return recordSelectDialogHtml;
+
+})(selectDialogHtml);
+
 discriptionTextDialogHtml = (function(_super) {
   __extends(discriptionTextDialogHtml, _super);
 
@@ -3582,8 +3854,14 @@ discriptionTextDialogHtml = (function(_super) {
 titleDiscription = (function(_super) {
   __extends(titleDiscription, _super);
 
-  function titleDiscription() {
-    titleDiscription.__super__.constructor.call(this, 400, 20);
+  function titleDiscription(width, height) {
+    if (width == null) {
+      width = 400;
+    }
+    if (height == null) {
+      height = 20;
+    }
+    titleDiscription.__super__.constructor.call(this, width, height);
     this["class"].push('title-discription');
   }
 
@@ -3595,9 +3873,9 @@ itemItemBuyDiscription = (function(_super) {
   __extends(itemItemBuyDiscription, _super);
 
   function itemItemBuyDiscription() {
-    itemItemBuyDiscription.__super__.constructor.apply(this, arguments);
+    itemItemBuyDiscription.__super__.constructor.call(this, 100, 20);
     this.x = 220;
-    this.y = 130;
+    this.y = 80;
     this.text = '魔法';
     this.setHtml();
   }
@@ -3612,12 +3890,27 @@ memberItemBuyDiscription = (function(_super) {
   function memberItemBuyDiscription() {
     memberItemBuyDiscription.__super__.constructor.apply(this, arguments);
     this.x = 220;
-    this.y = 370;
+    this.y = 310;
     this.text = '部員';
     this.setHtml();
   }
 
   return memberItemBuyDiscription;
+
+})(titleDiscription);
+
+trophyItemBuyDiscription = (function(_super) {
+  __extends(trophyItemBuyDiscription, _super);
+
+  function trophyItemBuyDiscription() {
+    trophyItemBuyDiscription.__super__.constructor.apply(this, arguments);
+    this.x = 200;
+    this.y = 530;
+    this.text = 'トロフィー';
+    this.setHtml();
+  }
+
+  return trophyItemBuyDiscription;
 
 })(titleDiscription);
 
@@ -3648,6 +3941,36 @@ useHaveDiscription = (function(_super) {
   }
 
   return useHaveDiscription;
+
+})(titleDiscription);
+
+recordDiscription = (function(_super) {
+  __extends(recordDiscription, _super);
+
+  function recordDiscription() {
+    recordDiscription.__super__.constructor.call(this, 100, 200);
+    this.x = 200;
+    this.y = 80;
+    this.text = '楽曲';
+    this.setHtml();
+  }
+
+  return recordDiscription;
+
+})(titleDiscription);
+
+trophyDiscription = (function(_super) {
+  __extends(trophyDiscription, _super);
+
+  function trophyDiscription() {
+    trophyDiscription.__super__.constructor.apply(this, arguments);
+    this.x = 170;
+    this.y = 520;
+    this.text = 'トロフィー';
+    this.setHtml();
+  }
+
+  return trophyDiscription;
 
 })(titleDiscription);
 
@@ -3811,7 +4134,7 @@ buyItemHtml = (function(_super) {
 
   function buyItemHtml(kind) {
     buyItemHtml.__super__.constructor.call(this, kind);
-    this.positionY = 160;
+    this.positionY = 110;
     this.is_exist = true;
   }
 
@@ -3908,7 +4231,7 @@ buyMemberHtml = (function(_super) {
 
   function buyMemberHtml(kind) {
     buyMemberHtml.__super__.constructor.call(this, kind);
-    this.positionY = 400;
+    this.positionY = 340;
     this.is_exist = true;
   }
 
@@ -3949,6 +4272,7 @@ setMemberHtml = (function(_super) {
   function setMemberHtml(position) {
     setMemberHtml.__super__.constructor.call(this, position);
     this.kind = 0;
+    this.disabled = false;
     this.positionY = 210;
     this.positionX = 120;
     this.positoin_kind = position - 1;
@@ -3971,7 +4295,7 @@ setMemberHtml = (function(_super) {
   };
 
   setMemberHtml.prototype.ontouchend = function() {
-    if (this.kind !== 10) {
+    if (this.kind !== 10 && this.disabled === false) {
       game.sePlay(this.dicisionSe);
       return game.pause_scene.setMemberUseSelectMenu(this.kind);
     }
@@ -3999,6 +4323,93 @@ selectItemImage = (function(_super) {
   return selectItemImage;
 
 })(imageHtml);
+
+baseRecordItemHtml = (function(_super) {
+  __extends(baseRecordItemHtml, _super);
+
+  function baseRecordItemHtml(position, kind) {
+    baseRecordItemHtml.__super__.constructor.call(this, 100, 100);
+    this.position = position;
+    this.kind = kind;
+    this.image_name = 'test_image2';
+    this.setImageHtml();
+    this.scaleX = 0.65;
+    this.scaleY = 0.65;
+    this.positionY = 0;
+    this.positionX = 0;
+    this.dicisionSe = game.soundload('dicision');
+  }
+
+  baseRecordItemHtml.prototype.setPosition = function() {
+    this.y = this.positionY + (Math.floor(this.position / 5) + 1) * 75;
+    return this.x = 75 * (this.position % 5) + this.positionX;
+  };
+
+  return baseRecordItemHtml;
+
+})(systemHtml);
+
+recordItemHtml = (function(_super) {
+  __extends(recordItemHtml, _super);
+
+  function recordItemHtml(position, kind) {
+    recordItemHtml.__super__.constructor.call(this, position, kind);
+    this.positionY = 40;
+    this.positionX = 35;
+  }
+
+  recordItemHtml.prototype.ontouchend = function() {
+    game.sePlay(this.dicisionSe);
+    return game.pause_scene.setRecordSelectMenu(this.kind);
+  };
+
+  return recordItemHtml;
+
+})(baseRecordItemHtml);
+
+trophyItemHtml = (function(_super) {
+  __extends(trophyItemHtml, _super);
+
+  function trophyItemHtml(position, kind) {
+    trophyItemHtml.__super__.constructor.call(this, position, kind);
+    this.positionY = 480;
+    this.positionX = 75;
+  }
+
+  trophyItemHtml.prototype.ontouchend = function() {
+    game.sePlay(this.dicisionSe);
+    return game.pause_scene.setTrophySelectMenu(this.kind);
+  };
+
+  return trophyItemHtml;
+
+})(baseRecordItemHtml);
+
+buyTrophyItemHtml = (function(_super) {
+  __extends(buyTrophyItemHtml, _super);
+
+  function buyTrophyItemHtml(position, kind) {
+    buyTrophyItemHtml.__super__.constructor.call(this, position, kind);
+    this.positionY = 480;
+    this.positionX = 75;
+    this.item_kind = kind;
+    this.is_exist = true;
+  }
+
+  buyTrophyItemHtml.prototype.ontouchend = function() {
+    if (this.is_exist === true) {
+      game.sePlay(this.dicisionSe);
+      return this.dispItemBuySelectDialog(this.item_kind);
+    }
+  };
+
+  buyTrophyItemHtml.prototype.dispItemBuySelectDialog = function(kind) {
+    return game.pause_scene.setItemBuySelectMenu(kind);
+  };
+
+  return buyTrophyItemHtml;
+
+})(baseRecordItemHtml);
 
 text = (function(_super) {
   __extends(text, _super);
@@ -4142,34 +4553,33 @@ Debug = (function(_super) {
     this.test_load_flg = false;
     this.test_load_val = {
       'money': 1234567890,
-      'bet': 100,
+      'bet': 1000000,
       'combo': 10,
       'tension': 100,
       'past_fever_num': 0,
-      'item_point': 10,
+      'item_point': 50,
       'next_add_member_key': 0,
-      'prev_muse': [11],
-      'item_have_now': [1, 2, 9, 11, 12, 13, 14],
-      'item_set_now': [9],
-      'member_set_now': [11, 12, 13],
-      'prev_fever_muse': [11]
+      'prev_muse': [],
+      'now_muse_num': 15,
+      'item_have_now': [],
+      'item_set_now': [],
+      'member_set_now': [],
+      'prev_fever_muse': []
     };
     this.lille_flg = false;
+    this.lille_array = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
 
     /*
     @lille_array = [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        [11, 11, 11, 11, 11, 11, 11, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [12, 12, 12, 12, 12, 12, 12, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [13, 13, 13, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     ]
      */
-    this.lille_array = [[11, 11, 11, 11, 11, 11, 11, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1], [12, 12, 12, 12, 12, 12, 12, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1], [13, 13, 13, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
     this.item_flg = false;
-    this.item_fall_early_flg = false;
     this.fix_tention_item_catch_flg = false;
     this.fix_tention_item_fall_flg = false;
     this.fix_tention_slot_hit_flg = false;
-    this.force_insert_muse = false;
     this.force_slot_hit = false;
     this.half_slot_hit = false;
     this.force_fever = false;
@@ -4223,8 +4633,8 @@ slotSetting = (function(_super) {
     /*
     カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
     11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
-    20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
-    31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
+    ユニット(役):20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
+    31:ほのりん、32:ことぱな、33:にこのぞ、34:のぞえり、35:まきりん、36:うみえり、37:ことうみ、38:にこまき
     direction:キャラクターの向き、left or right
     カットインの画像サイズ、頭の位置で570px
     頭の上に余白がある場合の高さ計算式：(570/(元画像高さ-元画像頭のY座標))*元画像高さ
@@ -4247,7 +4657,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'yumenaki',
-            'time': 107
+            'time': 107,
+            'title': '夢なき夢は夢じゃない',
+            'unit': '高坂穂乃果',
+            'image': 'test_image2'
           }
         ],
         'voice': ['11_0', '11_1']
@@ -4269,7 +4682,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'blueberry',
-            'time': 98
+            'time': 98,
+            'title': 'ぶる～べりぃとれいん',
+            'unit': '南ことり',
+            'image': 'test_image2'
           }
         ],
         'voice': ['12_0', '12_1']
@@ -4291,7 +4707,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'reason',
-            'time': 94
+            'time': 94,
+            'title': '勇気のReason',
+            'unit': '園田海未',
+            'image': 'test_image2'
           }
         ],
         'voice': ['13_0', '13_1']
@@ -4313,7 +4732,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'daring',
-            'time': 91
+            'time': 91,
+            'title': 'Darling！！',
+            'unit': '西木野真姫',
+            'image': 'test_image2'
           }
         ],
         'voice': ['14_0', '14_1']
@@ -4335,7 +4757,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'rinrinrin',
-            'time': 128
+            'time': 128,
+            'title': '恋のシグナルRin rin rin！',
+            'unit': '星空凛',
+            'image': 'test_image2'
           }
         ],
         'voice': ['15_0', '15_1']
@@ -4357,7 +4782,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'nawatobi',
-            'time': 164
+            'time': 164,
+            'title': 'なわとび',
+            'unit': '小泉花陽',
+            'image': 'test_image2'
           }
         ],
         'voice': ['16_0', '16_1']
@@ -4379,7 +4807,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'mahoutukai',
-            'time': 105
+            'time': 105,
+            'title': 'まほうつかいはじめました',
+            'unit': '矢澤にこ',
+            'image': 'test_image2'
           }
         ],
         'voice': ['17_0', '17_1']
@@ -4401,7 +4832,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'junai',
-            'time': 127
+            'time': 127,
+            'title': '純愛レンズ',
+            'unit': '東條希',
+            'image': 'test_image2'
           }
         ],
         'voice': ['18_0', '18_1']
@@ -4423,7 +4857,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'arihureta',
-            'time': 93
+            'time': 93,
+            'title': 'ありふれた悲しみの果て',
+            'unit': '絢瀬絵里',
+            'image': 'test_image2'
           }
         ],
         'voice': ['19_0', '19_1']
@@ -4432,7 +4869,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'zenkai_no_lovelive',
-            'time': 30
+            'time': 30,
+            'title': 'タイトル',
+            'unit': 'ユニット',
+            'image': 'test_image2'
           }
         ]
       },
@@ -4440,7 +4880,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'hello_hoshi',
-            'time': 93
+            'time': 93,
+            'title': 'Hello，星を数えて ',
+            'unit': '1年生<br>（星空凛、西木野真姫、小泉花陽）',
+            'image': 'test_image2'
           }
         ]
       },
@@ -4448,7 +4891,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'future_style',
-            'time': 94
+            'time': 94,
+            'title': 'Future style',
+            'unit': '2年生<br>（高坂穂乃果、南ことり、園田海未）',
+            'image': 'test_image2'
           }
         ]
       },
@@ -4456,7 +4902,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'hatena_heart',
-            'time': 84
+            'time': 84,
+            'title': '？←HEARTBEAT',
+            'unit': '3年生<br>（絢瀬絵里、東條希、矢澤にこ）',
+            'image': 'test_image2'
           }
         ]
       },
@@ -4464,7 +4913,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'zenkai_no_lovelive',
-            'time': 30
+            'time': 30,
+            'title': 'タイトル',
+            'unit': 'Printemps<br>(高坂穂乃果、南ことり、小泉花陽)',
+            'image': 'test_image2'
           }
         ]
       },
@@ -4472,7 +4924,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'zenkai_no_lovelive',
-            'time': 30
+            'time': 30,
+            'title': 'タイトル',
+            'unit': 'lily white<br>(園田海未、星空凛、東條希)',
+            'image': 'test_image2'
           }
         ]
       },
@@ -4480,7 +4935,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'zenkai_no_lovelive',
-            'time': 30
+            'time': 30,
+            'title': 'タイトル',
+            'unit': 'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)',
+            'image': 'test_image2'
           }
         ]
       },
@@ -4488,7 +4946,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'zenkai_no_lovelive',
-            'time': 30
+            'time': 30,
+            'title': 'タイトル',
+            'unit': 'にこりんぱな<br>(矢澤にこ、星空凛、小泉花陽)',
+            'image': 'test_image2'
           }
         ]
       },
@@ -4496,23 +4957,10 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'zenkai_no_lovelive',
-            'time': 30
-          }
-        ]
-      },
-      29: {
-        'bgm': [
-          {
-            'name': 'zenkai_no_lovelive',
-            'time': 30
-          }
-        ]
-      },
-      30: {
-        'bgm': [
-          {
-            'name': 'zenkai_no_lovelive',
-            'time': 30
+            'time': 30,
+            'title': 'タイトル',
+            'unit': '<br>園田海未、西木野真姫、絢瀬絵里',
+            'image': 'test_image2'
           }
         ]
       },
@@ -4520,11 +4968,92 @@ slotSetting = (function(_super) {
         'bgm': [
           {
             'name': 'zenkai_no_lovelive',
-            'time': 30
+            'time': 30,
+            'title': 'タイトル',
+            'unit': '高坂穂乃果、星空凛',
+            'image': 'test_image2'
+          }
+        ]
+      },
+      32: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30,
+            'title': 'タイトル',
+            'unit': '南ことり、小泉花陽',
+            'image': 'test_image2'
+          }
+        ]
+      },
+      33: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30,
+            'title': 'タイトル',
+            'unit': '矢澤にこ、東條希',
+            'image': 'test_image2'
+          }
+        ]
+      },
+      34: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30,
+            'title': 'タイトル',
+            'unit': '東條希、絢瀬絵里',
+            'image': 'test_image2'
+          }
+        ]
+      },
+      35: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30,
+            'title': 'タイトル',
+            'unit': '西木野真姫、星空凛',
+            'image': 'test_image2'
+          }
+        ]
+      },
+      36: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30,
+            'title': 'タイトル',
+            'unit': '園田海未、絢瀬絵里',
+            'image': 'test_image2'
+          }
+        ]
+      },
+      37: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30,
+            'title': 'タイトル',
+            'unit': '南ことり、園田海未',
+            'image': 'test_image2'
+          }
+        ]
+      },
+      38: {
+        'bgm': [
+          {
+            'name': 'zenkai_no_lovelive',
+            'time': 30,
+            'title': 'タイトル',
+            'unit': '矢澤にこ、西木野真姫',
+            'image': 'test_image2'
           }
         ]
       }
     };
+    this.bgm_list = [11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25, 26, 27, 28, 31, 32, 33, 34, 35, 36, 37, 38];
 
     /*
     アイテムのリスト
@@ -4545,7 +5074,7 @@ slotSetting = (function(_super) {
         'name': 'テンション上がるにゃー！',
         'image': 'item_1',
         'discription': '移動速度が上がる',
-        'price': 10000,
+        'price': 500000,
         'durationSec': 60,
         'conditoin': '',
         'condFunc': function() {
@@ -4556,8 +5085,8 @@ slotSetting = (function(_super) {
         'name': 'チーズケーキ鍋',
         'image': 'item_2',
         'discription': 'チーズケーキしか降ってこなくなる<br>ニンニクは降ってこなくなる',
-        'price': 50000,
-        'durationSec': 60,
+        'price': 10000,
+        'durationSec': 120,
         'conditoin': '',
         'condFunc': function() {
           return game.slot_setting.itemConditinon(2);
@@ -4578,8 +5107,8 @@ slotSetting = (function(_super) {
         'name': 'くすくす大明神',
         'image': 'item_4',
         'discription': 'コンボ数に関わらず<br>たくさんのコインが降ってくるようになる',
-        'price': 500000,
-        'durationSec': 60,
+        'price': 50000,
+        'durationSec': 120,
         'conditoin': '',
         'condFunc': function() {
           return game.slot_setting.itemConditinon(4);
@@ -4588,9 +5117,9 @@ slotSetting = (function(_super) {
       5: {
         'name': '完っ全にフルハウスね',
         'image': 'item_5',
-        'discription': 'CHANCE!!状態になる確率が<br>大幅に上がる',
-        'price': 1000000,
-        'durationSec': 30,
+        'discription': '3回に1回の確率で<br>CHANCE!!状態になる',
+        'price': 10000000,
+        'durationSec': 120,
         'conditoin': '',
         'condFunc': function() {
           return game.slot_setting.itemConditinon(5);
@@ -4601,7 +5130,7 @@ slotSetting = (function(_super) {
         'image': 'item_6',
         'discription': 'おやつが降ってくる速度が<br>ちょっとだけ遅くなる',
         'price': 5000000,
-        'durationSec': 30,
+        'durationSec': 60,
         'conditoin': '',
         'condFunc': function() {
           return game.slot_setting.itemConditinon(6);
@@ -4611,8 +5140,8 @@ slotSetting = (function(_super) {
         'name': 'ファイトだよっ',
         'image': 'item_7',
         'discription': 'スロットに当たった時に<br>得られる金額が2倍になる',
-        'price': 10000000,
-        'durationSec': 30,
+        'price': 1000000,
+        'durationSec': 120,
         'conditoin': '',
         'condFunc': function() {
           return game.slot_setting.itemConditinon(7);
@@ -4621,20 +5150,20 @@ slotSetting = (function(_super) {
       8: {
         'name': 'ラブアローシュート',
         'image': 'item_8',
-        'discription': 'おやつが頭上に落ちてくる',
-        'price': 100000000,
-        'durationSec': 30,
+        'discription': 'おやつが近くに落ちてくる',
+        'price': 1000000000,
+        'durationSec': 60,
         'conditoin': '',
         'condFunc': function() {
           return game.slot_setting.itemConditinon(8);
         }
       },
       9: {
-        'name': 'エリチカおうちに帰る！',
+        'name': '認められないわぁ',
         'image': 'item_9',
-        'discription': '掛け金をいくら上げても<br>おやつの落下速度が上がらなくなる',
-        'price': 1000000000,
-        'durationSec': 30,
+        'discription': 'アイテムを落としてもコンボが減らず<br>テンションも下がらないようになる',
+        'price': 100000000,
+        'durationSec': 60,
         'conditoin': '',
         'condFunc': function() {
           return game.slot_setting.itemConditinon(9);
@@ -4729,15 +5258,54 @@ slotSetting = (function(_super) {
         'condFunc': function() {
           return game.slot_setting.itemConditinon(19);
         }
+      },
+      21: {
+        'name': 'ブロンズことり',
+        'image': 'test_image2',
+        'discription': '移動速度とジャンプ力がアップする',
+        'price': 10000000,
+        'conditoin': '100コンボ達成する',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(21);
+        }
+      },
+      22: {
+        'name': 'シルバーことり',
+        'image': 'test_image2',
+        'discription': '魔法のスロットが1つ増える',
+        'price': 1000000000,
+        'conditoin': 'ソロ楽曲9曲を全て達成する',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(22);
+        }
+      },
+      23: {
+        'name': 'ゴールドことり',
+        'image': 'test_image2',
+        'discription': '魔法のスロットが1つ増える',
+        'price': 10000000000,
+        'conditoin': '200コンボ達成する',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(22);
+        }
+      },
+      24: {
+        'name': 'プラチナことり',
+        'image': 'test_image2',
+        'discription': 'このゲームの全てを極めた証',
+        'price': 1000000000000,
+        'conditoin': '全楽曲25曲を全て達成する',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(22);
+        }
       }
     };
     this.member_item_price = [1000, 10000, 100000, 500000, 1000000, 5000000, 10000000, 50000000, 100000000];
     this.tension_max = 500;
-    this.now_muse_num = 0;
     this.isForceSlotHit = false;
     this.slotHitRate = 0;
     this.item_point_max = 500;
-    this.item_point_recovery_sec = 120;
+    this.item_point_recovery_sec = 60;
     this.item_point_value = [
       {
         0: 0,
@@ -4755,6 +5323,7 @@ slotSetting = (function(_super) {
     this.prize_div = 1;
     this.item_gravity = 0;
     this.prev_muse = [];
+    this.now_muse_num = 0;
   }
 
   slotSetting.prototype.setItemPointValue = function() {
@@ -4783,25 +5352,28 @@ slotSetting = (function(_super) {
       this.prize_div = 1;
     } else if (game.bet < 100) {
       val = 0.44;
-      this.prize_div = 0.9;
+      this.prize_div = 1;
     } else if (game.bet < 500) {
       val = 0.48;
       this.prize_div = 0.9;
     } else if (game.bet < 1000) {
       val = 0.5;
+      this.prize_div = 0.9;
+    } else if (game.bet < 5000) {
+      val = 0.53;
       this.prize_div = 0.8;
     } else if (game.bet < 10000) {
-      val = 0.5 + Math.floor(game.bet / 1000) / 100;
-      this.prize_div = Math.floor(800 - (game.bet / 50)) / 1000;
+      val = 0.55;
+      this.prize_div = 0.8;
     } else if (game.bet < 100000) {
-      val = 0.6 + Math.floor(game.bet / 10000) / 100;
-      this.prize_div = Math.floor(600 - (game.bet / 500)) / 1000;
+      val = 0.55 + Math.floor(game.bet / 10000) / 100;
+      this.prize_div = Math.floor(700 - (game.bet / 500)) / 1000;
     } else if (game.bet < 1000000) {
-      val = 0.7 + Math.floor(game.bet / 10000) / 100;
-      this.prize_div = Math.floor(400 - (game.bet / 5000)) / 1000;
+      val = 0.65 + Math.floor(game.bet / 10000) / 100;
+      this.prize_div = Math.floor(500 - (game.bet / 5000)) / 1000;
     } else {
       val = 2;
-      this.prize_div = 0.2;
+      this.prize_div = 0.3;
     }
     div = 1;
     val = Math.floor(val * div * 100) / 100;
@@ -4811,6 +5383,9 @@ slotSetting = (function(_super) {
         div = 2;
       }
       val += div;
+    }
+    if (game.isItemSet(6)) {
+      val = Math.floor(val * 0.7 * 100) / 100;
     }
     this.item_gravity = val;
     return val;
@@ -4866,6 +5441,7 @@ slotSetting = (function(_super) {
     random = Math.floor(Math.random() * remain.length);
     member = remain[random];
     this.now_muse_num = member;
+    game.pause_scene.pause_member_set_layer.dispSetMemberList();
     if (this.prev_muse.indexOf(member) === -1) {
       return this.prev_muse.push(member);
     }
@@ -4886,8 +5462,8 @@ slotSetting = (function(_super) {
   /*
   スロットを強制的に当たりにするかどうかを決める
   コンボ数 * 0.1 ％
-  テンションMAXで+10補正
-  過去のフィーバー回数が少ないほど上方補正かける 0回:+12,1回:+8,2回:+4
+  テンションMAXで+15補正
+  過去のフィーバー回数が少ないほど上方補正かける 0回:+9,1回:+6,2回:+3
   最大値は30％
   フィーバー中は強制的に当たり
   @return boolean true:当たり
@@ -4896,11 +5472,11 @@ slotSetting = (function(_super) {
   slotSetting.prototype.getIsForceSlotHit = function() {
     var random, rate, result;
     result = false;
-    rate = Math.floor((game.combo * 0.1) + ((game.tension / this.tension_max) * 10));
+    rate = Math.floor((game.combo * 0.1) + ((game.tension / this.tension_max) * 15));
     if (game.past_fever_num <= 2) {
-      rate += (3 - game.past_fever_num) * 4;
+      rate += (3 - game.past_fever_num) * 3;
     }
-    if (rate > 30) {
+    if (rate > 30 || game.isItemSet(5) || game.main_scene.gp_back_panorama.now_back_effect_flg === true) {
       rate = 30;
     }
     if (game.debug.half_slot_hit === true) {
@@ -4921,7 +5497,12 @@ slotSetting = (function(_super) {
    */
 
   slotSetting.prototype.getReturnMoneyFallValue = function() {
-    return Math.floor(game.bet * game.combo * 0.03);
+    var up;
+    up = game.combo;
+    if (game.isItemSet(4) && game.combo < 100) {
+      up = 100;
+    }
+    return Math.floor(game.bet * up * 0.03);
   };
 
 
@@ -4941,6 +5522,9 @@ slotSetting = (function(_super) {
       }
       ret_money = Math.floor(ret_money / div);
     }
+    if (game.isItemSet(7) || game.main_scene.gp_back_panorama.now_back_effect_flg === true) {
+      ret_money *= 2;
+    }
     if (ret_money > 10000000000) {
       ret_money = 10000000000;
     }
@@ -4953,12 +5537,8 @@ slotSetting = (function(_super) {
    */
 
   slotSetting.prototype.setTensionItemCatch = function() {
-    var base, val;
-    base = 0.005;
-    if (game.past_fever_num <= 2) {
-      base += (2 - game.past_fever_num) * 0.005;
-    }
-    val = (this.tension_max - (game.tension / 2)) * base * (game.item_kind + 1);
+    var val;
+    val = (game.item_kind + 2) * this._getTensionCorrect();
     if (game.main_scene.gp_stage_front.player.isAir === true) {
       val *= 1.5;
     }
@@ -4978,23 +5558,71 @@ slotSetting = (function(_super) {
 
 
   /*
+  所持金と掛け金の比でテンションの増値に補正を加える
+   */
+
+  slotSetting.prototype._getTensionCorrect = function() {
+    var quo, val;
+    quo = Math.round(game.money / game.bet);
+    val = 1;
+    if (quo <= 10) {
+      val = 3;
+    } else if (quo <= 30) {
+      val = 2;
+    } else if (quo <= 60) {
+      val = 1.5;
+    } else if (quo <= 200) {
+      val = 1;
+    } else if (quo <= 600) {
+      val = 0.75;
+    } else if (quo <= 1000) {
+      val = 0.5;
+    } else if (quo <= 10000) {
+      val = 0.25;
+    } else {
+      val = 0.1;
+    }
+    return val;
+  };
+
+
+  /*
   アイテムを落とした時のテンションゲージの増減値を決める
    */
 
   slotSetting.prototype.setTensionItemFall = function() {
     var val;
-    val = this.tension_max * -0.1;
     if (game.debug.fix_tention_item_fall_flg === true) {
       val = game.debug.fix_tention_item_fall_val;
+    } else {
+      if (game.isItemSet(9)) {
+        val = 0;
+      } else {
+        val = this.tension_max * this._getTensionDownCorrect();
+      }
     }
     return val;
   };
 
   slotSetting.prototype.setTensionMissItem = function() {
     var val;
-    val = this.tension_max * -0.3;
     if (game.debug.fix_tention_item_fall_flg === true) {
       val = game.debug.fix_tention_item_fall_val;
+    } else {
+      val = Math.ceil(this.tension_max * (this._getTensionDownCorrect() - 0.2));
+    }
+    return val;
+  };
+
+  slotSetting.prototype._getTensionDownCorrect = function() {
+    var val;
+    val = -0.1;
+    if (game.bet < 10000) {
+      val = -0.1;
+    } else if (game.bet < 1000000) {
+      val = -0.2;
+    } else {
+      val = -0.3;
     }
     return val;
   };
@@ -5002,29 +5630,16 @@ slotSetting = (function(_super) {
 
   /*
   スロットが当たったのテンションゲージの増減値を決める
-  @param number prize_money 当選金額
   @param number hit_eye     当たった目の番号
    */
 
-  slotSetting.prototype.setTensionSlotHit = function(prize_money, hit_eye) {
-    var correct, hit_rate, val;
-    hit_rate = prize_money / game.money;
-    if (game.money < 100) {
-      correct = 0.02;
-    } else if (game.money < 1000) {
-      correct = 0.04;
-    } else if (game.money < 10000) {
-      correct = 0.06;
-    } else if (game.money < 100000) {
-      correct = 0.08;
-    } else {
-      correct = 0.1;
-    }
-    val = hit_rate * correct * this.tension_max;
+  slotSetting.prototype.setTensionSlotHit = function(hit_eye) {
+    var val;
+    val = this._getTensionCorrect() * this.tension_max * 0.1;
     if (val > this.tension_max * 0.5) {
       val = this.tension_max * 0.5;
-    } else if (val < this.tension_max * 0.1) {
-      val = this.tension_max * 0.1;
+    } else if (val < this.tension_max * 0.05) {
+      val = this.tension_max * 0.05;
     }
     val = Math.round(val);
     if (game.debug.fix_tention_slot_hit_flg === true) {
@@ -5081,44 +5696,21 @@ slotSetting = (function(_super) {
    */
 
   slotSetting.prototype.getCatchItemFrame = function() {
-    var rate, rate_0, rate_1, rate_2, rate_3, val;
+    var rate, val;
     val = 0;
     rate = Math.round(Math.random() * 100);
-    if (game.bet < 10) {
-      rate_0 = 60;
-      rate_1 = 80;
-      rate_2 = 90;
-      rate_3 = 95;
-    } else if (game.bet < 100) {
-      rate_0 = 20;
-      rate_1 = 60;
-      rate_2 = 80;
-      rate_3 = 90;
-    } else if (game.bet < 1000) {
-      rate_0 = 10;
-      rate_1 = 30;
-      rate_2 = 60;
-      rate_3 = 80;
-    } else if (game.bet < 5000) {
-      rate_0 = 5;
-      rate_1 = 20;
-      rate_2 = 40;
-      rate_3 = 70;
-    } else {
-      rate_0 = 2;
-      rate_1 = 10;
-      rate_2 = 30;
-      rate_3 = 50;
-    }
-    if (rate < rate_0) {
+    if (rate < 20) {
       val = 0;
-    } else if (rate < rate_1) {
+    } else if (rate < 40) {
       val = 1;
-    } else if (rate < rate_2) {
+    } else if (rate < 60) {
       val = 2;
-    } else if (rate < rate_3) {
+    } else if (rate < 80) {
       val = 3;
     } else {
+      val = 4;
+    }
+    if (game.isItemSet(2)) {
       val = 4;
     }
     game.item_kind = val;
@@ -5155,7 +5747,7 @@ slotSetting = (function(_super) {
   メンバー:11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
   @return role
   ユニット(役):20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
-  31:のぞえり、32:ほのりん、33:ことぱな、34:にこまき
+  31:ほのりん、32:ことぱな、33:にこのぞ、34:のぞえり、35:まきりん、36:うみえり、37:ことうみ、38:にこまき
    */
 
   slotSetting.prototype.getHitRole = function(left, middle, right) {
@@ -5190,17 +5782,29 @@ slotSetting = (function(_super) {
       case '13,14,19':
         role = 28;
         break;
-      case '18,19':
+      case '11,15':
         role = 31;
         break;
-      case '11,15':
+      case '12,16':
         role = 32;
         break;
-      case '12,16':
+      case '17,18':
         role = 33;
         break;
-      case '14,17':
+      case '18,19':
         role = 34;
+        break;
+      case '14,15':
+        role = 35;
+        break;
+      case '13,14':
+        role = 36;
+        break;
+      case '12,13':
+        role = 37;
+        break;
+      case '14,17':
+        role = 38;
         break;
       default:
         role = 20;
@@ -5220,10 +5824,12 @@ slotSetting = (function(_super) {
     rslt = false;
     if (num < 10) {
       rslt = true;
-    } else {
+    } else if (num < 20) {
       if (game.prev_fever_muse.indexOf(parseInt(num)) !== -1) {
         rslt = true;
       }
+    } else {
+      rslt = false;
     }
     return rslt;
   };
@@ -5321,7 +5927,9 @@ Test = (function(_super) {
   ここにゲーム呼び出し時に実行するテストを書く
    */
 
-  Test.prototype.testExe = function() {};
+  Test.prototype.testExe = function() {
+    return this.testSetGravity();
+  };
 
   Test.prototype.testGetHitRole = function() {
     var result;
@@ -5335,9 +5943,12 @@ Test = (function(_super) {
     _results = [];
     for (key in param) {
       val = param[key];
+      console.log('****************');
       console.log('bet:' + val);
       game.bet = val;
       result = game.slot_setting.setGravity();
+      console.log('gravity:' + result);
+      console.log('div:' + game.slot_setting.prize_div);
       _results.push(console.log('prize:' + game.slot_setting.prize_div * val * 50));
     }
     return _results;
@@ -5397,6 +6008,32 @@ Test = (function(_super) {
   Test.prototype.forceFever = function() {
     game.combo = 200;
     return game.slot_setting.isForceFever();
+  };
+
+  Test.prototype.tensionUp = function() {
+    var key, param, result, val, _results;
+    game.money = 300;
+    game.item_kind = 1;
+    param = [1, 2, 3, 5, 10, 30, 50, 100];
+    console.log('所持金：' + game.money);
+    console.log('おやつ：' + game.item_kind);
+    console.log('*******************');
+    _results = [];
+    for (key in param) {
+      val = param[key];
+      game.bet = val;
+      console.log('掛け金：' + game.bet);
+      result = game.slot_setting.setTensionItemCatch();
+      console.log('アイテム取得：' + result);
+      result = game.slot_setting.setTensionSlotHit(3);
+      console.log('スロット当たり：' + result);
+      result = game.slot_setting.setTensionItemFall();
+      console.log('アイテム落下：' + result);
+      result = game.slot_setting.setTensionMissItem();
+      console.log('ニンニク：' + result);
+      _results.push(console.log('*******************'));
+    }
+    return _results;
   };
 
   return Test;
@@ -5583,6 +6220,8 @@ pauseScene = (function(_super) {
     this.pause_item_use_select_layer = new pauseItemUseSelectLayer();
     this.pause_member_use_select_layer = new pauseMemberUseSelectLayer();
     this.pause_record_layer = new pauseRecordLayer();
+    this.pause_record_select_layer = new pauseRecordSelectLayer();
+    this.pause_trophy_select_layer = new pauseTrophySelectLayer();
     this.addChild(this.pause_back);
     this.addChild(this.pause_main_layer);
   }
@@ -5638,7 +6277,8 @@ pauseScene = (function(_super) {
   };
 
   pauseScene.prototype.removeItemUseSelectMenu = function() {
-    return this.removeChild(this.pause_item_use_select_layer);
+    this.removeChild(this.pause_item_use_select_layer);
+    return game.itemUseExe();
   };
 
   pauseScene.prototype.setMemberUseSelectMenu = function(kind) {
@@ -5656,6 +6296,24 @@ pauseScene = (function(_super) {
 
   pauseScene.prototype.removeRecordMenu = function() {
     return this.removeChild(this.pause_record_layer);
+  };
+
+  pauseScene.prototype.setRecordSelectMenu = function(kind) {
+    this.addChild(this.pause_record_select_layer);
+    return this.pause_record_select_layer.setSelectItem(kind);
+  };
+
+  pauseScene.prototype.removeRecordSelectMenu = function() {
+    return this.removeChild(this.pause_record_select_layer);
+  };
+
+  pauseScene.prototype.setTrophySelectMenu = function(kind) {
+    this.addChild(this.pause_trophy_select_layer);
+    return this.pause_trophy_select_layer.setSelectItem(kind);
+  };
+
+  pauseScene.prototype.removeTrophySelectmenu = function() {
+    return this.removeChild(this.pause_trophy_select_layer);
   };
 
   pauseScene.prototype.onenterframe = function(e) {
@@ -6262,6 +6920,14 @@ Character = (function(_super) {
     this.ax = 3;
     this.mx = 7;
     this.my = 19;
+    this.ax_init = 3;
+    this.ax_up = 5;
+    this.mx_init = 7;
+    this.mx_up = 11;
+    this.my_init = 19;
+    this.my_up = 24;
+    this.friction_init = 1.7;
+    this.friction_up = 2.7;
   }
 
   Character.prototype.onenterframe = function(e) {
@@ -6485,6 +7151,26 @@ Character = (function(_super) {
     }
   };
 
+  Character.prototype.setMxUp = function() {
+    this.mx = this.mx_up;
+    this.ax = this.ax_up;
+    return this.friction = this.friction_up;
+  };
+
+  Character.prototype.resetMxUp = function() {
+    this.mx = this.mx_init;
+    this.ax = this.ax_init;
+    return this.friction = this.friction_init;
+  };
+
+  Character.prototype.setMyUp = function() {
+    return this.my = this.my_up;
+  };
+
+  Character.prototype.resetMyUp = function() {
+    return this.my = this.my_init;
+  };
+
   return Character;
 
 })(appObject);
@@ -6669,7 +7355,9 @@ Catch = (function(_super) {
     if (this.y > game.height + this.h) {
       game.sePlay(this.miss_se);
       game.main_scene.gp_stage_front.removeChild(this);
-      game.combo = 0;
+      if (game.isItemSet(9) === false) {
+        game.combo = 0;
+      }
       game.main_scene.gp_system.combo_text.setValue();
       return game.tensionSetValueItemFall();
     }
@@ -6699,6 +7387,15 @@ Catch = (function(_super) {
       ret_x = game.main_scene.gp_stage_front.player.x;
     } else {
       ret_x = Math.floor((game.width - this.w) * Math.random());
+    }
+    if (game.isItemSet(8)) {
+      ret_x = Math.floor(game.main_scene.gp_stage_front.player.x + (game.width * 0.5 * Math.random()) - (game.width * 0.25));
+      if (ret_x < 0) {
+        ret_x = 0;
+      }
+      if (ret_x > (game.width - this.w)) {
+        ret_x = game.width - this.w;
+      }
     }
     return ret_x;
   };
@@ -6774,8 +7471,8 @@ OnionCatch = (function(_super) {
 Money = (function(_super) {
   __extends(Money, _super);
 
-  function Money(isHoming) {
-    Money.__super__.constructor.call(this, 26, 30);
+  function Money(isHoming, width, height) {
+    Money.__super__.constructor.call(this, width, height);
     this.vx = 0;
     this.vy = 0;
     this.frame_init = 0;
@@ -6883,7 +7580,7 @@ OneMoney = (function(_super) {
   __extends(OneMoney, _super);
 
   function OneMoney(isHoming) {
-    OneMoney.__super__.constructor.call(this, isHoming);
+    OneMoney.__super__.constructor.call(this, isHoming, 26, 30);
     this.price = 1;
     this.frame = 0;
     this.frame_init = 0;
@@ -6903,7 +7600,7 @@ TenMoney = (function(_super) {
   __extends(TenMoney, _super);
 
   function TenMoney(isHoming) {
-    TenMoney.__super__.constructor.call(this, isHoming);
+    TenMoney.__super__.constructor.call(this, isHoming, 26, 30);
     this.price = 10;
     this.frame = 0;
     this.frame_init = 0;
@@ -6923,7 +7620,7 @@ HundredMoney = (function(_super) {
   __extends(HundredMoney, _super);
 
   function HundredMoney(isHoming) {
-    HundredMoney.__super__.constructor.call(this, isHoming);
+    HundredMoney.__super__.constructor.call(this, isHoming, 26, 30);
     this.price = 100;
     this.frame = 4;
     this.frame_init = 4;
@@ -6943,7 +7640,7 @@ ThousandMoney = (function(_super) {
   __extends(ThousandMoney, _super);
 
   function ThousandMoney(isHoming) {
-    ThousandMoney.__super__.constructor.call(this, isHoming);
+    ThousandMoney.__super__.constructor.call(this, isHoming, 26, 30);
     this.price = 1000;
     this.frame = 4;
     this.frame_init = 4;
@@ -6963,7 +7660,7 @@ TenThousandMoney = (function(_super) {
   __extends(TenThousandMoney, _super);
 
   function TenThousandMoney(isHoming) {
-    TenThousandMoney.__super__.constructor.call(this, isHoming);
+    TenThousandMoney.__super__.constructor.call(this, isHoming, 26, 30);
     this.price = 10000;
     this.frame = 8;
     this.frame_init = 8;
@@ -6983,7 +7680,7 @@ HundredThousandMoney = (function(_super) {
   __extends(HundredThousandMoney, _super);
 
   function HundredThousandMoney(isHoming) {
-    HundredThousandMoney.__super__.constructor.call(this, isHoming);
+    HundredThousandMoney.__super__.constructor.call(this, isHoming, 26, 30);
     this.price = 100000;
     this.frame = 8;
     this.frame_init = 8;
@@ -7003,7 +7700,8 @@ OneMillionMoney = (function(_super) {
   __extends(OneMillionMoney, _super);
 
   function OneMillionMoney(isHoming) {
-    OneMillionMoney.__super__.constructor.call(this, isHoming);
+    OneMillionMoney.__super__.constructor.call(this, isHoming, 30, 30);
+    this.image = game.imageload("coin_pla");
     this.price = 1000000;
     this.frame = 8;
     this.frame_init = 8;
@@ -7023,7 +7721,8 @@ TenMillionMoney = (function(_super) {
   __extends(TenMillionMoney, _super);
 
   function TenMillionMoney(isHoming) {
-    TenMillionMoney.__super__.constructor.call(this, isHoming);
+    TenMillionMoney.__super__.constructor.call(this, isHoming, 30, 30);
+    this.image = game.imageload("coin_pla");
     this.price = 10000000;
     this.frame = 8;
     this.frame_init = 8;

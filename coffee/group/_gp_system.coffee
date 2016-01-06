@@ -39,7 +39,6 @@ class gpSystem extends appGroup
         @_setItemPoint()
     ###
     キーの上下を押して掛け金を設定する
-    TODO スロットの当選金額落下中は変更できないようにする
     ###
     _betSetting: ()->
         if @paermit_bet_change_flg is true
@@ -75,8 +74,14 @@ class gpSystem extends appGroup
                 val = 1000
             else if bet < 100000
                 val = 10000
-            else
+            else if bet < 1000000
                 val = 100000
+            else if bet < 10000000
+                val = 1000000
+            else if bet < 100000000
+                val = 10000000
+            else
+                val = 100000000
         else
             if bet <= 10
                 val = -1
@@ -88,15 +93,21 @@ class gpSystem extends appGroup
                 val = -1000
             else if bet <= 100000
                 val = -10000
-            else
+            else if bet <= 1000000
                 val = -100000
+            else if bet <= 10000000
+                val = -1000000
+            else if bet <= 100000000
+                val = -10000000
+            else
+                val = -100000000
         game.bet += val
         if game.bet < 1
             game.bet = 1
         else if game.bet > game.money
-            game.bet = game.money
-        else if game.bet > 10000000
-            game.bet = 10000000
+            game.bet -= val
+        else if game.bet > 100000000000
+            game.bet = 100000000000
         @bet_text.setValue()
     ###
     掛け金の変更が可能かを変更する
@@ -135,6 +146,8 @@ class gpSystem extends appGroup
                     if @prevItem != 0
                         game.item_set_now.push(@prevItem)
                         @itemDsp()
+                        game.pause_scene.pause_item_use_layer.dspSetItemList()
+                        game.itemUseExe()
         else
             if 0 < game.item_point
                 game.item_point = Math.floor(1000 * (game.item_point - game.slot_setting.item_point_value[game.now_item])) /1000
@@ -148,3 +161,4 @@ class gpSystem extends appGroup
         game.item_set_now = []
         @itemDsp()
         game.pause_scene.pause_item_use_layer.dspSetItemList()
+        game.itemUseExe()

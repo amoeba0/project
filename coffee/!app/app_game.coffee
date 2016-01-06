@@ -3,6 +3,7 @@ class appGame extends Game
         super w, h
         if @isSumaho() is false
             @scale = 1
+        @is_server = false
         @mute = false #ミュート（消音）フラグ
         @imgList = []
         @soundList = []
@@ -37,8 +38,10 @@ class appGame extends Game
             bgm.play()
             @nowPlayBgm = bgm
             if bgm_loop is true
-                bgm._element.loop = true
-                #bgm.src.loop = true
+                if @is_server is true
+                    bgm.src.loop = true
+                else
+                    bgm._element.loop = true
 
     ###
     BGMを止める

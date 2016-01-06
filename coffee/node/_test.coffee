@@ -10,7 +10,7 @@ class Test extends appNode
     ###
     testExe:()->
         #@testGetHitRole()
-        #@testSetGravity()
+        @testSetGravity()
         #@viewItemList()
         #@testCutin()
         #@preLoadMulti()
@@ -19,6 +19,7 @@ class Test extends appNode
         #@itemCatchTension()
         #@chanceTime()
         #@forceFever()
+        #@tensionUp()
 
     #以下、テスト用関数
 
@@ -29,11 +30,12 @@ class Test extends appNode
     testSetGravity:()->
         param = [1, 5, 10, 50, 100, 500, 1000, 2000, 8000, 9000, 10000, 20000, 80000, 90000, 100000, 200000, 800000, 900000, 1000000]
         for key, val of param
+            console.log('****************')
             console.log('bet:'+val)
             game.bet = val
             result = game.slot_setting.setGravity()
-            #console.log('gravity:'+result)
-            #console.log('div:'+game.slot_setting.prize_div)
+            console.log('gravity:'+result)
+            console.log('div:'+game.slot_setting.prize_div)
             console.log('prize:'+game.slot_setting.prize_div * val * 50)
 
 
@@ -74,3 +76,25 @@ class Test extends appNode
     forceFever:()->
         game.combo = 200
         game.slot_setting.isForceFever()
+
+    tensionUp:()->
+        #game.money = 100000
+        game.money = 300
+        game.item_kind = 1
+        #param = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000, 50000]
+        param = [1, 2, 3, 5, 10, 30, 50, 100]
+        console.log('所持金：'+game.money)
+        console.log('おやつ：'+game.item_kind)
+        console.log('*******************')
+        for key, val of param
+            game.bet = val
+            console.log('掛け金：'+game.bet)
+            result = game.slot_setting.setTensionItemCatch()
+            console.log('アイテム取得：'+result)
+            result = game.slot_setting.setTensionSlotHit(3)
+            console.log('スロット当たり：'+result)
+            result = game.slot_setting.setTensionItemFall()
+            console.log('アイテム落下：'+result)
+            result = game.slot_setting.setTensionMissItem()
+            console.log('ニンニク：'+result)
+            console.log('*******************')

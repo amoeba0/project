@@ -10,6 +10,14 @@ class Character extends appObject
         @ax = 3 #x軸加速度
         @mx = 7 #x軸速度最大値
         @my = 19 #y軸初速度
+        @ax_init = 3
+        @ax_up = 5
+        @mx_init = 7
+        @mx_up = 11
+        @my_init = 19
+        @my_up = 24
+        @friction_init = 1.7
+        @friction_up = 2.7
     onenterframe: (e) ->
         @charMove()
 
@@ -170,3 +178,19 @@ class Character extends appObject
                     @frame = 2
         else
             @frame = 3
+
+    setMxUp:()->
+        @mx = @mx_up
+        @ax = @ax_up
+        @friction = @friction_up
+
+    resetMxUp:()->
+        @mx = @mx_init
+        @ax = @ax_init
+        @friction = @friction_init
+
+    setMyUp:()->
+        @my = @my_up
+
+    resetMyUp:()->
+        @my = @my_init

@@ -108,6 +108,23 @@ class saveOkButtonHtml extends baseOkButtonHtml
     touchendEvent:() ->
         game.pause_scene.removeSaveMenu()
 
+class recordOkButtonHtml extends baseOkButtonHtml
+    constructor:()->
+        super
+        @x = 170
+        @y = 480
+    touchendEvent:() ->
+        game.pause_scene.removeRecordSelectMenu()
+
+class trophyOkButtonHtml extends baseOkButtonHtml
+    constructor:()->
+        super
+        @x = 170
+        @y = 480
+    touchendEvent:() ->
+        game.pause_scene.removeTrophySelectmenu()
+
+
 ###
 キャンセルボタン
 ###
@@ -274,6 +291,7 @@ class dialogCloseButton extends systemHtml
 class itemBuyDialogCloseButton extends dialogCloseButton
     constructor:()->
         super
+        @y = 70
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeItemBuyMenu()
@@ -295,6 +313,7 @@ class memberSetDialogCloseButton extends dialogCloseButton
 class recordDialogCloseButton extends dialogCloseButton
     constructor:()->
         super
+        @y = 70
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeRecordMenu()

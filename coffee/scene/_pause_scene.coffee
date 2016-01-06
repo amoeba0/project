@@ -13,6 +13,8 @@ class pauseScene extends appScene
         @pause_item_use_select_layer = new pauseItemUseSelectLayer()
         @pause_member_use_select_layer = new pauseMemberUseSelectLayer()
         @pause_record_layer = new pauseRecordLayer()
+        @pause_record_select_layer = new pauseRecordSelectLayer()
+        @pause_trophy_select_layer = new pauseTrophySelectLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
     setSaveMenu: () ->
@@ -45,6 +47,7 @@ class pauseScene extends appScene
         @pause_item_use_select_layer.setSelectItem(kind)
     removeItemUseSelectMenu:()->
         @removeChild(@pause_item_use_select_layer)
+        game.itemUseExe()
     setMemberUseSelectMenu:(kind)->
         @addChild(@pause_member_use_select_layer)
         @pause_member_use_select_layer.setSelectItem(kind)
@@ -54,6 +57,16 @@ class pauseScene extends appScene
         @addChild(@pause_record_layer)
     removeRecordMenu:()->
         @removeChild(@pause_record_layer)
+    setRecordSelectMenu:(kind)->
+        @addChild(@pause_record_select_layer)
+        @pause_record_select_layer.setSelectItem(kind)
+    removeRecordSelectMenu:()->
+        @removeChild(@pause_record_select_layer)
+    setTrophySelectMenu:(kind)->
+        @addChild(@pause_trophy_select_layer)
+        @pause_trophy_select_layer.setSelectItem(kind)
+    removeTrophySelectmenu:()->
+        @removeChild(@pause_trophy_select_layer)
     onenterframe: (e) ->
         @_pauseKeyPush()
     ###

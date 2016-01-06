@@ -12,12 +12,17 @@ class pauseItemBuyLayer extends appDomLayer
         @member_list = {}
         for i in [11..19]
             @member_list[i] = new buyMemberHtml(i)
+        @trophy_list = {}
+        for i in [21..24]
+            @trophy_list[i] = new buyTrophyItemHtml(i - 21, i)
         @setItemList()
         @resetItemList()
         @item_title = new itemItemBuyDiscription()
         @addChild(@item_title)
         @member_title = new memberItemBuyDiscription()
         @addChild(@member_title)
+        @trophy_title = new trophyItemBuyDiscription()
+        @addChild(@trophy_title)
     setItemList:()->
         for item_key, item_val of @item_list
             @addChild(item_val)
@@ -25,6 +30,9 @@ class pauseItemBuyLayer extends appDomLayer
         for member_key, member_val of @member_list
             @addChild(member_val)
             member_val.setPosition()
+        for trophy_key, trophy_val of @trophy_list
+            @addChild(trophy_val)
+            trophy_val.setPosition()
     #持ってるアイテムを透明にする、クリックできなくする
     resetItemList:()->
         master_list = game.slot_setting.item_list
@@ -78,9 +86,9 @@ class pauseItemBuySelectLayer extends appDomLayer
         text = '効果：'+@item_options.discription
         if @item_options.durationSec != undefined
             text += '<br>持続時間：'+@item_options.durationSec+'秒'
-        if @item_options.condFunc() is true
+        if @item_options.condFunc() is true || 20 < @item_kind
             text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'+'(所持金'+game.toJPUnit(game.money)+'円)'
-        else
+        if @item_options.condFunc() is false || 20 < @item_kind
             text += '<br>出現条件：'+@item_options.conditoin
         return text
     _setButton:()->

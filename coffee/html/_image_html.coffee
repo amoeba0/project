@@ -44,7 +44,7 @@ class itemHtml extends baseItemHtml
 class buyItemHtml extends itemHtml
     constructor:(kind)->
         super kind
-        @positionY = 160
+        @positionY = 110
         @is_exist = true
     ontouchend: () ->
         if @is_exist is true
@@ -96,7 +96,7 @@ class memberHtml extends baseItemHtml
 class buyMemberHtml extends memberHtml
     constructor:(kind)->
         super kind
-        @positionY = 400
+        @positionY = 340
         @is_exist = true
     ontouchend: () ->
         if @is_exist is true
@@ -117,6 +117,7 @@ class setMemberHtml extends baseItemHtml
     constructor:(position)->
         super position
         @kind = 0
+        @disabled = false
         @positionY = 210
         @positionX = 120
         @positoin_kind = position - 1
@@ -132,7 +133,7 @@ class setMemberHtml extends baseItemHtml
         @image_name = 'item_'+kind
         @setImageHtml()
     ontouchend: ()->
-        if @kind != 10
+        if @kind != 10 and @disabled is false
             game.sePlay(@dicisionSe)
             game.pause_scene.setMemberUseSelectMenu(@kind)
 
@@ -145,3 +146,49 @@ class selectItemImage extends imageHtml
     setImage:(image)->
         @image_name = image
         @setImageHtml()
+
+class baseRecordItemHtml extends systemHtml
+    constructor: (position, kind)->
+        super 100, 100
+        @position = position
+        @kind = kind
+        @image_name = 'test_image2'
+        @setImageHtml()
+        @scaleX = 0.65
+        @scaleY = 0.65
+        @positionY = 0
+        @positionX = 0
+        @dicisionSe = game.soundload('dicision')
+    setPosition:()->
+        @y = @positionY + (Math.floor(@position / 5) + 1) * 75
+        @x = 75 * (@position % 5) + @positionX
+
+class recordItemHtml extends baseRecordItemHtml
+    constructor: (position, kind)->
+        super position, kind
+        @positionY = 40
+        @positionX = 35
+    ontouchend: ()->
+        game.sePlay(@dicisionSe)
+        game.pause_scene.setRecordSelectMenu(@kind)
+class trophyItemHtml extends baseRecordItemHtml
+    constructor: (position, kind)->
+        super position, kind
+        @positionY = 480
+        @positionX = 75
+    ontouchend: ()->
+        game.sePlay(@dicisionSe)
+        game.pause_scene.setTrophySelectMenu(@kind)
+class buyTrophyItemHtml extends baseRecordItemHtml
+    constructor: (position, kind)->
+        super position, kind
+        @positionY = 480
+        @positionX = 75
+        @item_kind = kind
+        @is_exist = true
+    ontouchend: () ->
+        if @is_exist is true
+            game.sePlay(@dicisionSe)
+            @dispItemBuySelectDialog(@item_kind)
+    dispItemBuySelectDialog:(kind)->
+        game.pause_scene.setItemBuySelectMenu(kind)

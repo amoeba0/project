@@ -3,8 +3,8 @@
 @param boolean isHoming trueならコインがホーミングする
 ###
 class Money extends Item
-    constructor: (isHoming) ->
-        super 26, 30
+    constructor: (isHoming, width, height) ->
+        super width, height
         @vx = 0
         @vy = 0
         @frame_init = 0
@@ -85,7 +85,7 @@ class Money extends Item
 ###
 class OneMoney extends Money
     constructor: (isHoming) ->
-        super isHoming
+        super isHoming, 26, 30
         @price = 1
         @frame = 0
         @frame_init = 0
@@ -96,7 +96,7 @@ class OneMoney extends Money
 ###
 class TenMoney extends Money
     constructor: (isHoming) ->
-        super isHoming
+        super isHoming, 26, 30
         @price = 10
         @frame = 0
         @frame_init = 0
@@ -107,7 +107,7 @@ class TenMoney extends Money
 ###
 class HundredMoney extends Money
     constructor: (isHoming) ->
-        super isHoming
+        super isHoming, 26, 30
         @price = 100
         @frame = 4
         @frame_init = 4
@@ -118,7 +118,7 @@ class HundredMoney extends Money
 ###
 class ThousandMoney extends Money
     constructor: (isHoming) ->
-        super isHoming
+        super isHoming, 26, 30
         @price = 1000
         @frame = 4
         @frame_init = 4
@@ -129,7 +129,7 @@ class ThousandMoney extends Money
 ###
 class TenThousandMoney extends Money
     constructor: (isHoming) ->
-        super isHoming
+        super isHoming, 26, 30
         @price = 10000
         @frame = 8
         @frame_init = 8
@@ -140,7 +140,7 @@ class TenThousandMoney extends Money
 ###
 class HundredThousandMoney extends Money
     constructor: (isHoming) ->
-        super isHoming
+        super isHoming, 26, 30
         @price = 100000
         @frame = 8
         @frame_init = 8
@@ -151,7 +151,8 @@ class HundredThousandMoney extends Money
 ###
 class OneMillionMoney extends Money
     constructor: (isHoming) ->
-        super isHoming
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
         @price = 1000000
         @frame = 8
         @frame_init = 8
@@ -162,7 +163,8 @@ class OneMillionMoney extends Money
 ###
 class TenMillionMoney extends Money
     constructor: (isHoming) ->
-        super isHoming
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
         @price = 10000000
         @frame = 8
         @frame_init = 8

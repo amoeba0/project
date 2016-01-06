@@ -56,21 +56,23 @@ class stageFront extends gpStage
             if @itemFallSec != @itemFallSecInit
                 @setItemFallFrm(@itemFallSecInit)
         if @missItemFallSycleNow is @missItemFallSycle && @age % @itemFallFrm is @itemFallFrm / 2
-            @_missCatchFall()
+            if game.isItemSet(2) is false
+                @_missCatchFall()
             @missItemFallSycleNow = 0
 
     ###
     キャッチアイテムをランダムな位置から降らせる
     ###
     _catchFall:()->
+        if game.bet > game.money
+            game.bet = 1
+            game.main_scene.gp_system.bet_text.setValue()
         if game.money >= game.bet
             @catchItems.push(new MacaroonCatch())
             @addChild(@catchItems[@nowCatchItemsNum])
             @catchItems[@nowCatchItemsNum].setPosition()
             @nowCatchItemsNum += 1
             game.money -= game.bet
-            if game.bet > game.money
-                game.bet = game.money
             game.main_scene.gp_system.money_text.setValue()
             game.main_scene.gp_slot.slotStart()
             if game.slot_setting.getIsForceSlotHit() is true
@@ -215,7 +217,7 @@ class stageBack extends gpStage
             ret_data[1000] = game.getDigitNum(value, 4)
             ret_data[10000] = game.getDigitNum(value, 5)
             ret_data[100000] = game.getDigitNum(value, 6) + 10
-            ret_data[1000000] = game.getDigitNum(value, 7) -1
+            ret_data[1000000] = game.getDigitNum(value, 7) - 1
             ret_data[10000000] = 0
         else
             ret_data[1] = 0

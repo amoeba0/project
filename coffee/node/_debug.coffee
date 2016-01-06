@@ -17,23 +17,23 @@ class Debug extends appNode
         #テストロード用の値
         @test_load_val = {
             'money':1234567890,
-            'bet':100,
+            'bet':1000000,
             'combo':10,
             'tension':100,
             'past_fever_num':0,
-            'item_point':10,
+            'item_point':50,
             'next_add_member_key':0,
-            'prev_muse':[11],
-            'item_have_now':[1,2,9,11,12,13,14],
-            'item_set_now':[9],
-            'member_set_now':[11,12,13],
-            'prev_fever_muse':[11]
+            'prev_muse':[],
+            'now_muse_num':15,
+            'item_have_now':[],
+            'item_set_now':[],
+            'member_set_now':[],
+            'prev_fever_muse':[]
         }
 
         #デバッグ用リールにすりかえる
         @lille_flg = false
         #デバッグ用リール配列
-        ###
         @lille_array = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -45,11 +45,12 @@ class Debug extends appNode
             [12, 12, 12, 12, 12, 12, 12, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [13, 13, 13, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
+        ###
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上
         @item_flg = false
         #アイテムが降ってくる頻度を上げる
-        @item_fall_early_flg = false
+        #@item_fall_early_flg = false
         #アイテムを取った時のテンション増減値を固定する
         @fix_tention_item_catch_flg = false
         #アイテムを落とした時のテンション増減値を固定する
@@ -57,7 +58,7 @@ class Debug extends appNode
         #スロットが当たった時のテンション増減値を固定する
         @fix_tention_slot_hit_flg = false
         #スロットに必ずμ’ｓが追加される
-        @force_insert_muse = false
+        #@force_insert_muse = false
         #スロットが必ず当たる
         @force_slot_hit = false
         #スロットが2回に1回当たる

@@ -81,7 +81,7 @@ class gpSlot extends appGroup
                 target.frameChange()
 
     ###
-    スロットが強制的に辺になるようにリールから左のリールの当たり目と同じ目を探して配列のキーを返す
+    スロットが強制的に当たりになるようにリールから左のリールの当たり目と同じ目を探して配列のキーを返す
     左の当たり目がμ’ｓならリールからμ’ｓの目をランダムで取り出して返す
     ###
     _searchEye:(target)->
@@ -119,7 +119,7 @@ class gpSlot extends appGroup
         if @_isSlotHit() is true
             game.sePlay(@slot_hit_se)
             prize_money = game.slot_setting.calcPrizeMoney(@middle_lille.lilleArray[@middle_lille.nowEye])
-            game.tensionSetValueSlotHit(prize_money, @hit_role)
+            game.tensionSetValueSlotHit(@hit_role)
             @_feverStart(@hit_role)
             if @hit_role is 1
                 member = game.slot_setting.getAddMuseNum()

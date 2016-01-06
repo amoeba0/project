@@ -50,8 +50,18 @@ class pauseMemberSetLayer extends appDomLayer
             member_val.setPosition()
             if game.member_set_now[member_key - 1] != undefined
                 member_val.setItemKind(game.member_set_now[member_key - 1])
+                member_val.opacity = 1
+                member_val.disabled = false
             else
-                member_val.setItemKind(10)
+                if member_key is '1' and game.slot_setting.now_muse_num != 0
+                    member_val.setItemKind(game.slot_setting.now_muse_num)
+                    member_val.opacity = 0.5
+                    member_val.disabled = true
+                    member_val.changeNotButton()
+                else
+                    member_val.setItemKind(10)
+                    member_val.opacity = 1
+                    member_val.disabled = false
 
 class pauseMemberUseSelectLayer extends appDomLayer
     constructor:()->
