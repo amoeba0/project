@@ -234,7 +234,7 @@ class slotSetting extends appNode
                 'name':'チーズケーキ鍋',
                 'image':'item_1',
                 'discription':'チーズケーキしか降ってこなくなる<br>ニンニクは降ってこなくなる',
-                'price':10000,
+                'price':1000,
                 'durationSec':120,
                 'conditoin':'',
                 'condFunc':()->
@@ -244,7 +244,7 @@ class slotSetting extends appNode
                 'name':'くすくす大明神',
                 'image':'item_2',
                 'discription':'コンボ数に関わらず<br>たくさんのコインが降ってくるようになる',
-                'price':50000,
+                'price':10000,
                 'durationSec':120,
                 'conditoin':'',
                 'condFunc':()->
@@ -254,7 +254,7 @@ class slotSetting extends appNode
                 'name':'ぴょんぴょこぴょんぴょん',
                 'image':'item_3',
                 'discription':'ジャンプ力が上がる',
-                'price':100000,
+                'price':50000,
                 'durationSec':60,
                 'conditoin':'',
                 'condFunc':()->
@@ -264,7 +264,7 @@ class slotSetting extends appNode
                 'name':'テンション上がるにゃー！',
                 'image':'item_4',
                 'discription':'移動速度が上がる',
-                'price':500000,
+                'price':100000,
                 'durationSec':60,
                 'conditoin':'',
                 'condFunc':()->
@@ -273,8 +273,8 @@ class slotSetting extends appNode
             5:{
                 'name':'ファイトだよっ',
                 'image':'item_5',
-                'discription':'スロットに当たった時に<br>得られる金額が2倍になる',
-                'price':1000000,
+                'discription':'CHANCE!!でスロットが揃う時に<br>FEVER!!が出やすくなる',
+                'price':100000000,
                 'durationSec':120,
                 'conditoin':'',
                 'condFunc':()->
@@ -284,7 +284,7 @@ class slotSetting extends appNode
                 'name':'チョットマッテテー',
                 'image':'item_6',
                 'discription':'おやつが降ってくる速度が<br>ちょっとだけ遅くなる',
-                'price':5000000,
+                'price':1000000,
                 'durationSec':60,
                 'conditoin':'',
                 'condFunc':()->
@@ -304,7 +304,7 @@ class slotSetting extends appNode
                 'name':'認められないわぁ',
                 'image':'item_8',
                 'discription':'アイテムを落としてもコンボが減らず<br>テンションも下がらないようになる',
-                'price':100000000,
+                'price':5000000,
                 'durationSec':60,
                 'conditoin':'',
                 'condFunc':()->
@@ -403,7 +403,7 @@ class slotSetting extends appNode
             },
             21:{
                 'name':'ブロンズことり',
-                'image':'test_image2',
+                'image':'item_21',
                 'discription':'移動速度とジャンプ力がアップする',
                 'price':10000000,
                 'conditoin':'100コンボ達成する',
@@ -412,7 +412,7 @@ class slotSetting extends appNode
             },
             22:{
                 'name':'シルバーことり',
-                'image':'test_image2',
+                'image':'item_22',
                 'discription':'魔法のスロットが1つ増える',
                 'price':1000000000,
                 'conditoin':'ソロ楽曲9曲を全て達成する',
@@ -421,7 +421,7 @@ class slotSetting extends appNode
             },
             23:{
                 'name':'ゴールドことり',
-                'image':'test_image2',
+                'image':'item_23',
                 'discription':'魔法のスロットが1つ増える',
                 'price':10000000000,
                 'conditoin':'200コンボ達成する',
@@ -430,8 +430,8 @@ class slotSetting extends appNode
             },
             24:{
                 'name':'プラチナことり',
-                'image':'test_image2',
-                'discription':'このゲームの全てを極めた証',
+                'image':'item_24',
+                'discription':'エンディングが見れる',
                 'price':1000000000000,
                 'conditoin':'全楽曲25曲を全て達成する',
                 'condFunc':()->
@@ -599,8 +599,8 @@ class slotSetting extends appNode
     ###
     getReturnMoneyFallValue:()->
         up = game.combo
-        if game.isItemSet(2) && game.combo < 100
-            up = 100
+        if game.isItemSet(2) && game.combo < 200
+            up = 200
         return Math.floor(game.bet * up * 0.03)
 
     ###
@@ -615,7 +615,7 @@ class slotSetting extends appNode
             if div < 1
                 div = 1
             ret_money = Math.floor(ret_money / div)
-        if game.isItemSet(5) || game.main_scene.gp_back_panorama.now_back_effect_flg is true
+        if game.main_scene.gp_back_panorama.now_back_effect_flg is true
             ret_money *= 2
         if ret_money > 10000000000
             ret_money = 10000000000
@@ -864,15 +864,15 @@ class slotSetting extends appNode
     チャンスの時に強制的にフィーバーにする
     ###
     isForceFever:()->
-        rate = Math.floor(game.combo / 4) + 10
-        if game.past_fever_num is 0 && rate >= 50
-            rate = 50
-        else if game.past_fever_num is 1 && rate >= 40
-            rate = 40
-        else if game.past_fever_num is 2 && rate >= 30
-            rate = 30
-        else if game.past_fever_num is 3 && rate >= 20
+        tension_rate = Math.floor((game.tension * 100)/ @tension_max)
+        if game.isItemSet(5)
+            rate = 25
+        else if tension_rate is 100 || game.past_fever_num is 0
             rate = 20
+        else if 80 <= tension_rate || game.past_fever_num is 1
+            rate = 15
+        else if 60 <= tension_rate || game.past_fever_num is 2
+            rate = 10
         else
             rate = 5
         result = false

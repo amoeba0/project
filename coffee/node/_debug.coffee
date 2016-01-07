@@ -6,7 +6,7 @@ class Debug extends appNode
         super
 
         #開始後いきなりメイン画面
-        @force_main_flg = false
+        @force_main_flg = true
         #開始後いきなりポーズ画面
         @force_pause_flg = false
 

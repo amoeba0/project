@@ -174,7 +174,7 @@ class recordItemHtml extends baseRecordItemHtml
 class trophyItemHtml extends baseRecordItemHtml
     constructor: (position, kind)->
         super position, kind
-        @image_name = 'test_image2'
+        @image_name = 'item_' + kind
         @setImageHtml()
         @positionY = 480
         @positionX = 75
@@ -186,7 +186,7 @@ class trophyItemHtml extends baseRecordItemHtml
 class buyTrophyItemHtml extends baseRecordItemHtml
     constructor: (position, kind)->
         super position, kind
-        @image_name = 'test_image2'
+        @image_name = 'item_' + kind
         @setImageHtml()
         @positionY = 480
         @positionX = 75
