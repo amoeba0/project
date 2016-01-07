@@ -31,7 +31,7 @@ class slotSetting extends appNode
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
         11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
         ユニット(役):20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
-        31:ほのりん、32:ことぱな、33:にこのぞ、34:のぞえり、35:まきりん、36:うみえり、37:ことうみ、38:にこまき
+        31:ほのりん、32:ことぱな、33:にこのぞ、34:ことうみ、35:まきりん、36:のぞえり、37:にこまき、38:うみえり
         direction:キャラクターの向き、left or right
         カットインの画像サイズ、頭の位置で570px
         頭の上に余白がある場合の高さ計算式：(570/(元画像高さ-元画像頭のY座標))*元画像高さ
@@ -43,7 +43,7 @@ class slotSetting extends appNode
                     {'name':'11_1', 'width':730, 'height':662, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'yumenaki', 'time':107, 'title':'夢なき夢は夢じゃない', 'unit':'高坂穂乃果', 'image':'test_image2'}
+                    {'name':'yumenaki', 'time':107, 'title':'夢なき夢は夢じゃない', 'unit':'高坂穂乃果', 'image':'bgm_11'}
                 ],
                 'voice':['11_0', '11_1']
             },
@@ -53,7 +53,7 @@ class slotSetting extends appNode
                     {'name':'12_1', 'width':640, 'height':648, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'blueberry', 'time':98, 'title':'ぶる～べりぃとれいん', 'unit':'南ことり', 'image':'test_image2'}
+                    {'name':'blueberry', 'time':98, 'title':'ぶる～べりぃとれいん', 'unit':'南ことり', 'image':'bgm_12'}
                 ],
                 'voice':['12_0', '12_1']
             },
@@ -63,7 +63,7 @@ class slotSetting extends appNode
                     {'name':'13_1', 'width':408, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'reason', 'time':94, 'title':'勇気のReason', 'unit':'園田海未', 'image':'test_image2'}
+                    {'name':'reason', 'time':94, 'title':'勇気のReason', 'unit':'園田海未', 'image':'bgm_13'}
                 ],
                 'voice':['13_0', '13_1']
             },
@@ -73,7 +73,7 @@ class slotSetting extends appNode
                     {'name':'14_1', 'width':650, 'height':570, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'daring', 'time':91, 'title':'Darling！！', 'unit':'西木野真姫', 'image':'test_image2'}
+                    {'name':'daring', 'time':91, 'title':'Darling！！', 'unit':'西木野真姫', 'image':'bgm_14'}
                 ],
                 'voice':['14_0', '14_1']
             },
@@ -83,7 +83,7 @@ class slotSetting extends appNode
                     {'name':'15_1', 'width':601, 'height':638, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'rinrinrin', 'time':128, 'title':'恋のシグナルRin rin rin！', 'unit':'星空凛', 'image':'test_image2'}
+                    {'name':'rinrinrin', 'time':128, 'title':'恋のシグナルRin rin rin！', 'unit':'星空凛', 'image':'bgm_15'}
                 ],
                 'voice':['15_0', '15_1']
             },
@@ -93,7 +93,7 @@ class slotSetting extends appNode
                     {'name':'16_1', 'width':580, 'height':644, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'nawatobi', 'time':164, 'title':'なわとび', 'unit':'小泉花陽', 'image':'test_image2'}
+                    {'name':'nawatobi', 'time':164, 'title':'なわとび', 'unit':'小泉花陽', 'image':'bgm_16'}
                 ],
                 'voice':['16_0', '16_1']
             },
@@ -103,7 +103,7 @@ class slotSetting extends appNode
                     {'name':'17_1', 'width':361, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'mahoutukai', 'time':105, 'title':'まほうつかいはじめました', 'unit':'矢澤にこ', 'image':'test_image2'}
+                    {'name':'mahoutukai', 'time':105, 'title':'まほうつかいはじめました', 'unit':'矢澤にこ', 'image':'bgm_17'}
                 ],
                 'voice':['17_0', '17_1']
             },
@@ -113,7 +113,7 @@ class slotSetting extends appNode
                     {'name':'18_1', 'width':380, 'height':675, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'junai', 'time':127, 'title':'純愛レンズ', 'unit':'東條希', 'image':'test_image2'}
+                    {'name':'junai', 'time':127, 'title':'純愛レンズ', 'unit':'東條希', 'image':'bgm_18'}
                 ],
                 'voice':['18_0', '18_1']
             },
@@ -123,7 +123,7 @@ class slotSetting extends appNode
                     {'name':'19_1', 'width':670, 'height':650, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'arihureta', 'time':93, 'title':'ありふれた悲しみの果て', 'unit':'絢瀬絵里', 'image':'test_image2'}
+                    {'name':'arihureta', 'time':93, 'title':'ありふれた悲しみの果て', 'unit':'絢瀬絵里', 'image':'bgm_19'}
                 ],
                 'voice':['19_0', '19_1']
             },
@@ -134,82 +134,82 @@ class slotSetting extends appNode
             },
             21:{
                 'bgm':[
-                    {'name':'hello_hoshi', 'time':93, 'title':'Hello，星を数えて ', 'unit':'1年生<br>（星空凛、西木野真姫、小泉花陽）', 'image':'test_image2'}
+                    {'name':'hello_hoshi', 'time':93, 'title':'Hello，星を数えて ', 'unit':'1年生<br>（星空凛、西木野真姫、小泉花陽）', 'image':'bgm_21'}
                 ]
             },
             22:{
                 'bgm':[
-                    {'name':'future_style', 'time':94, 'title':'Future style', 'unit':'2年生<br>（高坂穂乃果、南ことり、園田海未）', 'image':'test_image2'}
+                    {'name':'future_style', 'time':94, 'title':'Future style', 'unit':'2年生<br>（高坂穂乃果、南ことり、園田海未）', 'image':'bgm_22'}
                 ]
             },
             23:{
                 'bgm':[
-                    {'name':'hatena_heart', 'time':84, 'title':'？←HEARTBEAT', 'unit':'3年生<br>（絢瀬絵里、東條希、矢澤にこ）', 'image':'test_image2'}
+                    {'name':'hatena_heart', 'time':84, 'title':'？←HEARTBEAT', 'unit':'3年生<br>（絢瀬絵里、東條希、矢澤にこ）', 'image':'bgm_23'}
                 ]
             },
             24:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'Printemps<br>(高坂穂乃果、南ことり、小泉花陽)', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'sweet＆sweet holiday', 'unit':'Printemps<br>(高坂穂乃果、南ことり、小泉花陽)', 'image':'bgm_24'}
                 ]
             },
             25:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'lily white<br>(園田海未、星空凛、東條希)', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'あ・の・ね・が・ん・ば・れ', 'unit':'lily white<br>(園田海未、星空凛、東條希)', 'image':'bgm_25'}
                 ]
             },
             26:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'ラブノベルス', 'unit':'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)', 'image':'bgm_26'}
                 ]
             },
             27:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'にこりんぱな<br>(矢澤にこ、星空凛、小泉花陽)', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Listen to my heart！！', 'unit':'にこりんぱな<br>(矢澤にこ、星空凛、小泉花陽)', 'image':'bgm_27'}
                 ]
             },
             28:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'<br>園田海未、西木野真姫、絢瀬絵里', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'soldier game', 'unit':'<br>園田海未、西木野真姫、絢瀬絵里', 'image':'bgm_28'}
                 ]
             },
             31:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'高坂穂乃果、星空凛', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Mermaid festa vol．2', 'unit':'高坂穂乃果、星空凛', 'image':'bgm_31'}
                 ]
             },
             32:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'南ことり、小泉花陽', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'告白日和、です！', 'unit':'南ことり、小泉花陽', 'image':'bgm_32'}
                 ]
             },
             33:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'矢澤にこ、東條希', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'乙女式れんあい塾', 'unit':'矢澤にこ、東條希', 'image':'bgm_33'}
                 ]
             },
             34:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'東條希、絢瀬絵里', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Anemone heart', 'unit':'南ことり、園田海未', 'image':'bgm_34'}
                 ]
             },
             35:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'西木野真姫、星空凛', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Bea in Angel', 'unit':'西木野真姫、星空凛', 'image':'bgm_35'}
                 ]
             },
             36:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'園田海未、絢瀬絵里', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'硝子の花園', 'unit':'東條希、絢瀬絵里', 'image':'bgm_36'}
                 ]
             },
             37:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'南ことり、園田海未', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'ずるいよMagnetic today', 'unit':'矢澤にこ、西木野真姫', 'image':'bgm_37'}
                 ]
             },
             38:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'矢澤にこ、西木野真姫', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Storm in Lover', 'unit':'園田海未、絢瀬絵里', 'image':'bgm_38'}
                 ]
             }
         }
@@ -231,24 +231,24 @@ class slotSetting extends appNode
                     return true
             },
             1:{
-                'name':'テンション上がるにゃー！',
-                'image':'item_1',
-                'discription':'移動速度が上がる',
-                'price':500000,
-                'durationSec':60,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(1)
-            },
-            2:{
                 'name':'チーズケーキ鍋',
-                'image':'item_2',
+                'image':'item_1',
                 'discription':'チーズケーキしか降ってこなくなる<br>ニンニクは降ってこなくなる',
                 'price':10000,
                 'durationSec':120,
                 'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(2)
+            },
+            2:{
+                'name':'くすくす大明神',
+                'image':'item_2',
+                'discription':'コンボ数に関わらず<br>たくさんのコインが降ってくるようになる',
+                'price':50000,
+                'durationSec':120,
+                'conditoin':'',
+                'condFunc':()->
+                    return game.slot_setting.itemConditinon(4)
             },
             3:{
                 'name':'ぴょんぴょこぴょんぴょん',
@@ -261,24 +261,24 @@ class slotSetting extends appNode
                     return game.slot_setting.itemConditinon(3)
             },
             4:{
-                'name':'くすくす大明神',
+                'name':'テンション上がるにゃー！',
                 'image':'item_4',
-                'discription':'コンボ数に関わらず<br>たくさんのコインが降ってくるようになる',
-                'price':50000,
-                'durationSec':120,
+                'discription':'移動速度が上がる',
+                'price':500000,
+                'durationSec':60,
                 'conditoin':'',
                 'condFunc':()->
-                    return game.slot_setting.itemConditinon(4)
+                    return game.slot_setting.itemConditinon(1)
             },
             5:{
-                'name':'完っ全にフルハウスね',
+                'name':'ファイトだよっ',
                 'image':'item_5',
-                'discription':'3回に1回の確率で<br>CHANCE!!状態になる',
-                'price':10000000,
+                'discription':'スロットに当たった時に<br>得られる金額が2倍になる',
+                'price':1000000,
                 'durationSec':120,
                 'conditoin':'',
                 'condFunc':()->
-                    return game.slot_setting.itemConditinon(5)
+                    return game.slot_setting.itemConditinon(7)
             },
             6:{
                 'name':'チョットマッテテー',
@@ -291,34 +291,34 @@ class slotSetting extends appNode
                     return game.slot_setting.itemConditinon(6)
             },
             7:{
-                'name':'ファイトだよっ',
+                'name':'完っ全にフルハウスね',
                 'image':'item_7',
-                'discription':'スロットに当たった時に<br>得られる金額が2倍になる',
-                'price':1000000,
+                'discription':'3回に1回の確率で<br>CHANCE!!状態になる',
+                'price':10000000,
                 'durationSec':120,
                 'conditoin':'',
                 'condFunc':()->
-                    return game.slot_setting.itemConditinon(7)
+                    return game.slot_setting.itemConditinon(5)
             },
             8:{
-                'name':'ラブアローシュート',
-                'image':'item_8',
-                'discription':'おやつが近くに落ちてくる',
-                'price':1000000000,
-                'durationSec':60,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(8)
-            },
-            9:{
                 'name':'認められないわぁ',
-                'image':'item_9',
+                'image':'item_8',
                 'discription':'アイテムを落としてもコンボが減らず<br>テンションも下がらないようになる',
                 'price':100000000,
                 'durationSec':60,
                 'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(9)
+            },
+            9:{
+                'name':'ラブアローシュート',
+                'image':'item_9',
+                'discription':'おやつが近くに落ちてくる',
+                'price':1000000000,
+                'durationSec':60,
+                'conditoin':'',
+                'condFunc':()->
+                    return game.slot_setting.itemConditinon(8)
             },
             11:{
                 'name':'高坂穂乃果',
@@ -426,7 +426,7 @@ class slotSetting extends appNode
                 'price':10000000000,
                 'conditoin':'200コンボ達成する',
                 'condFunc':()->
-                    return game.slot_setting.itemConditinon(22)
+                    return game.slot_setting.itemConditinon(23)
             },
             24:{
                 'name':'プラチナことり',
@@ -435,12 +435,12 @@ class slotSetting extends appNode
                 'price':1000000000000,
                 'conditoin':'全楽曲25曲を全て達成する',
                 'condFunc':()->
-                    return game.slot_setting.itemConditinon(22)
+                    return game.slot_setting.itemConditinon(24)
             }
         }
 
         #アイテムの並び順
-        #@item_sort_list = [2, 4, 3, 1, 7, 6, 5, 9, 8]
+        #@item_sort_list = [2->1, 4->2, 3->3, 1->4, 7->5, 6->6, 5->7, 9->8, 8->9]
 
         #μ’ｓメンバーアイテムの値段、フィーバーになった順に
         @member_item_price = [1000, 10000, 100000, 500000, 1000000, 5000000, 10000000, 50000000, 100000000]
@@ -461,6 +461,8 @@ class slotSetting extends appNode
         #掛け金が増えると当選金額の割合が減る補正
         @prize_div = 1
         @item_gravity = 0
+        #ランダムでの結果と部員の編成を加味した最終的な挿入するμ’ｓメンバーの数値
+        @add_muse_num = 0
 
         #セーブする変数
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
@@ -547,16 +549,18 @@ class slotSetting extends appNode
         full = [11,12,13,14,15,16,17,18,19]
         remain = []
         if @prev_muse.length >= 9
-            @prev_muse = []
-        for key, val of full
-            if @prev_muse.indexOf(val) is -1
-                remain.push(full[key])
-        random = Math.floor(Math.random() * remain.length)
-        member = remain[random]
-        @now_muse_num = member
+            @now_muse_num = 0
+        else
+            for key, val of full
+                if @prev_muse.indexOf(val) is -1
+                    remain.push(full[key])
+            random = Math.floor(Math.random() * remain.length)
+            member = remain[random]
+            @now_muse_num = member
+            if @prev_muse.indexOf(member) is -1
+                @prev_muse.push(member)
         game.pause_scene.pause_member_set_layer.dispSetMemberList()
-        if @prev_muse.indexOf(member) is -1
-            @prev_muse.push(member)
+
 
     ###
     挿入するμ’sメンバーの人数を決める
@@ -595,7 +599,7 @@ class slotSetting extends appNode
     ###
     getReturnMoneyFallValue:()->
         up = game.combo
-        if game.isItemSet(4) && game.combo < 100
+        if game.isItemSet(2) && game.combo < 100
             up = 100
         return Math.floor(game.bet * up * 0.03)
 
@@ -611,7 +615,7 @@ class slotSetting extends appNode
             if div < 1
                 div = 1
             ret_money = Math.floor(ret_money / div)
-        if game.isItemSet(7) || game.main_scene.gp_back_panorama.now_back_effect_flg is true
+        if game.isItemSet(5) || game.main_scene.gp_back_panorama.now_back_effect_flg is true
             ret_money *= 2
         if ret_money > 10000000000
             ret_money = 10000000000
@@ -650,12 +654,10 @@ class slotSetting extends appNode
             val = 1
         else if quo <= 600
             val = 0.75
-        else if quo <= 1000
+        else if quo <= 2000
             val = 0.5
-        else if quo <= 10000
-            val = 0.25
         else
-            val = 0.1
+            val = 0.25
         return  val
 
     ###
@@ -665,7 +667,7 @@ class slotSetting extends appNode
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
         else
-            if game.isItemSet(9)
+            if game.isItemSet(8) || game.fever is true
                 val = 0
             else
                 val = @tension_max * @_getTensionDownCorrect()
@@ -701,8 +703,6 @@ class slotSetting extends appNode
         val = Math.round(val)
         if game.debug.fix_tention_slot_hit_flg is true
             val = game.debug.fix_tention_slot_hit_flg
-        if hit_eye > 10
-            val = @tension_max
         if game.fever is true
             val = 0
         return val
@@ -753,7 +753,7 @@ class slotSetting extends appNode
             val = 3
         else
             val = 4
-        if game.isItemSet(2)
+        if game.isItemSet(1)
             val = 4
         game.item_kind = val
         return val
@@ -780,7 +780,7 @@ class slotSetting extends appNode
     メンバー:11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
     @return role
     ユニット(役):20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
-    31:ほのりん、32:ことぱな、33:にこのぞ、34:のぞえり、35:まきりん、36:うみえり、37:ことうみ、38:にこまき
+    31:ほのりん、32:ことぱな、33:にこのぞ、34:ことうみ、35:まきりん、36:のぞえり、37:にこまき、38:うみえり
     ###
     getHitRole:(left, middle, right)->
         role = 20
@@ -800,11 +800,11 @@ class slotSetting extends appNode
             when '11,15'    then role = 31
             when '12,16'    then role = 32
             when '17,18'    then role = 33
-            when '18,19'    then role = 34
+            when '12,13'    then role = 34
             when '14,15'    then role = 35
-            when '13,14'    then role = 36
-            when '12,13'    then role = 37
-            when '14,17'    then role = 38
+            when '18,19'    then role = 36
+            when '14,17'    then role = 37
+            when '13,14'    then role = 38
             else role = 20
         return role
 
@@ -820,8 +820,18 @@ class slotSetting extends appNode
         else if num < 20
             if game.prev_fever_muse.indexOf(parseInt(num)) != -1
                 rslt = true
-        else
-            rslt = false
+        else if num is 21
+            if 100 <= game.max_combo
+                rslt = true
+        else if num is 22
+            if 9 <= game.countSoloMusic()
+                rslt = true
+        else if num is 23
+            if 200 <= game.max_combo
+                rslt = true
+        else if num is 24
+            if 25 <= game.countFullMusic()
+                rslt = true
         return rslt
 
     ###
@@ -847,6 +857,7 @@ class slotSetting extends appNode
             game.next_add_member_key += 1
             if member[game.next_add_member_key] is undefined
                 game.next_add_member_key = 0
+        @add_muse_num = ret
         return ret
 
     ###
@@ -866,6 +877,6 @@ class slotSetting extends appNode
             rate = 5
         result = false
         random = Math.floor(Math.random() * 100)
-        if game.debug.foece_fever is true || random <= rate
+        if game.debug.force_fever is true || random <= rate
             result = true
         return result

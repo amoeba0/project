@@ -56,7 +56,7 @@ class stageFront extends gpStage
             if @itemFallSec != @itemFallSecInit
                 @setItemFallFrm(@itemFallSecInit)
         if @missItemFallSycleNow is @missItemFallSycle && @age % @itemFallFrm is @itemFallFrm / 2
-            if game.isItemSet(2) is false
+            if game.isItemSet(1) is false && game.fever is false
                 @_missCatchFall()
             @missItemFallSycleNow = 0
 

@@ -144,9 +144,6 @@ class gpSlot extends appGroup
         else if left > 10 && middle > 10 && right > 10
             hit_flg = true
             @hit_role = game.slot_setting.getHitRole(left, middle, right)
-        if @hit_role > 10
-            game.prev_fever_muse.push(@hit_role)
-            game.slot_setting.setMemberItemPrice()
         return hit_flg
 
     ###
@@ -155,15 +152,20 @@ class gpSlot extends appGroup
     _feverStart:(hit_eye)->
         if game.fever is false
             if (11 <= hit_eye && hit_eye <= 19) || (21 <= hit_eye)
-                game.fever = true
-                game.past_fever_num += 1
-                game.slot_setting.setMuseMember()
-                game.musePreLoad()
-                game.fever_hit_eye = hit_eye
-                game.main_scene.gp_system.changeBetChangeFlg(false)
-                game.main_scene.gp_effect.feverEffectSet()
-                @slotAddMuseAll(hit_eye)
-                @_feverBgmStart(hit_eye)
+                if game.prev_fever_muse.indexOf(parseInt(hit_eye)) is -1
+                    game.prev_fever_muse.push(@hit_role)
+                    game.pause_scene.pause_record_layer.resetRecordList()
+                    game.slot_setting.setMemberItemPrice()
+                    game.tensionSetValue(game.slot_setting.tension_max)
+                    game.fever = true
+                    game.past_fever_num += 1
+                    game.slot_setting.setMuseMember()
+                    game.musePreLoad()
+                    game.fever_hit_eye = hit_eye
+                    game.main_scene.gp_system.changeBetChangeFlg(false)
+                    game.main_scene.gp_effect.feverEffectSet()
+                    @slotAddMuseAll(hit_eye)
+                    @_feverBgmStart(hit_eye)
 
     ###
     フィーバー中のBGMを開始する
@@ -236,10 +238,11 @@ class gpSlot extends appGroup
     @param number num メンバーの指定
     ###
     slotAddMuse:(num)->
-        @left_lille.lilleArray = @_slotAddMuseUnit(num, @left_lille)
-        @middle_lille.lilleArray = @_slotAddMuseUnit(num, @middle_lille)
-        @right_lille.lilleArray = @_slotAddMuseUnit(num, @right_lille)
-        game.main_scene.gp_effect.cutInSet(num)
+        if 11 <= num && num <= 19
+            @left_lille.lilleArray = @_slotAddMuseUnit(num, @left_lille)
+            @middle_lille.lilleArray = @_slotAddMuseUnit(num, @middle_lille)
+            @right_lille.lilleArray = @_slotAddMuseUnit(num, @right_lille)
+            game.main_scene.gp_effect.cutInSet(num)
 
     ###
     リールにμ’sの誰かを挿入(単体)

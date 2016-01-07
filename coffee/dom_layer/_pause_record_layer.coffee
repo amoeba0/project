@@ -24,10 +24,30 @@ class pauseRecordLayer extends appDomLayer
         for record_key, record_val of @recordList
             @addChild(record_val)
             record_val.setPosition()
+    resetRecordList:()->
+        for record_key, record_val of @recordList
+            if game.prev_fever_muse.indexOf(parseInt(record_val.kind)) != -1
+                record_val.opacity = 1
+                record_val.removeDomClass('grayscale', true)
+            else
+                record_val.opacity = 0.5
+                record_val.addDomClass('grayscale', true)
     setTrophyList:()->
         for trophy_key, trophy_val of @trophyList
             @addChild(trophy_val)
             trophy_val.setPosition()
+    resetTrophyList:()->
+        for trophy_key, trophy_val of @trophyList
+            if game.item_have_now.indexOf(parseInt(trophy_val.kind)) != -1
+                trophy_val.opacity = 1
+                trophy_val.removeDomClass('grayscale', true)
+                trophy_val.changeIsButton()
+                trophy_val.is_exist = true
+            else
+                trophy_val.opacity = 0.5
+                trophy_val.addDomClass('grayscale', true)
+                trophy_val.changeNotButton()
+                trophy_val.is_exist = false
 
 class pauseBaseRecordSelectLayer extends appDomLayer
     constructor: ()->
@@ -51,6 +71,14 @@ class pauseRecordSelectLayer extends pauseBaseRecordSelectLayer
         @item_options = game.slot_setting.muse_material_list[kind].bgm[0]
         @item_name.setText(@item_options.title)
         @item_image.setImage(@item_options.image)
+        if game.prev_fever_muse.indexOf(parseInt(kind)) != -1
+            @item_image.opacity = 1
+            @item_image.removeDomClass('grayscale', true)
+            @item_name.setText(@item_options.title)
+        else
+            @item_image.opacity = 0.5
+            @item_image.addDomClass('grayscale', true)
+            @item_name.setText('？？？')
         discription = @_setDiscription()
         @item_discription.setText(discription)
     _setDiscription:()->
@@ -68,13 +96,20 @@ class pauseTrophySelectLayer extends pauseBaseRecordSelectLayer
         @addChild(@item_name)
         @addChild(@item_discription)
     setSelectItem:(kind)->
+        @kind = kind
         @item_options = game.slot_setting.item_list[kind]
-        @item_name.setText(@item_options.name)
         @item_image.setImage(@item_options.image)
+        @item_name.setText(@item_options.name)
         discription = @_setDiscription()
         @item_discription.setText(discription)
     _setDiscription:()->
         text = '効果：'+@item_options.discription
-        text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'
+        text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'+'(所持金'+game.toJPUnit(game.money)+'円)'
         text += '<br>出現条件：'+@item_options.conditoin
+        if @kind is 21 || @kind is 23
+            text += '<br>(MAXコンボ'+game.max_combo+')'
+        if @kind is 22
+            text += '<br>('+game.countSoloMusic()+'曲達成済)'
+        if @kind is 24
+            text += '<br>('+game.countFullMusic()+'曲達成済)'
         return text

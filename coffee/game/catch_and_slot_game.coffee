@@ -36,6 +36,7 @@ class LoveliveGame extends catchAndSlotGame
         @money = 0 #現在の所持金
         @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
+        @max_combo = 0 #MAXコンボ
         @tension = 0 #現在のテンション(500がマックス)
         @item_point = 500 #アイテムのポイント（500がマックス）
         @past_fever_num = 0 #過去にフィーバーになった回数
@@ -141,10 +142,19 @@ class LoveliveGame extends catchAndSlotGame
         return rslt
 
     ###
+    現在アイテムを持っているかを確認する
+    ###
+    isItemHave:(kind)->
+        rslt = false
+        if game.item_have_now.indexOf(kind) != -1
+            rslt = true
+        return rslt
+
+    ###
     アイテムの効果を発動する
     ###
     itemUseExe:()->
-        if @isItemSet(1)
+        if @isItemSet(4)
             @main_scene.gp_stage_front.player.setMxUp()
         else
             @main_scene.gp_stage_front.player.resetMxUp()
@@ -152,6 +162,16 @@ class LoveliveGame extends catchAndSlotGame
             @main_scene.gp_stage_front.player.setMyUp()
         else
             @main_scene.gp_stage_front.player.resetMyUp()
+
+    countSoloMusic:()->
+        cnt = 0
+        for val in @prev_fever_muse
+            if val < 20
+                cnt += 1
+        return cnt
+
+    countFullMusic:()->
+        return @prev_fever_muse.length
 
     ###
     アイテムを取った時にテンションゲージを増減する
@@ -216,6 +236,7 @@ class LoveliveGame extends catchAndSlotGame
             'money'    : 0,
             'bet'      : 0,
             'combo'    : 0,
+            'max_combo': 0,
             'tension'  : 0,
             'past_fever_num' : 0,
             'item_point' : 0,
@@ -244,6 +265,7 @@ class LoveliveGame extends catchAndSlotGame
             'money'    : @money,
             'bet'      : @bet,
             'combo'    : @combo,
+            'max_combo': @max_combo,
             'tension'  : @tension,
             'past_fever_num' : @past_fever_num,
             'item_point' : @item_point,
@@ -270,6 +292,7 @@ class LoveliveGame extends catchAndSlotGame
             @money = parseInt(money)
             @bet = @_loadStorage('bet', 'num')
             @combo = @_loadStorage('combo', 'num')
+            @max_combo = @_loadStorage('max_combo', 'num')
             @tension = @_loadStorage('tension', 'num')
             @past_fever_num = @_loadStorage('past_fever_num', 'num')
             @item_point = @_loadStorage('item_point', 'num')
@@ -308,6 +331,7 @@ class LoveliveGame extends catchAndSlotGame
         @money = data.money
         @bet = data.bet
         @combo = data.combo
+        @max_combo = data.max_combo
         @tension = data.tension
         @past_fever_num = data.past_fever_num
         @item_point = data.item_point
@@ -336,6 +360,8 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.pause_item_buy_layer.resetItemList()
         @pause_scene.pause_item_use_layer.dspSetItemList()
         @pause_scene.pause_member_set_layer.dispSetMemberList()
+        @pause_scene.pause_record_layer.resetRecordList()
+        @pause_scene.pause_record_layer.resetTrophyList()
         @slot_setting.setMemberItemPrice()
         @slot_setting.setItemPointValue()
         @musePreLoadByMemberSetNow()

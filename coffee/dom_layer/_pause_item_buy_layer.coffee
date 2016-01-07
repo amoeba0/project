@@ -41,6 +41,7 @@ class pauseItemBuyLayer extends appDomLayer
                 master_list[i] = master_list[0]
         @_resetItemList(@item_list, master_list)
         @_resetItemList(@member_list, master_list)
+        @_resetItemList(@trophy_list, master_list)
     _resetItemList:(item_list, master_list)->
         for item_key, item_val of item_list
             if master_list[item_key].condFunc() is false || master_list[item_key].price > game.money
@@ -90,6 +91,12 @@ class pauseItemBuySelectLayer extends appDomLayer
             text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'+'(所持金'+game.toJPUnit(game.money)+'円)'
         if @item_options.condFunc() is false || 20 < @item_kind
             text += '<br>出現条件：'+@item_options.conditoin
+            if @item_kind is 21 || @item_kind is 23
+                text += '<br>(MAXコンボ'+game.max_combo+')'
+            if @item_kind is 22
+                text += '<br>('+game.countSoloMusic()+'曲達成済)'
+            if @item_kind is 24
+                text += '<br>('+game.countFullMusic()+'曲達成済)'
         return text
     _setButton:()->
         if @item_options.condFunc() is true && game.money >= @item_options.price
@@ -107,3 +114,5 @@ class pauseItemBuySelectLayer extends appDomLayer
         game.pause_scene.removeItemBuySelectMenu()
         game.pause_scene.pause_item_buy_layer.resetItemList()
         game.main_scene.gp_system.money_text.setValue()
+        if 21 <= @item_kind
+            game.pause_scene.pause_record_layer.resetTrophyList()

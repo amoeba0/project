@@ -12,12 +12,16 @@ class Character extends appObject
         @my = 19 #y軸初速度
         @ax_init = 3
         @ax_up = 5
+        @ax_up2 = 7
         @mx_init = 7
-        @mx_up = 11
+        @mx_up = 10
+        @mx_up2 = 15
         @my_init = 19
-        @my_up = 24
+        @my_up = 22
+        @my_up2 = 28
         @friction_init = 1.7
         @friction_up = 2.7
+        @friction_up2 = 3.4
     onenterframe: (e) ->
         @charMove()
 
@@ -180,17 +184,33 @@ class Character extends appObject
             @frame = 3
 
     setMxUp:()->
-        @mx = @mx_up
-        @ax = @ax_up
-        @friction = @friction_up
+        if game.isItemHave(21) is true
+            @mx = @mx_up2
+            @ax = @ax_up2
+            @friction = @friction_up2
+        else
+            @mx = @mx_up
+            @ax = @ax_up
+            @friction = @friction_up
 
     resetMxUp:()->
-        @mx = @mx_init
-        @ax = @ax_init
-        @friction = @friction_init
+        if game.isItemHave(21) is true
+            @mx = @mx_up
+            @ax = @ax_up
+            @friction = @friction_up
+        else
+            @mx = @mx_init
+            @ax = @ax_init
+            @friction = @friction_init
 
     setMyUp:()->
-        @my = @my_up
+        if game.isItemHave(21) is true
+            @my = @my_up2
+        else
+            @my = @my_up
 
     resetMyUp:()->
-        @my = @my_init
+        if game.isItemHave(21) is true
+            @my = @my_up
+        else
+            @my = @my_init

@@ -6,7 +6,7 @@ class Debug extends appNode
         super
 
         #開始後いきなりメイン画面
-        @force_main_flg = true
+        @force_main_flg = false
         #開始後いきなりポーズ画面
         @force_pause_flg = false
 
@@ -17,18 +17,19 @@ class Debug extends appNode
         #テストロード用の値
         @test_load_val = {
             'money':1234567890,
-            'bet':1000000,
+            'bet':10000,
             'combo':10,
+            'max_combo':110,
             'tension':100,
             'past_fever_num':0,
-            'item_point':50,
+            'item_point':500,
             'next_add_member_key':0,
-            'prev_muse':[],
-            'now_muse_num':15,
-            'item_have_now':[],
+            'prev_muse':[12,13,14,15,16,17,18,19],
+            'now_muse_num':0,
+            'item_have_now':[3,4,15],
             'item_set_now':[],
             'member_set_now':[],
-            'prev_fever_muse':[]
+            'prev_fever_muse':[12,13,14,15,16,17,18,19,31]
         }
 
         #デバッグ用リールにすりかえる

@@ -580,7 +580,8 @@ pauseItemBuyLayer = (function(_super) {
       }
     }
     this._resetItemList(this.item_list, master_list);
-    return this._resetItemList(this.member_list, master_list);
+    this._resetItemList(this.member_list, master_list);
+    return this._resetItemList(this.trophy_list, master_list);
   };
 
   pauseItemBuyLayer.prototype._resetItemList = function(item_list, master_list) {
@@ -655,6 +656,15 @@ pauseItemBuySelectLayer = (function(_super) {
     }
     if (this.item_options.condFunc() === false || 20 < this.item_kind) {
       text += '<br>出現条件：' + this.item_options.conditoin;
+      if (this.item_kind === 21 || this.item_kind === 23) {
+        text += '<br>(MAXコンボ' + game.max_combo + ')';
+      }
+      if (this.item_kind === 22) {
+        text += '<br>(' + game.countSoloMusic() + '曲達成済)';
+      }
+      if (this.item_kind === 24) {
+        text += '<br>(' + game.countFullMusic() + '曲達成済)';
+      }
     }
     return text;
   };
@@ -679,7 +689,10 @@ pauseItemBuySelectLayer = (function(_super) {
     game.item_have_now.push(this.item_kind);
     game.pause_scene.removeItemBuySelectMenu();
     game.pause_scene.pause_item_buy_layer.resetItemList();
-    return game.main_scene.gp_system.money_text.setValue();
+    game.main_scene.gp_system.money_text.setValue();
+    if (21 <= this.item_kind) {
+      return game.pause_scene.pause_record_layer.resetTrophyList();
+    }
   };
 
   return pauseItemBuySelectLayer;
@@ -1069,6 +1082,23 @@ pauseRecordLayer = (function(_super) {
     return _results;
   };
 
+  pauseRecordLayer.prototype.resetRecordList = function() {
+    var record_key, record_val, _ref, _results;
+    _ref = this.recordList;
+    _results = [];
+    for (record_key in _ref) {
+      record_val = _ref[record_key];
+      if (game.prev_fever_muse.indexOf(parseInt(record_val.kind)) !== -1) {
+        record_val.opacity = 1;
+        _results.push(record_val.removeDomClass('grayscale', true));
+      } else {
+        record_val.opacity = 0.5;
+        _results.push(record_val.addDomClass('grayscale', true));
+      }
+    }
+    return _results;
+  };
+
   pauseRecordLayer.prototype.setTrophyList = function() {
     var trophy_key, trophy_val, _ref, _results;
     _ref = this.trophyList;
@@ -1077,6 +1107,27 @@ pauseRecordLayer = (function(_super) {
       trophy_val = _ref[trophy_key];
       this.addChild(trophy_val);
       _results.push(trophy_val.setPosition());
+    }
+    return _results;
+  };
+
+  pauseRecordLayer.prototype.resetTrophyList = function() {
+    var trophy_key, trophy_val, _ref, _results;
+    _ref = this.trophyList;
+    _results = [];
+    for (trophy_key in _ref) {
+      trophy_val = _ref[trophy_key];
+      if (game.item_have_now.indexOf(parseInt(trophy_val.kind)) !== -1) {
+        trophy_val.opacity = 1;
+        trophy_val.removeDomClass('grayscale', true);
+        trophy_val.changeIsButton();
+        _results.push(trophy_val.is_exist = true);
+      } else {
+        trophy_val.opacity = 0.5;
+        trophy_val.addDomClass('grayscale', true);
+        trophy_val.changeNotButton();
+        _results.push(trophy_val.is_exist = false);
+      }
     }
     return _results;
   };
@@ -1119,6 +1170,15 @@ pauseRecordSelectLayer = (function(_super) {
     this.item_options = game.slot_setting.muse_material_list[kind].bgm[0];
     this.item_name.setText(this.item_options.title);
     this.item_image.setImage(this.item_options.image);
+    if (game.prev_fever_muse.indexOf(parseInt(kind)) !== -1) {
+      this.item_image.opacity = 1;
+      this.item_image.removeDomClass('grayscale', true);
+      this.item_name.setText(this.item_options.title);
+    } else {
+      this.item_image.opacity = 0.5;
+      this.item_image.addDomClass('grayscale', true);
+      this.item_name.setText('？？？');
+    }
     discription = this._setDiscription();
     return this.item_discription.setText(discription);
   };
@@ -1149,9 +1209,10 @@ pauseTrophySelectLayer = (function(_super) {
 
   pauseTrophySelectLayer.prototype.setSelectItem = function(kind) {
     var discription;
+    this.kind = kind;
     this.item_options = game.slot_setting.item_list[kind];
-    this.item_name.setText(this.item_options.name);
     this.item_image.setImage(this.item_options.image);
+    this.item_name.setText(this.item_options.name);
     discription = this._setDiscription();
     return this.item_discription.setText(discription);
   };
@@ -1159,8 +1220,17 @@ pauseTrophySelectLayer = (function(_super) {
   pauseTrophySelectLayer.prototype._setDiscription = function() {
     var text;
     text = '効果：' + this.item_options.discription;
-    text += '<br>値段：' + game.toJPUnit(this.item_options.price) + '円';
+    text += '<br>値段：' + game.toJPUnit(this.item_options.price) + '円' + '(所持金' + game.toJPUnit(game.money) + '円)';
     text += '<br>出現条件：' + this.item_options.conditoin;
+    if (this.kind === 21 || this.kind === 23) {
+      text += '<br>(MAXコンボ' + game.max_combo + ')';
+    }
+    if (this.kind === 22) {
+      text += '<br>(' + game.countSoloMusic() + '曲達成済)';
+    }
+    if (this.kind === 24) {
+      text += '<br>(' + game.countFullMusic() + '曲達成済)';
+    }
     return text;
   };
 
@@ -1235,6 +1305,7 @@ LoveliveGame = (function(_super) {
     this.money = 0;
     this.bet = 1;
     this.combo = 0;
+    this.max_combo = 0;
     this.tension = 0;
     this.item_point = 500;
     this.past_fever_num = 0;
@@ -1389,11 +1460,25 @@ LoveliveGame = (function(_super) {
 
 
   /*
+  現在アイテムを持っているかを確認する
+   */
+
+  LoveliveGame.prototype.isItemHave = function(kind) {
+    var rslt;
+    rslt = false;
+    if (game.item_have_now.indexOf(kind) !== -1) {
+      rslt = true;
+    }
+    return rslt;
+  };
+
+
+  /*
   アイテムの効果を発動する
    */
 
   LoveliveGame.prototype.itemUseExe = function() {
-    if (this.isItemSet(1)) {
+    if (this.isItemSet(4)) {
       this.main_scene.gp_stage_front.player.setMxUp();
     } else {
       this.main_scene.gp_stage_front.player.resetMxUp();
@@ -1403,6 +1488,23 @@ LoveliveGame = (function(_super) {
     } else {
       return this.main_scene.gp_stage_front.player.resetMyUp();
     }
+  };
+
+  LoveliveGame.prototype.countSoloMusic = function() {
+    var cnt, val, _i, _len, _ref;
+    cnt = 0;
+    _ref = this.prev_fever_muse;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      val = _ref[_i];
+      if (val < 20) {
+        cnt += 1;
+      }
+    }
+    return cnt;
+  };
+
+  LoveliveGame.prototype.countFullMusic = function() {
+    return this.prev_fever_muse.length;
   };
 
 
@@ -1501,6 +1603,7 @@ LoveliveGame = (function(_super) {
       'money': 0,
       'bet': 0,
       'combo': 0,
+      'max_combo': 0,
       'tension': 0,
       'past_fever_num': 0,
       'item_point': 0,
@@ -1534,6 +1637,7 @@ LoveliveGame = (function(_super) {
       'money': this.money,
       'bet': this.bet,
       'combo': this.combo,
+      'max_combo': this.max_combo,
       'tension': this.tension,
       'past_fever_num': this.past_fever_num,
       'item_point': this.item_point,
@@ -1568,6 +1672,7 @@ LoveliveGame = (function(_super) {
       this.money = parseInt(money);
       this.bet = this._loadStorage('bet', 'num');
       this.combo = this._loadStorage('combo', 'num');
+      this.max_combo = this._loadStorage('max_combo', 'num');
       this.tension = this._loadStorage('tension', 'num');
       this.past_fever_num = this._loadStorage('past_fever_num', 'num');
       this.item_point = this._loadStorage('item_point', 'num');
@@ -1623,6 +1728,7 @@ LoveliveGame = (function(_super) {
     this.money = data.money;
     this.bet = data.bet;
     this.combo = data.combo;
+    this.max_combo = data.max_combo;
     this.tension = data.tension;
     this.past_fever_num = data.past_fever_num;
     this.item_point = data.item_point;
@@ -1655,6 +1761,8 @@ LoveliveGame = (function(_super) {
     this.pause_scene.pause_item_buy_layer.resetItemList();
     this.pause_scene.pause_item_use_layer.dspSetItemList();
     this.pause_scene.pause_member_set_layer.dispSetMemberList();
+    this.pause_scene.pause_record_layer.resetRecordList();
+    this.pause_scene.pause_record_layer.resetTrophyList();
     this.slot_setting.setMemberItemPrice();
     this.slot_setting.setItemPointValue();
     this.musePreLoadByMemberSetNow();
@@ -1684,7 +1792,7 @@ gpEffect = (function(_super) {
       num = 0;
     }
     setting = game.slot_setting;
-    if (setting.muse_material_list[setting.now_muse_num] !== void 0) {
+    if (setting.muse_material_list[setting.add_muse_num] !== void 0) {
       this.cut_in = new cutIn(num);
       this.addChild(this.cut_in);
       return game.main_scene.gp_stage_front.missItemFallSycleNow = 0;
@@ -2023,10 +2131,6 @@ gpSlot = (function(_super) {
       hit_flg = true;
       this.hit_role = game.slot_setting.getHitRole(left, middle, right);
     }
-    if (this.hit_role > 10) {
-      game.prev_fever_muse.push(this.hit_role);
-      game.slot_setting.setMemberItemPrice();
-    }
     return hit_flg;
   };
 
@@ -2038,15 +2142,21 @@ gpSlot = (function(_super) {
   gpSlot.prototype._feverStart = function(hit_eye) {
     if (game.fever === false) {
       if ((11 <= hit_eye && hit_eye <= 19) || (21 <= hit_eye)) {
-        game.fever = true;
-        game.past_fever_num += 1;
-        game.slot_setting.setMuseMember();
-        game.musePreLoad();
-        game.fever_hit_eye = hit_eye;
-        game.main_scene.gp_system.changeBetChangeFlg(false);
-        game.main_scene.gp_effect.feverEffectSet();
-        this.slotAddMuseAll(hit_eye);
-        return this._feverBgmStart(hit_eye);
+        if (game.prev_fever_muse.indexOf(parseInt(hit_eye)) === -1) {
+          game.prev_fever_muse.push(this.hit_role);
+          game.pause_scene.pause_record_layer.resetRecordList();
+          game.slot_setting.setMemberItemPrice();
+          game.tensionSetValue(game.slot_setting.tension_max);
+          game.fever = true;
+          game.past_fever_num += 1;
+          game.slot_setting.setMuseMember();
+          game.musePreLoad();
+          game.fever_hit_eye = hit_eye;
+          game.main_scene.gp_system.changeBetChangeFlg(false);
+          game.main_scene.gp_effect.feverEffectSet();
+          this.slotAddMuseAll(hit_eye);
+          return this._feverBgmStart(hit_eye);
+        }
       }
     }
   };
@@ -2150,10 +2260,12 @@ gpSlot = (function(_super) {
    */
 
   gpSlot.prototype.slotAddMuse = function(num) {
-    this.left_lille.lilleArray = this._slotAddMuseUnit(num, this.left_lille);
-    this.middle_lille.lilleArray = this._slotAddMuseUnit(num, this.middle_lille);
-    this.right_lille.lilleArray = this._slotAddMuseUnit(num, this.right_lille);
-    return game.main_scene.gp_effect.cutInSet(num);
+    if (11 <= num && num <= 19) {
+      this.left_lille.lilleArray = this._slotAddMuseUnit(num, this.left_lille);
+      this.middle_lille.lilleArray = this._slotAddMuseUnit(num, this.middle_lille);
+      this.right_lille.lilleArray = this._slotAddMuseUnit(num, this.right_lille);
+      return game.main_scene.gp_effect.cutInSet(num);
+    }
   };
 
 
@@ -2371,7 +2483,7 @@ stageFront = (function(_super) {
       }
     }
     if (this.missItemFallSycleNow === this.missItemFallSycle && this.age % this.itemFallFrm === this.itemFallFrm / 2) {
-      if (game.isItemSet(2) === false) {
+      if (game.isItemSet(1) === false && game.fever === false) {
         this._missCatchFall();
       }
       return this.missItemFallSycleNow = 0;
@@ -4331,8 +4443,6 @@ baseRecordItemHtml = (function(_super) {
     baseRecordItemHtml.__super__.constructor.call(this, 100, 100);
     this.position = position;
     this.kind = kind;
-    this.image_name = 'test_image2';
-    this.setImageHtml();
     this.scaleX = 0.65;
     this.scaleY = 0.65;
     this.positionY = 0;
@@ -4354,6 +4464,8 @@ recordItemHtml = (function(_super) {
 
   function recordItemHtml(position, kind) {
     recordItemHtml.__super__.constructor.call(this, position, kind);
+    this.image_name = 'bgm_' + kind;
+    this.setImageHtml();
     this.positionY = 40;
     this.positionX = 35;
   }
@@ -4372,13 +4484,18 @@ trophyItemHtml = (function(_super) {
 
   function trophyItemHtml(position, kind) {
     trophyItemHtml.__super__.constructor.call(this, position, kind);
+    this.image_name = 'test_image2';
+    this.setImageHtml();
     this.positionY = 480;
     this.positionX = 75;
+    this.is_exist = true;
   }
 
   trophyItemHtml.prototype.ontouchend = function() {
-    game.sePlay(this.dicisionSe);
-    return game.pause_scene.setTrophySelectMenu(this.kind);
+    if (this.is_exist === true) {
+      game.sePlay(this.dicisionSe);
+      return game.pause_scene.setTrophySelectMenu(this.kind);
+    }
   };
 
   return trophyItemHtml;
@@ -4390,6 +4507,8 @@ buyTrophyItemHtml = (function(_super) {
 
   function buyTrophyItemHtml(position, kind) {
     buyTrophyItemHtml.__super__.constructor.call(this, position, kind);
+    this.image_name = 'test_image2';
+    this.setImageHtml();
     this.positionY = 480;
     this.positionX = 75;
     this.item_kind = kind;
@@ -4547,24 +4666,25 @@ Debug = (function(_super) {
 
   function Debug() {
     Debug.__super__.constructor.apply(this, arguments);
-    this.force_main_flg = true;
+    this.force_main_flg = false;
     this.force_pause_flg = false;
     this.not_load_flg = false;
     this.test_load_flg = false;
     this.test_load_val = {
       'money': 1234567890,
-      'bet': 1000000,
+      'bet': 10000,
       'combo': 10,
+      'max_combo': 110,
       'tension': 100,
       'past_fever_num': 0,
-      'item_point': 50,
+      'item_point': 500,
       'next_add_member_key': 0,
-      'prev_muse': [],
-      'now_muse_num': 15,
-      'item_have_now': [],
+      'prev_muse': [12, 13, 14, 15, 16, 17, 18, 19],
+      'now_muse_num': 0,
+      'item_have_now': [3, 4, 15],
       'item_set_now': [],
       'member_set_now': [],
-      'prev_fever_muse': []
+      'prev_fever_muse': [12, 13, 14, 15, 16, 17, 18, 19, 31]
     };
     this.lille_flg = false;
     this.lille_array = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
@@ -4634,7 +4754,7 @@ slotSetting = (function(_super) {
     カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
     11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
     ユニット(役):20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
-    31:ほのりん、32:ことぱな、33:にこのぞ、34:のぞえり、35:まきりん、36:うみえり、37:ことうみ、38:にこまき
+    31:ほのりん、32:ことぱな、33:にこのぞ、34:ことうみ、35:まきりん、36:のぞえり、37:にこまき、38:うみえり
     direction:キャラクターの向き、left or right
     カットインの画像サイズ、頭の位置で570px
     頭の上に余白がある場合の高さ計算式：(570/(元画像高さ-元画像頭のY座標))*元画像高さ
@@ -4660,7 +4780,7 @@ slotSetting = (function(_super) {
             'time': 107,
             'title': '夢なき夢は夢じゃない',
             'unit': '高坂穂乃果',
-            'image': 'test_image2'
+            'image': 'bgm_11'
           }
         ],
         'voice': ['11_0', '11_1']
@@ -4685,7 +4805,7 @@ slotSetting = (function(_super) {
             'time': 98,
             'title': 'ぶる～べりぃとれいん',
             'unit': '南ことり',
-            'image': 'test_image2'
+            'image': 'bgm_12'
           }
         ],
         'voice': ['12_0', '12_1']
@@ -4710,7 +4830,7 @@ slotSetting = (function(_super) {
             'time': 94,
             'title': '勇気のReason',
             'unit': '園田海未',
-            'image': 'test_image2'
+            'image': 'bgm_13'
           }
         ],
         'voice': ['13_0', '13_1']
@@ -4735,7 +4855,7 @@ slotSetting = (function(_super) {
             'time': 91,
             'title': 'Darling！！',
             'unit': '西木野真姫',
-            'image': 'test_image2'
+            'image': 'bgm_14'
           }
         ],
         'voice': ['14_0', '14_1']
@@ -4760,7 +4880,7 @@ slotSetting = (function(_super) {
             'time': 128,
             'title': '恋のシグナルRin rin rin！',
             'unit': '星空凛',
-            'image': 'test_image2'
+            'image': 'bgm_15'
           }
         ],
         'voice': ['15_0', '15_1']
@@ -4785,7 +4905,7 @@ slotSetting = (function(_super) {
             'time': 164,
             'title': 'なわとび',
             'unit': '小泉花陽',
-            'image': 'test_image2'
+            'image': 'bgm_16'
           }
         ],
         'voice': ['16_0', '16_1']
@@ -4810,7 +4930,7 @@ slotSetting = (function(_super) {
             'time': 105,
             'title': 'まほうつかいはじめました',
             'unit': '矢澤にこ',
-            'image': 'test_image2'
+            'image': 'bgm_17'
           }
         ],
         'voice': ['17_0', '17_1']
@@ -4835,7 +4955,7 @@ slotSetting = (function(_super) {
             'time': 127,
             'title': '純愛レンズ',
             'unit': '東條希',
-            'image': 'test_image2'
+            'image': 'bgm_18'
           }
         ],
         'voice': ['18_0', '18_1']
@@ -4860,7 +4980,7 @@ slotSetting = (function(_super) {
             'time': 93,
             'title': 'ありふれた悲しみの果て',
             'unit': '絢瀬絵里',
-            'image': 'test_image2'
+            'image': 'bgm_19'
           }
         ],
         'voice': ['19_0', '19_1']
@@ -4883,7 +5003,7 @@ slotSetting = (function(_super) {
             'time': 93,
             'title': 'Hello，星を数えて ',
             'unit': '1年生<br>（星空凛、西木野真姫、小泉花陽）',
-            'image': 'test_image2'
+            'image': 'bgm_21'
           }
         ]
       },
@@ -4894,7 +5014,7 @@ slotSetting = (function(_super) {
             'time': 94,
             'title': 'Future style',
             'unit': '2年生<br>（高坂穂乃果、南ことり、園田海未）',
-            'image': 'test_image2'
+            'image': 'bgm_22'
           }
         ]
       },
@@ -4905,7 +5025,7 @@ slotSetting = (function(_super) {
             'time': 84,
             'title': '？←HEARTBEAT',
             'unit': '3年生<br>（絢瀬絵里、東條希、矢澤にこ）',
-            'image': 'test_image2'
+            'image': 'bgm_23'
           }
         ]
       },
@@ -4914,9 +5034,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
+            'title': 'sweet＆sweet holiday',
             'unit': 'Printemps<br>(高坂穂乃果、南ことり、小泉花陽)',
-            'image': 'test_image2'
+            'image': 'bgm_24'
           }
         ]
       },
@@ -4925,9 +5045,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
+            'title': 'あ・の・ね・が・ん・ば・れ',
             'unit': 'lily white<br>(園田海未、星空凛、東條希)',
-            'image': 'test_image2'
+            'image': 'bgm_25'
           }
         ]
       },
@@ -4936,9 +5056,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
+            'title': 'ラブノベルス',
             'unit': 'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)',
-            'image': 'test_image2'
+            'image': 'bgm_26'
           }
         ]
       },
@@ -4947,9 +5067,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
+            'title': 'Listen to my heart！！',
             'unit': 'にこりんぱな<br>(矢澤にこ、星空凛、小泉花陽)',
-            'image': 'test_image2'
+            'image': 'bgm_27'
           }
         ]
       },
@@ -4958,9 +5078,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
+            'title': 'soldier game',
             'unit': '<br>園田海未、西木野真姫、絢瀬絵里',
-            'image': 'test_image2'
+            'image': 'bgm_28'
           }
         ]
       },
@@ -4969,9 +5089,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
+            'title': 'Mermaid festa vol．2',
             'unit': '高坂穂乃果、星空凛',
-            'image': 'test_image2'
+            'image': 'bgm_31'
           }
         ]
       },
@@ -4980,9 +5100,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
+            'title': '告白日和、です！',
             'unit': '南ことり、小泉花陽',
-            'image': 'test_image2'
+            'image': 'bgm_32'
           }
         ]
       },
@@ -4991,9 +5111,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
+            'title': '乙女式れんあい塾',
             'unit': '矢澤にこ、東條希',
-            'image': 'test_image2'
+            'image': 'bgm_33'
           }
         ]
       },
@@ -5002,9 +5122,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
-            'unit': '東條希、絢瀬絵里',
-            'image': 'test_image2'
+            'title': 'Anemone heart',
+            'unit': '南ことり、園田海未',
+            'image': 'bgm_34'
           }
         ]
       },
@@ -5013,9 +5133,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
+            'title': 'Bea in Angel',
             'unit': '西木野真姫、星空凛',
-            'image': 'test_image2'
+            'image': 'bgm_35'
           }
         ]
       },
@@ -5024,9 +5144,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
-            'unit': '園田海未、絢瀬絵里',
-            'image': 'test_image2'
+            'title': '硝子の花園',
+            'unit': '東條希、絢瀬絵里',
+            'image': 'bgm_36'
           }
         ]
       },
@@ -5035,9 +5155,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
-            'unit': '南ことり、園田海未',
-            'image': 'test_image2'
+            'title': 'ずるいよMagnetic today',
+            'unit': '矢澤にこ、西木野真姫',
+            'image': 'bgm_37'
           }
         ]
       },
@@ -5046,9 +5166,9 @@ slotSetting = (function(_super) {
           {
             'name': 'zenkai_no_lovelive',
             'time': 30,
-            'title': 'タイトル',
-            'unit': '矢澤にこ、西木野真姫',
-            'image': 'test_image2'
+            'title': 'Storm in Lover',
+            'unit': '園田海未、絢瀬絵里',
+            'image': 'bgm_38'
           }
         ]
       }
@@ -5071,25 +5191,25 @@ slotSetting = (function(_super) {
         }
       },
       1: {
-        'name': 'テンション上がるにゃー！',
-        'image': 'item_1',
-        'discription': '移動速度が上がる',
-        'price': 500000,
-        'durationSec': 60,
-        'conditoin': '',
-        'condFunc': function() {
-          return game.slot_setting.itemConditinon(1);
-        }
-      },
-      2: {
         'name': 'チーズケーキ鍋',
-        'image': 'item_2',
+        'image': 'item_1',
         'discription': 'チーズケーキしか降ってこなくなる<br>ニンニクは降ってこなくなる',
         'price': 10000,
         'durationSec': 120,
         'conditoin': '',
         'condFunc': function() {
           return game.slot_setting.itemConditinon(2);
+        }
+      },
+      2: {
+        'name': 'くすくす大明神',
+        'image': 'item_2',
+        'discription': 'コンボ数に関わらず<br>たくさんのコインが降ってくるようになる',
+        'price': 50000,
+        'durationSec': 120,
+        'conditoin': '',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(4);
         }
       },
       3: {
@@ -5104,25 +5224,25 @@ slotSetting = (function(_super) {
         }
       },
       4: {
-        'name': 'くすくす大明神',
+        'name': 'テンション上がるにゃー！',
         'image': 'item_4',
-        'discription': 'コンボ数に関わらず<br>たくさんのコインが降ってくるようになる',
-        'price': 50000,
-        'durationSec': 120,
+        'discription': '移動速度が上がる',
+        'price': 500000,
+        'durationSec': 60,
         'conditoin': '',
         'condFunc': function() {
-          return game.slot_setting.itemConditinon(4);
+          return game.slot_setting.itemConditinon(1);
         }
       },
       5: {
-        'name': '完っ全にフルハウスね',
+        'name': 'ファイトだよっ',
         'image': 'item_5',
-        'discription': '3回に1回の確率で<br>CHANCE!!状態になる',
-        'price': 10000000,
+        'discription': 'スロットに当たった時に<br>得られる金額が2倍になる',
+        'price': 1000000,
         'durationSec': 120,
         'conditoin': '',
         'condFunc': function() {
-          return game.slot_setting.itemConditinon(5);
+          return game.slot_setting.itemConditinon(7);
         }
       },
       6: {
@@ -5137,36 +5257,36 @@ slotSetting = (function(_super) {
         }
       },
       7: {
-        'name': 'ファイトだよっ',
+        'name': '完っ全にフルハウスね',
         'image': 'item_7',
-        'discription': 'スロットに当たった時に<br>得られる金額が2倍になる',
-        'price': 1000000,
+        'discription': '3回に1回の確率で<br>CHANCE!!状態になる',
+        'price': 10000000,
         'durationSec': 120,
         'conditoin': '',
         'condFunc': function() {
-          return game.slot_setting.itemConditinon(7);
+          return game.slot_setting.itemConditinon(5);
         }
       },
       8: {
-        'name': 'ラブアローシュート',
-        'image': 'item_8',
-        'discription': 'おやつが近くに落ちてくる',
-        'price': 1000000000,
-        'durationSec': 60,
-        'conditoin': '',
-        'condFunc': function() {
-          return game.slot_setting.itemConditinon(8);
-        }
-      },
-      9: {
         'name': '認められないわぁ',
-        'image': 'item_9',
+        'image': 'item_8',
         'discription': 'アイテムを落としてもコンボが減らず<br>テンションも下がらないようになる',
         'price': 100000000,
         'durationSec': 60,
         'conditoin': '',
         'condFunc': function() {
           return game.slot_setting.itemConditinon(9);
+        }
+      },
+      9: {
+        'name': 'ラブアローシュート',
+        'image': 'item_9',
+        'discription': 'おやつが近くに落ちてくる',
+        'price': 1000000000,
+        'durationSec': 60,
+        'conditoin': '',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(8);
         }
       },
       11: {
@@ -5286,7 +5406,7 @@ slotSetting = (function(_super) {
         'price': 10000000000,
         'conditoin': '200コンボ達成する',
         'condFunc': function() {
-          return game.slot_setting.itemConditinon(22);
+          return game.slot_setting.itemConditinon(23);
         }
       },
       24: {
@@ -5296,7 +5416,7 @@ slotSetting = (function(_super) {
         'price': 1000000000000,
         'conditoin': '全楽曲25曲を全て達成する',
         'condFunc': function() {
-          return game.slot_setting.itemConditinon(22);
+          return game.slot_setting.itemConditinon(24);
         }
       }
     };
@@ -5322,6 +5442,7 @@ slotSetting = (function(_super) {
     ];
     this.prize_div = 1;
     this.item_gravity = 0;
+    this.add_muse_num = 0;
     this.prev_muse = [];
     this.now_muse_num = 0;
   }
@@ -5430,21 +5551,22 @@ slotSetting = (function(_super) {
     full = [11, 12, 13, 14, 15, 16, 17, 18, 19];
     remain = [];
     if (this.prev_muse.length >= 9) {
-      this.prev_muse = [];
-    }
-    for (key in full) {
-      val = full[key];
-      if (this.prev_muse.indexOf(val) === -1) {
-        remain.push(full[key]);
+      this.now_muse_num = 0;
+    } else {
+      for (key in full) {
+        val = full[key];
+        if (this.prev_muse.indexOf(val) === -1) {
+          remain.push(full[key]);
+        }
+      }
+      random = Math.floor(Math.random() * remain.length);
+      member = remain[random];
+      this.now_muse_num = member;
+      if (this.prev_muse.indexOf(member) === -1) {
+        this.prev_muse.push(member);
       }
     }
-    random = Math.floor(Math.random() * remain.length);
-    member = remain[random];
-    this.now_muse_num = member;
-    game.pause_scene.pause_member_set_layer.dispSetMemberList();
-    if (this.prev_muse.indexOf(member) === -1) {
-      return this.prev_muse.push(member);
-    }
+    return game.pause_scene.pause_member_set_layer.dispSetMemberList();
   };
 
 
@@ -5499,7 +5621,7 @@ slotSetting = (function(_super) {
   slotSetting.prototype.getReturnMoneyFallValue = function() {
     var up;
     up = game.combo;
-    if (game.isItemSet(4) && game.combo < 100) {
+    if (game.isItemSet(2) && game.combo < 100) {
       up = 100;
     }
     return Math.floor(game.bet * up * 0.03);
@@ -5522,7 +5644,7 @@ slotSetting = (function(_super) {
       }
       ret_money = Math.floor(ret_money / div);
     }
-    if (game.isItemSet(7) || game.main_scene.gp_back_panorama.now_back_effect_flg === true) {
+    if (game.isItemSet(5) || game.main_scene.gp_back_panorama.now_back_effect_flg === true) {
       ret_money *= 2;
     }
     if (ret_money > 10000000000) {
@@ -5575,12 +5697,10 @@ slotSetting = (function(_super) {
       val = 1;
     } else if (quo <= 600) {
       val = 0.75;
-    } else if (quo <= 1000) {
+    } else if (quo <= 2000) {
       val = 0.5;
-    } else if (quo <= 10000) {
-      val = 0.25;
     } else {
-      val = 0.1;
+      val = 0.25;
     }
     return val;
   };
@@ -5595,7 +5715,7 @@ slotSetting = (function(_super) {
     if (game.debug.fix_tention_item_fall_flg === true) {
       val = game.debug.fix_tention_item_fall_val;
     } else {
-      if (game.isItemSet(9)) {
+      if (game.isItemSet(8) || game.fever === true) {
         val = 0;
       } else {
         val = this.tension_max * this._getTensionDownCorrect();
@@ -5644,9 +5764,6 @@ slotSetting = (function(_super) {
     val = Math.round(val);
     if (game.debug.fix_tention_slot_hit_flg === true) {
       val = game.debug.fix_tention_slot_hit_flg;
-    }
-    if (hit_eye > 10) {
-      val = this.tension_max;
     }
     if (game.fever === true) {
       val = 0;
@@ -5710,7 +5827,7 @@ slotSetting = (function(_super) {
     } else {
       val = 4;
     }
-    if (game.isItemSet(2)) {
+    if (game.isItemSet(1)) {
       val = 4;
     }
     game.item_kind = val;
@@ -5747,7 +5864,7 @@ slotSetting = (function(_super) {
   メンバー:11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
   @return role
   ユニット(役):20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
-  31:ほのりん、32:ことぱな、33:にこのぞ、34:のぞえり、35:まきりん、36:うみえり、37:ことうみ、38:にこまき
+  31:ほのりん、32:ことぱな、33:にこのぞ、34:ことうみ、35:まきりん、36:のぞえり、37:にこまき、38:うみえり
    */
 
   slotSetting.prototype.getHitRole = function(left, middle, right) {
@@ -5791,19 +5908,19 @@ slotSetting = (function(_super) {
       case '17,18':
         role = 33;
         break;
-      case '18,19':
+      case '12,13':
         role = 34;
         break;
       case '14,15':
         role = 35;
         break;
-      case '13,14':
+      case '18,19':
         role = 36;
         break;
-      case '12,13':
+      case '14,17':
         role = 37;
         break;
-      case '14,17':
+      case '13,14':
         role = 38;
         break;
       default:
@@ -5828,8 +5945,22 @@ slotSetting = (function(_super) {
       if (game.prev_fever_muse.indexOf(parseInt(num)) !== -1) {
         rslt = true;
       }
-    } else {
-      rslt = false;
+    } else if (num === 21) {
+      if (100 <= game.max_combo) {
+        rslt = true;
+      }
+    } else if (num === 22) {
+      if (9 <= game.countSoloMusic()) {
+        rslt = true;
+      }
+    } else if (num === 23) {
+      if (200 <= game.max_combo) {
+        rslt = true;
+      }
+    } else if (num === 24) {
+      if (25 <= game.countFullMusic()) {
+        rslt = true;
+      }
     }
     return rslt;
   };
@@ -5875,6 +6006,7 @@ slotSetting = (function(_super) {
         game.next_add_member_key = 0;
       }
     }
+    this.add_muse_num = ret;
     return ret;
   };
 
@@ -5899,7 +6031,7 @@ slotSetting = (function(_super) {
     }
     result = false;
     random = Math.floor(Math.random() * 100);
-    if (game.debug.foece_fever === true || random <= rate) {
+    if (game.debug.force_fever === true || random <= rate) {
       result = true;
     }
     return result;
@@ -6224,42 +6356,51 @@ pauseScene = (function(_super) {
     this.pause_trophy_select_layer = new pauseTrophySelectLayer();
     this.addChild(this.pause_back);
     this.addChild(this.pause_main_layer);
+    this.isAblePopPause = true;
   }
 
   pauseScene.prototype.setSaveMenu = function() {
     this.addChild(this.pause_save_layer);
-    return game.saveGame();
+    game.saveGame();
+    return this.isAblePopPause = false;
   };
 
   pauseScene.prototype.removeSaveMenu = function() {
-    return this.removeChild(this.pause_save_layer);
+    this.removeChild(this.pause_save_layer);
+    return this.isAblePopPause = true;
   };
 
   pauseScene.prototype.setItemBuyMenu = function() {
-    return this.addChild(this.pause_item_buy_layer);
+    this.addChild(this.pause_item_buy_layer);
+    return this.isAblePopPause = false;
   };
 
   pauseScene.prototype.removeItemBuyMenu = function() {
-    return this.removeChild(this.pause_item_buy_layer);
+    this.removeChild(this.pause_item_buy_layer);
+    return this.isAblePopPause = true;
   };
 
   pauseScene.prototype.setItemUseMenu = function() {
     this.pause_item_use_layer.resetItemList();
-    return this.addChild(this.pause_item_use_layer);
+    this.addChild(this.pause_item_use_layer);
+    return this.isAblePopPause = false;
   };
 
   pauseScene.prototype.removeItemUseMenu = function() {
-    return this.removeChild(this.pause_item_use_layer);
+    this.removeChild(this.pause_item_use_layer);
+    return this.isAblePopPause = true;
   };
 
   pauseScene.prototype.setMemberSetMenu = function() {
     this.pause_member_set_layer.resetItemList();
-    return this.addChild(this.pause_member_set_layer);
+    this.addChild(this.pause_member_set_layer);
+    return this.isAblePopPause = false;
   };
 
   pauseScene.prototype.removeMemberSetMenu = function() {
     this.removeChild(this.pause_member_set_layer);
-    return game.musePreLoadByMemberSetNow();
+    game.musePreLoadByMemberSetNow();
+    return this.isAblePopPause = true;
   };
 
   pauseScene.prototype.setItemBuySelectMenu = function(kind) {
@@ -6268,7 +6409,8 @@ pauseScene = (function(_super) {
   };
 
   pauseScene.prototype.removeItemBuySelectMenu = function() {
-    return this.removeChild(this.pause_item_buy_select_layer);
+    this.removeChild(this.pause_item_buy_select_layer);
+    return game.itemUseExe();
   };
 
   pauseScene.prototype.setItemUseSelectMenu = function(kind) {
@@ -6291,11 +6433,13 @@ pauseScene = (function(_super) {
   };
 
   pauseScene.prototype.setRecordMenu = function() {
-    return this.addChild(this.pause_record_layer);
+    this.addChild(this.pause_record_layer);
+    return this.isAblePopPause = false;
   };
 
   pauseScene.prototype.removeRecordMenu = function() {
-    return this.removeChild(this.pause_record_layer);
+    this.removeChild(this.pause_record_layer);
+    return this.isAblePopPause = true;
   };
 
   pauseScene.prototype.setRecordSelectMenu = function(kind) {
@@ -6328,7 +6472,9 @@ pauseScene = (function(_super) {
   pauseScene.prototype._pauseKeyPush = function() {
     if (game.input.x === true || this.buttonList.pause === true) {
       if (this.keyList.pause === false) {
-        game.popPauseScene();
+        if (this.isAblePopPause === true) {
+          game.popPauseScene();
+        }
         return this.keyList.pause = true;
       }
     } else {
@@ -6922,12 +7068,16 @@ Character = (function(_super) {
     this.my = 19;
     this.ax_init = 3;
     this.ax_up = 5;
+    this.ax_up2 = 7;
     this.mx_init = 7;
-    this.mx_up = 11;
+    this.mx_up = 10;
+    this.mx_up2 = 15;
     this.my_init = 19;
-    this.my_up = 24;
+    this.my_up = 22;
+    this.my_up2 = 28;
     this.friction_init = 1.7;
     this.friction_up = 2.7;
+    this.friction_up2 = 3.4;
   }
 
   Character.prototype.onenterframe = function(e) {
@@ -7152,23 +7302,43 @@ Character = (function(_super) {
   };
 
   Character.prototype.setMxUp = function() {
-    this.mx = this.mx_up;
-    this.ax = this.ax_up;
-    return this.friction = this.friction_up;
+    if (game.isItemHave(21) === true) {
+      this.mx = this.mx_up2;
+      this.ax = this.ax_up2;
+      return this.friction = this.friction_up2;
+    } else {
+      this.mx = this.mx_up;
+      this.ax = this.ax_up;
+      return this.friction = this.friction_up;
+    }
   };
 
   Character.prototype.resetMxUp = function() {
-    this.mx = this.mx_init;
-    this.ax = this.ax_init;
-    return this.friction = this.friction_init;
+    if (game.isItemHave(21) === true) {
+      this.mx = this.mx_up;
+      this.ax = this.ax_up;
+      return this.friction = this.friction_up;
+    } else {
+      this.mx = this.mx_init;
+      this.ax = this.ax_init;
+      return this.friction = this.friction_init;
+    }
   };
 
   Character.prototype.setMyUp = function() {
-    return this.my = this.my_up;
+    if (game.isItemHave(21) === true) {
+      return this.my = this.my_up2;
+    } else {
+      return this.my = this.my_up;
+    }
   };
 
   Character.prototype.resetMyUp = function() {
-    return this.my = this.my_init;
+    if (game.isItemHave(21) === true) {
+      return this.my = this.my_up;
+    } else {
+      return this.my = this.my_init;
+    }
   };
 
   return Character;
@@ -7340,6 +7510,9 @@ Catch = (function(_super) {
       game.main_scene.gp_effect.setItemChatchEffect(this.x, this.y);
       game.main_scene.gp_stage_front.removeChild(this);
       game.combo += 1;
+      if (game.combo > game.max_combo) {
+        game.max_combo = game.max_combo;
+      }
       game.main_scene.gp_system.combo_text.setValue();
       game.main_scene.gp_slot.slotStop();
       return game.tensionSetValueItemCatch();
@@ -7355,7 +7528,7 @@ Catch = (function(_super) {
     if (this.y > game.height + this.h) {
       game.sePlay(this.miss_se);
       game.main_scene.gp_stage_front.removeChild(this);
-      if (game.isItemSet(9) === false) {
+      if (game.isItemSet(8) === false) {
         game.combo = 0;
       }
       game.main_scene.gp_system.combo_text.setValue();
@@ -7388,7 +7561,7 @@ Catch = (function(_super) {
     } else {
       ret_x = Math.floor((game.width - this.w) * Math.random());
     }
-    if (game.isItemSet(8)) {
+    if (game.isItemSet(9)) {
       ret_x = Math.floor(game.main_scene.gp_stage_front.player.x + (game.width * 0.5 * Math.random()) - (game.width * 0.25));
       if (ret_x < 0) {
         ret_x = 0;

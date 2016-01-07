@@ -152,8 +152,6 @@ class baseRecordItemHtml extends systemHtml
         super 100, 100
         @position = position
         @kind = kind
-        @image_name = 'test_image2'
-        @setImageHtml()
         @scaleX = 0.65
         @scaleY = 0.65
         @positionY = 0
@@ -166,6 +164,8 @@ class baseRecordItemHtml extends systemHtml
 class recordItemHtml extends baseRecordItemHtml
     constructor: (position, kind)->
         super position, kind
+        @image_name = 'bgm_' + kind
+        @setImageHtml()
         @positionY = 40
         @positionX = 35
     ontouchend: ()->
@@ -174,14 +174,20 @@ class recordItemHtml extends baseRecordItemHtml
 class trophyItemHtml extends baseRecordItemHtml
     constructor: (position, kind)->
         super position, kind
+        @image_name = 'test_image2'
+        @setImageHtml()
         @positionY = 480
         @positionX = 75
+        @is_exist = true
     ontouchend: ()->
-        game.sePlay(@dicisionSe)
-        game.pause_scene.setTrophySelectMenu(@kind)
+        if @is_exist is true
+            game.sePlay(@dicisionSe)
+            game.pause_scene.setTrophySelectMenu(@kind)
 class buyTrophyItemHtml extends baseRecordItemHtml
     constructor: (position, kind)->
         super position, kind
+        @image_name = 'test_image2'
+        @setImageHtml()
         @positionY = 480
         @positionX = 75
         @item_kind = kind

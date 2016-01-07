@@ -17,31 +17,41 @@ class pauseScene extends appScene
         @pause_trophy_select_layer = new pauseTrophySelectLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
+        @isAblePopPause = true
     setSaveMenu: () ->
         @addChild(@pause_save_layer)
         game.saveGame()
+        @isAblePopPause = false
     removeSaveMenu:()->
         @removeChild(@pause_save_layer)
+        @isAblePopPause = true
     setItemBuyMenu:()->
         @addChild(@pause_item_buy_layer)
+        @isAblePopPause = false
     removeItemBuyMenu:()->
         @removeChild(@pause_item_buy_layer)
+        @isAblePopPause = true
     setItemUseMenu:()->
         @pause_item_use_layer.resetItemList()
         @addChild(@pause_item_use_layer)
+        @isAblePopPause = false
     removeItemUseMenu:()->
         @removeChild(@pause_item_use_layer)
+        @isAblePopPause = true
     setMemberSetMenu:()->
         @pause_member_set_layer.resetItemList()
         @addChild(@pause_member_set_layer)
+        @isAblePopPause = false
     removeMemberSetMenu:()->
         @removeChild(@pause_member_set_layer)
         game.musePreLoadByMemberSetNow()
+        @isAblePopPause = true
     setItemBuySelectMenu:(kind)->
         @addChild(@pause_item_buy_select_layer)
         @pause_item_buy_select_layer.setSelectItem(kind)
     removeItemBuySelectMenu:()->
         @removeChild(@pause_item_buy_select_layer)
+        game.itemUseExe()
     setItemUseSelectMenu:(kind)->
         @addChild(@pause_item_use_select_layer)
         @pause_item_use_select_layer.setSelectItem(kind)
@@ -55,8 +65,10 @@ class pauseScene extends appScene
         @removeChild(@pause_member_use_select_layer)
     setRecordMenu:()->
         @addChild(@pause_record_layer)
+        @isAblePopPause = false
     removeRecordMenu:()->
         @removeChild(@pause_record_layer)
+        @isAblePopPause = true
     setRecordSelectMenu:(kind)->
         @addChild(@pause_record_select_layer)
         @pause_record_select_layer.setSelectItem(kind)
@@ -75,7 +87,8 @@ class pauseScene extends appScene
     _pauseKeyPush:()->
         if game.input.x is true || @buttonList.pause is true
             if @keyList.pause is false
-                game.popPauseScene()
+                if @isAblePopPause is true
+                    game.popPauseScene()
                 @keyList.pause = true
         else
             if @keyList.pause = true

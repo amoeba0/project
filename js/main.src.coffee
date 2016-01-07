@@ -365,6 +365,7 @@ class pauseItemBuyLayer extends appDomLayer
                 master_list[i] = master_list[0]
         @_resetItemList(@item_list, master_list)
         @_resetItemList(@member_list, master_list)
+        @_resetItemList(@trophy_list, master_list)
     _resetItemList:(item_list, master_list)->
         for item_key, item_val of item_list
             if master_list[item_key].condFunc() is false || master_list[item_key].price > game.money
@@ -414,6 +415,12 @@ class pauseItemBuySelectLayer extends appDomLayer
             text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'+'(所持金'+game.toJPUnit(game.money)+'円)'
         if @item_options.condFunc() is false || 20 < @item_kind
             text += '<br>出現条件：'+@item_options.conditoin
+            if @item_kind is 21 || @item_kind is 23
+                text += '<br>(MAXコンボ'+game.max_combo+')'
+            if @item_kind is 22
+                text += '<br>('+game.countSoloMusic()+'曲達成済)'
+            if @item_kind is 24
+                text += '<br>('+game.countFullMusic()+'曲達成済)'
         return text
     _setButton:()->
         if @item_options.condFunc() is true && game.money >= @item_options.price
@@ -431,6 +438,8 @@ class pauseItemBuySelectLayer extends appDomLayer
         game.pause_scene.removeItemBuySelectMenu()
         game.pause_scene.pause_item_buy_layer.resetItemList()
         game.main_scene.gp_system.money_text.setValue()
+        if 21 <= @item_kind
+            game.pause_scene.pause_record_layer.resetTrophyList()
 
 #TODO 持っていないものは半透明、セット中は透明
 class pauseItemUseLayer extends appDomLayer
@@ -679,10 +688,30 @@ class pauseRecordLayer extends appDomLayer
         for record_key, record_val of @recordList
             @addChild(record_val)
             record_val.setPosition()
+    resetRecordList:()->
+        for record_key, record_val of @recordList
+            if game.prev_fever_muse.indexOf(parseInt(record_val.kind)) != -1
+                record_val.opacity = 1
+                record_val.removeDomClass('grayscale', true)
+            else
+                record_val.opacity = 0.5
+                record_val.addDomClass('grayscale', true)
     setTrophyList:()->
         for trophy_key, trophy_val of @trophyList
             @addChild(trophy_val)
             trophy_val.setPosition()
+    resetTrophyList:()->
+        for trophy_key, trophy_val of @trophyList
+            if game.item_have_now.indexOf(parseInt(trophy_val.kind)) != -1
+                trophy_val.opacity = 1
+                trophy_val.removeDomClass('grayscale', true)
+                trophy_val.changeIsButton()
+                trophy_val.is_exist = true
+            else
+                trophy_val.opacity = 0.5
+                trophy_val.addDomClass('grayscale', true)
+                trophy_val.changeNotButton()
+                trophy_val.is_exist = false
 
 class pauseBaseRecordSelectLayer extends appDomLayer
     constructor: ()->
@@ -706,6 +735,14 @@ class pauseRecordSelectLayer extends pauseBaseRecordSelectLayer
         @item_options = game.slot_setting.muse_material_list[kind].bgm[0]
         @item_name.setText(@item_options.title)
         @item_image.setImage(@item_options.image)
+        if game.prev_fever_muse.indexOf(parseInt(kind)) != -1
+            @item_image.opacity = 1
+            @item_image.removeDomClass('grayscale', true)
+            @item_name.setText(@item_options.title)
+        else
+            @item_image.opacity = 0.5
+            @item_image.addDomClass('grayscale', true)
+            @item_name.setText('？？？')
         discription = @_setDiscription()
         @item_discription.setText(discription)
     _setDiscription:()->
@@ -723,15 +760,22 @@ class pauseTrophySelectLayer extends pauseBaseRecordSelectLayer
         @addChild(@item_name)
         @addChild(@item_discription)
     setSelectItem:(kind)->
+        @kind = kind
         @item_options = game.slot_setting.item_list[kind]
-        @item_name.setText(@item_options.name)
         @item_image.setImage(@item_options.image)
+        @item_name.setText(@item_options.name)
         discription = @_setDiscription()
         @item_discription.setText(discription)
     _setDiscription:()->
         text = '効果：'+@item_options.discription
-        text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'
+        text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'+'(所持金'+game.toJPUnit(game.money)+'円)'
         text += '<br>出現条件：'+@item_options.conditoin
+        if @kind is 21 || @kind is 23
+            text += '<br>(MAXコンボ'+game.max_combo+')'
+        if @kind is 22
+            text += '<br>('+game.countSoloMusic()+'曲達成済)'
+        if @kind is 24
+            text += '<br>('+game.countFullMusic()+'曲達成済)'
         return text
 class pauseSaveLayer extends appDomLayer
     constructor: () ->
@@ -785,6 +829,7 @@ class LoveliveGame extends catchAndSlotGame
         @money = 0 #現在の所持金
         @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
+        @max_combo = 0 #MAXコンボ
         @tension = 0 #現在のテンション(500がマックス)
         @item_point = 500 #アイテムのポイント（500がマックス）
         @past_fever_num = 0 #過去にフィーバーになった回数
@@ -890,10 +935,19 @@ class LoveliveGame extends catchAndSlotGame
         return rslt
 
     ###
+    現在アイテムを持っているかを確認する
+    ###
+    isItemHave:(kind)->
+        rslt = false
+        if game.item_have_now.indexOf(kind) != -1
+            rslt = true
+        return rslt
+
+    ###
     アイテムの効果を発動する
     ###
     itemUseExe:()->
-        if @isItemSet(1)
+        if @isItemSet(4)
             @main_scene.gp_stage_front.player.setMxUp()
         else
             @main_scene.gp_stage_front.player.resetMxUp()
@@ -901,6 +955,16 @@ class LoveliveGame extends catchAndSlotGame
             @main_scene.gp_stage_front.player.setMyUp()
         else
             @main_scene.gp_stage_front.player.resetMyUp()
+
+    countSoloMusic:()->
+        cnt = 0
+        for val in @prev_fever_muse
+            if val < 20
+                cnt += 1
+        return cnt
+
+    countFullMusic:()->
+        return @prev_fever_muse.length
 
     ###
     アイテムを取った時にテンションゲージを増減する
@@ -965,6 +1029,7 @@ class LoveliveGame extends catchAndSlotGame
             'money'    : 0,
             'bet'      : 0,
             'combo'    : 0,
+            'max_combo': 0,
             'tension'  : 0,
             'past_fever_num' : 0,
             'item_point' : 0,
@@ -993,6 +1058,7 @@ class LoveliveGame extends catchAndSlotGame
             'money'    : @money,
             'bet'      : @bet,
             'combo'    : @combo,
+            'max_combo': @max_combo,
             'tension'  : @tension,
             'past_fever_num' : @past_fever_num,
             'item_point' : @item_point,
@@ -1019,6 +1085,7 @@ class LoveliveGame extends catchAndSlotGame
             @money = parseInt(money)
             @bet = @_loadStorage('bet', 'num')
             @combo = @_loadStorage('combo', 'num')
+            @max_combo = @_loadStorage('max_combo', 'num')
             @tension = @_loadStorage('tension', 'num')
             @past_fever_num = @_loadStorage('past_fever_num', 'num')
             @item_point = @_loadStorage('item_point', 'num')
@@ -1057,6 +1124,7 @@ class LoveliveGame extends catchAndSlotGame
         @money = data.money
         @bet = data.bet
         @combo = data.combo
+        @max_combo = data.max_combo
         @tension = data.tension
         @past_fever_num = data.past_fever_num
         @item_point = data.item_point
@@ -1085,6 +1153,8 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.pause_item_buy_layer.resetItemList()
         @pause_scene.pause_item_use_layer.dspSetItemList()
         @pause_scene.pause_member_set_layer.dispSetMemberList()
+        @pause_scene.pause_record_layer.resetRecordList()
+        @pause_scene.pause_record_layer.resetTrophyList()
         @slot_setting.setMemberItemPrice()
         @slot_setting.setItemPointValue()
         @musePreLoadByMemberSetNow()
@@ -1101,7 +1171,7 @@ class gpEffect extends appGroup
 
     cutInSet:(num = 0)->
         setting = game.slot_setting
-        if setting.muse_material_list[setting.now_muse_num] != undefined
+        if setting.muse_material_list[setting.add_muse_num] != undefined
             @cut_in = new cutIn(num)
             @addChild(@cut_in)
             game.main_scene.gp_stage_front.missItemFallSycleNow = 0
@@ -1319,9 +1389,6 @@ class gpSlot extends appGroup
         else if left > 10 && middle > 10 && right > 10
             hit_flg = true
             @hit_role = game.slot_setting.getHitRole(left, middle, right)
-        if @hit_role > 10
-            game.prev_fever_muse.push(@hit_role)
-            game.slot_setting.setMemberItemPrice()
         return hit_flg
 
     ###
@@ -1330,15 +1397,20 @@ class gpSlot extends appGroup
     _feverStart:(hit_eye)->
         if game.fever is false
             if (11 <= hit_eye && hit_eye <= 19) || (21 <= hit_eye)
-                game.fever = true
-                game.past_fever_num += 1
-                game.slot_setting.setMuseMember()
-                game.musePreLoad()
-                game.fever_hit_eye = hit_eye
-                game.main_scene.gp_system.changeBetChangeFlg(false)
-                game.main_scene.gp_effect.feverEffectSet()
-                @slotAddMuseAll(hit_eye)
-                @_feverBgmStart(hit_eye)
+                if game.prev_fever_muse.indexOf(parseInt(hit_eye)) is -1
+                    game.prev_fever_muse.push(@hit_role)
+                    game.pause_scene.pause_record_layer.resetRecordList()
+                    game.slot_setting.setMemberItemPrice()
+                    game.tensionSetValue(game.slot_setting.tension_max)
+                    game.fever = true
+                    game.past_fever_num += 1
+                    game.slot_setting.setMuseMember()
+                    game.musePreLoad()
+                    game.fever_hit_eye = hit_eye
+                    game.main_scene.gp_system.changeBetChangeFlg(false)
+                    game.main_scene.gp_effect.feverEffectSet()
+                    @slotAddMuseAll(hit_eye)
+                    @_feverBgmStart(hit_eye)
 
     ###
     フィーバー中のBGMを開始する
@@ -1411,10 +1483,11 @@ class gpSlot extends appGroup
     @param number num メンバーの指定
     ###
     slotAddMuse:(num)->
-        @left_lille.lilleArray = @_slotAddMuseUnit(num, @left_lille)
-        @middle_lille.lilleArray = @_slotAddMuseUnit(num, @middle_lille)
-        @right_lille.lilleArray = @_slotAddMuseUnit(num, @right_lille)
-        game.main_scene.gp_effect.cutInSet(num)
+        if 11 <= num && num <= 19
+            @left_lille.lilleArray = @_slotAddMuseUnit(num, @left_lille)
+            @middle_lille.lilleArray = @_slotAddMuseUnit(num, @middle_lille)
+            @right_lille.lilleArray = @_slotAddMuseUnit(num, @right_lille)
+            game.main_scene.gp_effect.cutInSet(num)
 
     ###
     リールにμ’sの誰かを挿入(単体)
@@ -1555,7 +1628,7 @@ class stageFront extends gpStage
             if @itemFallSec != @itemFallSecInit
                 @setItemFallFrm(@itemFallSecInit)
         if @missItemFallSycleNow is @missItemFallSycle && @age % @itemFallFrm is @itemFallFrm / 2
-            if game.isItemSet(2) is false
+            if game.isItemSet(1) is false && game.fever is false
                 @_missCatchFall()
             @missItemFallSycleNow = 0
 
@@ -2658,8 +2731,6 @@ class baseRecordItemHtml extends systemHtml
         super 100, 100
         @position = position
         @kind = kind
-        @image_name = 'test_image2'
-        @setImageHtml()
         @scaleX = 0.65
         @scaleY = 0.65
         @positionY = 0
@@ -2672,6 +2743,8 @@ class baseRecordItemHtml extends systemHtml
 class recordItemHtml extends baseRecordItemHtml
     constructor: (position, kind)->
         super position, kind
+        @image_name = 'bgm_' + kind
+        @setImageHtml()
         @positionY = 40
         @positionX = 35
     ontouchend: ()->
@@ -2680,14 +2753,20 @@ class recordItemHtml extends baseRecordItemHtml
 class trophyItemHtml extends baseRecordItemHtml
     constructor: (position, kind)->
         super position, kind
+        @image_name = 'test_image2'
+        @setImageHtml()
         @positionY = 480
         @positionX = 75
+        @is_exist = true
     ontouchend: ()->
-        game.sePlay(@dicisionSe)
-        game.pause_scene.setTrophySelectMenu(@kind)
+        if @is_exist is true
+            game.sePlay(@dicisionSe)
+            game.pause_scene.setTrophySelectMenu(@kind)
 class buyTrophyItemHtml extends baseRecordItemHtml
     constructor: (position, kind)->
         super position, kind
+        @image_name = 'test_image2'
+        @setImageHtml()
         @positionY = 480
         @positionX = 75
         @item_kind = kind
@@ -2778,7 +2857,7 @@ class Debug extends appNode
         super
 
         #開始後いきなりメイン画面
-        @force_main_flg = true
+        @force_main_flg = false
         #開始後いきなりポーズ画面
         @force_pause_flg = false
 
@@ -2789,18 +2868,19 @@ class Debug extends appNode
         #テストロード用の値
         @test_load_val = {
             'money':1234567890,
-            'bet':1000000,
+            'bet':10000,
             'combo':10,
+            'max_combo':110,
             'tension':100,
             'past_fever_num':0,
-            'item_point':50,
+            'item_point':500,
             'next_add_member_key':0,
-            'prev_muse':[],
-            'now_muse_num':15,
-            'item_have_now':[],
+            'prev_muse':[12,13,14,15,16,17,18,19],
+            'now_muse_num':0,
+            'item_have_now':[3,4,15],
             'item_set_now':[],
             'member_set_now':[],
-            'prev_fever_muse':[]
+            'prev_fever_muse':[12,13,14,15,16,17,18,19,31]
         }
 
         #デバッグ用リールにすりかえる
@@ -2882,7 +2962,7 @@ class slotSetting extends appNode
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
         11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
         ユニット(役):20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
-        31:ほのりん、32:ことぱな、33:にこのぞ、34:のぞえり、35:まきりん、36:うみえり、37:ことうみ、38:にこまき
+        31:ほのりん、32:ことぱな、33:にこのぞ、34:ことうみ、35:まきりん、36:のぞえり、37:にこまき、38:うみえり
         direction:キャラクターの向き、left or right
         カットインの画像サイズ、頭の位置で570px
         頭の上に余白がある場合の高さ計算式：(570/(元画像高さ-元画像頭のY座標))*元画像高さ
@@ -2894,7 +2974,7 @@ class slotSetting extends appNode
                     {'name':'11_1', 'width':730, 'height':662, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'yumenaki', 'time':107, 'title':'夢なき夢は夢じゃない', 'unit':'高坂穂乃果', 'image':'test_image2'}
+                    {'name':'yumenaki', 'time':107, 'title':'夢なき夢は夢じゃない', 'unit':'高坂穂乃果', 'image':'bgm_11'}
                 ],
                 'voice':['11_0', '11_1']
             },
@@ -2904,7 +2984,7 @@ class slotSetting extends appNode
                     {'name':'12_1', 'width':640, 'height':648, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'blueberry', 'time':98, 'title':'ぶる～べりぃとれいん', 'unit':'南ことり', 'image':'test_image2'}
+                    {'name':'blueberry', 'time':98, 'title':'ぶる～べりぃとれいん', 'unit':'南ことり', 'image':'bgm_12'}
                 ],
                 'voice':['12_0', '12_1']
             },
@@ -2914,7 +2994,7 @@ class slotSetting extends appNode
                     {'name':'13_1', 'width':408, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'reason', 'time':94, 'title':'勇気のReason', 'unit':'園田海未', 'image':'test_image2'}
+                    {'name':'reason', 'time':94, 'title':'勇気のReason', 'unit':'園田海未', 'image':'bgm_13'}
                 ],
                 'voice':['13_0', '13_1']
             },
@@ -2924,7 +3004,7 @@ class slotSetting extends appNode
                     {'name':'14_1', 'width':650, 'height':570, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'daring', 'time':91, 'title':'Darling！！', 'unit':'西木野真姫', 'image':'test_image2'}
+                    {'name':'daring', 'time':91, 'title':'Darling！！', 'unit':'西木野真姫', 'image':'bgm_14'}
                 ],
                 'voice':['14_0', '14_1']
             },
@@ -2934,7 +3014,7 @@ class slotSetting extends appNode
                     {'name':'15_1', 'width':601, 'height':638, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'rinrinrin', 'time':128, 'title':'恋のシグナルRin rin rin！', 'unit':'星空凛', 'image':'test_image2'}
+                    {'name':'rinrinrin', 'time':128, 'title':'恋のシグナルRin rin rin！', 'unit':'星空凛', 'image':'bgm_15'}
                 ],
                 'voice':['15_0', '15_1']
             },
@@ -2944,7 +3024,7 @@ class slotSetting extends appNode
                     {'name':'16_1', 'width':580, 'height':644, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'nawatobi', 'time':164, 'title':'なわとび', 'unit':'小泉花陽', 'image':'test_image2'}
+                    {'name':'nawatobi', 'time':164, 'title':'なわとび', 'unit':'小泉花陽', 'image':'bgm_16'}
                 ],
                 'voice':['16_0', '16_1']
             },
@@ -2954,7 +3034,7 @@ class slotSetting extends appNode
                     {'name':'17_1', 'width':361, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'mahoutukai', 'time':105, 'title':'まほうつかいはじめました', 'unit':'矢澤にこ', 'image':'test_image2'}
+                    {'name':'mahoutukai', 'time':105, 'title':'まほうつかいはじめました', 'unit':'矢澤にこ', 'image':'bgm_17'}
                 ],
                 'voice':['17_0', '17_1']
             },
@@ -2964,7 +3044,7 @@ class slotSetting extends appNode
                     {'name':'18_1', 'width':380, 'height':675, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'junai', 'time':127, 'title':'純愛レンズ', 'unit':'東條希', 'image':'test_image2'}
+                    {'name':'junai', 'time':127, 'title':'純愛レンズ', 'unit':'東條希', 'image':'bgm_18'}
                 ],
                 'voice':['18_0', '18_1']
             },
@@ -2974,7 +3054,7 @@ class slotSetting extends appNode
                     {'name':'19_1', 'width':670, 'height':650, 'direction':'right'}
                 ],
                 'bgm':[
-                    {'name':'arihureta', 'time':93, 'title':'ありふれた悲しみの果て', 'unit':'絢瀬絵里', 'image':'test_image2'}
+                    {'name':'arihureta', 'time':93, 'title':'ありふれた悲しみの果て', 'unit':'絢瀬絵里', 'image':'bgm_19'}
                 ],
                 'voice':['19_0', '19_1']
             },
@@ -2985,82 +3065,82 @@ class slotSetting extends appNode
             },
             21:{
                 'bgm':[
-                    {'name':'hello_hoshi', 'time':93, 'title':'Hello，星を数えて ', 'unit':'1年生<br>（星空凛、西木野真姫、小泉花陽）', 'image':'test_image2'}
+                    {'name':'hello_hoshi', 'time':93, 'title':'Hello，星を数えて ', 'unit':'1年生<br>（星空凛、西木野真姫、小泉花陽）', 'image':'bgm_21'}
                 ]
             },
             22:{
                 'bgm':[
-                    {'name':'future_style', 'time':94, 'title':'Future style', 'unit':'2年生<br>（高坂穂乃果、南ことり、園田海未）', 'image':'test_image2'}
+                    {'name':'future_style', 'time':94, 'title':'Future style', 'unit':'2年生<br>（高坂穂乃果、南ことり、園田海未）', 'image':'bgm_22'}
                 ]
             },
             23:{
                 'bgm':[
-                    {'name':'hatena_heart', 'time':84, 'title':'？←HEARTBEAT', 'unit':'3年生<br>（絢瀬絵里、東條希、矢澤にこ）', 'image':'test_image2'}
+                    {'name':'hatena_heart', 'time':84, 'title':'？←HEARTBEAT', 'unit':'3年生<br>（絢瀬絵里、東條希、矢澤にこ）', 'image':'bgm_23'}
                 ]
             },
             24:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'Printemps<br>(高坂穂乃果、南ことり、小泉花陽)', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'sweet＆sweet holiday', 'unit':'Printemps<br>(高坂穂乃果、南ことり、小泉花陽)', 'image':'bgm_24'}
                 ]
             },
             25:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'lily white<br>(園田海未、星空凛、東條希)', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'あ・の・ね・が・ん・ば・れ', 'unit':'lily white<br>(園田海未、星空凛、東條希)', 'image':'bgm_25'}
                 ]
             },
             26:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'ラブノベルス', 'unit':'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)', 'image':'bgm_26'}
                 ]
             },
             27:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'にこりんぱな<br>(矢澤にこ、星空凛、小泉花陽)', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Listen to my heart！！', 'unit':'にこりんぱな<br>(矢澤にこ、星空凛、小泉花陽)', 'image':'bgm_27'}
                 ]
             },
             28:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'<br>園田海未、西木野真姫、絢瀬絵里', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'soldier game', 'unit':'<br>園田海未、西木野真姫、絢瀬絵里', 'image':'bgm_28'}
                 ]
             },
             31:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'高坂穂乃果、星空凛', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Mermaid festa vol．2', 'unit':'高坂穂乃果、星空凛', 'image':'bgm_31'}
                 ]
             },
             32:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'南ことり、小泉花陽', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'告白日和、です！', 'unit':'南ことり、小泉花陽', 'image':'bgm_32'}
                 ]
             },
             33:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'矢澤にこ、東條希', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'乙女式れんあい塾', 'unit':'矢澤にこ、東條希', 'image':'bgm_33'}
                 ]
             },
             34:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'東條希、絢瀬絵里', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Anemone heart', 'unit':'南ことり、園田海未', 'image':'bgm_34'}
                 ]
             },
             35:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'西木野真姫、星空凛', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Bea in Angel', 'unit':'西木野真姫、星空凛', 'image':'bgm_35'}
                 ]
             },
             36:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'園田海未、絢瀬絵里', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'硝子の花園', 'unit':'東條希、絢瀬絵里', 'image':'bgm_36'}
                 ]
             },
             37:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'南ことり、園田海未', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'ずるいよMagnetic today', 'unit':'矢澤にこ、西木野真姫', 'image':'bgm_37'}
                 ]
             },
             38:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'タイトル', 'unit':'矢澤にこ、西木野真姫', 'image':'test_image2'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Storm in Lover', 'unit':'園田海未、絢瀬絵里', 'image':'bgm_38'}
                 ]
             }
         }
@@ -3082,24 +3162,24 @@ class slotSetting extends appNode
                     return true
             },
             1:{
-                'name':'テンション上がるにゃー！',
-                'image':'item_1',
-                'discription':'移動速度が上がる',
-                'price':500000,
-                'durationSec':60,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(1)
-            },
-            2:{
                 'name':'チーズケーキ鍋',
-                'image':'item_2',
+                'image':'item_1',
                 'discription':'チーズケーキしか降ってこなくなる<br>ニンニクは降ってこなくなる',
                 'price':10000,
                 'durationSec':120,
                 'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(2)
+            },
+            2:{
+                'name':'くすくす大明神',
+                'image':'item_2',
+                'discription':'コンボ数に関わらず<br>たくさんのコインが降ってくるようになる',
+                'price':50000,
+                'durationSec':120,
+                'conditoin':'',
+                'condFunc':()->
+                    return game.slot_setting.itemConditinon(4)
             },
             3:{
                 'name':'ぴょんぴょこぴょんぴょん',
@@ -3112,24 +3192,24 @@ class slotSetting extends appNode
                     return game.slot_setting.itemConditinon(3)
             },
             4:{
-                'name':'くすくす大明神',
+                'name':'テンション上がるにゃー！',
                 'image':'item_4',
-                'discription':'コンボ数に関わらず<br>たくさんのコインが降ってくるようになる',
-                'price':50000,
-                'durationSec':120,
+                'discription':'移動速度が上がる',
+                'price':500000,
+                'durationSec':60,
                 'conditoin':'',
                 'condFunc':()->
-                    return game.slot_setting.itemConditinon(4)
+                    return game.slot_setting.itemConditinon(1)
             },
             5:{
-                'name':'完っ全にフルハウスね',
+                'name':'ファイトだよっ',
                 'image':'item_5',
-                'discription':'3回に1回の確率で<br>CHANCE!!状態になる',
-                'price':10000000,
+                'discription':'スロットに当たった時に<br>得られる金額が2倍になる',
+                'price':1000000,
                 'durationSec':120,
                 'conditoin':'',
                 'condFunc':()->
-                    return game.slot_setting.itemConditinon(5)
+                    return game.slot_setting.itemConditinon(7)
             },
             6:{
                 'name':'チョットマッテテー',
@@ -3142,34 +3222,34 @@ class slotSetting extends appNode
                     return game.slot_setting.itemConditinon(6)
             },
             7:{
-                'name':'ファイトだよっ',
+                'name':'完っ全にフルハウスね',
                 'image':'item_7',
-                'discription':'スロットに当たった時に<br>得られる金額が2倍になる',
-                'price':1000000,
+                'discription':'3回に1回の確率で<br>CHANCE!!状態になる',
+                'price':10000000,
                 'durationSec':120,
                 'conditoin':'',
                 'condFunc':()->
-                    return game.slot_setting.itemConditinon(7)
+                    return game.slot_setting.itemConditinon(5)
             },
             8:{
-                'name':'ラブアローシュート',
-                'image':'item_8',
-                'discription':'おやつが近くに落ちてくる',
-                'price':1000000000,
-                'durationSec':60,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(8)
-            },
-            9:{
                 'name':'認められないわぁ',
-                'image':'item_9',
+                'image':'item_8',
                 'discription':'アイテムを落としてもコンボが減らず<br>テンションも下がらないようになる',
                 'price':100000000,
                 'durationSec':60,
                 'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(9)
+            },
+            9:{
+                'name':'ラブアローシュート',
+                'image':'item_9',
+                'discription':'おやつが近くに落ちてくる',
+                'price':1000000000,
+                'durationSec':60,
+                'conditoin':'',
+                'condFunc':()->
+                    return game.slot_setting.itemConditinon(8)
             },
             11:{
                 'name':'高坂穂乃果',
@@ -3277,7 +3357,7 @@ class slotSetting extends appNode
                 'price':10000000000,
                 'conditoin':'200コンボ達成する',
                 'condFunc':()->
-                    return game.slot_setting.itemConditinon(22)
+                    return game.slot_setting.itemConditinon(23)
             },
             24:{
                 'name':'プラチナことり',
@@ -3286,12 +3366,12 @@ class slotSetting extends appNode
                 'price':1000000000000,
                 'conditoin':'全楽曲25曲を全て達成する',
                 'condFunc':()->
-                    return game.slot_setting.itemConditinon(22)
+                    return game.slot_setting.itemConditinon(24)
             }
         }
 
         #アイテムの並び順
-        #@item_sort_list = [2, 4, 3, 1, 7, 6, 5, 9, 8]
+        #@item_sort_list = [2->1, 4->2, 3->3, 1->4, 7->5, 6->6, 5->7, 9->8, 8->9]
 
         #μ’ｓメンバーアイテムの値段、フィーバーになった順に
         @member_item_price = [1000, 10000, 100000, 500000, 1000000, 5000000, 10000000, 50000000, 100000000]
@@ -3312,6 +3392,8 @@ class slotSetting extends appNode
         #掛け金が増えると当選金額の割合が減る補正
         @prize_div = 1
         @item_gravity = 0
+        #ランダムでの結果と部員の編成を加味した最終的な挿入するμ’ｓメンバーの数値
+        @add_muse_num = 0
 
         #セーブする変数
         @prev_muse = [] #過去にスロットに入ったμ’ｓ番号
@@ -3398,16 +3480,18 @@ class slotSetting extends appNode
         full = [11,12,13,14,15,16,17,18,19]
         remain = []
         if @prev_muse.length >= 9
-            @prev_muse = []
-        for key, val of full
-            if @prev_muse.indexOf(val) is -1
-                remain.push(full[key])
-        random = Math.floor(Math.random() * remain.length)
-        member = remain[random]
-        @now_muse_num = member
+            @now_muse_num = 0
+        else
+            for key, val of full
+                if @prev_muse.indexOf(val) is -1
+                    remain.push(full[key])
+            random = Math.floor(Math.random() * remain.length)
+            member = remain[random]
+            @now_muse_num = member
+            if @prev_muse.indexOf(member) is -1
+                @prev_muse.push(member)
         game.pause_scene.pause_member_set_layer.dispSetMemberList()
-        if @prev_muse.indexOf(member) is -1
-            @prev_muse.push(member)
+
 
     ###
     挿入するμ’sメンバーの人数を決める
@@ -3446,7 +3530,7 @@ class slotSetting extends appNode
     ###
     getReturnMoneyFallValue:()->
         up = game.combo
-        if game.isItemSet(4) && game.combo < 100
+        if game.isItemSet(2) && game.combo < 100
             up = 100
         return Math.floor(game.bet * up * 0.03)
 
@@ -3462,7 +3546,7 @@ class slotSetting extends appNode
             if div < 1
                 div = 1
             ret_money = Math.floor(ret_money / div)
-        if game.isItemSet(7) || game.main_scene.gp_back_panorama.now_back_effect_flg is true
+        if game.isItemSet(5) || game.main_scene.gp_back_panorama.now_back_effect_flg is true
             ret_money *= 2
         if ret_money > 10000000000
             ret_money = 10000000000
@@ -3501,12 +3585,10 @@ class slotSetting extends appNode
             val = 1
         else if quo <= 600
             val = 0.75
-        else if quo <= 1000
+        else if quo <= 2000
             val = 0.5
-        else if quo <= 10000
-            val = 0.25
         else
-            val = 0.1
+            val = 0.25
         return  val
 
     ###
@@ -3516,7 +3598,7 @@ class slotSetting extends appNode
         if game.debug.fix_tention_item_fall_flg is true
             val = game.debug.fix_tention_item_fall_val
         else
-            if game.isItemSet(9)
+            if game.isItemSet(8) || game.fever is true
                 val = 0
             else
                 val = @tension_max * @_getTensionDownCorrect()
@@ -3552,8 +3634,6 @@ class slotSetting extends appNode
         val = Math.round(val)
         if game.debug.fix_tention_slot_hit_flg is true
             val = game.debug.fix_tention_slot_hit_flg
-        if hit_eye > 10
-            val = @tension_max
         if game.fever is true
             val = 0
         return val
@@ -3604,7 +3684,7 @@ class slotSetting extends appNode
             val = 3
         else
             val = 4
-        if game.isItemSet(2)
+        if game.isItemSet(1)
             val = 4
         game.item_kind = val
         return val
@@ -3631,7 +3711,7 @@ class slotSetting extends appNode
     メンバー:11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
     @return role
     ユニット(役):20:該当なし、21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
-    31:ほのりん、32:ことぱな、33:にこのぞ、34:のぞえり、35:まきりん、36:うみえり、37:ことうみ、38:にこまき
+    31:ほのりん、32:ことぱな、33:にこのぞ、34:ことうみ、35:まきりん、36:のぞえり、37:にこまき、38:うみえり
     ###
     getHitRole:(left, middle, right)->
         role = 20
@@ -3651,11 +3731,11 @@ class slotSetting extends appNode
             when '11,15'    then role = 31
             when '12,16'    then role = 32
             when '17,18'    then role = 33
-            when '18,19'    then role = 34
+            when '12,13'    then role = 34
             when '14,15'    then role = 35
-            when '13,14'    then role = 36
-            when '12,13'    then role = 37
-            when '14,17'    then role = 38
+            when '18,19'    then role = 36
+            when '14,17'    then role = 37
+            when '13,14'    then role = 38
             else role = 20
         return role
 
@@ -3671,8 +3751,18 @@ class slotSetting extends appNode
         else if num < 20
             if game.prev_fever_muse.indexOf(parseInt(num)) != -1
                 rslt = true
-        else
-            rslt = false
+        else if num is 21
+            if 100 <= game.max_combo
+                rslt = true
+        else if num is 22
+            if 9 <= game.countSoloMusic()
+                rslt = true
+        else if num is 23
+            if 200 <= game.max_combo
+                rslt = true
+        else if num is 24
+            if 25 <= game.countFullMusic()
+                rslt = true
         return rslt
 
     ###
@@ -3698,6 +3788,7 @@ class slotSetting extends appNode
             game.next_add_member_key += 1
             if member[game.next_add_member_key] is undefined
                 game.next_add_member_key = 0
+        @add_muse_num = ret
         return ret
 
     ###
@@ -3717,7 +3808,7 @@ class slotSetting extends appNode
             rate = 5
         result = false
         random = Math.floor(Math.random() * 100)
-        if game.debug.foece_fever is true || random <= rate
+        if game.debug.force_fever is true || random <= rate
             result = true
         return result
 
@@ -3943,31 +4034,41 @@ class pauseScene extends appScene
         @pause_trophy_select_layer = new pauseTrophySelectLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
+        @isAblePopPause = true
     setSaveMenu: () ->
         @addChild(@pause_save_layer)
         game.saveGame()
+        @isAblePopPause = false
     removeSaveMenu:()->
         @removeChild(@pause_save_layer)
+        @isAblePopPause = true
     setItemBuyMenu:()->
         @addChild(@pause_item_buy_layer)
+        @isAblePopPause = false
     removeItemBuyMenu:()->
         @removeChild(@pause_item_buy_layer)
+        @isAblePopPause = true
     setItemUseMenu:()->
         @pause_item_use_layer.resetItemList()
         @addChild(@pause_item_use_layer)
+        @isAblePopPause = false
     removeItemUseMenu:()->
         @removeChild(@pause_item_use_layer)
+        @isAblePopPause = true
     setMemberSetMenu:()->
         @pause_member_set_layer.resetItemList()
         @addChild(@pause_member_set_layer)
+        @isAblePopPause = false
     removeMemberSetMenu:()->
         @removeChild(@pause_member_set_layer)
         game.musePreLoadByMemberSetNow()
+        @isAblePopPause = true
     setItemBuySelectMenu:(kind)->
         @addChild(@pause_item_buy_select_layer)
         @pause_item_buy_select_layer.setSelectItem(kind)
     removeItemBuySelectMenu:()->
         @removeChild(@pause_item_buy_select_layer)
+        game.itemUseExe()
     setItemUseSelectMenu:(kind)->
         @addChild(@pause_item_use_select_layer)
         @pause_item_use_select_layer.setSelectItem(kind)
@@ -3981,8 +4082,10 @@ class pauseScene extends appScene
         @removeChild(@pause_member_use_select_layer)
     setRecordMenu:()->
         @addChild(@pause_record_layer)
+        @isAblePopPause = false
     removeRecordMenu:()->
         @removeChild(@pause_record_layer)
+        @isAblePopPause = true
     setRecordSelectMenu:(kind)->
         @addChild(@pause_record_select_layer)
         @pause_record_select_layer.setSelectItem(kind)
@@ -4001,7 +4104,8 @@ class pauseScene extends appScene
     _pauseKeyPush:()->
         if game.input.x is true || @buttonList.pause is true
             if @keyList.pause is false
-                game.popPauseScene()
+                if @isAblePopPause is true
+                    game.popPauseScene()
                 @keyList.pause = true
         else
             if @keyList.pause = true
@@ -4341,12 +4445,16 @@ class Character extends appObject
         @my = 19 #y軸初速度
         @ax_init = 3
         @ax_up = 5
+        @ax_up2 = 7
         @mx_init = 7
-        @mx_up = 11
+        @mx_up = 10
+        @mx_up2 = 15
         @my_init = 19
-        @my_up = 24
+        @my_up = 22
+        @my_up2 = 28
         @friction_init = 1.7
         @friction_up = 2.7
+        @friction_up2 = 3.4
     onenterframe: (e) ->
         @charMove()
 
@@ -4509,20 +4617,36 @@ class Character extends appObject
             @frame = 3
 
     setMxUp:()->
-        @mx = @mx_up
-        @ax = @ax_up
-        @friction = @friction_up
+        if game.isItemHave(21) is true
+            @mx = @mx_up2
+            @ax = @ax_up2
+            @friction = @friction_up2
+        else
+            @mx = @mx_up
+            @ax = @ax_up
+            @friction = @friction_up
 
     resetMxUp:()->
-        @mx = @mx_init
-        @ax = @ax_init
-        @friction = @friction_init
+        if game.isItemHave(21) is true
+            @mx = @mx_up
+            @ax = @ax_up
+            @friction = @friction_up
+        else
+            @mx = @mx_init
+            @ax = @ax_init
+            @friction = @friction_init
 
     setMyUp:()->
-        @my = @my_up
+        if game.isItemHave(21) is true
+            @my = @my_up2
+        else
+            @my = @my_up
 
     resetMyUp:()->
-        @my = @my_init
+        if game.isItemHave(21) is true
+            @my = @my_up
+        else
+            @my = @my_init
 
 class Guest extends Character
     constructor: (w, h) ->
@@ -4621,6 +4745,8 @@ class Catch extends Item
             game.main_scene.gp_effect.setItemChatchEffect(@x, @y)
             game.main_scene.gp_stage_front.removeChild(@)
             game.combo += 1
+            if game.combo > game.max_combo
+                game.max_combo = game.max_combo
             game.main_scene.gp_system.combo_text.setValue()
             game.main_scene.gp_slot.slotStop()
             game.tensionSetValueItemCatch()
@@ -4632,7 +4758,7 @@ class Catch extends Item
         if @y > game.height + @h
             game.sePlay(@miss_se)
             game.main_scene.gp_stage_front.removeChild(@)
-            if game.isItemSet(9) is false
+            if game.isItemSet(8) is false
                 game.combo = 0
             game.main_scene.gp_system.combo_text.setValue()
             game.tensionSetValueItemFall()
@@ -4655,7 +4781,7 @@ class Catch extends Item
             ret_x = game.main_scene.gp_stage_front.player.x
         else
             ret_x = Math.floor((game.width - @w) * Math.random())
-        if game.isItemSet(8)
+        if game.isItemSet(9)
             ret_x = Math.floor(game.main_scene.gp_stage_front.player.x + (game.width * 0.5 * Math.random()) - (game.width * 0.25))
             if ret_x < 0
                 ret_x = 0
