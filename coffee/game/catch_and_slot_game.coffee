@@ -31,6 +31,7 @@ class LoveliveGame extends catchAndSlotGame
         @fever_hit_eye = 0 #どの目で当たって今フィーバーになっているか
         @now_item = 0 #現在セット中のアイテム（１つめ）
         @already_added_material = [] #ゲームを開いてから現在までにロードしたμ’ｓの画像や楽曲の素材の番号
+        @limit_set_item_num = 3
 
         #セーブする変数(slot_settingにもあるので注意)
         @money = 0 #現在の所持金
@@ -41,6 +42,7 @@ class LoveliveGame extends catchAndSlotGame
         @item_point = 500 #アイテムのポイント（500がマックス）
         @past_fever_num = 0 #過去にフィーバーになった回数
         @next_add_member_key = 0 #メンバーがセットされている場合、次に挿入されるメンバーの配列のキー
+        @max_set_item_num = 1 #アイテムスロットの最大数
         @item_have_now = [] #現在所持しているアイテム
         @item_set_now = [] #現在セットされているアイテム
         @member_set_now = [] #現在セットされているメンバー
@@ -163,6 +165,20 @@ class LoveliveGame extends catchAndSlotGame
         else
             @main_scene.gp_stage_front.player.resetMyUp()
 
+    ###
+    アイテムスロットを表示する
+    ###
+    setItemSlot:()->
+        if @isItemHave(22) && @isItemHave(23)
+            @max_set_item_num = 3
+        else if @isItemHave(22) || @isItemHave(23)
+            @max_set_item_num = 2
+        else
+            @max_set_item_num = 1
+        @main_scene.gp_system.itemDsp()
+        @main_scene.gp_system.combo_text.setXposition()
+        @slot_setting.setItemPointMax()
+
     countSoloMusic:()->
         cnt = 0
         for val in @prev_fever_muse
@@ -249,7 +265,8 @@ class LoveliveGame extends catchAndSlotGame
             'item_have_now':'[]',
             'item_set_now':'[]',
             'member_set_now':'[]',
-            'prev_fever_muse':'[]'
+            'prev_fever_muse':'[]',
+            'max_set_item_num':0
         }
         ret = null
         if data[key] is undefined
@@ -278,7 +295,8 @@ class LoveliveGame extends catchAndSlotGame
             'item_have_now':JSON.stringify(@item_have_now),
             'item_set_now':JSON.stringify(@item_set_now),
             'member_set_now':JSON.stringify(@member_set_now),
-            'prev_fever_muse':JSON.stringify(@prev_fever_muse)
+            'prev_fever_muse':JSON.stringify(@prev_fever_muse),
+            'max_set_item_num':@max_set_item_num
         }
         for key, val of saveData
             @local_storage.setItem(key, val)
@@ -306,6 +324,7 @@ class LoveliveGame extends catchAndSlotGame
             @item_set_now = @_loadStorage('item_set_now', 'json')
             @member_set_now = @_loadStorage('member_set_now', 'json')
             @prev_fever_muse = @_loadStorage('prev_fever_muse', 'json')
+            @max_set_item_num = @_loadStorage('max_set_item_num', 'num')
     ###
     ローカルストレージから指定のキーの値を取り出して返す
     @param string key ロードするデータのキー
@@ -342,6 +361,7 @@ class LoveliveGame extends catchAndSlotGame
         @item_set_now = data.item_set_now
         @prev_fever_muse = data.prev_fever_muse
         @member_set_now = data.member_set_now
+        @max_set_item_num = data.max_set_item_num
 
     ###
     ゲームロード後の画面表示等の初期値設定
@@ -355,6 +375,7 @@ class LoveliveGame extends catchAndSlotGame
         sys.money_text.setValue()
         sys.bet_text.setValue()
         sys.combo_text.setValue()
+        sys.combo_text.setXposition()
         sys.tension_gauge.setValue()
         sys.itemDsp()
         @pause_scene.pause_item_buy_layer.resetItemList()
@@ -363,6 +384,6 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.pause_record_layer.resetRecordList()
         @pause_scene.pause_record_layer.resetTrophyList()
         @slot_setting.setMemberItemPrice()
-        @slot_setting.setItemPointValue()
+        @slot_setting.setItemPointMax()
         @musePreLoadByMemberSetNow()
         @itemUseExe()

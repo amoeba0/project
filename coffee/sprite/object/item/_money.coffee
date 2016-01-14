@@ -154,8 +154,8 @@ class OneMillionMoney extends Money
         super isHoming, 30, 30
         @image = game.imageload("coin_pla")
         @price = 1000000
-        @frame = 8
-        @frame_init = 8
+        @frame = 0
+        @frame_init = 0
 
 ###
 1000万円
@@ -166,5 +166,53 @@ class TenMillionMoney extends Money
         super isHoming, 30, 30
         @image = game.imageload("coin_pla")
         @price = 10000000
+        @frame = 0
+        @frame_init = 0
+
+###
+1億円
+@param boolean isHoming trueならコインがホーミングする
+###
+class OneHundredMillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
+        @price = 100000000
+        @frame = 4
+        @frame_init = 4
+
+###
+10億円
+@param boolean isHoming trueならコインがホーミングする
+###
+class BillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
+        @price = 1000000000
+        @frame = 4
+        @frame_init = 4
+
+###
+100億円
+@param boolean isHoming trueならコインがホーミングする
+###
+class TenBillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
+        @price = 10000000000
+        @frame = 8
+        @frame_init = 8
+
+###
+1000億円
+@param boolean isHoming trueならコインがホーミングする
+###
+class OneHundredBillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
+        @price = 100000000000
         @frame = 8
         @frame_init = 8

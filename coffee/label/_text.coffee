@@ -60,8 +60,9 @@ class comboText extends text
     setXposition: () ->
         unit = game.main_scene.gp_system.combo_unit_text
         @x = game.width / 2 - (@_boundWidth + unit._boundWidth + 5) / 2
+        if 3 <= game.max_set_item_num
+            @x += 50
         unit.x = @x + @_boundWidth + 5
-
 class comboUnitText extends text
     constructor: () ->
         super

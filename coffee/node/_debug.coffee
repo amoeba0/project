@@ -16,20 +16,21 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':1234567890,
+            'money':123456789000,
             'bet':10000,
-            'combo':10,
-            'max_combo':110,
+            'combo':0,
+            'max_combo':200,
             'tension':100,
             'past_fever_num':0,
             'item_point':500,
             'next_add_member_key':0,
-            'prev_muse':[12,13,14,15,16,17,18,19],
+            'prev_muse':[11,12,13,14,15,16,17,18,19],
             'now_muse_num':0,
-            'item_have_now':[3,4,15],
+            'max_set_item_num':1,
+            'item_have_now':[3,4,5,15],
             'item_set_now':[],
             'member_set_now':[],
-            'prev_fever_muse':[12,13,14,15,16,17,18,19,31]
+            'prev_fever_muse':[11,12,13,14,15,16,17,18,19,31]
         }
 
         #デバッグ用リールにすりかえる

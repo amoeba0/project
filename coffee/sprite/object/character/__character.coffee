@@ -13,15 +13,19 @@ class Character extends appObject
         @ax_init = 3
         @ax_up = 5
         @ax_up2 = 7
+        @ax_up3 = 9
         @mx_init = 7
-        @mx_up = 10
+        @mx_up = 11
         @mx_up2 = 15
+        @mx_up3 = 19
         @my_init = 19
         @my_up = 22
-        @my_up2 = 28
+        @my_up2 = 25
+        @my_up3 = 28
         @friction_init = 1.7
-        @friction_up = 2.7
-        @friction_up2 = 3.4
+        @friction_up = 3
+        @friction_up2 = 4.5
+        @friction_up3 = 6
     onenterframe: (e) ->
         @charMove()
 
@@ -184,7 +188,11 @@ class Character extends appObject
             @frame = 3
 
     setMxUp:()->
-        if game.isItemHave(21) is true
+        if game.isItemHave(21) && game.isItemHave(23)
+            @mx = @mx_up3
+            @ax = @ax_up3
+            @friction = @friction_up3
+        else if game.isItemHave(21) || game.isItemHave(23)
             @mx = @mx_up2
             @ax = @ax_up2
             @friction = @friction_up2
@@ -194,7 +202,11 @@ class Character extends appObject
             @friction = @friction_up
 
     resetMxUp:()->
-        if game.isItemHave(21) is true
+        if game.isItemHave(21) && game.isItemHave(23)
+            @mx = @mx_up2
+            @ax = @ax_up2
+            @friction = @friction_up2
+        else if game.isItemHave(21) || game.isItemHave(23)
             @mx = @mx_up
             @ax = @ax_up
             @friction = @friction_up
@@ -204,13 +216,17 @@ class Character extends appObject
             @friction = @friction_init
 
     setMyUp:()->
-        if game.isItemHave(21) is true
+        if game.isItemHave(21) && game.isItemHave(23)
+            @my = @my_up3
+        else if game.isItemHave(21) || game.isItemHave(23)
             @my = @my_up2
         else
             @my = @my_up
 
     resetMyUp:()->
-        if game.isItemHave(21) is true
+        if game.isItemHave(21) && game.isItemHave(23)
+            @my = @my_up2
+        else if game.isItemHave(21) || game.isItemHave(23)
             @my = @my_up
         else
             @my = @my_init

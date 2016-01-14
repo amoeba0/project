@@ -19,7 +19,7 @@ class Catch extends Item
             game.main_scene.gp_stage_front.removeChild(@)
             game.combo += 1
             if game.combo > game.max_combo
-                game.max_combo = game.max_combo
+                game.max_combo = game.combo
             game.main_scene.gp_system.combo_text.setValue()
             game.main_scene.gp_slot.slotStop()
             game.tensionSetValueItemCatch()

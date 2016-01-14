@@ -41,6 +41,8 @@ class ItemSlot extends Param
         @frame = 0
         @x = 5
         @y = 70
+    setPositoin:(num)->
+        @x = (num - 1) * 55 + 5
 
 class ItemGaugeBack extends Param
     constructor:()->
@@ -48,6 +50,8 @@ class ItemGaugeBack extends Param
         @image = @drawRect('#333')
         @x = 8
         @y = 112
+    setWidth:()->
+        @width = 50 * game.max_set_item_num
 
 class ItemGauge extends Param
     constructor:()->
@@ -56,3 +60,5 @@ class ItemGauge extends Param
         @initX = 7
         @x = @initX
         @y = 112
+    setWidth:()->
+        @width = 51 * game.max_set_item_num

@@ -445,7 +445,6 @@ class pauseItemBuySelectLayer extends appDomLayer
 class pauseItemUseLayer extends appDomLayer
     constructor: () ->
         super
-        @max_set_item_num = 1
         @dialog = new itemUseDialogHtml()
         @close_button = new itemUseDialogCloseButton()
         @menu_title = new itemUseDiscription()
@@ -461,7 +460,7 @@ class pauseItemUseLayer extends appDomLayer
         @set_item_list = {} #アイテムセット中リスト
         for i in [1..9]
             @item_list[i] = new useItemHtml(i)
-        for i in [1..@max_set_item_num]
+        for i in [1..game.limit_set_item_num]
             @set_item_list[i] = new setItemHtml(i)
             @addChild(@set_item_list[i])
         @setItemList()
@@ -488,13 +487,25 @@ class pauseItemUseLayer extends appDomLayer
                 item_val.is_exist = false
     #セットされているアイテムをレンダリングする
     dspSetItemList:()->
+        game.setItemSlot()
         @resetItemList()
         for item_key, item_val of @set_item_list
             item_val.setPosition()
-            if game.item_set_now[item_key - 1] != undefined
+            if game.max_set_item_num < item_key
+                item_val.setItemKind(0)
+                item_val.opacity = 0.5
+                item_val.changeNotButton()
+                item_val.addDomClass('grayscale', true)
+            else if game.item_set_now[item_key - 1] != undefined
                 item_val.setItemKind(game.item_set_now[item_key - 1])
+                item_val.opacity = 1
+                item_val.changeIsButton()
+                item_val.removeDomClass('grayscale', true)
             else
                 item_val.setItemKind(0)
+                item_val.opacity = 1
+                item_val.changeIsButton()
+                item_val.removeDomClass('grayscale', true)
 
 class pauseItemUseSelectLayer extends appDomLayer
     constructor:()->
@@ -529,13 +540,14 @@ class pauseItemUseSelectLayer extends appDomLayer
         return text
     setItem:()->
         @_itemSet(@item_kind)
+        game.slot_setting.setItemDecreasePoint()
         game.main_scene.gp_system.itemDsp()
         game.pause_scene.pause_item_use_layer.dspSetItemList()
         game.pause_scene.removeItemUseSelectMenu()
     #アイテムをセットする
     _itemSet:(kind)->
         if game.item_set_now.indexOf(parseInt(kind)) == -1
-            if (game.pause_scene.pause_item_use_layer.max_set_item_num <= game.item_set_now.length)
+            if (game.max_set_item_num <= game.item_set_now.length)
                 game.item_set_now.shift()
             game.item_set_now.push(kind)
         else
@@ -824,6 +836,7 @@ class LoveliveGame extends catchAndSlotGame
         @fever_hit_eye = 0 #どの目で当たって今フィーバーになっているか
         @now_item = 0 #現在セット中のアイテム（１つめ）
         @already_added_material = [] #ゲームを開いてから現在までにロードしたμ’ｓの画像や楽曲の素材の番号
+        @limit_set_item_num = 3
 
         #セーブする変数(slot_settingにもあるので注意)
         @money = 0 #現在の所持金
@@ -834,6 +847,7 @@ class LoveliveGame extends catchAndSlotGame
         @item_point = 500 #アイテムのポイント（500がマックス）
         @past_fever_num = 0 #過去にフィーバーになった回数
         @next_add_member_key = 0 #メンバーがセットされている場合、次に挿入されるメンバーの配列のキー
+        @max_set_item_num = 1 #アイテムスロットの最大数
         @item_have_now = [] #現在所持しているアイテム
         @item_set_now = [] #現在セットされているアイテム
         @member_set_now = [] #現在セットされているメンバー
@@ -956,6 +970,20 @@ class LoveliveGame extends catchAndSlotGame
         else
             @main_scene.gp_stage_front.player.resetMyUp()
 
+    ###
+    アイテムスロットを表示する
+    ###
+    setItemSlot:()->
+        if @isItemHave(22) && @isItemHave(23)
+            @max_set_item_num = 3
+        else if @isItemHave(22) || @isItemHave(23)
+            @max_set_item_num = 2
+        else
+            @max_set_item_num = 1
+        @main_scene.gp_system.itemDsp()
+        @main_scene.gp_system.combo_text.setXposition()
+        @slot_setting.setItemPointMax()
+
     countSoloMusic:()->
         cnt = 0
         for val in @prev_fever_muse
@@ -1042,7 +1070,8 @@ class LoveliveGame extends catchAndSlotGame
             'item_have_now':'[]',
             'item_set_now':'[]',
             'member_set_now':'[]',
-            'prev_fever_muse':'[]'
+            'prev_fever_muse':'[]',
+            'max_set_item_num':0
         }
         ret = null
         if data[key] is undefined
@@ -1071,7 +1100,8 @@ class LoveliveGame extends catchAndSlotGame
             'item_have_now':JSON.stringify(@item_have_now),
             'item_set_now':JSON.stringify(@item_set_now),
             'member_set_now':JSON.stringify(@member_set_now),
-            'prev_fever_muse':JSON.stringify(@prev_fever_muse)
+            'prev_fever_muse':JSON.stringify(@prev_fever_muse),
+            'max_set_item_num':@max_set_item_num
         }
         for key, val of saveData
             @local_storage.setItem(key, val)
@@ -1099,6 +1129,7 @@ class LoveliveGame extends catchAndSlotGame
             @item_set_now = @_loadStorage('item_set_now', 'json')
             @member_set_now = @_loadStorage('member_set_now', 'json')
             @prev_fever_muse = @_loadStorage('prev_fever_muse', 'json')
+            @max_set_item_num = @_loadStorage('max_set_item_num', 'num')
     ###
     ローカルストレージから指定のキーの値を取り出して返す
     @param string key ロードするデータのキー
@@ -1135,6 +1166,7 @@ class LoveliveGame extends catchAndSlotGame
         @item_set_now = data.item_set_now
         @prev_fever_muse = data.prev_fever_muse
         @member_set_now = data.member_set_now
+        @max_set_item_num = data.max_set_item_num
 
     ###
     ゲームロード後の画面表示等の初期値設定
@@ -1148,6 +1180,7 @@ class LoveliveGame extends catchAndSlotGame
         sys.money_text.setValue()
         sys.bet_text.setValue()
         sys.combo_text.setValue()
+        sys.combo_text.setXposition()
         sys.tension_gauge.setValue()
         sys.itemDsp()
         @pause_scene.pause_item_buy_layer.resetItemList()
@@ -1156,7 +1189,7 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.pause_record_layer.resetRecordList()
         @pause_scene.pause_record_layer.resetTrophyList()
         @slot_setting.setMemberItemPrice()
-        @slot_setting.setItemPointValue()
+        @slot_setting.setItemPointMax()
         @musePreLoadByMemberSetNow()
         @itemUseExe()
 class gpEffect extends appGroup
@@ -1672,7 +1705,7 @@ class stageBack extends gpStage
     constructor: () ->
         super
         @prizeMoneyItemsInstance = [] #スロット当選金のインスタンスを格納
-        @prizeMoneyItemsNum = {1:0,10:0,100:0,1000:0,10000:0,100000:0,1000000:0,10000000:0} #当選金を降らせる各コイン数の内訳
+        @prizeMoneyItemsNum = {1:0,10:0,100:0,1000:0,10000:0,100000:0,1000000:0,10000000:0,100000000:0,1000000000:0,10000000000:0,100000000000:0} #当選金を降らせる各コイン数の内訳
         @nowPrizeMoneyItemsNum = 0
         @prizeMoneyFallIntervalFrm = 4 #スロットの当選金を降らせる間隔（フレーム）
         @prizeMoneyFallPeriodSec = 5 #スロットの当選金額が振っている時間（秒）
@@ -1680,7 +1713,7 @@ class stageBack extends gpStage
         @oneSetMoney = 1 #1フレームに設置するコインの数
 
         @returnMoneyItemsInstance = [] #掛け金の戻り分のインスタンスを格納
-        @returnMoneyItemsNum = {1:0,10:0,100:0,1000:0,10000:0,100000:0,1000000:0,10000000:0} #掛け金の戻り分を降らせる各コイン数の内訳
+        @returnMoneyItemsNum = {1:0,10:0,100:0,1000:0,10000:0,100000:0,1000000:0,10000000:0,100000000:0,1000000000:0,10000000000:0,100000000000:0} #掛け金の戻り分を降らせる各コイン数の内訳
         @nowReturnMoneyItemsNum = 0
         @returnMoneyFallIntervalFrm = 4 #掛け金の戻り分を降らせる間隔（フレーム）
     onenterframe: () ->
@@ -1692,16 +1725,16 @@ class stageBack extends gpStage
     ###
     fallPrizeMoneyStart:(value) ->
         stage = game.main_scene.gp_stage_front
-        if value < 100000000
+        if value < 1000000000000
             @prizeMoneyFallIntervalFrm = 4
-        else if value < 1000000000
+        else if value < 10000000000000
             @prizeMoneyFallIntervalFrm = 2
         else
             @prizeMoneyFallIntervalFrm = 1
         @prizeMoneyItemsNum = @_calcMoneyItemsNum(value, true)
         @prizeMoneyItemsInstance = @_setMoneyItemsInstance(@prizeMoneyItemsNum, true)
-        if @prizeMoneyItemsNum[10000000] > 1000
-            @oneSetMoney = Math.floor(@prizeMoneyItemsNum[10000000] / 1000)
+        if @prizeMoneyItemsNum[100000000000] > 1000
+            @oneSetMoney = Math.floor(@prizeMoneyItemsNum[100000000000] / 1000)
         @prizeMoneyFallPeriodSec = Math.ceil((@prizeMoneyItemsInstance.length / @oneSetMoney) * @prizeMoneyFallIntervalFrm / game.fps) + stage.itemFallSecInit
         if @prizeMoneyFallPeriodSec > stage.itemFallSecInit
             stage.setItemFallFrm(@prizeMoneyFallPeriodSec)
@@ -1727,7 +1760,7 @@ class stageBack extends gpStage
     @prize boolean true:当選金額
     ###
     _calcMoneyItemsNum:(value, prize)->
-        ret_data = {1:0,10:0,100:0,1000:0,10000:0,100000:0,1000000:0,10000000:0}
+        ret_data = {1:0,10:0,100:0,1000:0,10000:0,100000:0,1000000:0,10000000:0,100000000:0,1000000000:0,10000000000:0,100000000000:0}
         if value <= 20 #全部1円
             ret_data[1] = value
             ret_data[10] = 0
@@ -1737,6 +1770,10 @@ class stageBack extends gpStage
             ret_data[100000] = 0
             ret_data[1000000] = 0
             ret_data[10000000] = 0
+            ret_data[100000000] = 0
+            ret_data[1000000000] = 0
+            ret_data[10000000000] = 0
+            ret_data[100000000000] = 0
         else if value < 100 #1円と10円と端数
             ret_data[1] = game.getDigitNum(value, 1) + 10
             ret_data[10] = game.getDigitNum(value, 2) - 1
@@ -1746,6 +1783,10 @@ class stageBack extends gpStage
             ret_data[100000] = 0
             ret_data[1000000] = 0
             ret_data[10000000] = 0
+            ret_data[100000000] = 0
+            ret_data[1000000000] = 0
+            ret_data[10000000000] = 0
+            ret_data[100000000000] = 0
         else if value < 1000 #10円と100円と端数
             ret_data[1] = game.getDigitNum(value, 1)
             ret_data[10] = game.getDigitNum(value, 2) + 10
@@ -1755,6 +1796,10 @@ class stageBack extends gpStage
             ret_data[100000] = 0
             ret_data[1000000] = 0
             ret_data[10000000] = 0
+            ret_data[100000000] = 0
+            ret_data[1000000000] = 0
+            ret_data[10000000000] = 0
+            ret_data[100000000000] = 0
         else if value < 10000 #1000円と100円と端数
             ret_data[1] = game.getDigitNum(value, 1)
             ret_data[10] = game.getDigitNum(value, 2)
@@ -1764,6 +1809,10 @@ class stageBack extends gpStage
             ret_data[100000] = 0
             ret_data[1000000] = 0
             ret_data[10000000] = 0
+            ret_data[100000000] = 0
+            ret_data[1000000000] = 0
+            ret_data[10000000000] = 0
+            ret_data[100000000000] = 0
         else if value < 100000
             ret_data[1] = 0
             ret_data[10] = game.getDigitNum(value, 2)
@@ -1773,6 +1822,10 @@ class stageBack extends gpStage
             ret_data[100000] = 0
             ret_data[1000000] = 0
             ret_data[10000000] = 0
+            ret_data[100000000] = 0
+            ret_data[1000000000] = 0
+            ret_data[10000000000] = 0
+            ret_data[100000000000] = 0
         else if value < 1000000
             ret_data[1] = 0
             ret_data[10] = 0
@@ -1782,6 +1835,10 @@ class stageBack extends gpStage
             ret_data[100000] = game.getDigitNum(value, 6) - 1
             ret_data[1000000] = 0
             ret_data[10000000] = 0
+            ret_data[100000000] = 0
+            ret_data[1000000000] = 0
+            ret_data[10000000000] = 0
+            ret_data[100000000000] = 0
         else if value < 10000000
             ret_data[1] = 0
             ret_data[10] = 0
@@ -1791,7 +1848,11 @@ class stageBack extends gpStage
             ret_data[100000] = game.getDigitNum(value, 6) + 10
             ret_data[1000000] = game.getDigitNum(value, 7) - 1
             ret_data[10000000] = 0
-        else
+            ret_data[100000000] = 0
+            ret_data[1000000000] = 0
+            ret_data[10000000000] = 0
+            ret_data[100000000000] = 0
+        else if value < 100000000
             ret_data[1] = 0
             ret_data[10] = 0
             ret_data[100] = 0
@@ -1799,7 +1860,63 @@ class stageBack extends gpStage
             ret_data[10000] = game.getDigitNum(value, 5)
             ret_data[100000] = game.getDigitNum(value, 6)
             ret_data[1000000] = game.getDigitNum(value, 7) + 10
-            ret_data[10000000] = Math.floor(value/10000000)
+            ret_data[10000000] = game.getDigitNum(value, 8) - 1
+            ret_data[100000000] = 0
+            ret_data[1000000000] = 0
+            ret_data[10000000000] = 0
+            ret_data[100000000000] = 0
+        else if value < 1000000000
+            ret_data[1] = 0
+            ret_data[10] = 0
+            ret_data[100] = 0
+            ret_data[1000] = 0
+            ret_data[10000] = 0
+            ret_data[100000] = game.getDigitNum(value, 6)
+            ret_data[1000000] = game.getDigitNum(value, 7)
+            ret_data[10000000] = game.getDigitNum(value, 8) + 10
+            ret_data[100000000] = game.getDigitNum(value, 9) - 1
+            ret_data[1000000000] = 0
+            ret_data[10000000000] = 0
+            ret_data[100000000000] = 0
+        else if value < 10000000000
+            ret_data[1] = 0
+            ret_data[10] = 0
+            ret_data[100] = 0
+            ret_data[1000] = 0
+            ret_data[10000] = 0
+            ret_data[100000] = 0
+            ret_data[1000000] = game.getDigitNum(value, 7)
+            ret_data[10000000] = game.getDigitNum(value, 8)
+            ret_data[100000000] = game.getDigitNum(value, 9) + 10
+            ret_data[1000000000] = game.getDigitNum(value, 10) - 1
+            ret_data[10000000000] = 0
+            ret_data[100000000000] = 0
+        else if value < 100000000000
+            ret_data[1] = 0
+            ret_data[10] = 0
+            ret_data[100] = 0
+            ret_data[1000] = 0
+            ret_data[10000] = 0
+            ret_data[100000] = 0
+            ret_data[1000000] = 0
+            ret_data[10000000] = game.getDigitNum(value, 8)
+            ret_data[100000000] = game.getDigitNum(value, 9)
+            ret_data[1000000000] = game.getDigitNum(value, 10) + 10
+            ret_data[10000000000] = game.getDigitNum(value, 11) - 1
+            ret_data[100000000000] = 0
+        else
+            ret_data[1] = 0
+            ret_data[10] = 0
+            ret_data[100] = 0
+            ret_data[1000] = 0
+            ret_data[10000] = 0
+            ret_data[100000] = 0
+            ret_data[1000000] = 0
+            ret_data[10000000] = 0
+            ret_data[100000000] = game.getDigitNum(value, 9)
+            ret_data[1000000000] = game.getDigitNum(value, 10)
+            ret_data[10000000000] = game.getDigitNum(value, 11) + 10
+            ret_data[100000000000] = Math.floor(value/100000000000)
         return ret_data
 
     ###
@@ -1834,6 +1951,18 @@ class stageBack extends gpStage
         if itemsNum[10000000] > 0
             for i in [1..itemsNum[10000000]]
                 ret_data.push(new TenMillionMoney(isHoming))
+        if itemsNum[100000000] > 0
+            for i in [1..itemsNum[100000000]]
+                ret_data.push(new OneHundredMillionMoney(isHoming))
+        if itemsNum[1000000000] > 0
+            for i in [1..itemsNum[1000000000]]
+                ret_data.push(new BillionMoney(isHoming))
+        if itemsNum[10000000000] > 0
+            for i in [1..itemsNum[10000000000]]
+                ret_data.push(new TenBillionMoney(isHoming))
+        if itemsNum[100000000000] > 0
+            for i in [1..itemsNum[100000000000]]
+                ret_data.push(new OneHundredBillionMoney(isHoming))
         return ret_data
 
     ###
@@ -1854,8 +1983,16 @@ class stageBack extends gpStage
             val = Math.floor(val / 100000) * 100000
         else if val < 10000000
             val = Math.floor(val / 1000000) * 1000000
-        else
+        else if val < 100000000
             val = Math.floor(val / 10000000) * 10000000
+        else if val < 1000000000
+            val = Math.floor(val / 100000000) * 100000000
+        else if val < 10000000000
+            val = Math.floor(val / 1000000000) * 1000000000
+        else if val < 100000000000
+            val = Math.floor(val / 10000000000) * 10000000000
+        else
+            val = Math.floor(val / 100000000000) * 100000000000
         @returnMoneyItemsNum = @_calcMoneyItemsNum(val, false)
         @returnMoneyItemsInstance = @_setMoneyItemsInstance(@returnMoneyItemsNum, false)
         stage = game.main_scene.gp_stage_front
@@ -1892,8 +2029,11 @@ class gpSystem extends appGroup
         @addChild(@tension_gauge)
         @pause_button = new pauseButton()
         @addChild(@pause_button)
-        @item_slot = new ItemSlot()
-        @addChild(@item_slot)
+        @item_slot = {}
+        for i in [1..game.limit_set_item_num]
+            @item_slot[i] = new ItemSlot(i)
+            @addChild(@item_slot[i])
+            @item_slot[i].setPositoin(i)
         @item_gauge_back = new ItemGaugeBack()
         @addChild(@item_gauge_back)
         @item_gauge = new ItemGauge()
@@ -1909,7 +2049,7 @@ class gpSystem extends appGroup
         @low_bet_button = new lowBetButton()
         @addChild(@low_bet_button)
         @keyList = {'up':false, 'down':false}
-        @prevItem = 0
+        @prevItem = []
     onenterframe: (e) ->
         @_betSetting()
         @_setItemPoint()
@@ -1956,8 +2096,16 @@ class gpSystem extends appGroup
                 val = 1000000
             else if bet < 100000000
                 val = 10000000
-            else
+            else if bet < 1000000000
                 val = 100000000
+            else if bet < 10000000000
+                val = 1000000000
+            else if bet < 10000000000
+                val = 1000000000
+            else if bet < 10000000000
+                val = 1000000000
+            else
+                val = 10000000000
         else
             if bet <= 10
                 val = -1
@@ -1975,8 +2123,16 @@ class gpSystem extends appGroup
                 val = -1000000
             else if bet <= 100000000
                 val = -10000000
-            else
+            else if bet <= 1000000000
                 val = -100000000
+            else if bet <= 10000000000
+                val = -1000000000
+            else if bet <= 100000000000
+                val = -10000000000
+            else if bet <= 1000000000000
+                val = -100000000000
+            else
+                val = -1000000000000
         game.bet += val
         if game.bet < 1
             game.bet = 1
@@ -2002,38 +2158,45 @@ class gpSystem extends appGroup
     セットしているアイテムを表示する
     ###
     itemDsp:()->
-        if game.item_set_now[0] != undefined
-            @item_slot.frame = game.item_set_now[0]
-            game.now_item = game.item_set_now[0]
-        else
-            @item_slot.frame = 0
-            game.now_item = 0
+        for i in [1..game.limit_set_item_num]
+            if i <= game.max_set_item_num
+                if game.item_set_now[i - 1] != undefined
+                    @item_slot[i].frame = game.item_set_now[i - 1]
+                    @item_slot[i].opacity = 1
+                    #game.now_item = game.item_set_now[i]
+                else
+                    @item_slot[i].frame = 0
+                    @item_slot[i].opacity = 1
+                    #game.now_item = 0
+            else
+                @item_slot[i].frame = 0
+                @item_slot[i].opacity = 0
     ###
     リアルタイムでアイテムゲージの増減をします
     アイテムスロットが空なら一定時間で回復し、全回復したら前にセットしていたアイテムを自動的にセットします
     アイテムスロットにアイテムが入っていたら、入っているアイテムによって一定時間で減少し、全てなくなったら自動的にアイテムを解除します
     ###
     _setItemPoint:()->
-        if game.now_item is 0
+        if game.item_set_now.length is 0
             if game.item_point < game.slot_setting.item_point_max
                 game.item_point = Math.floor(1000 * (game.item_point + game.slot_setting.item_point_value[0])) /1000
                 if game.slot_setting.item_point_max < game.item_point
                     game.item_point = game.slot_setting.item_point_max
-                    if @prevItem != 0
-                        game.item_set_now.push(@prevItem)
+                    if @prevItem.length != 0
+                        game.item_set_now = @prevItem
                         @itemDsp()
                         game.pause_scene.pause_item_use_layer.dspSetItemList()
                         game.itemUseExe()
         else
             if 0 < game.item_point
-                game.item_point = Math.floor(1000 * (game.item_point - game.slot_setting.item_point_value[game.now_item])) /1000
+                game.item_point = Math.floor(1000 * (game.item_point - game.slot_setting.item_decrease_point)) /1000
                 if game.item_point < 0
                     game.item_point = 0
                     @_resetItem()
         @item_gauge.scaleX = Math.floor(100 * (game.item_point / game.slot_setting.item_point_max)) / 100
-        @item_gauge.x = @item_gauge.initX - Math.floor(@item_gauge.w * (1 - @item_gauge.scaleX) / 2)
+        @item_gauge.x = @item_gauge.initX - Math.floor(@item_gauge.width * (1 - @item_gauge.scaleX) / 2)
     _resetItem:()->
-        @prevItem = game.now_item
+        @prevItem = game.item_set_now
         game.item_set_now = []
         @itemDsp()
         game.pause_scene.pause_item_use_layer.dspSetItemList()
@@ -2645,7 +2808,7 @@ class setItemHtml extends baseItemHtml
         super position
         @kind = 0
         @positionY = 210
-        @positionX = 200
+        @positionX = 120
         @positoin_kind = position - 1
         @_setImage(0)
     setItemKind:(kind)->
@@ -2839,8 +3002,9 @@ class comboText extends text
     setXposition: () ->
         unit = game.main_scene.gp_system.combo_unit_text
         @x = game.width / 2 - (@_boundWidth + unit._boundWidth + 5) / 2
+        if 3 <= game.max_set_item_num
+            @x += 50
         unit.x = @x + @_boundWidth + 5
-
 class comboUnitText extends text
     constructor: () ->
         super
@@ -2867,20 +3031,21 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':1234567890,
+            'money':123456789000,
             'bet':10000,
-            'combo':10,
-            'max_combo':110,
+            'combo':0,
+            'max_combo':200,
             'tension':100,
             'past_fever_num':0,
             'item_point':500,
             'next_add_member_key':0,
-            'prev_muse':[12,13,14,15,16,17,18,19],
+            'prev_muse':[11,12,13,14,15,16,17,18,19],
             'now_muse_num':0,
-            'item_have_now':[3,4,15],
+            'max_set_item_num':1,
+            'item_have_now':[3,4,5,15],
             'item_set_now':[],
             'member_set_now':[],
-            'prev_fever_muse':[12,13,14,15,16,17,18,19,31]
+            'prev_fever_muse':[11,12,13,14,15,16,17,18,19,31]
         }
 
         #デバッグ用リールにすりかえる
@@ -2955,8 +3120,8 @@ class slotSetting extends appNode
         ]
         #リールの目に対する当選額の倍率
         @bairitu = {
-            1:10, 2:20, 3:30, 4:40, 5:50,
-            11:50, 12:50, 13:50, 14:50, 15:50, 16:50, 17:50, 18:50, 19:50
+            1:10, 2:10, 3:20, 4:30, 5:40,
+            11:40, 12:40, 13:40, 14:40, 15:40, 16:40, 17:40, 18:40, 19:40
         }
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
@@ -3125,7 +3290,7 @@ class slotSetting extends appNode
             },
             35:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Bea in Angel', 'unit':'西木野真姫、星空凛', 'image':'bgm_35'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Beat in Angel', 'unit':'西木野真姫、星空凛', 'image':'bgm_35'}
                 ]
             },
             36:{
@@ -3254,7 +3419,7 @@ class slotSetting extends appNode
             11:{
                 'name':'高坂穂乃果',
                 'image':'item_11',
-                'discription':'部員に穂乃果を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに穂乃果が挿入されるようになる。',
                 'price':0,
                 'conditoin':'穂乃果でスロットを3つ揃える',
                 'condFunc':()->
@@ -3263,7 +3428,7 @@ class slotSetting extends appNode
             12:{
                 'name':'南ことり',
                 'image':'item_12',
-                'discription':'部員にことりを追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットにことりが挿入されるようになる。',
                 'price':0,
                 'conditoin':'ことりでスロットを3つ揃える',
                 'condFunc':()->
@@ -3272,7 +3437,7 @@ class slotSetting extends appNode
             13:{
                 'name':'園田海未',
                 'image':'item_13',
-                'discription':'部員に海未を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに海未が挿入されるようになる。',
                 'price':0,
                 'conditoin':'海未でスロットを3つ揃える',
                 'condFunc':()->
@@ -3281,7 +3446,7 @@ class slotSetting extends appNode
             14:{
                 'name':'西木野真姫',
                 'image':'item_14',
-                'discription':'部員に真姫を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに真姫が挿入されるようになる。',
                 'price':0,
                 'conditoin':'真姫でスロットを3つ揃える',
                 'condFunc':()->
@@ -3290,7 +3455,7 @@ class slotSetting extends appNode
             15:{
                 'name':'星空凛',
                 'image':'item_15',
-                'discription':'部員に凛を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに凛が挿入されるようになる。',
                 'price':0,
                 'conditoin':'凛でスロットを3つ揃える',
                 'condFunc':()->
@@ -3299,7 +3464,7 @@ class slotSetting extends appNode
             16:{
                 'name':'小泉花陽',
                 'image':'item_16',
-                'discription':'部員に花陽を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに花陽が挿入されるようになる。',
                 'price':0,
                 'conditoin':'花陽でスロットを3つ揃える',
                 'condFunc':()->
@@ -3308,7 +3473,7 @@ class slotSetting extends appNode
             17:{
                 'name':'矢澤にこ',
                 'image':'item_17',
-                'discription':'部員ににこを追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットににこが挿入されるようになる。',
                 'price':0,
                 'conditoin':'にこでスロットを3つ揃える',
                 'condFunc':()->
@@ -3317,7 +3482,7 @@ class slotSetting extends appNode
             18:{
                 'name':'東條希',
                 'image':'item_18',
-                'discription':'部員に希を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに希が挿入されるようになる。',
                 'price':0,
                 'conditoin':'希でスロットを3つ揃える',
                 'condFunc':()->
@@ -3326,7 +3491,7 @@ class slotSetting extends appNode
             19:{
                 'name':'絢瀬絵里',
                 'image':'item_19',
-                'discription':'部員に絵里を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに絵里が挿入されるようになる。',
                 'price':0,
                 'conditoin':'絵里でスロットを3つ揃える',
                 'condFunc':()->
@@ -3336,7 +3501,7 @@ class slotSetting extends appNode
                 'name':'ブロンズことり',
                 'image':'item_21',
                 'discription':'移動速度とジャンプ力がアップする',
-                'price':10000000,
+                'price':1000000,
                 'conditoin':'100コンボ達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(21)
@@ -3345,7 +3510,7 @@ class slotSetting extends appNode
                 'name':'シルバーことり',
                 'image':'item_22',
                 'discription':'魔法のスロットが1つ増える',
-                'price':1000000000,
+                'price':100000000,
                 'conditoin':'ソロ楽曲9曲を全て達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(22)
@@ -3353,7 +3518,7 @@ class slotSetting extends appNode
             23:{
                 'name':'ゴールドことり',
                 'image':'item_23',
-                'discription':'魔法のスロットが1つ増える',
+                'discription':'移動速度とジャンプ力がアップする<br>魔法のスロットが1つ増える',
                 'price':10000000000,
                 'conditoin':'200コンボ達成する',
                 'condFunc':()->
@@ -3374,7 +3539,7 @@ class slotSetting extends appNode
         #@item_sort_list = [2->1, 4->2, 3->3, 1->4, 7->5, 6->6, 5->7, 9->8, 8->9]
 
         #μ’ｓメンバーアイテムの値段、フィーバーになった順に
-        @member_item_price = [1000, 10000, 100000, 500000, 1000000, 5000000, 10000000, 50000000, 100000000]
+        @member_item_price = [1000, 5000, 10000, 50000, 100000, 500000, 1000000, 5000000, 10000000]
 
         #テンションの最大値
         @tension_max = 500
@@ -3383,12 +3548,15 @@ class slotSetting extends appNode
         #スロットが強制で当たる確率
         @slotHitRate = 0
         #アイテムポイントの最大値
+        @item_point_max_init = 500
         @item_point_max = 500
         #アイテムポイントが全回復するまでの秒数
         @item_point_recovery_sec = 60
         #アイテムポイントが増える／減るのにかかる値(ポイント／フレーム)
         #0はアイテムがセットされていない時に増える値、１～は各アイテムをセットしている時に減る値
         @item_point_value = [0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0]
+        #単位時間で減少するアイテムポイント
+        @item_decrease_point = 0
         #掛け金が増えると当選金額の割合が減る補正
         @prize_div = 1
         @item_gravity = 0
@@ -3402,11 +3570,31 @@ class slotSetting extends appNode
     setItemPointValue:()->
         @item_point_value[0] = Math.floor(@item_point_max * 1000 / (@item_point_recovery_sec * game.fps)) / 1000
         for i in [1..9]
-            @item_point_value[i] = Math.floor(@item_point_max * 1000 / (@item_list[i].durationSec * game.fps)) / 1000
+            @item_point_value[i] = Math.floor(@item_point_max_init * 1000 / (@item_list[i].durationSec * game.fps)) / 1000
+
+    ###
+    単位時間で減少するアイテムポイントの値を決定する
+    ###
+    setItemDecreasePoint:()->
+        point = 0
+        for key, val of game.item_set_now
+            if val != undefined
+                point += @item_point_value[val]
+        @item_decrease_point = point
+
+    ###
+    アイテムポイントの最大値を決定する
+    ###
+    setItemPointMax:()->
+        @item_point_max = @item_point_max_init * game.max_set_item_num
+        @setItemPointValue()
+        sys = game.main_scene.gp_system
+        sys.item_gauge_back.setWidth()
+        sys.item_gauge.setWidth()
 
     ###
     落下アイテムの加速度
-    掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
+    掛け金が多いほど速くする
     ###
     setGravity:()->
         if game.bet < 10
@@ -3427,25 +3615,66 @@ class slotSetting extends appNode
         else if game.bet < 5000
             val = 0.53
             @prize_div = 0.8
-        else if game.bet < 10000
+        else if game.bet < 10000 #1万
             val = 0.55
             @prize_div = 0.8
+        else if game.bet < 50000
+            val = 0.58
+            @prize_div = 0.7
         else if game.bet < 100000
-            val = 0.55 + Math.floor(game.bet / 10000) / 100
-            @prize_div = Math.floor(700 - (game.bet / 500)) / 1000
-        else if game.bet < 1000000
-            val = 0.65 + Math.floor(game.bet / 10000) / 100
-            @prize_div = Math.floor(500 - (game.bet / 5000)) / 1000
-        else
+            val = 0.61
+            @prize_div = 0.7
+        else if game.bet < 500000
+            val = 0.64
+            @prize_div = 0.6
+        else if game.bet < 1000000 #100万
+            val = 0.67
+            @prize_div = 0.6
+        else if game.bet < 5000000
+            val = 0.7
+            @prize_div = 0.5
+        else if game.bet < 10000000
+            val = 0.73
+            @prize_div = 0.5
+        else if game.bet < 50000000
+            val = 0.76
+            @prize_div = 0.5
+        else if game.bet < 100000000 #１億
+            val = 0.8
+            @prize_div = 0.5
+        else if game.bet < 500000000
+            val = 0.9
+            @prize_div = 0.4
+        else if game.bet < 1000000000
+            val = 1
+            @prize_div = 0.4
+        else if game.bet < 5000000000
+            val = 1.2
+            @prize_div = 0.4
+        else if game.bet < 10000000000 #100億
+            val = 1.4
+            @prize_div = 0.4
+        else if game.bet < 50000000000
+            val = 1.6
+            @prize_div = 0.3
+        else if game.bet < 100000000000
+            val = 1.8
+            @prize_div = 0.3
+        else if game.bet < 500000000000
             val = 2
             @prize_div = 0.3
-        #div = 1 + Math.floor(2 * game.tension / @tension_max) / 10
+        else if game.bet < 1000000000000 #1兆
+            val = 2.5
+            @prize_div = 0.3
+        else
+            val = 3
+            @prize_div = 0.2
         div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
             div = Math.floor((game.combo - 100) / 20) / 10
-            if 2 < div
-                div = 2
+            if 3 < div
+                div = 3
             val += div
         if game.isItemSet(6)
             val = Math.floor(val * 0.7 * 100) / 100
@@ -3797,15 +4026,15 @@ class slotSetting extends appNode
     isForceFever:()->
         tension_rate = Math.floor((game.tension * 100)/ @tension_max)
         if game.isItemSet(5)
-            rate = 25
-        else if tension_rate is 100 || game.past_fever_num is 0
             rate = 20
+        else if tension_rate is 100 || game.past_fever_num is 0
+            rate = 16
         else if 80 <= tension_rate || game.past_fever_num is 1
-            rate = 15
+            rate = 12
         else if 60 <= tension_rate || game.past_fever_num is 2
-            rate = 10
+            rate = 8
         else
-            rate = 5
+            rate = 4
         result = false
         random = Math.floor(Math.random() * 100)
         if game.debug.force_fever is true || random <= rate
@@ -4048,8 +4277,10 @@ class pauseScene extends appScene
     removeItemBuyMenu:()->
         @removeChild(@pause_item_buy_layer)
         @isAblePopPause = true
+        game.setItemSlot()
     setItemUseMenu:()->
         @pause_item_use_layer.resetItemList()
+        @pause_item_use_layer.dspSetItemList()
         @addChild(@pause_item_use_layer)
         @isAblePopPause = false
     removeItemUseMenu:()->
@@ -4446,15 +4677,19 @@ class Character extends appObject
         @ax_init = 3
         @ax_up = 5
         @ax_up2 = 7
+        @ax_up3 = 9
         @mx_init = 7
-        @mx_up = 10
+        @mx_up = 11
         @mx_up2 = 15
+        @mx_up3 = 19
         @my_init = 19
         @my_up = 22
-        @my_up2 = 28
+        @my_up2 = 25
+        @my_up3 = 28
         @friction_init = 1.7
-        @friction_up = 2.7
-        @friction_up2 = 3.4
+        @friction_up = 3
+        @friction_up2 = 4.5
+        @friction_up3 = 6
     onenterframe: (e) ->
         @charMove()
 
@@ -4617,7 +4852,11 @@ class Character extends appObject
             @frame = 3
 
     setMxUp:()->
-        if game.isItemHave(21) is true
+        if game.isItemHave(21) && game.isItemHave(23)
+            @mx = @mx_up3
+            @ax = @ax_up3
+            @friction = @friction_up3
+        else if game.isItemHave(21) || game.isItemHave(23)
             @mx = @mx_up2
             @ax = @ax_up2
             @friction = @friction_up2
@@ -4627,7 +4866,11 @@ class Character extends appObject
             @friction = @friction_up
 
     resetMxUp:()->
-        if game.isItemHave(21) is true
+        if game.isItemHave(21) && game.isItemHave(23)
+            @mx = @mx_up2
+            @ax = @ax_up2
+            @friction = @friction_up2
+        else if game.isItemHave(21) || game.isItemHave(23)
             @mx = @mx_up
             @ax = @ax_up
             @friction = @friction_up
@@ -4637,13 +4880,17 @@ class Character extends appObject
             @friction = @friction_init
 
     setMyUp:()->
-        if game.isItemHave(21) is true
+        if game.isItemHave(21) && game.isItemHave(23)
+            @my = @my_up3
+        else if game.isItemHave(21) || game.isItemHave(23)
             @my = @my_up2
         else
             @my = @my_up
 
     resetMyUp:()->
-        if game.isItemHave(21) is true
+        if game.isItemHave(21) && game.isItemHave(23)
+            @my = @my_up2
+        else if game.isItemHave(21) || game.isItemHave(23)
             @my = @my_up
         else
             @my = @my_init
@@ -4746,7 +4993,7 @@ class Catch extends Item
             game.main_scene.gp_stage_front.removeChild(@)
             game.combo += 1
             if game.combo > game.max_combo
-                game.max_combo = game.max_combo
+                game.max_combo = game.combo
             game.main_scene.gp_system.combo_text.setValue()
             game.main_scene.gp_slot.slotStop()
             game.tensionSetValueItemCatch()
@@ -4978,8 +5225,8 @@ class OneMillionMoney extends Money
         super isHoming, 30, 30
         @image = game.imageload("coin_pla")
         @price = 1000000
-        @frame = 8
-        @frame_init = 8
+        @frame = 0
+        @frame_init = 0
 
 ###
 1000万円
@@ -4990,6 +5237,54 @@ class TenMillionMoney extends Money
         super isHoming, 30, 30
         @image = game.imageload("coin_pla")
         @price = 10000000
+        @frame = 0
+        @frame_init = 0
+
+###
+1億円
+@param boolean isHoming trueならコインがホーミングする
+###
+class OneHundredMillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
+        @price = 100000000
+        @frame = 4
+        @frame_init = 4
+
+###
+10億円
+@param boolean isHoming trueならコインがホーミングする
+###
+class BillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
+        @price = 1000000000
+        @frame = 4
+        @frame_init = 4
+
+###
+100億円
+@param boolean isHoming trueならコインがホーミングする
+###
+class TenBillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
+        @price = 10000000000
+        @frame = 8
+        @frame_init = 8
+
+###
+1000億円
+@param boolean isHoming trueならコインがホーミングする
+###
+class OneHundredBillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
+        @price = 100000000000
         @frame = 8
         @frame_init = 8
 class Slot extends appSprite
@@ -5247,6 +5542,8 @@ class ItemSlot extends Param
         @frame = 0
         @x = 5
         @y = 70
+    setPositoin:(num)->
+        @x = (num - 1) * 55 + 5
 
 class ItemGaugeBack extends Param
     constructor:()->
@@ -5254,6 +5551,8 @@ class ItemGaugeBack extends Param
         @image = @drawRect('#333')
         @x = 8
         @y = 112
+    setWidth:()->
+        @width = 50 * game.max_set_item_num
 
 class ItemGauge extends Param
     constructor:()->
@@ -5262,3 +5561,5 @@ class ItemGauge extends Param
         @initX = 7
         @x = @initX
         @y = 112
+    setWidth:()->
+        @width = 51 * game.max_set_item_num

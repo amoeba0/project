@@ -31,8 +31,10 @@ class pauseScene extends appScene
     removeItemBuyMenu:()->
         @removeChild(@pause_item_buy_layer)
         @isAblePopPause = true
+        game.setItemSlot()
     setItemUseMenu:()->
         @pause_item_use_layer.resetItemList()
+        @pause_item_use_layer.dspSetItemList()
         @addChild(@pause_item_use_layer)
         @isAblePopPause = false
     removeItemUseMenu:()->

@@ -66,7 +66,7 @@ class setItemHtml extends baseItemHtml
         super position
         @kind = 0
         @positionY = 210
-        @positionX = 200
+        @positionX = 120
         @positoin_kind = position - 1
         @_setImage(0)
     setItemKind:(kind)->

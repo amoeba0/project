@@ -24,8 +24,8 @@ class slotSetting extends appNode
         ]
         #リールの目に対する当選額の倍率
         @bairitu = {
-            1:10, 2:20, 3:30, 4:40, 5:50,
-            11:50, 12:50, 13:50, 14:50, 15:50, 16:50, 17:50, 18:50, 19:50
+            1:10, 2:10, 3:20, 4:30, 5:40,
+            11:40, 12:40, 13:40, 14:40, 15:40, 16:40, 17:40, 18:40, 19:40
         }
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
@@ -194,7 +194,7 @@ class slotSetting extends appNode
             },
             35:{
                 'bgm':[
-                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Bea in Angel', 'unit':'西木野真姫、星空凛', 'image':'bgm_35'}
+                    {'name':'zenkai_no_lovelive', 'time':30, 'title':'Beat in Angel', 'unit':'西木野真姫、星空凛', 'image':'bgm_35'}
                 ]
             },
             36:{
@@ -323,7 +323,7 @@ class slotSetting extends appNode
             11:{
                 'name':'高坂穂乃果',
                 'image':'item_11',
-                'discription':'部員に穂乃果を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに穂乃果が挿入されるようになる。',
                 'price':0,
                 'conditoin':'穂乃果でスロットを3つ揃える',
                 'condFunc':()->
@@ -332,7 +332,7 @@ class slotSetting extends appNode
             12:{
                 'name':'南ことり',
                 'image':'item_12',
-                'discription':'部員にことりを追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットにことりが挿入されるようになる。',
                 'price':0,
                 'conditoin':'ことりでスロットを3つ揃える',
                 'condFunc':()->
@@ -341,7 +341,7 @@ class slotSetting extends appNode
             13:{
                 'name':'園田海未',
                 'image':'item_13',
-                'discription':'部員に海未を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに海未が挿入されるようになる。',
                 'price':0,
                 'conditoin':'海未でスロットを3つ揃える',
                 'condFunc':()->
@@ -350,7 +350,7 @@ class slotSetting extends appNode
             14:{
                 'name':'西木野真姫',
                 'image':'item_14',
-                'discription':'部員に真姫を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに真姫が挿入されるようになる。',
                 'price':0,
                 'conditoin':'真姫でスロットを3つ揃える',
                 'condFunc':()->
@@ -359,7 +359,7 @@ class slotSetting extends appNode
             15:{
                 'name':'星空凛',
                 'image':'item_15',
-                'discription':'部員に凛を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに凛が挿入されるようになる。',
                 'price':0,
                 'conditoin':'凛でスロットを3つ揃える',
                 'condFunc':()->
@@ -368,7 +368,7 @@ class slotSetting extends appNode
             16:{
                 'name':'小泉花陽',
                 'image':'item_16',
-                'discription':'部員に花陽を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに花陽が挿入されるようになる。',
                 'price':0,
                 'conditoin':'花陽でスロットを3つ揃える',
                 'condFunc':()->
@@ -377,7 +377,7 @@ class slotSetting extends appNode
             17:{
                 'name':'矢澤にこ',
                 'image':'item_17',
-                'discription':'部員ににこを追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットににこが挿入されるようになる。',
                 'price':0,
                 'conditoin':'にこでスロットを3つ揃える',
                 'condFunc':()->
@@ -386,7 +386,7 @@ class slotSetting extends appNode
             18:{
                 'name':'東條希',
                 'image':'item_18',
-                'discription':'部員に希を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに希が挿入されるようになる。',
                 'price':0,
                 'conditoin':'希でスロットを3つ揃える',
                 'condFunc':()->
@@ -395,7 +395,7 @@ class slotSetting extends appNode
             19:{
                 'name':'絢瀬絵里',
                 'image':'item_19',
-                'discription':'部員に絵里を追加できるようになる<br>（セット中の部員がスロットに出現するようになります。部員を１人もセットしていないと、スロットに出現する部員はランダムで決まります。）',
+                'discription':'スロットに絵里が挿入されるようになる。',
                 'price':0,
                 'conditoin':'絵里でスロットを3つ揃える',
                 'condFunc':()->
@@ -405,7 +405,7 @@ class slotSetting extends appNode
                 'name':'ブロンズことり',
                 'image':'item_21',
                 'discription':'移動速度とジャンプ力がアップする',
-                'price':10000000,
+                'price':1000000,
                 'conditoin':'100コンボ達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(21)
@@ -414,7 +414,7 @@ class slotSetting extends appNode
                 'name':'シルバーことり',
                 'image':'item_22',
                 'discription':'魔法のスロットが1つ増える',
-                'price':1000000000,
+                'price':100000000,
                 'conditoin':'ソロ楽曲9曲を全て達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(22)
@@ -422,7 +422,7 @@ class slotSetting extends appNode
             23:{
                 'name':'ゴールドことり',
                 'image':'item_23',
-                'discription':'魔法のスロットが1つ増える',
+                'discription':'移動速度とジャンプ力がアップする<br>魔法のスロットが1つ増える',
                 'price':10000000000,
                 'conditoin':'200コンボ達成する',
                 'condFunc':()->
@@ -443,7 +443,7 @@ class slotSetting extends appNode
         #@item_sort_list = [2->1, 4->2, 3->3, 1->4, 7->5, 6->6, 5->7, 9->8, 8->9]
 
         #μ’ｓメンバーアイテムの値段、フィーバーになった順に
-        @member_item_price = [1000, 10000, 100000, 500000, 1000000, 5000000, 10000000, 50000000, 100000000]
+        @member_item_price = [1000, 5000, 10000, 50000, 100000, 500000, 1000000, 5000000, 10000000]
 
         #テンションの最大値
         @tension_max = 500
@@ -452,12 +452,15 @@ class slotSetting extends appNode
         #スロットが強制で当たる確率
         @slotHitRate = 0
         #アイテムポイントの最大値
+        @item_point_max_init = 500
         @item_point_max = 500
         #アイテムポイントが全回復するまでの秒数
         @item_point_recovery_sec = 60
         #アイテムポイントが増える／減るのにかかる値(ポイント／フレーム)
         #0はアイテムがセットされていない時に増える値、１～は各アイテムをセットしている時に減る値
         @item_point_value = [0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0]
+        #単位時間で減少するアイテムポイント
+        @item_decrease_point = 0
         #掛け金が増えると当選金額の割合が減る補正
         @prize_div = 1
         @item_gravity = 0
@@ -471,11 +474,31 @@ class slotSetting extends appNode
     setItemPointValue:()->
         @item_point_value[0] = Math.floor(@item_point_max * 1000 / (@item_point_recovery_sec * game.fps)) / 1000
         for i in [1..9]
-            @item_point_value[i] = Math.floor(@item_point_max * 1000 / (@item_list[i].durationSec * game.fps)) / 1000
+            @item_point_value[i] = Math.floor(@item_point_max_init * 1000 / (@item_list[i].durationSec * game.fps)) / 1000
+
+    ###
+    単位時間で減少するアイテムポイントの値を決定する
+    ###
+    setItemDecreasePoint:()->
+        point = 0
+        for key, val of game.item_set_now
+            if val != undefined
+                point += @item_point_value[val]
+        @item_decrease_point = point
+
+    ###
+    アイテムポイントの最大値を決定する
+    ###
+    setItemPointMax:()->
+        @item_point_max = @item_point_max_init * game.max_set_item_num
+        @setItemPointValue()
+        sys = game.main_scene.gp_system
+        sys.item_gauge_back.setWidth()
+        sys.item_gauge.setWidth()
 
     ###
     落下アイテムの加速度
-    掛け金が多いほど速くする、10000円で速すぎて取れないレベルまで上げる
+    掛け金が多いほど速くする
     ###
     setGravity:()->
         if game.bet < 10
@@ -496,25 +519,66 @@ class slotSetting extends appNode
         else if game.bet < 5000
             val = 0.53
             @prize_div = 0.8
-        else if game.bet < 10000
+        else if game.bet < 10000 #1万
             val = 0.55
             @prize_div = 0.8
+        else if game.bet < 50000
+            val = 0.58
+            @prize_div = 0.7
         else if game.bet < 100000
-            val = 0.55 + Math.floor(game.bet / 10000) / 100
-            @prize_div = Math.floor(700 - (game.bet / 500)) / 1000
-        else if game.bet < 1000000
-            val = 0.65 + Math.floor(game.bet / 10000) / 100
-            @prize_div = Math.floor(500 - (game.bet / 5000)) / 1000
-        else
+            val = 0.61
+            @prize_div = 0.7
+        else if game.bet < 500000
+            val = 0.64
+            @prize_div = 0.6
+        else if game.bet < 1000000 #100万
+            val = 0.67
+            @prize_div = 0.6
+        else if game.bet < 5000000
+            val = 0.7
+            @prize_div = 0.5
+        else if game.bet < 10000000
+            val = 0.73
+            @prize_div = 0.5
+        else if game.bet < 50000000
+            val = 0.76
+            @prize_div = 0.5
+        else if game.bet < 100000000 #１億
+            val = 0.8
+            @prize_div = 0.5
+        else if game.bet < 500000000
+            val = 0.9
+            @prize_div = 0.4
+        else if game.bet < 1000000000
+            val = 1
+            @prize_div = 0.4
+        else if game.bet < 5000000000
+            val = 1.2
+            @prize_div = 0.4
+        else if game.bet < 10000000000 #100億
+            val = 1.4
+            @prize_div = 0.4
+        else if game.bet < 50000000000
+            val = 1.6
+            @prize_div = 0.3
+        else if game.bet < 100000000000
+            val = 1.8
+            @prize_div = 0.3
+        else if game.bet < 500000000000
             val = 2
             @prize_div = 0.3
-        #div = 1 + Math.floor(2 * game.tension / @tension_max) / 10
+        else if game.bet < 1000000000000 #1兆
+            val = 2.5
+            @prize_div = 0.3
+        else
+            val = 3
+            @prize_div = 0.2
         div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
             div = Math.floor((game.combo - 100) / 20) / 10
-            if 2 < div
-                div = 2
+            if 3 < div
+                div = 3
             val += div
         if game.isItemSet(6)
             val = Math.floor(val * 0.7 * 100) / 100
@@ -866,15 +930,15 @@ class slotSetting extends appNode
     isForceFever:()->
         tension_rate = Math.floor((game.tension * 100)/ @tension_max)
         if game.isItemSet(5)
-            rate = 25
-        else if tension_rate is 100 || game.past_fever_num is 0
             rate = 20
+        else if tension_rate is 100 || game.past_fever_num is 0
+            rate = 16
         else if 80 <= tension_rate || game.past_fever_num is 1
-            rate = 15
+            rate = 12
         else if 60 <= tension_rate || game.past_fever_num is 2
-            rate = 10
+            rate = 8
         else
-            rate = 5
+            rate = 4
         result = false
         random = Math.floor(Math.random() * 100)
         if game.debug.force_fever is true || random <= rate

@@ -16,8 +16,11 @@ class gpSystem extends appGroup
         @addChild(@tension_gauge)
         @pause_button = new pauseButton()
         @addChild(@pause_button)
-        @item_slot = new ItemSlot()
-        @addChild(@item_slot)
+        @item_slot = {}
+        for i in [1..game.limit_set_item_num]
+            @item_slot[i] = new ItemSlot(i)
+            @addChild(@item_slot[i])
+            @item_slot[i].setPositoin(i)
         @item_gauge_back = new ItemGaugeBack()
         @addChild(@item_gauge_back)
         @item_gauge = new ItemGauge()
@@ -33,7 +36,7 @@ class gpSystem extends appGroup
         @low_bet_button = new lowBetButton()
         @addChild(@low_bet_button)
         @keyList = {'up':false, 'down':false}
-        @prevItem = 0
+        @prevItem = []
     onenterframe: (e) ->
         @_betSetting()
         @_setItemPoint()
@@ -80,8 +83,16 @@ class gpSystem extends appGroup
                 val = 1000000
             else if bet < 100000000
                 val = 10000000
-            else
+            else if bet < 1000000000
                 val = 100000000
+            else if bet < 10000000000
+                val = 1000000000
+            else if bet < 10000000000
+                val = 1000000000
+            else if bet < 10000000000
+                val = 1000000000
+            else
+                val = 10000000000
         else
             if bet <= 10
                 val = -1
@@ -99,8 +110,16 @@ class gpSystem extends appGroup
                 val = -1000000
             else if bet <= 100000000
                 val = -10000000
-            else
+            else if bet <= 1000000000
                 val = -100000000
+            else if bet <= 10000000000
+                val = -1000000000
+            else if bet <= 100000000000
+                val = -10000000000
+            else if bet <= 1000000000000
+                val = -100000000000
+            else
+                val = -1000000000000
         game.bet += val
         if game.bet < 1
             game.bet = 1
@@ -126,38 +145,45 @@ class gpSystem extends appGroup
     セットしているアイテムを表示する
     ###
     itemDsp:()->
-        if game.item_set_now[0] != undefined
-            @item_slot.frame = game.item_set_now[0]
-            game.now_item = game.item_set_now[0]
-        else
-            @item_slot.frame = 0
-            game.now_item = 0
+        for i in [1..game.limit_set_item_num]
+            if i <= game.max_set_item_num
+                if game.item_set_now[i - 1] != undefined
+                    @item_slot[i].frame = game.item_set_now[i - 1]
+                    @item_slot[i].opacity = 1
+                    #game.now_item = game.item_set_now[i]
+                else
+                    @item_slot[i].frame = 0
+                    @item_slot[i].opacity = 1
+                    #game.now_item = 0
+            else
+                @item_slot[i].frame = 0
+                @item_slot[i].opacity = 0
     ###
     リアルタイムでアイテムゲージの増減をします
     アイテムスロットが空なら一定時間で回復し、全回復したら前にセットしていたアイテムを自動的にセットします
     アイテムスロットにアイテムが入っていたら、入っているアイテムによって一定時間で減少し、全てなくなったら自動的にアイテムを解除します
     ###
     _setItemPoint:()->
-        if game.now_item is 0
+        if game.item_set_now.length is 0
             if game.item_point < game.slot_setting.item_point_max
                 game.item_point = Math.floor(1000 * (game.item_point + game.slot_setting.item_point_value[0])) /1000
                 if game.slot_setting.item_point_max < game.item_point
                     game.item_point = game.slot_setting.item_point_max
-                    if @prevItem != 0
-                        game.item_set_now.push(@prevItem)
+                    if @prevItem.length != 0
+                        game.item_set_now = @prevItem
                         @itemDsp()
                         game.pause_scene.pause_item_use_layer.dspSetItemList()
                         game.itemUseExe()
         else
             if 0 < game.item_point
-                game.item_point = Math.floor(1000 * (game.item_point - game.slot_setting.item_point_value[game.now_item])) /1000
+                game.item_point = Math.floor(1000 * (game.item_point - game.slot_setting.item_decrease_point)) /1000
                 if game.item_point < 0
                     game.item_point = 0
                     @_resetItem()
         @item_gauge.scaleX = Math.floor(100 * (game.item_point / game.slot_setting.item_point_max)) / 100
-        @item_gauge.x = @item_gauge.initX - Math.floor(@item_gauge.w * (1 - @item_gauge.scaleX) / 2)
+        @item_gauge.x = @item_gauge.initX - Math.floor(@item_gauge.width * (1 - @item_gauge.scaleX) / 2)
     _resetItem:()->
-        @prevItem = game.now_item
+        @prevItem = game.item_set_now
         game.item_set_now = []
         @itemDsp()
         game.pause_scene.pause_item_use_layer.dspSetItemList()
