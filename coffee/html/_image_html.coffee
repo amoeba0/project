@@ -1,6 +1,7 @@
 class imageHtml extends systemHtml
     constructor: (width, height) ->
         super width, height
+        @is_button = true
 
 ###
 アイテム画像のベース
@@ -12,6 +13,7 @@ class baseItemHtml extends systemHtml
         @image_name = 'test_image'
         @setImageHtml()
         @item_kind = kind
+        @is_button = true
         @scaleX = 0.7
         @scaleY = 0.7
         @positionY = 0
@@ -54,7 +56,7 @@ class buyItemHtml extends itemHtml
 class useItemHtml extends itemHtml
     constructor:(kind)->
         super kind
-        @positionY = 400
+        @positionY = 330
         @is_exist = false
     ontouchend:()->
         if @is_exist is true
@@ -65,7 +67,7 @@ class setItemHtml extends baseItemHtml
     constructor:(position)->
         super position
         @kind = 0
-        @positionY = 210
+        @positionY = 180
         @positionX = 120
         @positoin_kind = position - 1
         @_setImage(0)
@@ -106,7 +108,7 @@ class buyMemberHtml extends memberHtml
 class useMemberHtml extends memberHtml
     constructor:(kind)->
         super kind
-        @positionY = 400
+        @positionY = 350
         @is_exist = false
     ontouchend:()->
         if @is_exist is true
@@ -118,7 +120,7 @@ class setMemberHtml extends baseItemHtml
         super position
         @kind = 0
         @disabled = false
-        @positionY = 210
+        @positionY = 180
         @positionX = 120
         @positoin_kind = position - 1
         @_setImage(10)
@@ -152,6 +154,7 @@ class baseRecordItemHtml extends systemHtml
         super 100, 100
         @position = position
         @kind = kind
+        @is_button = true
         @scaleX = 0.65
         @scaleY = 0.65
         @positionY = 0

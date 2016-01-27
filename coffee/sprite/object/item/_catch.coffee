@@ -31,7 +31,7 @@ class Catch extends Item
         if @y > game.height + @h
             game.sePlay(@miss_se)
             game.main_scene.gp_stage_front.removeChild(@)
-            if game.isItemSet(8) is false
+            if game.isItemSet(6) is false
                 game.combo = 0
             game.main_scene.gp_system.combo_text.setValue()
             game.tensionSetValueItemFall()

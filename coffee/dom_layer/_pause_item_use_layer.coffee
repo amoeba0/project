@@ -1,4 +1,3 @@
-#TODO 持っていないものは半透明、セット中は透明
 class pauseItemUseLayer extends appDomLayer
     constructor: () ->
         super
@@ -7,12 +6,16 @@ class pauseItemUseLayer extends appDomLayer
         @menu_title = new itemUseDiscription()
         @set_title = new useSetDiscription()
         @have_title = new useHaveDiscription()
+        @speed_title = new speedDiscription()
+        @set_title.y = 140
+        @have_title.y = 300
         @addChild(@modal)
         @addChild(@dialog)
         @addChild(@close_button)
         @addChild(@menu_title)
         @addChild(@set_title)
         @addChild(@have_title)
+        @addChild(@speed_title)
         @item_list = {} #アイテム所持リスト
         @set_item_list = {} #アイテムセット中リスト
         for i in [1..9]
@@ -109,4 +112,4 @@ class pauseItemUseSelectLayer extends appDomLayer
             game.item_set_now.push(kind)
         else
             game.item_set_now = game.arrayValueDel(game.item_set_now, kind)
-            game.main_scene.gp_system.prevItem = 0
+            game.prev_item = []

@@ -14,10 +14,16 @@ class baseDialogHtml extends dialogHtml
 class saveDialogHtml extends baseDialogHtml
     constructor: () ->
         super 375, 375
-        @text = '保存しました。'
         @class.push('base-dialog-save')
         @x = 60
         @y = 150
+        @setHtml()
+class betDialogHtml extends baseDialogHtml
+    constructor:()->
+        super 340, 200
+        @x = 60
+        @y = 180
+        @class.push('base-dialog-bet')
         @setHtml()
 class menuDialogHtml extends baseDialogHtml
     constructor:(width=420, height=460)->
@@ -38,11 +44,17 @@ class itemBuyDialogHtml extends menuDialogHtml
 
 class itemUseDialogHtml extends menuDialogHtml
     constructor:()->
-        super
+        super 420, 500
+        @y = 50
+    classPush:()->
+        @class.push('base-dialog-high')
 
 class memberSetDialogHtml extends menuDialogHtml
     constructor:()->
-        super
+        super 420, 500
+        @y = 50
+    classPush:()->
+        @class.push('base-dialog-high')
 
 class recordDialogHtml extends menuDialogHtml
     constructor:()->
@@ -142,6 +154,14 @@ class trophyDiscription extends titleDiscription
         @text = 'トロフィー'
         @setHtml()
 
+class speedDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 80
+        @y = 530
+        @text = '移動速度とジャンプ力'
+        @setHtml()
+
 class itemNameDiscription extends titleDiscription
     constructor:()->
         super
@@ -160,6 +180,30 @@ class itemDiscription extends discriptionTextDialogHtml
         @text = text
         @setHtml()
 
+class saveConfirmDiscription extends discriptionTextDialogHtml
+    constructor:()->
+        super 390, 150
+        @x = 100
+        @y = 230
+        @text = 'ゲームの進行状態を保存します。<br>よろしいですか？'
+        @setHtml()
+
+class titleConfirmDiscription extends discriptionTextDialogHtml
+    constructor:()->
+        super 390, 150
+        @x = 80
+        @y = 210
+        @text = 'タイトル画面に戻ります。<br>保存していないゲームの進行状況は<br>失われます。<br>よろしいですか？'
+        @setHtml()
+
+class saveEndDiscription extends discriptionTextDialogHtml
+    constructor:()->
+        super 390, 150
+        @x = 100
+        @y = 230
+        @text = 'セーブ完了しました。'
+        @setHtml()
+
 class longTitleDiscription extends discriptionTextDialogHtml
     constructor:()->
         super 250, 20
@@ -169,7 +213,7 @@ class itemUseDiscription extends longTitleDiscription
     constructor:()->
         super
         @x = 120
-        @y = 110
+        @y = 80
         @text = '魔法をセットする'
         @setHtml()
 
@@ -177,6 +221,6 @@ class memberSetDiscription extends longTitleDiscription
     constructor:()->
         super
         @x = 120
-        @y = 110
+        @y = 80
         @text = '部員を編成する'
         @setHtml()

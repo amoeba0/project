@@ -3,7 +3,7 @@ class mainScene extends appScene
         super
         @backgroundColor = '#93F0FF'
         #キーのリスト、物理キーとソフトキー両方に対応
-        @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
+        @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false, 'white':false}
         #ソフトキーのリスト
         @buttonList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         @bgm = game.soundload("bgm/bgm1")
@@ -83,8 +83,16 @@ class mainScene extends appScene
                 game.setPauseScene()
                 @keyList.pause = true
         else
-            if @keyList.pause = true
+            if @keyList.pause is true
                 @keyList.pause = false
+        #画面ホワイトアウト
+        if game.input.c is true
+            if @keyList.white is false
+                @gp_system.whiteOut()
+                @keyList.white = true
+        else
+            if @keyList.white is true
+                @keyList.white = false
 
     ###
     フィーバー中に一定時間でテンションが下がる
@@ -94,7 +102,9 @@ class mainScene extends appScene
         if game.fever is true
             game.tensionSetValue(game.fever_down_tension)
             if game.tension <= 0
+                game.autoMemberSetAfeterFever()
                 game.main_scene.gp_slot.upperFrame.frame = 0
+                game.pause_scene.pause_main_layer.save_game_button.makeAble()
                 game.bgmStop(game.main_scene.gp_slot.fever_bgm)
                 game.bgmPlay(@bgm, true)
                 @gp_system.changeBetChangeFlg(true)

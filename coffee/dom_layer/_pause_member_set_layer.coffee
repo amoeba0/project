@@ -8,12 +8,18 @@ class pauseMemberSetLayer extends appDomLayer
         @menu_title = new memberSetDiscription()
         @set_title = new useSetDiscription()
         @have_title = new useHaveDiscription()
+        @auto_button = new autoMemberSetButtonHtml()
+        @unset_button = new autoMemberUnsetButtonHtml()
+        @set_title.y = 140
+        @have_title.y = 320
         @addChild(@modal)
         @addChild(@dialog)
         @addChild(@close_button)
         @addChild(@menu_title)
         @addChild(@set_title)
         @addChild(@have_title)
+        @addChild(@auto_button)
+        @addChild(@unset_button)
         @member_list = {}
         @set_member_list = {}
         for i in [11..19]
@@ -46,6 +52,7 @@ class pauseMemberSetLayer extends appDomLayer
     #セットされている部員をレンダリングする
     dispSetMemberList:()->
         @resetItemList()
+        now_nuse_set = false
         for member_key, member_val of @set_member_list
             member_val.setPosition()
             if game.member_set_now[member_key - 1] != undefined
@@ -53,11 +60,12 @@ class pauseMemberSetLayer extends appDomLayer
                 member_val.opacity = 1
                 member_val.disabled = false
             else
-                if member_key is '1' and game.slot_setting.now_muse_num != 0
+                if now_nuse_set is false and game.slot_setting.now_muse_num != 0
                     member_val.setItemKind(game.slot_setting.now_muse_num)
                     member_val.opacity = 0.5
                     member_val.disabled = true
                     member_val.changeNotButton()
+                    now_nuse_set = true
                 else
                     member_val.setItemKind(10)
                     member_val.opacity = 1

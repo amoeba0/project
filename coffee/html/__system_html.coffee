@@ -3,18 +3,20 @@ class systemHtml extends appHtml
         super width, height
         @class = []
         @text = ''
-        @is_button = true
+        @is_button = false
     setHtml: ()->
         tmp_cls = ''
         for val in @class
             tmp_cls += val + ' '
+        if @is_button is true
+            tmp_cls += 'button-pointer'
         @_element.innerHTML = '<div class="'+tmp_cls+'">'+@text+'</div>'
     setImageHtml:()->
         tmp_cls = ''
         for val in @class
             tmp_cls += val + ' '
         if @is_button is true
-            tmp_cls += 'image-button'
+            tmp_cls += 'button-pointer'
         @_element.innerHTML = '<img src="images/html/'+@image_name+'.png" class="'+tmp_cls+'"></img>'
     changeNotButton:()->
         @is_button = false

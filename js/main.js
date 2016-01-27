@@ -1,4 +1,4 @@
-var BackPanorama, Bear, BillionMoney, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneHundredBillionMoney, OneHundredMillionMoney, OneMillionMoney, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenBillionMoney, TenMillionMoney, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, backGround, baseByuButtonHtml, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, baseRecordItemHtml, baseSetButtonHtml, betButton, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, buyTrophyItemHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, explosionEffect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, imageHtml, itemBuyBuyButtonHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemCatchEffect, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseCancelButtonHtml, itemUseDialogCloseButton, itemUseDialogHtml, itemUseDiscription, itemUseSelectDialogHtml, itemUseSetButtonHtml, jumpButton, kirakiraEffect, leftButton, longTitleDiscription, lowBetButton, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, memberSetDiscription, memberUseCancelButtonHtml, memberUseSelectDialogHtml, memberUseSetButtonHtml, menuDialogHtml, modal, moneyText, panoramaEffect, pauseBack, pauseBaseRecordSelectLayer, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseItemUseSelectLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseMemberUseSelectLayer, pauseRecordLayer, pauseRecordSelectLayer, pauseSaveLayer, pauseScene, pauseTrophySelectLayer, performanceEffect, recordButtonHtml, recordDialogCloseButton, recordDialogHtml, recordDiscription, recordItemHtml, recordOkButtonHtml, recordSelectDialogHtml, returnGameButtonHtml, rightButton, saveDialogHtml, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setItemHtml, setMemberButtonHtml, setMemberHtml, slotSetting, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, trophyDiscription, trophyItemBuyDiscription, trophyItemHtml, trophyOkButtonHtml, useHaveDiscription, useItemButtonHtml, useItemHtml, useMemberHtml, useSetDiscription,
+var BackPanorama, Bear, BillionMoney, Button, Catch, Character, Debug, Dialog, Floor, Frame, FrontPanorama, Guest, HundredMoney, HundredThousandMoney, Item, ItemGauge, ItemGaugeBack, ItemSlot, LeftLille, Lille, LoveliveGame, MacaroonCatch, MiddleLille, Money, OneHundredBillionMoney, OneHundredMillionMoney, OneMillionMoney, OneMoney, OnionCatch, Panorama, Param, Player, RightLille, Slot, System, TenBillionMoney, TenMillionMoney, TenMoney, TenThousandMoney, TensionGauge, TensionGaugeBack, Test, ThousandMoney, UnderFrame, UpperFrame, appDomLayer, appGame, appGroup, appHtml, appLabel, appNode, appObject, appScene, appSprite, autoMemberSetButtonHtml, autoMemberUnsetButtonHtml, backGround, baseByuButtonHtml, baseCancelButtonHtml, baseDialogHtml, baseItemHtml, baseOkButtonHtml, baseRecordItemHtml, baseSetButtonHtml, betButton, betDialogHtml, betText, bigKotori, buttonHtml, buyItemButtonHtml, buyItemHtml, buyMemberHtml, buyTrophyItemHtml, catchAndSlotGame, chanceEffect, comboText, comboUnitText, controllerButton, cutIn, dialogCloseButton, dialogHtml, discriptionTextDialogHtml, effect, explosionEffect, feverEffect, feverOverlay, gpBackPanorama, gpEffect, gpFrontPanorama, gpPanorama, gpSlot, gpStage, gpSystem, heighBetButton, heighBetButtonPause, imageHtml, itemBuyBuyButtonHtml, itemBuyCancelButtonHtml, itemBuyDialogCloseButton, itemBuyDialogHtml, itemBuySelectDialogHtml, itemCatchEffect, itemDiscription, itemHtml, itemItemBuyDiscription, itemNameDiscription, itemUseCancelButtonHtml, itemUseDialogCloseButton, itemUseDialogHtml, itemUseDiscription, itemUseSelectDialogHtml, itemUseSetButtonHtml, jumpButton, kirakiraEffect, leftButton, longTitleDiscription, lowBetButton, lowBetButtonPause, mainScene, memberHtml, memberItemBuyDiscription, memberSetDialogCloseButton, memberSetDialogHtml, memberSetDiscription, memberUseCancelButtonHtml, memberUseSelectDialogHtml, memberUseSetButtonHtml, menuDialogHtml, modal, moneyText, newGameButtonHtml, panoramaEffect, pauseBack, pauseBaseRecordSelectLayer, pauseButton, pauseItemBuyLayer, pauseItemBuySelectLayer, pauseItemUseLayer, pauseItemUseSelectLayer, pauseMainLayer, pauseMainMenuButtonHtml, pauseMemberSetLayer, pauseMemberUseSelectLayer, pauseRecordLayer, pauseRecordSelectLayer, pauseSaveConfirmLayer, pauseSaveLayer, pauseScene, pauseTitleConfirmLayer, pauseTrophySelectLayer, performanceEffect, recordButtonHtml, recordDialogCloseButton, recordDialogHtml, recordDiscription, recordItemHtml, recordOkButtonHtml, recordSelectDialogHtml, returnGameButtonHtml, returnTitleButtonHtml, rightButton, saveConfirmCancelButtonHtml, saveConfirmDiscription, saveConfirmOkButtonHtml, saveDialogHtml, saveEndDiscription, saveGameButtonHtml, saveOkButtonHtml, selectDialogHtml, selectItemImage, setItemHtml, setMemberButtonHtml, setMemberHtml, slotSetting, speedDiscription, stageBack, stageFront, startGameButtonHtml, systemHtml, testScene, text, titleConfirmCancelButtonHtml, titleConfirmDiscription, titleConfirmOkButtonHtml, titleDiscription, titleMainLayer, titleMenuButtonHtml, titleScene, trophyDiscription, trophyItemBuyDiscription, trophyItemHtml, trophyOkButtonHtml, useHaveDiscription, useItemButtonHtml, useItemHtml, useMemberHtml, useSetDiscription, whiteBack,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -282,6 +282,28 @@ appGame = (function(_super) {
       }
     });
     return arr;
+  };
+
+
+  /*
+  targetの配列の中にsearchの配列が全て入っていたらtrueを返す
+  １つでも入っていなかったらfalseを返す
+  @param arr target 検索する対象の配列
+  @param arr search 検索する文字列を格納した配列
+  @return boolean
+   */
+
+  appGame.prototype.arrIndexOf = function(target, search) {
+    var rslt, searchVal, _i, _len;
+    rslt = true;
+    for (_i = 0, _len = search.length; _i < _len; _i++) {
+      searchVal = search[_i];
+      if (target.indexOf(searchVal) === -1) {
+        rslt = false;
+        break;
+      }
+    }
+    return rslt;
   };
 
 
@@ -686,6 +708,7 @@ pauseItemBuySelectLayer = (function(_super) {
 
   pauseItemBuySelectLayer.prototype.buyItem = function() {
     game.money -= this.item_options.price;
+    game.pause_scene.pause_main_layer.statusDsp();
     game.item_have_now.push(this.item_kind);
     game.pause_scene.removeItemBuySelectMenu();
     game.pause_scene.pause_item_buy_layer.resetItemList();
@@ -710,12 +733,16 @@ pauseItemUseLayer = (function(_super) {
     this.menu_title = new itemUseDiscription();
     this.set_title = new useSetDiscription();
     this.have_title = new useHaveDiscription();
+    this.speed_title = new speedDiscription();
+    this.set_title.y = 140;
+    this.have_title.y = 300;
     this.addChild(this.modal);
     this.addChild(this.dialog);
     this.addChild(this.close_button);
     this.addChild(this.menu_title);
     this.addChild(this.set_title);
     this.addChild(this.have_title);
+    this.addChild(this.speed_title);
     this.item_list = {};
     this.set_item_list = {};
     for (i = _i = 1; _i <= 9; i = ++_i) {
@@ -858,7 +885,7 @@ pauseItemUseSelectLayer = (function(_super) {
       return game.item_set_now.push(kind);
     } else {
       game.item_set_now = game.arrayValueDel(game.item_set_now, kind);
-      return game.main_scene.gp_system.prevItem = 0;
+      return game.prev_item = [];
     }
   };
 
@@ -873,18 +900,54 @@ pauseMainLayer = (function(_super) {
     pauseMainLayer.__super__.constructor.apply(this, arguments);
     this.return_game_button = new returnGameButtonHtml();
     this.save_game_button = new saveGameButtonHtml();
+    this.title_button = new returnTitleButtonHtml();
     this.buy_item_button = new buyItemButtonHtml();
     this.use_item_button = new useItemButtonHtml();
     this.set_member_button = new setMemberButtonHtml();
     this.record_button = new recordButtonHtml();
+    this.bet_dialog = new betDialogHtml();
     this.addChild(this.return_game_button);
     this.addChild(this.save_game_button);
+    this.addChild(this.title_button);
     this.addChild(this.buy_item_button);
     this.addChild(this.use_item_button);
     this.addChild(this.set_member_button);
     this.addChild(this.record_button);
+    this.addChild(this.bet_dialog);
+    this.money_text = new moneyText();
+    this.addChild(this.money_text);
+    this.bet_text = new betText();
+    this.addChild(this.bet_text);
+    this.heigh_bet_button = new heighBetButtonPause();
+    this.addChild(this.heigh_bet_button);
+    this.low_bet_button = new lowBetButtonPause();
+    this.addChild(this.low_bet_button);
     this.y = -20;
   }
+
+  pauseMainLayer.prototype.statusDsp = function() {
+    this.money_text.setValue();
+    this.money_text.setPositionPause();
+    this.bet_text.setValue();
+    this.bet_text.setPositionPause();
+    this.low_bet_button.setXposition();
+    if (game.fever === true) {
+      this.heigh_bet_button.opacity = 0;
+      return this.low_bet_button.opacity = 0;
+    } else {
+      this.heigh_bet_button.opacity = 1;
+      return this.low_bet_button.opacity = 1;
+    }
+  };
+
+  pauseMainLayer.prototype.betSetting = function(up) {
+    if (game.fever === false) {
+      game.slot_setting.betChange(up);
+      this.bet_text.setValue();
+      this.bet_text.setPositionPause();
+      return this.low_bet_button.setXposition();
+    }
+  };
 
   return pauseMainLayer;
 
@@ -902,12 +965,18 @@ pauseMemberSetLayer = (function(_super) {
     this.menu_title = new memberSetDiscription();
     this.set_title = new useSetDiscription();
     this.have_title = new useHaveDiscription();
+    this.auto_button = new autoMemberSetButtonHtml();
+    this.unset_button = new autoMemberUnsetButtonHtml();
+    this.set_title.y = 140;
+    this.have_title.y = 320;
     this.addChild(this.modal);
     this.addChild(this.dialog);
     this.addChild(this.close_button);
     this.addChild(this.menu_title);
     this.addChild(this.set_title);
     this.addChild(this.have_title);
+    this.addChild(this.auto_button);
+    this.addChild(this.unset_button);
     this.member_list = {};
     this.set_member_list = {};
     for (i = _i = 11; _i <= 19; i = ++_i) {
@@ -959,8 +1028,9 @@ pauseMemberSetLayer = (function(_super) {
   };
 
   pauseMemberSetLayer.prototype.dispSetMemberList = function() {
-    var member_key, member_val, _ref, _results;
+    var member_key, member_val, now_nuse_set, _ref, _results;
     this.resetItemList();
+    now_nuse_set = false;
     _ref = this.set_member_list;
     _results = [];
     for (member_key in _ref) {
@@ -971,11 +1041,12 @@ pauseMemberSetLayer = (function(_super) {
         member_val.opacity = 1;
         _results.push(member_val.disabled = false);
       } else {
-        if (member_key === '1' && game.slot_setting.now_muse_num !== 0) {
+        if (now_nuse_set === false && game.slot_setting.now_muse_num !== 0) {
           member_val.setItemKind(game.slot_setting.now_muse_num);
           member_val.opacity = 0.5;
           member_val.disabled = true;
-          _results.push(member_val.changeNotButton());
+          member_val.changeNotButton();
+          _results.push(now_nuse_set = true);
         } else {
           member_val.setItemKind(10);
           member_val.opacity = 1;
@@ -1250,6 +1321,26 @@ pauseTrophySelectLayer = (function(_super) {
 
 })(pauseBaseRecordSelectLayer);
 
+pauseSaveConfirmLayer = (function(_super) {
+  __extends(pauseSaveConfirmLayer, _super);
+
+  function pauseSaveConfirmLayer() {
+    pauseSaveConfirmLayer.__super__.constructor.apply(this, arguments);
+    this.addChild(this.modal);
+    this.dialog = new saveDialogHtml();
+    this.addChild(this.dialog);
+    this.discription = new saveConfirmDiscription();
+    this.addChild(this.discription);
+    this.ok_button = new saveConfirmOkButtonHtml();
+    this.addChild(this.ok_button);
+    this.cancel_button = new saveConfirmCancelButtonHtml();
+    this.addChild(this.cancel_button);
+  }
+
+  return pauseSaveConfirmLayer;
+
+})(appDomLayer);
+
 pauseSaveLayer = (function(_super) {
   __extends(pauseSaveLayer, _super);
 
@@ -1258,11 +1349,33 @@ pauseSaveLayer = (function(_super) {
     this.addChild(this.modal);
     this.dialog = new saveDialogHtml();
     this.addChild(this.dialog);
+    this.discription = new saveEndDiscription();
+    this.addChild(this.discription);
     this.ok_button = new saveOkButtonHtml();
     this.addChild(this.ok_button);
   }
 
   return pauseSaveLayer;
+
+})(appDomLayer);
+
+pauseTitleConfirmLayer = (function(_super) {
+  __extends(pauseTitleConfirmLayer, _super);
+
+  function pauseTitleConfirmLayer() {
+    pauseTitleConfirmLayer.__super__.constructor.apply(this, arguments);
+    this.addChild(this.modal);
+    this.dialog = new saveDialogHtml();
+    this.addChild(this.dialog);
+    this.discription = new titleConfirmDiscription();
+    this.addChild(this.discription);
+    this.ok_button = new titleConfirmOkButtonHtml();
+    this.addChild(this.ok_button);
+    this.cancel_button = new titleConfirmCancelButtonHtml();
+    this.addChild(this.cancel_button);
+  }
+
+  return pauseTitleConfirmLayer;
 
 })(appDomLayer);
 
@@ -1273,6 +1386,8 @@ titleMainLayer = (function(_super) {
     titleMainLayer.__super__.constructor.apply(this, arguments);
     this.start_game_button = new startGameButtonHtml();
     this.addChild(this.start_game_button);
+    this.new_game_button = new newGameButtonHtml();
+    this.addChild(this.new_game_button);
   }
 
   return titleMainLayer;
@@ -1306,6 +1421,7 @@ LoveliveGame = (function(_super) {
     this.soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm/bgm1'];
     this.keybind(90, 'z');
     this.keybind(88, 'x');
+    this.keybind(67, 'c');
     this.preloadAll();
     this.money_init = 100;
     this.fever = false;
@@ -1315,6 +1431,7 @@ LoveliveGame = (function(_super) {
     this.now_item = 0;
     this.already_added_material = [];
     this.limit_set_item_num = 3;
+    this.next_auto_set_member = [];
     this.money = 0;
     this.bet = 1;
     this.combo = 0;
@@ -1328,29 +1445,89 @@ LoveliveGame = (function(_super) {
     this.item_set_now = [];
     this.member_set_now = [];
     this.prev_fever_muse = [];
+    this.prev_item = [];
+    this.init_load_val = {
+      'money': 100,
+      'bet': 1,
+      'combo': 0,
+      'max_combo': 0,
+      'tension': 0,
+      'past_fever_num': 0,
+      'item_point': 500,
+      'next_add_member_key': 0,
+      'now_muse_num': 0,
+      'max_set_item_num': 1,
+      'item_have_now': [],
+      'item_set_now': [],
+      'member_set_now': [],
+      'prev_fever_muse': [],
+      'prev_item': [],
+      'left_lille': this.arrayCopy(this.slot_setting.lille_array_0[0]),
+      'middle_lille': this.arrayCopy(this.slot_setting.lille_array_0[1]),
+      'right_lille': this.arrayCopy(this.slot_setting.lille_array_0[2])
+    };
     this.money = this.money_init;
   }
 
   LoveliveGame.prototype.onload = function() {
-    this.title_scene = new titleScene();
-    this.main_scene = new mainScene();
-    this.pause_scene = new pauseScene();
-    this.loadGame();
     if (this.test.test_exe_flg === true) {
+      this.main_scene = new mainScene();
+      this.pause_scene = new pauseScene();
+      this.loadGame();
       this.test_scene = new testScene();
       this.pushScene(this.test_scene);
       return this.test.testExe();
     } else {
+      this.title_scene = new titleScene();
+      this.pushScene(this.title_scene);
       if (this.debug.force_main_flg === true) {
+        this.main_scene = new mainScene();
+        this.pause_scene = new pauseScene();
+        this.loadGame();
         this.bgmPlay(this.main_scene.bgm, true);
         this.pushScene(this.main_scene);
         if (this.debug.force_pause_flg === true) {
-          return this.pushScene(this.pause_scene);
+          return this.setPauseScene();
         }
-      } else {
-        return this.pushScene(this.title_scene);
       }
     }
+  };
+
+
+  /*
+  タイトルへ戻る
+   */
+
+  LoveliveGame.prototype.returnToTitle = function() {
+    this.popScene(this.pause_scene);
+    return this.popScene(this.main_scene);
+  };
+
+
+  /*
+  続きからゲーム開始
+   */
+
+  LoveliveGame.prototype.loadGameStart = function() {
+    this.main_scene = new mainScene();
+    this.pause_scene = new pauseScene();
+    this.loadGame();
+    this.bgmPlay(this.main_scene.bgm, true);
+    return this.pushScene(this.main_scene);
+  };
+
+
+  /*
+  最初からゲーム開始
+   */
+
+  LoveliveGame.prototype.newGameStart = function() {
+    this.main_scene = new mainScene();
+    this.pause_scene = new pauseScene();
+    this._loadGameInit();
+    this._gameInitSetting();
+    this.bgmPlay(this.main_scene.bgm, true);
+    return this.pushScene(this.main_scene);
   };
 
 
@@ -1370,9 +1547,14 @@ LoveliveGame = (function(_super) {
    */
 
   LoveliveGame.prototype.getRoleByMemberSetNow = function() {
-    var roles, tmp;
+    var max, roles, tmp;
+    max = this.pause_scene.pause_member_set_layer.max_set_member_num;
     roles = game.arrayCopy(this.member_set_now);
-    tmp = this.member_set_now;
+    tmp = game.arrayCopy(this.member_set_now);
+    if (this.slot_setting.now_muse_num !== 0 && this.member_set_now.length !== max) {
+      roles.push(this.slot_setting.now_muse_num);
+      tmp.push(this.slot_setting.now_muse_num);
+    }
     roles.push(this.slot_setting.getHitRole(tmp[0], tmp[1], tmp[2]));
     roles.push(this.slot_setting.getHitRole(tmp[1], tmp[1], tmp[2]));
     roles.push(this.slot_setting.getHitRole(tmp[0], tmp[0], tmp[2]));
@@ -1541,6 +1723,37 @@ LoveliveGame = (function(_super) {
 
 
   /*
+  フィーバー開始直前に自動的に次の部員を設定
+  ソロ楽曲が全て出ないうちは設定しない
+  先にメンバーだけ記憶しておいてあらかじめ素材をロードしておく
+  フィーバー終了時にautoMemberSetAfeterFever()で実際に追加
+  設定された部員は自動的に空にする
+   */
+
+  LoveliveGame.prototype.autoMemberSetBeforeFever = function() {
+    if (this.arrIndexOf(this.prev_fever_muse, [11, 12, 13, 14, 15, 16, 17, 18, 19])) {
+      this.member_set_now = [];
+      this.next_auto_set_member = this.slot_setting.getRoleAbleMemberList();
+      this.musePreLoadMulti(this.next_auto_set_member);
+      return this.pause_scene.pause_member_set_layer.dispSetMemberList();
+    }
+  };
+
+
+  /*
+  フィーバー終了直後にあらかじめロードしておいた次の部員を自動的に設定
+  手動で設定された部員がいない時のみ実行
+   */
+
+  LoveliveGame.prototype.autoMemberSetAfeterFever = function() {
+    if (this.next_auto_set_member.length !== 0 && this.member_set_now.length === 0) {
+      this.member_set_now = this.next_auto_set_member;
+      return this.pause_scene.pause_member_set_layer.dispSetMemberList();
+    }
+  };
+
+
+  /*
   アイテムを取った時にテンションゲージを増減する
    */
 
@@ -1593,6 +1806,7 @@ LoveliveGame = (function(_super) {
     this.pause_scene.keyList.pause = true;
     this.pushScene(this.pause_scene);
     this.pause_scene.pause_item_buy_layer.resetItemList();
+    this.pause_scene.pause_main_layer.statusDsp();
     return this.nowPlayBgmPause();
   };
 
@@ -1604,6 +1818,7 @@ LoveliveGame = (function(_super) {
   LoveliveGame.prototype.popPauseScene = function() {
     this.pause_scene.buttonList.pause = false;
     this.main_scene.keyList.pause = true;
+    this.main_scene.gp_system.bet_text.setValue();
     this.popScene(this.pause_scene);
     return this.nowPlayBgmRestart();
   };
@@ -1639,7 +1854,6 @@ LoveliveGame = (function(_super) {
       'tension': 0,
       'past_fever_num': 0,
       'item_point': 0,
-      'prev_muse': '[]',
       'now_muse_num': 0,
       'next_add_member_key': 0,
       'left_lille': '[]',
@@ -1649,11 +1863,13 @@ LoveliveGame = (function(_super) {
       'item_set_now': '[]',
       'member_set_now': '[]',
       'prev_fever_muse': '[]',
-      'max_set_item_num': 0
+      'max_set_item_num': 0,
+      'prev_item': '[]'
     };
     ret = null;
     if (data[key] === void 0) {
       console.error(key + 'のデータのロードに失敗しました。');
+    } else {
       ret = data[key];
     }
     return ret;
@@ -1674,7 +1890,6 @@ LoveliveGame = (function(_super) {
       'tension': this.tension,
       'past_fever_num': this.past_fever_num,
       'item_point': this.item_point,
-      'prev_muse': JSON.stringify(this.slot_setting.prev_muse),
       'now_muse_num': this.slot_setting.now_muse_num,
       'next_add_member_key': this.next_add_member_key,
       'left_lille': JSON.stringify(this.main_scene.gp_slot.left_lille.lilleArray),
@@ -1684,7 +1899,8 @@ LoveliveGame = (function(_super) {
       'item_set_now': JSON.stringify(this.item_set_now),
       'member_set_now': JSON.stringify(this.member_set_now),
       'prev_fever_muse': JSON.stringify(this.prev_fever_muse),
-      'max_set_item_num': this.max_set_item_num
+      'max_set_item_num': this.max_set_item_num,
+      'prev_item': JSON.stringify(this.prev_item)
     };
     _results = [];
     for (key in saveData) {
@@ -1711,7 +1927,6 @@ LoveliveGame = (function(_super) {
       this.past_fever_num = this._loadStorage('past_fever_num', 'num');
       this.item_point = this._loadStorage('item_point', 'num');
       this.next_add_member_key = this._loadStorage('next_add_member_key', 'num');
-      this.slot_setting.prev_muse = this._loadStorage('prev_muse', 'json');
       this.slot_setting.now_muse_num = this._loadStorage('now_muse_num', 'num');
       this.main_scene.gp_slot.left_lille.lilleArray = this._loadStorage('left_lille', 'json');
       this.main_scene.gp_slot.middle_lille.lilleArray = this._loadStorage('middle_lille', 'json');
@@ -1720,7 +1935,8 @@ LoveliveGame = (function(_super) {
       this.item_set_now = this._loadStorage('item_set_now', 'json');
       this.member_set_now = this._loadStorage('member_set_now', 'json');
       this.prev_fever_muse = this._loadStorage('prev_fever_muse', 'json');
-      return this.max_set_item_num = this._loadStorage('max_set_item_num', 'num');
+      this.max_set_item_num = this._loadStorage('max_set_item_num', 'num');
+      return this.prev_item = this._loadStorage('prev_item', 'json');
     }
   };
 
@@ -1735,7 +1951,7 @@ LoveliveGame = (function(_super) {
     var ret, val;
     ret = null;
     val = this.local_storage.getItem(key);
-    if (val === null) {
+    if (val === void 0 || val === null) {
       ret = this._defaultLoadData(key);
     } else {
       switch (type) {
@@ -1758,23 +1974,53 @@ LoveliveGame = (function(_super) {
    */
 
   LoveliveGame.prototype._loadGameTest = function() {
-    var data;
-    data = this.debug.test_load_val;
-    this.money = data.money;
-    this.bet = data.bet;
-    this.combo = data.combo;
-    this.max_combo = data.max_combo;
-    this.tension = data.tension;
-    this.past_fever_num = data.past_fever_num;
-    this.item_point = data.item_point;
-    this.next_add_member_key = data.next_add_member_key;
-    this.slot_setting.prev_muse = data.prev_muse;
-    this.slot_setting.now_muse_num = data.now_muse_num;
-    this.item_have_now = data.item_have_now;
-    this.item_set_now = data.item_set_now;
-    this.prev_fever_muse = data.prev_fever_muse;
-    this.member_set_now = data.member_set_now;
-    return this.max_set_item_num = data.max_set_item_num;
+    return this._loadGameFix(this.debug.test_load_val);
+  };
+
+
+  /*
+  ゲームのロード、新規ゲーム用
+   */
+
+  LoveliveGame.prototype._loadGameInit = function() {
+    return this._loadGameFix(this.init_load_val);
+  };
+
+
+  /*
+  ゲームのロード、固定値をロードする
+   */
+
+  LoveliveGame.prototype._loadGameFix = function(data) {
+    this.money = this._loadGameFixUnit(data, 'money');
+    this.bet = this._loadGameFixUnit(data, 'bet');
+    this.combo = this._loadGameFixUnit(data, 'combo');
+    this.max_combo = this._loadGameFixUnit(data, 'max_combo');
+    this.tension = this._loadGameFixUnit(data, 'tension');
+    this.past_fever_num = this._loadGameFixUnit(data, 'past_fever_num');
+    this.item_point = this._loadGameFixUnit(data, 'item_point');
+    this.next_add_member_key = this._loadGameFixUnit(data, 'next_add_member_key');
+    this.slot_setting.now_muse_num = this._loadGameFixUnit(data, 'now_muse_num');
+    this.item_have_now = this._loadGameFixUnit(data, 'item_have_now');
+    this.item_set_now = this._loadGameFixUnit(data, 'item_set_now');
+    this.prev_fever_muse = this._loadGameFixUnit(data, 'prev_fever_muse');
+    this.member_set_now = this._loadGameFixUnit(data, 'member_set_now');
+    this.max_set_item_num = this._loadGameFixUnit(data, 'max_set_item_num');
+    this.slot_setting.now_muse_num = this._loadGameFixUnit(data, 'now_muse_num');
+    this.main_scene.gp_slot.left_lille.lilleArray = this._loadGameFixUnit(data, 'left_lille');
+    this.main_scene.gp_slot.middle_lille.lilleArray = this._loadGameFixUnit(data, 'middle_lille');
+    this.main_scene.gp_slot.right_lille.lilleArray = this._loadGameFixUnit(data, 'right_lille');
+    return this.prev_item = this._loadGameFixUnit(data, 'prev_item');
+  };
+
+  LoveliveGame.prototype._loadGameFixUnit = function(data, key) {
+    var ret;
+    if (data[key] !== void 0) {
+      ret = data[key];
+    } else {
+      ret = this._defaultLoadData(key);
+    }
+    return ret;
   };
 
 
@@ -1802,8 +2048,10 @@ LoveliveGame = (function(_super) {
     this.pause_scene.pause_record_layer.resetTrophyList();
     this.slot_setting.setMemberItemPrice();
     this.slot_setting.setItemPointMax();
+    this.slot_setting.setItemDecreasePoint();
     this.musePreLoadByMemberSetNow();
-    return this.itemUseExe();
+    this.itemUseExe();
+    return this.main_scene.gp_system.whiteOut();
   };
 
   return LoveliveGame;
@@ -2182,12 +2430,14 @@ gpSlot = (function(_super) {
         if (game.prev_fever_muse.indexOf(parseInt(hit_eye)) === -1) {
           game.prev_fever_muse.push(this.hit_role);
           game.pause_scene.pause_record_layer.resetRecordList();
+          game.pause_scene.pause_main_layer.save_game_button.makeDisable();
           game.slot_setting.setMemberItemPrice();
           game.tensionSetValue(game.slot_setting.tension_max);
           game.fever = true;
           game.past_fever_num += 1;
           game.slot_setting.setMuseMember();
           game.musePreLoad();
+          game.autoMemberSetBeforeFever();
           game.fever_hit_eye = hit_eye;
           game.main_scene.gp_system.changeBetChangeFlg(false);
           game.main_scene.gp_effect.feverEffectSet();
@@ -3042,11 +3292,12 @@ gpSystem = (function(_super) {
     this.addChild(this.heigh_bet_button);
     this.low_bet_button = new lowBetButton();
     this.addChild(this.low_bet_button);
+    this.white_back = new whiteBack();
     this.keyList = {
       'up': false,
       'down': false
     };
-    this.prevItem = [];
+    this.isWhiteBack = false;
   }
 
   gpSystem.prototype.onenterframe = function(e) {
@@ -3090,74 +3341,7 @@ gpSystem = (function(_super) {
    */
 
   gpSystem.prototype._getBetSettingValue = function(up) {
-    var bet, val;
-    val = 1;
-    bet = game.bet;
-    if (up === true) {
-      if (bet < 10) {
-        val = 1;
-      } else if (bet < 100) {
-        val = 10;
-      } else if (bet < 1000) {
-        val = 100;
-      } else if (bet < 10000) {
-        val = 1000;
-      } else if (bet < 100000) {
-        val = 10000;
-      } else if (bet < 1000000) {
-        val = 100000;
-      } else if (bet < 10000000) {
-        val = 1000000;
-      } else if (bet < 100000000) {
-        val = 10000000;
-      } else if (bet < 1000000000) {
-        val = 100000000;
-      } else if (bet < 10000000000) {
-        val = 1000000000;
-      } else if (bet < 10000000000) {
-        val = 1000000000;
-      } else if (bet < 10000000000) {
-        val = 1000000000;
-      } else {
-        val = 10000000000;
-      }
-    } else {
-      if (bet <= 10) {
-        val = -1;
-      } else if (bet <= 100) {
-        val = -10;
-      } else if (bet <= 1000) {
-        val = -100;
-      } else if (bet <= 10000) {
-        val = -1000;
-      } else if (bet <= 100000) {
-        val = -10000;
-      } else if (bet <= 1000000) {
-        val = -100000;
-      } else if (bet <= 10000000) {
-        val = -1000000;
-      } else if (bet <= 100000000) {
-        val = -10000000;
-      } else if (bet <= 1000000000) {
-        val = -100000000;
-      } else if (bet <= 10000000000) {
-        val = -1000000000;
-      } else if (bet <= 100000000000) {
-        val = -10000000000;
-      } else if (bet <= 1000000000000) {
-        val = -100000000000;
-      } else {
-        val = -1000000000000;
-      }
-    }
-    game.bet += val;
-    if (game.bet < 1) {
-      game.bet = 1;
-    } else if (game.bet > game.money) {
-      game.bet -= val;
-    } else if (game.bet > 100000000000) {
-      game.bet = 100000000000;
-    }
+    game.slot_setting.betChange(up);
     return this.bet_text.setValue();
   };
 
@@ -3213,17 +3397,9 @@ gpSystem = (function(_super) {
 
   gpSystem.prototype._setItemPoint = function() {
     if (game.item_set_now.length === 0) {
-      if (game.item_point < game.slot_setting.item_point_max) {
+      if (game.item_point <= game.slot_setting.item_point_max) {
         game.item_point = Math.floor(1000 * (game.item_point + game.slot_setting.item_point_value[0])) / 1000;
-        if (game.slot_setting.item_point_max < game.item_point) {
-          game.item_point = game.slot_setting.item_point_max;
-          if (this.prevItem.length !== 0) {
-            game.item_set_now = this.prevItem;
-            this.itemDsp();
-            game.pause_scene.pause_item_use_layer.dspSetItemList();
-            game.itemUseExe();
-          }
-        }
+        this._makeItemPointMaxProcess();
       }
     } else {
       if (0 < game.item_point) {
@@ -3234,16 +3410,67 @@ gpSystem = (function(_super) {
         }
       }
     }
-    this.item_gauge.scaleX = Math.floor(100 * (game.item_point / game.slot_setting.item_point_max)) / 100;
-    return this.item_gauge.x = this.item_gauge.initX - Math.floor(this.item_gauge.width * (1 - this.item_gauge.scaleX) / 2);
+    return this._dspItemPoint();
   };
 
+
+  /*
+  アイテムゲージが回復してMAXになった時の処理
+   */
+
+  gpSystem.prototype._makeItemPointMaxProcess = function() {
+    if (game.slot_setting.item_point_max <= game.item_point) {
+      game.item_point = game.slot_setting.item_point_max;
+      if (game.prev_item.length !== 0) {
+        game.item_set_now = game.prev_item;
+        this.itemDsp();
+        game.pause_scene.pause_item_use_layer.dspSetItemList();
+        return game.itemUseExe();
+      }
+    }
+  };
+
+
+  /*
+  アイテムゲージを決められた数値だけ回復する
+   */
+
+  gpSystem.prototype.upItemPoint = function(val) {
+    if (game.item_point <= game.slot_setting.item_point_max) {
+      game.item_point = Math.floor(1000 * (game.item_point + val)) / 1000;
+      this._makeItemPointMaxProcess();
+      return this._dspItemPoint();
+    }
+  };
+
+
+  /*
+  アイテムスロットを空にする
+   */
+
   gpSystem.prototype._resetItem = function() {
-    this.prevItem = game.item_set_now;
+    game.prev_item = game.item_set_now;
     game.item_set_now = [];
     this.itemDsp();
     game.pause_scene.pause_item_use_layer.dspSetItemList();
     return game.itemUseExe();
+  };
+
+  gpSystem.prototype._dspItemPoint = function() {
+    this.item_gauge.scaleX = Math.floor(100 * (game.item_point / game.slot_setting.item_point_max)) / 100;
+    return this.item_gauge.x = this.item_gauge.initX - Math.floor(this.item_gauge.width * (1 - this.item_gauge.scaleX) / 2);
+  };
+
+  gpSystem.prototype.whiteOut = function() {
+    if (game.debug.white_back === true) {
+      if (this.isWhiteBack === true) {
+        this.removeChild(this.white_back);
+        return this.isWhiteBack = false;
+      } else {
+        this.addChild(this.white_back);
+        return this.isWhiteBack = true;
+      }
+    }
   };
 
   return gpSystem;
@@ -3257,7 +3484,7 @@ systemHtml = (function(_super) {
     systemHtml.__super__.constructor.call(this, width, height);
     this["class"] = [];
     this.text = '';
-    this.is_button = true;
+    this.is_button = false;
   }
 
   systemHtml.prototype.setHtml = function() {
@@ -3267,6 +3494,9 @@ systemHtml = (function(_super) {
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       val = _ref[_i];
       tmp_cls += val + ' ';
+    }
+    if (this.is_button === true) {
+      tmp_cls += 'button-pointer';
     }
     return this._element.innerHTML = '<div class="' + tmp_cls + '">' + this.text + '</div>';
   };
@@ -3280,7 +3510,7 @@ systemHtml = (function(_super) {
       tmp_cls += val + ' ';
     }
     if (this.is_button === true) {
-      tmp_cls += 'image-button';
+      tmp_cls += 'button-pointer';
     }
     return this._element.innerHTML = '<img src="images/html/' + this.image_name + '.png" class="' + tmp_cls + '"></img>';
   };
@@ -3343,9 +3573,22 @@ buttonHtml = (function(_super) {
     this["class"] = ['base-button'];
     this.dicisionSe = game.soundload('dicision');
     this.cancelSe = game.soundload('cancel');
+    this.is_button = true;
   }
 
   buttonHtml.prototype.touchendEvent = function() {};
+
+  buttonHtml.prototype.makeAble = function() {
+    this.is_button = true;
+    this.setHtml();
+    return this.opacity = 1;
+  };
+
+  buttonHtml.prototype.makeDisable = function() {
+    this.is_button = false;
+    this.setHtml();
+    return this.opacity = 0.5;
+  };
 
   return buttonHtml;
 
@@ -3359,9 +3602,9 @@ buttonHtml = (function(_super) {
 pauseMainMenuButtonHtml = (function(_super) {
   __extends(pauseMainMenuButtonHtml, _super);
 
-  function pauseMainMenuButtonHtml() {
-    pauseMainMenuButtonHtml.__super__.constructor.call(this, 300, 45);
-    this.x = 90;
+  function pauseMainMenuButtonHtml(width, height) {
+    pauseMainMenuButtonHtml.__super__.constructor.call(this, width, height);
+    this.x = 30;
     this.y = 0;
     this["class"].push('pause-main-menu-button');
   }
@@ -3383,9 +3626,10 @@ returnGameButtonHtml = (function(_super) {
   __extends(returnGameButtonHtml, _super);
 
   function returnGameButtonHtml() {
-    returnGameButtonHtml.__super__.constructor.apply(this, arguments);
-    this.y = 100;
+    returnGameButtonHtml.__super__.constructor.call(this, 300, 45);
+    this.y = 80;
     this.text = 'ゲームに戻る';
+    this["class"].push('pause-main-menu-button-white');
     this.setHtml();
   }
 
@@ -3407,18 +3651,43 @@ saveGameButtonHtml = (function(_super) {
   __extends(saveGameButtonHtml, _super);
 
   function saveGameButtonHtml() {
-    saveGameButtonHtml.__super__.constructor.apply(this, arguments);
-    this.y = 200;
-    this.text = 'ゲームを保存する';
+    saveGameButtonHtml.__super__.constructor.call(this, 180, 45);
+    this.y = 620;
+    this.text = 'セーブ';
+    this["class"].push('pause-main-menu-button-middle');
+    this["class"].push('pause-main-menu-button-blue');
     this.setHtml();
   }
 
   saveGameButtonHtml.prototype.touchendEvent = function() {
-    game.sePlay(this.dicisionSe);
-    return game.pause_scene.setSaveMenu();
+    if (game.fever === false) {
+      game.sePlay(this.dicisionSe);
+      return game.pause_scene.setSaveConfirmMenu();
+    }
   };
 
   return saveGameButtonHtml;
+
+})(pauseMainMenuButtonHtml);
+
+returnTitleButtonHtml = (function(_super) {
+  __extends(returnTitleButtonHtml, _super);
+
+  function returnTitleButtonHtml() {
+    returnTitleButtonHtml.__super__.constructor.call(this, 180, 45);
+    this.x = 250;
+    this.y = 620;
+    this.text = 'タイトル';
+    this["class"].push('pause-main-menu-button-middle');
+    this.setHtml();
+  }
+
+  returnTitleButtonHtml.prototype.touchendEvent = function() {
+    game.sePlay(this.dicisionSe);
+    return game.pause_scene.setTitleConfirmMenu();
+  };
+
+  return returnTitleButtonHtml;
 
 })(pauseMainMenuButtonHtml);
 
@@ -3426,9 +3695,10 @@ buyItemButtonHtml = (function(_super) {
   __extends(buyItemButtonHtml, _super);
 
   function buyItemButtonHtml() {
-    buyItemButtonHtml.__super__.constructor.apply(this, arguments);
-    this.y = 300;
-    this.text = 'アイテムを買う';
+    buyItemButtonHtml.__super__.constructor.call(this, 400, 45);
+    this.y = 370;
+    this.text = 'アイテムSHOP';
+    this["class"].push('pause-main-menu-button-purple');
     this.setHtml();
   }
 
@@ -3445,9 +3715,12 @@ useItemButtonHtml = (function(_super) {
   __extends(useItemButtonHtml, _super);
 
   function useItemButtonHtml() {
-    useItemButtonHtml.__super__.constructor.apply(this, arguments);
-    this.y = 400;
-    this.text = '魔法をセットする';
+    useItemButtonHtml.__super__.constructor.call(this, 100, 45);
+    this.x = 30;
+    this.y = 490;
+    this.text = '魔法';
+    this["class"].push('pause-main-menu-button-small');
+    this["class"].push('pause-main-menu-button-green');
     this.setHtml();
   }
 
@@ -3464,9 +3737,12 @@ setMemberButtonHtml = (function(_super) {
   __extends(setMemberButtonHtml, _super);
 
   function setMemberButtonHtml() {
-    setMemberButtonHtml.__super__.constructor.apply(this, arguments);
-    this.y = 500;
-    this.text = '部員を編成する';
+    setMemberButtonHtml.__super__.constructor.call(this, 100, 45);
+    this.x = 170;
+    this.y = 490;
+    this.text = '部員';
+    this["class"].push('pause-main-menu-button-small');
+    this["class"].push('pause-main-menu-button-red');
     this.setHtml();
   }
 
@@ -3483,9 +3759,12 @@ recordButtonHtml = (function(_super) {
   __extends(recordButtonHtml, _super);
 
   function recordButtonHtml() {
-    recordButtonHtml.__super__.constructor.apply(this, arguments);
-    this.y = 600;
-    this.text = '実績を確認する';
+    recordButtonHtml.__super__.constructor.call(this, 100, 45);
+    this.x = 310;
+    this.y = 490;
+    this.text = '実績';
+    this["class"].push('pause-main-menu-button-small');
+    this["class"].push('pause-main-menu-button-orange');
     this.setHtml();
   }
 
@@ -3533,7 +3812,7 @@ saveOkButtonHtml = (function(_super) {
   function saveOkButtonHtml() {
     saveOkButtonHtml.__super__.constructor.apply(this, arguments);
     this.x = 170;
-    this.y = 380;
+    this.y = 330;
   }
 
   saveOkButtonHtml.prototype.touchendEvent = function() {
@@ -3541,6 +3820,45 @@ saveOkButtonHtml = (function(_super) {
   };
 
   return saveOkButtonHtml;
+
+})(baseOkButtonHtml);
+
+saveConfirmOkButtonHtml = (function(_super) {
+  __extends(saveConfirmOkButtonHtml, _super);
+
+  function saveConfirmOkButtonHtml() {
+    saveConfirmOkButtonHtml.__super__.constructor.apply(this, arguments);
+    this.x = 80;
+    this.y = 330;
+  }
+
+  saveConfirmOkButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.setSaveMenu();
+  };
+
+  return saveConfirmOkButtonHtml;
+
+})(baseOkButtonHtml);
+
+
+/*
+タイトルへ戻るOKボタン
+ */
+
+titleConfirmOkButtonHtml = (function(_super) {
+  __extends(titleConfirmOkButtonHtml, _super);
+
+  function titleConfirmOkButtonHtml() {
+    titleConfirmOkButtonHtml.__super__.constructor.apply(this, arguments);
+    this.x = 80;
+    this.y = 330;
+  }
+
+  titleConfirmOkButtonHtml.prototype.touchendEvent = function() {
+    return game.returnToTitle();
+  };
+
+  return titleConfirmOkButtonHtml;
 
 })(baseOkButtonHtml);
 
@@ -3601,6 +3919,40 @@ baseCancelButtonHtml = (function(_super) {
   return baseCancelButtonHtml;
 
 })(buttonHtml);
+
+saveConfirmCancelButtonHtml = (function(_super) {
+  __extends(saveConfirmCancelButtonHtml, _super);
+
+  function saveConfirmCancelButtonHtml() {
+    saveConfirmCancelButtonHtml.__super__.constructor.apply(this, arguments);
+    this.x = 260;
+    this.y = 335;
+  }
+
+  saveConfirmCancelButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.removeSaveConfirmMenu();
+  };
+
+  return saveConfirmCancelButtonHtml;
+
+})(baseCancelButtonHtml);
+
+titleConfirmCancelButtonHtml = (function(_super) {
+  __extends(titleConfirmCancelButtonHtml, _super);
+
+  function titleConfirmCancelButtonHtml() {
+    titleConfirmCancelButtonHtml.__super__.constructor.apply(this, arguments);
+    this.x = 260;
+    this.y = 335;
+  }
+
+  titleConfirmCancelButtonHtml.prototype.touchendEvent = function() {
+    return game.pause_scene.removeTitleConfirmMenu();
+  };
+
+  return titleConfirmCancelButtonHtml;
+
+})(baseCancelButtonHtml);
 
 
 /*
@@ -3851,15 +4203,33 @@ startGameButtonHtml = (function(_super) {
   function startGameButtonHtml() {
     startGameButtonHtml.__super__.constructor.apply(this, arguments);
     this.y = 350;
-    this.text = 'ゲーム開始';
+    this.text = '続きから';
     this.setHtml();
   }
 
   startGameButtonHtml.prototype.touchendEvent = function() {
-    return game.replaceScene(game.main_scene);
+    return game.loadGameStart();
   };
 
   return startGameButtonHtml;
+
+})(titleMenuButtonHtml);
+
+newGameButtonHtml = (function(_super) {
+  __extends(newGameButtonHtml, _super);
+
+  function newGameButtonHtml() {
+    newGameButtonHtml.__super__.constructor.apply(this, arguments);
+    this.y = 430;
+    this.text = '初めから';
+    this.setHtml();
+  }
+
+  newGameButtonHtml.prototype.touchendEvent = function() {
+    return game.newGameStart();
+  };
+
+  return newGameButtonHtml;
 
 })(titleMenuButtonHtml);
 
@@ -3874,6 +4244,7 @@ dialogCloseButton = (function(_super) {
   function dialogCloseButton() {
     dialogCloseButton.__super__.constructor.call(this, 30, 30);
     this.image_name = 'close';
+    this.is_button = true;
     this.x = 400;
     this.y = 100;
     this.setImageHtml();
@@ -3906,6 +4277,7 @@ itemUseDialogCloseButton = (function(_super) {
 
   function itemUseDialogCloseButton() {
     itemUseDialogCloseButton.__super__.constructor.apply(this, arguments);
+    this.y = 70;
   }
 
   itemUseDialogCloseButton.prototype.ontouchend = function() {
@@ -3922,6 +4294,7 @@ memberSetDialogCloseButton = (function(_super) {
 
   function memberSetDialogCloseButton() {
     memberSetDialogCloseButton.__super__.constructor.apply(this, arguments);
+    this.y = 70;
   }
 
   memberSetDialogCloseButton.prototype.ontouchend = function() {
@@ -3949,6 +4322,60 @@ recordDialogCloseButton = (function(_super) {
   return recordDialogCloseButton;
 
 })(dialogCloseButton);
+
+
+/*
+部員のおすすめ編成
+ */
+
+autoMemberSetButtonHtml = (function(_super) {
+  __extends(autoMemberSetButtonHtml, _super);
+
+  function autoMemberSetButtonHtml() {
+    autoMemberSetButtonHtml.__super__.constructor.call(this, 180, 45);
+    this.x = 45;
+    this.y = 560;
+    this["class"].push('osusume-button');
+    this.text = 'おすすめ';
+    this.setHtml();
+  }
+
+  autoMemberSetButtonHtml.prototype.ontouchend = function(e) {
+    game.sePlay(this.dicisionSe);
+    game.member_set_now = game.slot_setting.getRoleAbleMemberList();
+    return game.pause_scene.pause_member_set_layer.dispSetMemberList();
+  };
+
+  return autoMemberSetButtonHtml;
+
+})(buttonHtml);
+
+
+/*
+部員の全解除
+ */
+
+autoMemberUnsetButtonHtml = (function(_super) {
+  __extends(autoMemberUnsetButtonHtml, _super);
+
+  function autoMemberUnsetButtonHtml() {
+    autoMemberUnsetButtonHtml.__super__.constructor.call(this, 180, 45);
+    this.x = 245;
+    this.y = 560;
+    this["class"].push('osusume-button');
+    this.text = '全解除';
+    this.setHtml();
+  }
+
+  autoMemberUnsetButtonHtml.prototype.ontouchend = function(e) {
+    game.sePlay(this.dicisionSe);
+    game.member_set_now = [];
+    return game.pause_scene.pause_member_set_layer.dispSetMemberList();
+  };
+
+  return autoMemberUnsetButtonHtml;
+
+})(buttonHtml);
 
 dialogHtml = (function(_super) {
   __extends(dialogHtml, _super);
@@ -3992,7 +4419,6 @@ saveDialogHtml = (function(_super) {
 
   function saveDialogHtml() {
     saveDialogHtml.__super__.constructor.call(this, 375, 375);
-    this.text = '保存しました。';
     this["class"].push('base-dialog-save');
     this.x = 60;
     this.y = 150;
@@ -4000,6 +4426,21 @@ saveDialogHtml = (function(_super) {
   }
 
   return saveDialogHtml;
+
+})(baseDialogHtml);
+
+betDialogHtml = (function(_super) {
+  __extends(betDialogHtml, _super);
+
+  function betDialogHtml() {
+    betDialogHtml.__super__.constructor.call(this, 340, 200);
+    this.x = 60;
+    this.y = 180;
+    this["class"].push('base-dialog-bet');
+    this.setHtml();
+  }
+
+  return betDialogHtml;
 
 })(baseDialogHtml);
 
@@ -4049,8 +4490,13 @@ itemUseDialogHtml = (function(_super) {
   __extends(itemUseDialogHtml, _super);
 
   function itemUseDialogHtml() {
-    itemUseDialogHtml.__super__.constructor.apply(this, arguments);
+    itemUseDialogHtml.__super__.constructor.call(this, 420, 500);
+    this.y = 50;
   }
+
+  itemUseDialogHtml.prototype.classPush = function() {
+    return this["class"].push('base-dialog-high');
+  };
 
   return itemUseDialogHtml;
 
@@ -4060,8 +4506,13 @@ memberSetDialogHtml = (function(_super) {
   __extends(memberSetDialogHtml, _super);
 
   function memberSetDialogHtml() {
-    memberSetDialogHtml.__super__.constructor.apply(this, arguments);
+    memberSetDialogHtml.__super__.constructor.call(this, 420, 500);
+    this.y = 50;
   }
+
+  memberSetDialogHtml.prototype.classPush = function() {
+    return this["class"].push('base-dialog-high');
+  };
 
   return memberSetDialogHtml;
 
@@ -4278,6 +4729,21 @@ trophyDiscription = (function(_super) {
 
 })(titleDiscription);
 
+speedDiscription = (function(_super) {
+  __extends(speedDiscription, _super);
+
+  function speedDiscription() {
+    speedDiscription.__super__.constructor.apply(this, arguments);
+    this.x = 80;
+    this.y = 530;
+    this.text = '移動速度とジャンプ力';
+    this.setHtml();
+  }
+
+  return speedDiscription;
+
+})(titleDiscription);
+
 itemNameDiscription = (function(_super) {
   __extends(itemNameDiscription, _super);
 
@@ -4314,6 +4780,51 @@ itemDiscription = (function(_super) {
 
 })(discriptionTextDialogHtml);
 
+saveConfirmDiscription = (function(_super) {
+  __extends(saveConfirmDiscription, _super);
+
+  function saveConfirmDiscription() {
+    saveConfirmDiscription.__super__.constructor.call(this, 390, 150);
+    this.x = 100;
+    this.y = 230;
+    this.text = 'ゲームの進行状態を保存します。<br>よろしいですか？';
+    this.setHtml();
+  }
+
+  return saveConfirmDiscription;
+
+})(discriptionTextDialogHtml);
+
+titleConfirmDiscription = (function(_super) {
+  __extends(titleConfirmDiscription, _super);
+
+  function titleConfirmDiscription() {
+    titleConfirmDiscription.__super__.constructor.call(this, 390, 150);
+    this.x = 80;
+    this.y = 210;
+    this.text = 'タイトル画面に戻ります。<br>保存していないゲームの進行状況は<br>失われます。<br>よろしいですか？';
+    this.setHtml();
+  }
+
+  return titleConfirmDiscription;
+
+})(discriptionTextDialogHtml);
+
+saveEndDiscription = (function(_super) {
+  __extends(saveEndDiscription, _super);
+
+  function saveEndDiscription() {
+    saveEndDiscription.__super__.constructor.call(this, 390, 150);
+    this.x = 100;
+    this.y = 230;
+    this.text = 'セーブ完了しました。';
+    this.setHtml();
+  }
+
+  return saveEndDiscription;
+
+})(discriptionTextDialogHtml);
+
 longTitleDiscription = (function(_super) {
   __extends(longTitleDiscription, _super);
 
@@ -4332,7 +4843,7 @@ itemUseDiscription = (function(_super) {
   function itemUseDiscription() {
     itemUseDiscription.__super__.constructor.apply(this, arguments);
     this.x = 120;
-    this.y = 110;
+    this.y = 80;
     this.text = '魔法をセットする';
     this.setHtml();
   }
@@ -4347,7 +4858,7 @@ memberSetDiscription = (function(_super) {
   function memberSetDiscription() {
     memberSetDiscription.__super__.constructor.apply(this, arguments);
     this.x = 120;
-    this.y = 110;
+    this.y = 80;
     this.text = '部員を編成する';
     this.setHtml();
   }
@@ -4361,6 +4872,7 @@ imageHtml = (function(_super) {
 
   function imageHtml(width, height) {
     imageHtml.__super__.constructor.call(this, width, height);
+    this.is_button = true;
   }
 
   return imageHtml;
@@ -4381,6 +4893,7 @@ baseItemHtml = (function(_super) {
     this.image_name = 'test_image';
     this.setImageHtml();
     this.item_kind = kind;
+    this.is_button = true;
     this.scaleX = 0.7;
     this.scaleY = 0.7;
     this.positionY = 0;
@@ -4458,7 +4971,7 @@ useItemHtml = (function(_super) {
 
   function useItemHtml(kind) {
     useItemHtml.__super__.constructor.call(this, kind);
-    this.positionY = 400;
+    this.positionY = 330;
     this.is_exist = false;
   }
 
@@ -4479,7 +4992,7 @@ setItemHtml = (function(_super) {
   function setItemHtml(position) {
     setItemHtml.__super__.constructor.call(this, position);
     this.kind = 0;
-    this.positionY = 210;
+    this.positionY = 180;
     this.positionX = 120;
     this.positoin_kind = position - 1;
     this._setImage(0);
@@ -4555,7 +5068,7 @@ useMemberHtml = (function(_super) {
 
   function useMemberHtml(kind) {
     useMemberHtml.__super__.constructor.call(this, kind);
-    this.positionY = 400;
+    this.positionY = 350;
     this.is_exist = false;
   }
 
@@ -4577,7 +5090,7 @@ setMemberHtml = (function(_super) {
     setMemberHtml.__super__.constructor.call(this, position);
     this.kind = 0;
     this.disabled = false;
-    this.positionY = 210;
+    this.positionY = 180;
     this.positionX = 120;
     this.positoin_kind = position - 1;
     this._setImage(10);
@@ -4635,6 +5148,7 @@ baseRecordItemHtml = (function(_super) {
     baseRecordItemHtml.__super__.constructor.call(this, 100, 100);
     this.position = position;
     this.kind = kind;
+    this.is_button = true;
     this.scaleX = 0.65;
     this.scaleY = 0.65;
     this.positionY = 0;
@@ -4774,6 +5288,11 @@ moneyText = (function(_super) {
     return this.x = game.width - this._boundWidth - 7;
   };
 
+  moneyText.prototype.setPositionPause = function() {
+    this.x = 100;
+    return this.y = 210;
+  };
+
   return moneyText;
 
 })(text);
@@ -4797,6 +5316,11 @@ betText = (function(_super) {
   betText.prototype.setValue = function() {
     this.text = this.kakekin_text + game.toJPUnit(game.bet) + this.yen_text;
     return game.main_scene.gp_system.low_bet_button.setXposition();
+  };
+
+  betText.prototype.setPositionPause = function() {
+    this.x = 140;
+    return this.y = 270;
   };
 
   return betText;
@@ -4861,7 +5385,7 @@ Debug = (function(_super) {
 
   function Debug() {
     Debug.__super__.constructor.apply(this, arguments);
-    this.force_main_flg = true;
+    this.force_main_flg = false;
     this.force_pause_flg = false;
     this.not_load_flg = false;
     this.test_load_flg = false;
@@ -4870,16 +5394,15 @@ Debug = (function(_super) {
       'bet': 10000,
       'combo': 0,
       'max_combo': 200,
-      'tension': 100,
+      'tension': 500,
       'past_fever_num': 0,
-      'item_point': 500,
+      'item_point': 100,
       'next_add_member_key': 0,
-      'prev_muse': [11, 12, 13, 14, 15, 16, 17, 18, 19],
       'now_muse_num': 0,
-      'max_set_item_num': 1,
-      'item_have_now': [3, 4, 5, 15],
-      'item_set_now': [],
-      'member_set_now': [],
+      'max_set_item_num': 3,
+      'item_have_now': [3, 4, 5, 11, 12, 13, 15, 16, 21, 22, 23],
+      'item_set_now': [5, 7, 8],
+      'member_set_now': [11, 12, 13],
       'prev_fever_muse': [11, 12, 13, 14, 15, 16, 17, 18, 19, 31]
     };
     this.lille_flg = false;
@@ -4892,6 +5415,7 @@ Debug = (function(_super) {
         [13, 13, 13, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     ]
      */
+    this.white_back = false;
     this.item_flg = false;
     this.fix_tention_item_catch_flg = false;
     this.fix_tention_item_fall_flg = false;
@@ -5228,8 +5752,8 @@ slotSetting = (function(_super) {
       24: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'sweet_holiday',
+            'time': 114,
             'title': 'sweet＆sweet holiday',
             'unit': 'Printemps<br>(高坂穂乃果、南ことり、小泉花陽)',
             'image': 'bgm_24'
@@ -5239,8 +5763,8 @@ slotSetting = (function(_super) {
       25: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'anone_ganbare',
+            'time': 100,
             'title': 'あ・の・ね・が・ん・ば・れ',
             'unit': 'lily white<br>(園田海未、星空凛、東條希)',
             'image': 'bgm_25'
@@ -5250,8 +5774,8 @@ slotSetting = (function(_super) {
       26: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'love_novels',
+            'time': 98,
             'title': 'ラブノベルス',
             'unit': 'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)',
             'image': 'bgm_26'
@@ -5261,8 +5785,8 @@ slotSetting = (function(_super) {
       27: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'listen_to_my_heart',
+            'time': 137,
             'title': 'Listen to my heart！！',
             'unit': 'にこりんぱな<br>(矢澤にこ、星空凛、小泉花陽)',
             'image': 'bgm_27'
@@ -5272,8 +5796,8 @@ slotSetting = (function(_super) {
       28: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'soldier_game',
+            'time': 90,
             'title': 'soldier game',
             'unit': '<br>園田海未、西木野真姫、絢瀬絵里',
             'image': 'bgm_28'
@@ -5283,8 +5807,8 @@ slotSetting = (function(_super) {
       31: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'mermaid2',
+            'time': 122,
             'title': 'Mermaid festa vol．2',
             'unit': '高坂穂乃果、星空凛',
             'image': 'bgm_31'
@@ -5294,8 +5818,8 @@ slotSetting = (function(_super) {
       32: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'kokuhaku',
+            'time': 98,
             'title': '告白日和、です！',
             'unit': '南ことり、小泉花陽',
             'image': 'bgm_32'
@@ -5305,8 +5829,8 @@ slotSetting = (function(_super) {
       33: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'otomesiki',
+            'time': 100,
             'title': '乙女式れんあい塾',
             'unit': '矢澤にこ、東條希',
             'image': 'bgm_33'
@@ -5316,8 +5840,8 @@ slotSetting = (function(_super) {
       34: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'anemone_heart',
+            'time': 100,
             'title': 'Anemone heart',
             'unit': '南ことり、園田海未',
             'image': 'bgm_34'
@@ -5327,8 +5851,8 @@ slotSetting = (function(_super) {
       35: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'beat_in_angel',
+            'time': 105,
             'title': 'Beat in Angel',
             'unit': '西木野真姫、星空凛',
             'image': 'bgm_35'
@@ -5338,8 +5862,8 @@ slotSetting = (function(_super) {
       36: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'garasu',
+            'time': 103,
             'title': '硝子の花園',
             'unit': '東條希、絢瀬絵里',
             'image': 'bgm_36'
@@ -5349,8 +5873,8 @@ slotSetting = (function(_super) {
       37: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'magnetic',
+            'time': 111,
             'title': 'ずるいよMagnetic today',
             'unit': '矢澤にこ、西木野真姫',
             'image': 'bgm_37'
@@ -5360,8 +5884,8 @@ slotSetting = (function(_super) {
       38: {
         'bgm': [
           {
-            'name': 'zenkai_no_lovelive',
-            'time': 30,
+            'name': 'storm',
+            'time': 116,
             'title': 'Storm in Lover',
             'unit': '園田海未、絢瀬絵里',
             'image': 'bgm_38'
@@ -5389,7 +5913,7 @@ slotSetting = (function(_super) {
       1: {
         'name': 'チーズケーキ鍋',
         'image': 'item_1',
-        'discription': 'チーズケーキしか降ってこなくなる<br>ニンニクは降ってこなくなる',
+        'discription': 'チーズケーキしか降ってこなくなる<br>爆弾は降ってこなくなる',
         'price': 1000,
         'durationSec': 120,
         'conditoin': '',
@@ -5431,25 +5955,25 @@ slotSetting = (function(_super) {
         }
       },
       5: {
-        'name': 'ファイトだよっ',
-        'image': 'item_5',
-        'discription': 'CHANCE!!でスロットが揃う時に<br>FEVER!!が出やすくなる',
-        'price': 100000000,
-        'durationSec': 120,
-        'conditoin': '',
-        'condFunc': function() {
-          return game.slot_setting.itemConditinon(7);
-        }
-      },
-      6: {
         'name': 'チョットマッテテー',
-        'image': 'item_6',
+        'image': 'item_5',
         'discription': 'おやつが降ってくる速度が<br>ちょっとだけ遅くなる',
         'price': 1000000,
         'durationSec': 60,
         'conditoin': '',
         'condFunc': function() {
           return game.slot_setting.itemConditinon(6);
+        }
+      },
+      6: {
+        'name': '認められないわぁ',
+        'image': 'item_6',
+        'discription': 'アイテムを落としてもコンボが減らず<br>テンションも下がらないようになる',
+        'price': 5000000,
+        'durationSec': 60,
+        'conditoin': '',
+        'condFunc': function() {
+          return game.slot_setting.itemConditinon(9);
         }
       },
       7: {
@@ -5464,14 +5988,14 @@ slotSetting = (function(_super) {
         }
       },
       8: {
-        'name': '認められないわぁ',
+        'name': 'ファイトだよっ',
         'image': 'item_8',
-        'discription': 'アイテムを落としてもコンボが減らず<br>テンションも下がらないようになる',
-        'price': 5000000,
-        'durationSec': 60,
+        'discription': 'CHANCE!!でスロットが揃う時に<br>FEVER!!が出やすくなる',
+        'price': 100000000,
+        'durationSec': 120,
         'conditoin': '',
         'condFunc': function() {
-          return game.slot_setting.itemConditinon(9);
+          return game.slot_setting.itemConditinon(7);
         }
       },
       9: {
@@ -5610,7 +6134,7 @@ slotSetting = (function(_super) {
         'image': 'item_24',
         'discription': 'エンディングが見れる',
         'price': 1000000000000,
-        'conditoin': '全楽曲25曲を全て達成する',
+        'conditoin': '楽曲を20曲以上達成する',
         'condFunc': function() {
           return game.slot_setting.itemConditinon(24);
         }
@@ -5772,12 +6296,15 @@ slotSetting = (function(_super) {
     val = Math.floor(val * div * 100) / 100;
     if (100 < game.combo) {
       div = Math.floor((game.combo - 100) / 20) / 10;
+      if (div < 0) {
+        div = 0;
+      }
       if (3 < div) {
         div = 3;
       }
       val += div;
     }
-    if (game.isItemSet(6)) {
+    if (game.isItemSet(5)) {
       val = Math.floor(val * 0.7 * 100) / 100;
     }
     this.item_gravity = val;
@@ -5822,12 +6349,12 @@ slotSetting = (function(_super) {
     var full, key, member, random, remain, val;
     full = [11, 12, 13, 14, 15, 16, 17, 18, 19];
     remain = [];
-    if (this.prev_muse.length >= 9) {
+    if (game.arrIndexOf(game.prev_fever_muse, full)) {
       this.now_muse_num = 0;
     } else {
       for (key in full) {
         val = full[key];
-        if (this.prev_muse.indexOf(val) === -1) {
+        if (game.prev_fever_muse.indexOf(val) === -1) {
           remain.push(full[key]);
         }
       }
@@ -5870,7 +6397,7 @@ slotSetting = (function(_super) {
     if (game.past_fever_num <= 2) {
       rate += (3 - game.past_fever_num) * 3;
     }
-    if (rate > 30 || game.isItemSet(5) || game.main_scene.gp_back_panorama.now_back_effect_flg === true) {
+    if (rate > 30 || game.isItemSet(8) || game.main_scene.gp_back_panorama.now_back_effect_flg === true) {
       rate = 30;
     }
     if (game.debug.half_slot_hit === true) {
@@ -5935,6 +6462,7 @@ slotSetting = (function(_super) {
     val = (game.item_kind + 2) * this._getTensionCorrect();
     if (game.main_scene.gp_stage_front.player.isAir === true) {
       val *= 1.5;
+      game.main_scene.gp_system.upItemPoint(10);
     }
     if (val >= 1) {
       val = Math.round(val);
@@ -5987,7 +6515,7 @@ slotSetting = (function(_super) {
     if (game.debug.fix_tention_item_fall_flg === true) {
       val = game.debug.fix_tention_item_fall_val;
     } else {
-      if (game.isItemSet(8) || game.fever === true) {
+      if (game.isItemSet(6) || game.fever === true) {
         val = 0;
       } else {
         val = this.tension_max * this._getTensionDownCorrect();
@@ -6009,13 +6537,6 @@ slotSetting = (function(_super) {
   slotSetting.prototype._getTensionDownCorrect = function() {
     var val;
     val = -0.1;
-    if (game.bet < 10000) {
-      val = -0.1;
-    } else if (game.bet < 1000000) {
-      val = -0.2;
-    } else {
-      val = -0.3;
-    }
     return val;
   };
 
@@ -6192,7 +6713,7 @@ slotSetting = (function(_super) {
       case '14,17':
         role = 37;
         break;
-      case '13,14':
+      case '13,19':
         role = 38;
         break;
       default:
@@ -6230,7 +6751,7 @@ slotSetting = (function(_super) {
         rslt = true;
       }
     } else if (num === 24) {
-      if (25 <= game.countFullMusic()) {
+      if (20 <= game.countFullMusic()) {
         rslt = true;
       }
     }
@@ -6267,16 +6788,30 @@ slotSetting = (function(_super) {
    */
 
   slotSetting.prototype.getAddMuseNum = function() {
-    var member, ret;
+    var max, member, ret;
     member = game.member_set_now;
+    max = game.pause_scene.pause_member_set_layer.max_set_member_num;
     if (member.length === 0) {
       ret = this.now_muse_num;
     } else {
-      ret = member[game.next_add_member_key];
-      game.next_add_member_key += 1;
-      if (member[game.next_add_member_key] === void 0) {
-        game.next_add_member_key = 0;
+      if (game.next_add_member_key === member.length && game.next_add_member_key !== max && this.now_muse_num !== 0) {
+        ret = this.now_muse_num;
+      } else {
+        if (this.now_muse_num === 0) {
+          if (game.next_add_member_key === member.length) {
+            game.next_add_member_key = 0;
+          }
+        } else {
+          if (game.next_add_member_key === member.length + 1 || game.next_add_member_key === max) {
+            game.next_add_member_key = 0;
+          }
+        }
+        if (member[game.next_add_member_key] === void 0) {
+          game.next_add_member_key = 0;
+        }
+        ret = member[game.next_add_member_key];
       }
+      game.next_add_member_key += 1;
     }
     this.add_muse_num = ret;
     return ret;
@@ -6290,7 +6825,7 @@ slotSetting = (function(_super) {
   slotSetting.prototype.isForceFever = function() {
     var random, rate, result, tension_rate;
     tension_rate = Math.floor((game.tension * 100) / this.tension_max);
-    if (game.isItemSet(5)) {
+    if (game.isItemSet(8)) {
       rate = 20;
     } else if (tension_rate === 100 || game.past_fever_num === 0) {
       rate = 16;
@@ -6307,6 +6842,122 @@ slotSetting = (function(_super) {
       result = true;
     }
     return result;
+  };
+
+
+  /*
+  現在所持している部員から作成可能な役を作って返します
+  過去にフィーバーになった役は除外します
+  @return array role
+  メンバー:11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
+  ユニット(役):21:１年生、22:2年生、23:3年生、24:printemps、25:liliwhite、26:bibi、27:にこりんぱな、28:ソルゲ、
+  31:ほのりん、32:ことぱな、33:にこのぞ、34:ことうみ、35:まきりん、36:のぞえり、37:にこまき、38:うみえり
+   */
+
+  slotSetting.prototype.getRoleAbleMemberList = function() {
+    var allRoles, member, random, returnRoles, role, roleNum;
+    role = [];
+    allRoles = [];
+    returnRoles = {
+      21: [14, 15, 16],
+      22: [11, 12, 13],
+      23: [17, 18, 19],
+      24: [11, 12, 16],
+      25: [13, 15, 18],
+      26: [14, 17, 19],
+      27: [15, 16, 17],
+      28: [13, 14, 19],
+      31: [11, 15],
+      32: [12, 16],
+      33: [17, 18],
+      34: [12, 13],
+      35: [14, 15],
+      36: [18, 19],
+      37: [14, 17],
+      38: [13, 19]
+    };
+    for (roleNum in returnRoles) {
+      member = returnRoles[roleNum];
+      if (game.arrIndexOf(game.item_have_now, member) && game.prev_fever_muse.indexOf(parseInt(roleNum)) === -1) {
+        allRoles.push(member);
+      }
+    }
+    if (0 < allRoles.length) {
+      random = Math.floor(Math.random() * allRoles.length);
+      role = allRoles[random];
+    }
+    return role;
+  };
+
+  slotSetting.prototype.betChange = function(up) {
+    var bet, val;
+    val = 1;
+    bet = game.bet;
+    if (up === true) {
+      if (bet < 10) {
+        val = 1;
+      } else if (bet < 100) {
+        val = 10;
+      } else if (bet < 1000) {
+        val = 100;
+      } else if (bet < 10000) {
+        val = 1000;
+      } else if (bet < 100000) {
+        val = 10000;
+      } else if (bet < 1000000) {
+        val = 100000;
+      } else if (bet < 10000000) {
+        val = 1000000;
+      } else if (bet < 100000000) {
+        val = 10000000;
+      } else if (bet < 1000000000) {
+        val = 100000000;
+      } else if (bet < 10000000000) {
+        val = 1000000000;
+      } else if (bet < 10000000000) {
+        val = 1000000000;
+      } else if (bet < 10000000000) {
+        val = 1000000000;
+      } else {
+        val = 10000000000;
+      }
+    } else {
+      if (bet <= 10) {
+        val = -1;
+      } else if (bet <= 100) {
+        val = -10;
+      } else if (bet <= 1000) {
+        val = -100;
+      } else if (bet <= 10000) {
+        val = -1000;
+      } else if (bet <= 100000) {
+        val = -10000;
+      } else if (bet <= 1000000) {
+        val = -100000;
+      } else if (bet <= 10000000) {
+        val = -1000000;
+      } else if (bet <= 100000000) {
+        val = -10000000;
+      } else if (bet <= 1000000000) {
+        val = -100000000;
+      } else if (bet <= 10000000000) {
+        val = -1000000000;
+      } else if (bet <= 100000000000) {
+        val = -10000000000;
+      } else if (bet <= 1000000000000) {
+        val = -100000000000;
+      } else {
+        val = -1000000000000;
+      }
+    }
+    game.bet += val;
+    if (game.bet < 1) {
+      return game.bet = 1;
+    } else if (game.bet > game.money) {
+      return game.bet -= val;
+    } else if (game.bet > 100000000000) {
+      return game.bet = 100000000000;
+    }
   };
 
   return slotSetting;
@@ -6331,9 +6982,7 @@ Test = (function(_super) {
   ここにゲーム呼び出し時に実行するテストを書く
    */
 
-  Test.prototype.testExe = function() {
-    return this.testSetGravity();
-  };
+  Test.prototype.testExe = function() {};
 
   Test.prototype.testGetHitRole = function() {
     var result;
@@ -6440,6 +7089,33 @@ Test = (function(_super) {
     return _results;
   };
 
+  Test.prototype.nextMuse = function() {
+    var i, num, _i, _results;
+    console.log(game.member_set_now);
+    console.log(game.slot_setting.now_muse_num);
+    _results = [];
+    for (i = _i = 1; _i <= 6; i = ++_i) {
+      num = game.slot_setting.getAddMuseNum();
+      _results.push(console.log(num));
+    }
+    return _results;
+  };
+
+  Test.prototype.getRoleByMemberSetNow = function() {
+    var role;
+    console.log(game.member_set_now);
+    console.log(game.slot_setting.now_muse_num);
+    role = game.getRoleByMemberSetNow();
+    return console.log(role);
+  };
+
+  Test.prototype.getRoleAbleMemberList = function() {
+    var role;
+    console.log(game.item_have_now);
+    role = game.slot_setting.getRoleAbleMemberList();
+    return console.log(role);
+  };
+
   return Test;
 
 })(appNode);
@@ -6456,7 +7132,8 @@ mainScene = (function(_super) {
       'jump': false,
       'up': false,
       'down': false,
-      'pause': false
+      'pause': false,
+      'white': false
     };
     this.buttonList = {
       'left': false,
@@ -6560,11 +7237,21 @@ mainScene = (function(_super) {
     if (game.input.x === true || this.buttonList.pause === true) {
       if (this.keyList.pause === false) {
         game.setPauseScene();
-        return this.keyList.pause = true;
+        this.keyList.pause = true;
       }
     } else {
-      if (this.keyList.pause = true) {
-        return this.keyList.pause = false;
+      if (this.keyList.pause === true) {
+        this.keyList.pause = false;
+      }
+    }
+    if (game.input.c === true) {
+      if (this.keyList.white === false) {
+        this.gp_system.whiteOut();
+        return this.keyList.white = true;
+      }
+    } else {
+      if (this.keyList.white === true) {
+        return this.keyList.white = false;
       }
     }
   };
@@ -6579,7 +7266,9 @@ mainScene = (function(_super) {
     if (game.fever === true) {
       game.tensionSetValue(game.fever_down_tension);
       if (game.tension <= 0) {
+        game.autoMemberSetAfeterFever();
         game.main_scene.gp_slot.upperFrame.frame = 0;
+        game.pause_scene.pause_main_layer.save_game_button.makeAble();
         game.bgmStop(game.main_scene.gp_slot.fever_bgm);
         game.bgmPlay(this.bgm, true);
         this.gp_system.changeBetChangeFlg(true);
@@ -6616,7 +7305,9 @@ pauseScene = (function(_super) {
     };
     this.pause_back = new pauseBack();
     this.pause_main_layer = new pauseMainLayer();
+    this.pause_save_confirm_layer = new pauseSaveConfirmLayer();
     this.pause_save_layer = new pauseSaveLayer();
+    this.pause_title_confirm_layer = new pauseTitleConfirmLayer();
     this.pause_item_buy_layer = new pauseItemBuyLayer();
     this.pause_item_use_layer = new pauseItemUseLayer();
     this.pause_member_set_layer = new pauseMemberSetLayer();
@@ -6631,14 +7322,34 @@ pauseScene = (function(_super) {
     this.isAblePopPause = true;
   }
 
+  pauseScene.prototype.setSaveConfirmMenu = function() {
+    this.addChild(this.pause_save_confirm_layer);
+    return this.isAblePopPause = false;
+  };
+
   pauseScene.prototype.setSaveMenu = function() {
     this.addChild(this.pause_save_layer);
-    game.saveGame();
+    return game.saveGame();
+  };
+
+  pauseScene.prototype.setTitleConfirmMenu = function() {
+    this.addChild(this.pause_title_confirm_layer);
     return this.isAblePopPause = false;
+  };
+
+  pauseScene.prototype.removeSaveConfirmMenu = function() {
+    this.removeChild(this.pause_save_confirm_layer);
+    return this.isAblePopPause = true;
+  };
+
+  pauseScene.prototype.removeTitleConfirmMenu = function() {
+    this.removeChild(this.pause_title_confirm_layer);
+    return this.isAblePopPause = true;
   };
 
   pauseScene.prototype.removeSaveMenu = function() {
     this.removeChild(this.pause_save_layer);
+    this.removeChild(this.pause_save_confirm_layer);
     return this.isAblePopPause = true;
   };
 
@@ -6847,7 +7558,7 @@ FrontPanorama = (function(_super) {
 
   FrontPanorama.prototype.setPosition = function() {
     this.x = 0;
-    return this.y = game.height - this.h;
+    return this.y = game.height - this.h + 3;
   };
 
   return FrontPanorama;
@@ -7818,7 +8529,7 @@ Catch = (function(_super) {
     if (this.y > game.height + this.h) {
       game.sePlay(this.miss_se);
       game.main_scene.gp_stage_front.removeChild(this);
-      if (game.isItemSet(8) === false) {
+      if (game.isItemSet(6) === false) {
         game.combo = 0;
       }
       game.main_scene.gp_system.combo_text.setValue();
@@ -8647,6 +9358,24 @@ heighBetButton = (function(_super) {
 
 })(betButton);
 
+heighBetButtonPause = (function(_super) {
+  __extends(heighBetButtonPause, _super);
+
+  function heighBetButtonPause() {
+    heighBetButtonPause.__super__.constructor.apply(this, arguments);
+    this.image = this.drawUpTriangle(this.color);
+    this.x = 100;
+    this.y = 270;
+  }
+
+  heighBetButtonPause.prototype.ontouchend = function() {
+    return game.pause_scene.pause_main_layer.betSetting(true);
+  };
+
+  return heighBetButtonPause;
+
+})(betButton);
+
 
 /*
 掛け金を減らすボタン
@@ -8675,6 +9404,29 @@ lowBetButton = (function(_super) {
   };
 
   return lowBetButton;
+
+})(betButton);
+
+lowBetButtonPause = (function(_super) {
+  __extends(lowBetButtonPause, _super);
+
+  function lowBetButtonPause() {
+    lowBetButtonPause.__super__.constructor.apply(this, arguments);
+    this.image = this.drawUpTriangle(this.color);
+    this.scaleY = -1;
+    this.x = 110;
+    this.y = 270;
+  }
+
+  lowBetButtonPause.prototype.ontouchend = function() {
+    return game.pause_scene.pause_main_layer.betSetting(false);
+  };
+
+  lowBetButtonPause.prototype.setXposition = function() {
+    return this.x = 110 + game.pause_scene.pause_main_layer.bet_text._boundWidth + this.w + 20;
+  };
+
+  return lowBetButtonPause;
 
 })(betButton);
 
@@ -8708,6 +9460,19 @@ pauseBack = (function(_super) {
   }
 
   return pauseBack;
+
+})(Dialog);
+
+whiteBack = (function(_super) {
+  __extends(whiteBack, _super);
+
+  function whiteBack(w, h) {
+    whiteBack.__super__.constructor.call(this, game.width, game.height);
+    this.image = this.drawRect('#FFFFFF');
+    this.opacity = 1;
+  }
+
+  return whiteBack;
 
 })(Dialog);
 

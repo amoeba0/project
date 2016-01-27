@@ -110,6 +110,7 @@ class pauseItemBuySelectLayer extends appDomLayer
     ###
     buyItem:()->
         game.money -= @item_options.price
+        game.pause_scene.pause_main_layer.statusDsp()
         game.item_have_now.push(@item_kind)
         game.pause_scene.removeItemBuySelectMenu()
         game.pause_scene.pause_item_buy_layer.resetItemList()

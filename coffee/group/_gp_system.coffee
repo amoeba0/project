@@ -35,8 +35,9 @@ class gpSystem extends appGroup
         @addChild(@heigh_bet_button)
         @low_bet_button = new lowBetButton()
         @addChild(@low_bet_button)
+        @white_back = new whiteBack()
         @keyList = {'up':false, 'down':false}
-        @prevItem = []
+        @isWhiteBack = false
     onenterframe: (e) ->
         @_betSetting()
         @_setItemPoint()
@@ -64,69 +65,7 @@ class gpSystem extends appGroup
     掛け金の変更
     ###
     _getBetSettingValue:(up)->
-        val = 1
-        bet = game.bet
-        if up is true
-            if bet < 10
-                val = 1
-            else if bet < 100
-                val = 10
-            else if bet < 1000
-                val = 100
-            else if bet < 10000
-                val = 1000
-            else if bet < 100000
-                val = 10000
-            else if bet < 1000000
-                val = 100000
-            else if bet < 10000000
-                val = 1000000
-            else if bet < 100000000
-                val = 10000000
-            else if bet < 1000000000
-                val = 100000000
-            else if bet < 10000000000
-                val = 1000000000
-            else if bet < 10000000000
-                val = 1000000000
-            else if bet < 10000000000
-                val = 1000000000
-            else
-                val = 10000000000
-        else
-            if bet <= 10
-                val = -1
-            else if bet <= 100
-                val = -10
-            else if bet <= 1000
-                val = -100
-            else if bet <= 10000
-                val = -1000
-            else if bet <= 100000
-                val = -10000
-            else if bet <= 1000000
-                val = -100000
-            else if bet <= 10000000
-                val = -1000000
-            else if bet <= 100000000
-                val = -10000000
-            else if bet <= 1000000000
-                val = -100000000
-            else if bet <= 10000000000
-                val = -1000000000
-            else if bet <= 100000000000
-                val = -10000000000
-            else if bet <= 1000000000000
-                val = -100000000000
-            else
-                val = -1000000000000
-        game.bet += val
-        if game.bet < 1
-            game.bet = 1
-        else if game.bet > game.money
-            game.bet -= val
-        else if game.bet > 100000000000
-            game.bet = 100000000000
+        game.slot_setting.betChange(up)
         @bet_text.setValue()
     ###
     掛け金の変更が可能かを変更する
@@ -165,26 +104,52 @@ class gpSystem extends appGroup
     ###
     _setItemPoint:()->
         if game.item_set_now.length is 0
-            if game.item_point < game.slot_setting.item_point_max
+            if game.item_point <= game.slot_setting.item_point_max
                 game.item_point = Math.floor(1000 * (game.item_point + game.slot_setting.item_point_value[0])) /1000
-                if game.slot_setting.item_point_max < game.item_point
-                    game.item_point = game.slot_setting.item_point_max
-                    if @prevItem.length != 0
-                        game.item_set_now = @prevItem
-                        @itemDsp()
-                        game.pause_scene.pause_item_use_layer.dspSetItemList()
-                        game.itemUseExe()
+                @_makeItemPointMaxProcess()
         else
             if 0 < game.item_point
                 game.item_point = Math.floor(1000 * (game.item_point - game.slot_setting.item_decrease_point)) /1000
                 if game.item_point < 0
                     game.item_point = 0
                     @_resetItem()
-        @item_gauge.scaleX = Math.floor(100 * (game.item_point / game.slot_setting.item_point_max)) / 100
-        @item_gauge.x = @item_gauge.initX - Math.floor(@item_gauge.width * (1 - @item_gauge.scaleX) / 2)
+        @_dspItemPoint()
+    ###
+    アイテムゲージが回復してMAXになった時の処理
+    ###
+    _makeItemPointMaxProcess:()->
+        if game.slot_setting.item_point_max <= game.item_point
+            game.item_point = game.slot_setting.item_point_max
+            if game.prev_item.length != 0
+                game.item_set_now = game.prev_item
+                @itemDsp()
+                game.pause_scene.pause_item_use_layer.dspSetItemList()
+                game.itemUseExe()
+    ###
+    アイテムゲージを決められた数値だけ回復する
+    ###
+    upItemPoint:(val)->
+        if game.item_point <= game.slot_setting.item_point_max
+            game.item_point = Math.floor(1000 * (game.item_point + val)) /1000
+            @_makeItemPointMaxProcess()
+            @_dspItemPoint()
+    ###
+    アイテムスロットを空にする
+    ###
     _resetItem:()->
-        @prevItem = game.item_set_now
+        game.prev_item = game.item_set_now
         game.item_set_now = []
         @itemDsp()
         game.pause_scene.pause_item_use_layer.dspSetItemList()
         game.itemUseExe()
+    _dspItemPoint:()->
+        @item_gauge.scaleX = Math.floor(100 * (game.item_point / game.slot_setting.item_point_max)) / 100
+        @item_gauge.x = @item_gauge.initX - Math.floor(@item_gauge.width * (1 - @item_gauge.scaleX) / 2)
+    whiteOut:()->
+        if game.debug.white_back is true
+            if @isWhiteBack is true
+                @removeChild(@white_back)
+                @isWhiteBack = false
+            else
+                @addChild(@white_back)
+                @isWhiteBack = true

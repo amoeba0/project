@@ -10,7 +10,7 @@ class Test extends appNode
     ###
     testExe:()->
         #@testGetHitRole()
-        @testSetGravity()
+        #@testSetGravity()
         #@viewItemList()
         #@testCutin()
         #@preLoadMulti()
@@ -20,6 +20,9 @@ class Test extends appNode
         #@chanceTime()
         #@forceFever()
         #@tensionUp()
+        #@nextMuse()
+        #@getRoleByMemberSetNow()
+        #@getRoleAbleMemberList()
 
     #以下、テスト用関数
 
@@ -98,3 +101,21 @@ class Test extends appNode
             result = game.slot_setting.setTensionMissItem()
             console.log('ニンニク：'+result)
             console.log('*******************')
+
+    nextMuse:()->
+        console.log(game.member_set_now)
+        console.log(game.slot_setting.now_muse_num)
+        for i in [1..6]
+            num = game.slot_setting.getAddMuseNum()
+            console.log(num)
+
+    getRoleByMemberSetNow:()->
+        console.log(game.member_set_now)
+        console.log(game.slot_setting.now_muse_num)
+        role = game.getRoleByMemberSetNow()
+        console.log(role)
+
+    getRoleAbleMemberList:()->
+        console.log(game.item_have_now)
+        role = game.slot_setting.getRoleAbleMemberList()
+        console.log(role)

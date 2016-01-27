@@ -173,6 +173,21 @@ class appGame extends Game
         return arr
 
     ###
+    targetの配列の中にsearchの配列が全て入っていたらtrueを返す
+    １つでも入っていなかったらfalseを返す
+    @param arr target 検索する対象の配列
+    @param arr search 検索する文字列を格納した配列
+    @return boolean
+    ###
+    arrIndexOf:(target, search)->
+        rslt = true
+        for searchVal in search
+            if target.indexOf(searchVal) is -1
+                rslt = false
+                break
+        return rslt
+
+    ###
     数値の単位を漢数字で区切る
     ###
     toJPUnit:(num)->

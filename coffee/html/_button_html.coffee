@@ -4,15 +4,24 @@ class buttonHtml extends systemHtml
         @class = ['base-button']
         @dicisionSe = game.soundload('dicision')
         @cancelSe = game.soundload('cancel')
+        @is_button = true
     touchendEvent:() ->
+    makeAble:()->
+        @is_button = true
+        @setHtml()
+        @opacity = 1
+    makeDisable:()->
+        @is_button = false
+        @setHtml()
+        @opacity = 0.5
 
 ###
 ポーズメニューのボタン
 ###
 class pauseMainMenuButtonHtml extends buttonHtml
-    constructor: () ->
-        super 300, 45
-        @x = 90
+    constructor: (width, height) ->
+        super width, height
+        @x = 30
         @y = 0
         @class.push('pause-main-menu-button')
     ontouchend: (e) ->
@@ -23,9 +32,10 @@ class pauseMainMenuButtonHtml extends buttonHtml
 ###
 class returnGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
-        super
-        @y = 100
+        super 300, 45
+        @y = 80
         @text = 'ゲームに戻る'
+        @class.push('pause-main-menu-button-white')
         @setHtml()
     touchendEvent:() ->
         game.sePlay(@cancelSe)
@@ -36,19 +46,35 @@ class returnGameButtonHtml extends pauseMainMenuButtonHtml
 ###
 class saveGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
-        super
-        @y = 200
-        @text = 'ゲームを保存する'
+        super 180, 45
+        @y = 620
+        @text = 'セーブ'
+        @class.push('pause-main-menu-button-middle')
+        @class.push('pause-main-menu-button-blue')
+        @setHtml()
+    touchendEvent:() ->
+        if game.fever is false
+            game.sePlay(@dicisionSe)
+            game.pause_scene.setSaveConfirmMenu()
+
+class returnTitleButtonHtml extends pauseMainMenuButtonHtml
+    constructor:()->
+        super 180, 45
+        @x = 250
+        @y = 620
+        @text = 'タイトル'
+        @class.push('pause-main-menu-button-middle')
         @setHtml()
     touchendEvent:() ->
         game.sePlay(@dicisionSe)
-        game.pause_scene.setSaveMenu()
+        game.pause_scene.setTitleConfirmMenu()
 
 class buyItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
-        super
-        @y = 300
-        @text = 'アイテムを買う'
+        super 400, 45
+        @y = 370
+        @text = 'アイテムSHOP'
+        @class.push('pause-main-menu-button-purple')
         @setHtml()
     touchendEvent:() ->
         game.sePlay(@dicisionSe)
@@ -56,9 +82,12 @@ class buyItemButtonHtml extends pauseMainMenuButtonHtml
 
 class useItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
-        super
-        @y = 400
-        @text = '魔法をセットする'
+        super 100, 45
+        @x = 30
+        @y = 490
+        @text = '魔法'
+        @class.push('pause-main-menu-button-small')
+        @class.push('pause-main-menu-button-green')
         @setHtml()
     touchendEvent:() ->
         game.sePlay(@dicisionSe)
@@ -66,9 +95,12 @@ class useItemButtonHtml extends pauseMainMenuButtonHtml
 
 class setMemberButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
-        super
-        @y = 500
-        @text = '部員を編成する'
+        super 100, 45
+        @x = 170
+        @y = 490
+        @text = '部員'
+        @class.push('pause-main-menu-button-small')
+        @class.push('pause-main-menu-button-red')
         @setHtml()
     touchendEvent:() ->
         game.sePlay(@dicisionSe)
@@ -76,9 +108,12 @@ class setMemberButtonHtml extends pauseMainMenuButtonHtml
 
 class recordButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
-        super
-        @y = 600
-        @text = '実績を確認する'
+        super 100, 45
+        @x = 310
+        @y = 490
+        @text = '実績'
+        @class.push('pause-main-menu-button-small')
+        @class.push('pause-main-menu-button-orange')
         @setHtml()
     touchendEvent:() ->
         game.sePlay(@dicisionSe)
@@ -104,9 +139,28 @@ class saveOkButtonHtml extends baseOkButtonHtml
     constructor:()->
         super
         @x = 170
-        @y = 380
+        @y = 330
     touchendEvent:() ->
         game.pause_scene.removeSaveMenu()
+
+class saveConfirmOkButtonHtml extends baseOkButtonHtml
+    constructor:()->
+        super
+        @x = 80
+        @y = 330
+    touchendEvent:()->
+        game.pause_scene.setSaveMenu()
+
+###
+タイトルへ戻るOKボタン
+###
+class titleConfirmOkButtonHtml extends baseOkButtonHtml
+    constructor:()->
+        super
+        @x = 80
+        @y = 330
+    touchendEvent:() ->
+        game.returnToTitle()
 
 class recordOkButtonHtml extends baseOkButtonHtml
     constructor:()->
@@ -137,6 +191,22 @@ class baseCancelButtonHtml extends buttonHtml
     ontouchend: (e) ->
         game.sePlay(@cancelSe)
         @touchendEvent()
+
+class saveConfirmCancelButtonHtml extends baseCancelButtonHtml
+    constructor:()->
+        super
+        @x = 260
+        @y = 335
+    touchendEvent:()->
+        game.pause_scene.removeSaveConfirmMenu()
+
+class titleConfirmCancelButtonHtml extends baseCancelButtonHtml
+    constructor:()->
+        super
+        @x = 260
+        @y = 335
+    touchendEvent:()->
+        game.pause_scene.removeTitleConfirmMenu()
 
 ###
 アイテム購入のキャンセルボタン
@@ -271,10 +341,19 @@ class startGameButtonHtml extends titleMenuButtonHtml
     constructor: () ->
         super
         @y = 350
-        @text = 'ゲーム開始'
+        @text = '続きから'
         @setHtml()
     touchendEvent:() ->
-        game.replaceScene(game.main_scene)
+        game.loadGameStart()
+
+class newGameButtonHtml extends titleMenuButtonHtml
+    constructor: () ->
+        super
+        @y = 430
+        @text = '初めから'
+        @setHtml()
+    touchendEvent:() ->
+        game.newGameStart()
 
 ###
 ダイアログを閉じるボタン
@@ -283,6 +362,7 @@ class dialogCloseButton extends systemHtml
     constructor:()->
         super 30, 30
         @image_name = 'close'
+        @is_button = true
         @x = 400
         @y = 100
         @setImageHtml()
@@ -299,6 +379,7 @@ class itemBuyDialogCloseButton extends dialogCloseButton
 class itemUseDialogCloseButton extends dialogCloseButton
     constructor:()->
         super
+        @y = 70
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeItemUseMenu()
@@ -306,6 +387,7 @@ class itemUseDialogCloseButton extends dialogCloseButton
 class memberSetDialogCloseButton extends dialogCloseButton
     constructor:()->
         super
+        @y = 70
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeMemberSetMenu()
@@ -317,3 +399,35 @@ class recordDialogCloseButton extends dialogCloseButton
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeRecordMenu()
+
+###
+部員のおすすめ編成
+###
+class autoMemberSetButtonHtml extends buttonHtml
+    constructor:()->
+        super 180, 45
+        @x = 45
+        @y = 560
+        @class.push('osusume-button')
+        @text = 'おすすめ'
+        @setHtml()
+    ontouchend: (e) ->
+        game.sePlay(@dicisionSe)
+        game.member_set_now = game.slot_setting.getRoleAbleMemberList()
+        game.pause_scene.pause_member_set_layer.dispSetMemberList()
+
+###
+部員の全解除
+###
+class autoMemberUnsetButtonHtml extends buttonHtml
+    constructor:()->
+        super 180, 45
+        @x = 245
+        @y = 560
+        @class.push('osusume-button')
+        @text = '全解除'
+        @setHtml()
+    ontouchend: (e) ->
+        game.sePlay(@dicisionSe)
+        game.member_set_now = []
+        game.pause_scene.pause_member_set_layer.dispSetMemberList()

@@ -102,6 +102,15 @@ class heighBetButton extends betButton
     ontouchend: () ->
         game.main_scene.buttonList.up = false
 
+class heighBetButtonPause extends betButton
+    constructor: () ->
+        super
+        @image = @drawUpTriangle(@color)
+        @x = 100
+        @y = 270
+    ontouchend: () ->
+        game.pause_scene.pause_main_layer.betSetting(true)
+
 ###
 掛け金を減らすボタン
 ###
@@ -117,3 +126,15 @@ class lowBetButton extends betButton
         game.main_scene.buttonList.down = true
     ontouchend: () ->
         game.main_scene.buttonList.down = false
+
+class lowBetButtonPause extends betButton
+    constructor: () ->
+        super
+        @image = @drawUpTriangle(@color)
+        @scaleY = -1
+        @x = 110
+        @y = 270
+    ontouchend: () ->
+        game.pause_scene.pause_main_layer.betSetting(false)
+    setXposition:()->
+        @x = 110 + game.pause_scene.pause_main_layer.bet_text._boundWidth + @w + 20

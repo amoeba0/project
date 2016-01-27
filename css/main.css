@@ -7,13 +7,43 @@
 
 .base-button {
     text-align: center;
+}
+.button-pointer {
     cursor: pointer;
 }
 .pause-main-menu-button {
-    background-color: #ffffff;
-    width: 300px;
-    font: 30px Consolas Monaco MSゴシック;
+    background-color: #888888;
+    color: #ffffff;
+    width: 400px;
+    font: 40px Consolas Monaco MSゴシック;
     padding: 10px 0px;
+    border: solid 3px #ffffff;
+    border-radius: 10px;
+}
+.pause-main-menu-button-small {
+	width: 120px;
+}
+.pause-main-menu-button-middle {
+	width: 180px;
+}
+.pause-main-menu-button-white {
+	background-color: #EFEFEF;
+	color: #333333;
+}
+.pause-main-menu-button-green {
+	background-color: #28DE82;
+}
+.pause-main-menu-button-red {
+	background-color: #FF7A7A;
+}
+.pause-main-menu-button-orange {
+	background-color: #FB7744;
+}
+.pause-main-menu-button-purple {
+	background-color: #C77FEC;
+}
+.pause-main-menu-button-blue {
+	background-color: #6695FF;
 }
 .title-menu-button {
     background-color: #ffffff;
@@ -31,7 +61,7 @@
     color: white;
 }
 .base-cancel-button {
-    background-color: #44A5CB;
+    background-color: #4FA2E8;
     width: 150px;
     padding: 10px 0px;
     font: 30px Consolas Monaco MSゴシック;
@@ -39,23 +69,28 @@
     color: white;
 }
 .base-buy-button {
-    background-color: #A4C520;
+    background-color: #29DE7A;
     width: 150px;
+    padding: 7px 0px;
+    font: 37px Consolas Monaco MSゴシック;
+    border: solid 3px #cccccc;
+    color: white;
+}
+.osusume-button {
+    background-color: #29DE7A;
+    width: 180px;
     padding: 7px 0px;
     font: 37px Consolas Monaco MSゴシック;
     border: solid 3px #cccccc;
     color: white;
 }
 .base-set-button {
-    background-color: #B2CF3E;
+    background-color: #29DE7A;
     width: 150px;
     padding: 7px 0px;
     font: 37px Consolas Monaco MSゴシック;
     border: solid 3px #cccccc;
     color: white;
-}
-.image-button {
-    cursor: pointer;
 }
 
 
@@ -69,6 +104,10 @@
 }
 .base-dialog-save {
     padding: 100px 0px 200px 0px;
+}
+.base-dialog-bet {
+    padding: 100px 0px 50px 0px;
+    width: 340px;
 }
 .base-dialog-menu {
     padding: 200px 0px 300px 0px;

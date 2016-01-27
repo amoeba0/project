@@ -5,7 +5,9 @@ class pauseScene extends appScene
         @buttonList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         @pause_back = new pauseBack()
         @pause_main_layer = new pauseMainLayer()
+        @pause_save_confirm_layer = new pauseSaveConfirmLayer()
         @pause_save_layer = new pauseSaveLayer()
+        @pause_title_confirm_layer = new pauseTitleConfirmLayer()
         @pause_item_buy_layer = new pauseItemBuyLayer()
         @pause_item_use_layer = new pauseItemUseLayer()
         @pause_member_set_layer = new pauseMemberSetLayer()
@@ -18,12 +20,24 @@ class pauseScene extends appScene
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
         @isAblePopPause = true
-    setSaveMenu: () ->
+    setSaveConfirmMenu: () ->
+        @addChild(@pause_save_confirm_layer)
+        @isAblePopPause = false
+    setSaveMenu:()->
         @addChild(@pause_save_layer)
         game.saveGame()
+    setTitleConfirmMenu:()->
+        @addChild(@pause_title_confirm_layer)
         @isAblePopPause = false
+    removeSaveConfirmMenu:()->
+        @removeChild(@pause_save_confirm_layer)
+        @isAblePopPause = true
+    removeTitleConfirmMenu:()->
+        @removeChild(@pause_title_confirm_layer)
+        @isAblePopPause = true
     removeSaveMenu:()->
         @removeChild(@pause_save_layer)
+        @removeChild(@pause_save_confirm_layer)
         @isAblePopPause = true
     setItemBuyMenu:()->
         @addChild(@pause_item_buy_layer)

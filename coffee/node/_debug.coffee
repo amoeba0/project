@@ -6,7 +6,7 @@ class Debug extends appNode
         super
 
         #開始後いきなりメイン画面
-        @force_main_flg = true
+        @force_main_flg = false
         #開始後いきなりポーズ画面
         @force_pause_flg = false
 
@@ -20,21 +20,21 @@ class Debug extends appNode
             'bet':10000,
             'combo':0,
             'max_combo':200,
-            'tension':100,
+            'tension':500,
             'past_fever_num':0,
-            'item_point':500,
+            'item_point':100,
             'next_add_member_key':0,
-            'prev_muse':[11,12,13,14,15,16,17,18,19],
             'now_muse_num':0,
-            'max_set_item_num':1,
-            'item_have_now':[3,4,5,15],
-            'item_set_now':[],
-            'member_set_now':[],
+            'max_set_item_num':3,
+            'item_have_now':[3,4,5,11,12,13,15,16,21,22,23],
+            'item_set_now':[5,7,8],
+            'member_set_now':[11,12,13],
             'prev_fever_muse':[11,12,13,14,15,16,17,18,19,31]
         }
 
         #デバッグ用リールにすりかえる
         @lille_flg = false
+
         #デバッグ用リール配列
         @lille_array = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -48,6 +48,9 @@ class Debug extends appNode
             [13, 13, 13, 13, 13, 13, 13, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
         ###
+
+        #画面が白一色で覆われる、ｃキーで切り替え可能
+        @white_back = false
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上
         @item_flg = false

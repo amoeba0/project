@@ -12,4 +12,4 @@ class FrontPanorama extends Panorama
         @setPosition()
     setPosition:()->
         @x = 0
-        @y = game.height - @h
+        @y = game.height - @h + 3

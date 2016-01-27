@@ -28,6 +28,9 @@ class moneyText extends text
     ###
     setXposition: () ->
         @x = game.width - @_boundWidth - 7
+    setPositionPause:()->
+        @x = 100
+        @y = 210
 
 class betText extends text
     constructor: () ->
@@ -44,6 +47,9 @@ class betText extends text
     setValue: () ->
         @text = @kakekin_text + game.toJPUnit(game.bet) + @yen_text
         game.main_scene.gp_system.low_bet_button.setXposition()
+    setPositionPause:()->
+        @x = 140
+        @y = 270
 
 class comboText extends text
     constructor: () ->

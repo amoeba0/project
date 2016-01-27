@@ -2,7 +2,6 @@ class catchAndSlotGame extends appGame
     constructor:(w, h)->
         super w, h
 
-#TODO フィーバー中はセーブ出来ないようにする
 class LoveliveGame extends catchAndSlotGame
     constructor:()->
         super @width, @height
@@ -21,6 +20,7 @@ class LoveliveGame extends catchAndSlotGame
 
         @keybind(90, 'z')
         @keybind(88, 'x')
+        @keybind(67, 'c')
         @preloadAll()
 
         #ゲーム中どこからでもアクセスのある数値
@@ -32,6 +32,7 @@ class LoveliveGame extends catchAndSlotGame
         @now_item = 0 #現在セット中のアイテム（１つめ）
         @already_added_material = [] #ゲームを開いてから現在までにロードしたμ’ｓの画像や楽曲の素材の番号
         @limit_set_item_num = 3
+        @next_auto_set_member = [] #ソロ楽曲全達成後にフィーバー後自動的に部員に設定されるリスト
 
         #セーブする変数(slot_settingにもあるので注意)
         @money = 0 #現在の所持金
@@ -47,27 +48,79 @@ class LoveliveGame extends catchAndSlotGame
         @item_set_now = [] #現在セットされているアイテム
         @member_set_now = [] #現在セットされているメンバー
         @prev_fever_muse = [] #過去にフィーバーになったμ’ｓメンバー（ユニット番号も含む）
+        @prev_item = [] #前にセットしていたアイテム
+
+        @init_load_val = {
+            'money':100,
+            'bet':1,
+            'combo':0,
+            'max_combo':0,
+            'tension':0,
+            'past_fever_num':0,
+            'item_point':500,
+            'next_add_member_key':0,
+            'now_muse_num':0,
+            'max_set_item_num':1,
+            'item_have_now':[],
+            'item_set_now':[],
+            'member_set_now':[],
+            'prev_fever_muse':[],
+            'prev_item':[],
+            'left_lille':@arrayCopy(@slot_setting.lille_array_0[0]),
+            'middle_lille':@arrayCopy(@slot_setting.lille_array_0[1]),
+            'right_lille':@arrayCopy(@slot_setting.lille_array_0[2])
+        }
 
         @money = @money_init
 
     onload:() ->
-        @title_scene = new titleScene()
-        @main_scene = new mainScene()
-        @pause_scene = new pauseScene()
-        @loadGame()
         #テスト
         if @test.test_exe_flg is true
+            @main_scene = new mainScene()
+            @pause_scene = new pauseScene()
+            @loadGame()
             @test_scene = new testScene()
             @pushScene(@test_scene)
             @test.testExe()
         else
+            @title_scene = new titleScene()
+            @pushScene(@title_scene)
             if @debug.force_main_flg is true
+                @main_scene = new mainScene()
+                @pause_scene = new pauseScene()
+                @loadGame()
                 @bgmPlay(@main_scene.bgm, true)
                 @pushScene(@main_scene)
                 if @debug.force_pause_flg is true
-                    @pushScene(@pause_scene)
-            else
-                @pushScene(@title_scene)
+                    @setPauseScene()
+
+    ###
+    タイトルへ戻る
+    ###
+    returnToTitle:()->
+        @popScene(@pause_scene)
+        @popScene(@main_scene)
+
+    ###
+    続きからゲーム開始
+    ###
+    loadGameStart:()->
+        @main_scene = new mainScene()
+        @pause_scene = new pauseScene()
+        @loadGame()
+        @bgmPlay(@main_scene.bgm, true)
+        @pushScene(@main_scene)
+
+    ###
+    最初からゲーム開始
+    ###
+    newGameStart:()->
+        @main_scene = new mainScene()
+        @pause_scene = new pauseScene()
+        @_loadGameInit()
+        @_gameInitSetting()
+        @bgmPlay(@main_scene.bgm, true)
+        @pushScene(@main_scene)
 
     ###
     現在セットされているメンバーをもとに素材をロードします
@@ -80,8 +133,12 @@ class LoveliveGame extends catchAndSlotGame
     現在セットされているメンバーをもとに組み合わせ可能な役の一覧を全て取得します
     ###
     getRoleByMemberSetNow:()->
+        max = @pause_scene.pause_member_set_layer.max_set_member_num
         roles = game.arrayCopy(@member_set_now)
-        tmp = @member_set_now
+        tmp = game.arrayCopy(@member_set_now)
+        if @slot_setting.now_muse_num != 0 && @member_set_now.length != max
+            roles.push(@slot_setting.now_muse_num)
+            tmp.push(@slot_setting.now_muse_num)
         roles.push(@slot_setting.getHitRole(tmp[0], tmp[1], tmp[2]))
         roles.push(@slot_setting.getHitRole(tmp[1], tmp[1], tmp[2]))
         roles.push(@slot_setting.getHitRole(tmp[0], tmp[0], tmp[2]))
@@ -190,6 +247,29 @@ class LoveliveGame extends catchAndSlotGame
         return @prev_fever_muse.length
 
     ###
+    フィーバー開始直前に自動的に次の部員を設定
+    ソロ楽曲が全て出ないうちは設定しない
+    先にメンバーだけ記憶しておいてあらかじめ素材をロードしておく
+    フィーバー終了時にautoMemberSetAfeterFever()で実際に追加
+    設定された部員は自動的に空にする
+    ###
+    autoMemberSetBeforeFever:()->
+        if @arrIndexOf(@prev_fever_muse, [11,12,13,14,15,16,17,18,19])
+            @member_set_now = []
+            @next_auto_set_member = @slot_setting.getRoleAbleMemberList()
+            @musePreLoadMulti(@next_auto_set_member)
+            @pause_scene.pause_member_set_layer.dispSetMemberList()
+
+    ###
+    フィーバー終了直後にあらかじめロードしておいた次の部員を自動的に設定
+    手動で設定された部員がいない時のみ実行
+    ###
+    autoMemberSetAfeterFever:()->
+        if @next_auto_set_member.length != 0 && @member_set_now.length is 0
+            @member_set_now = @next_auto_set_member
+            @pause_scene.pause_member_set_layer.dispSetMemberList()
+
+    ###
     アイテムを取った時にテンションゲージを増減する
     ###
     tensionSetValueItemCatch:()->
@@ -223,6 +303,7 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.keyList.pause = true
         @pushScene(@pause_scene)
         @pause_scene.pause_item_buy_layer.resetItemList()
+        @pause_scene.pause_main_layer.statusDsp()
         @nowPlayBgmPause()
     ###
     ポーズシーンをポップする
@@ -230,6 +311,7 @@ class LoveliveGame extends catchAndSlotGame
     popPauseScene:()->
         @pause_scene.buttonList.pause = false
         @main_scene.keyList.pause = true
+        @main_scene.gp_system.bet_text.setValue()
         @popScene(@pause_scene)
         @nowPlayBgmRestart()
 
@@ -256,7 +338,6 @@ class LoveliveGame extends catchAndSlotGame
             'tension'  : 0,
             'past_fever_num' : 0,
             'item_point' : 0,
-            'prev_muse': '[]',
             'now_muse_num': 0,
             'next_add_member_key': 0,
             'left_lille': '[]',
@@ -266,11 +347,13 @@ class LoveliveGame extends catchAndSlotGame
             'item_set_now':'[]',
             'member_set_now':'[]',
             'prev_fever_muse':'[]',
-            'max_set_item_num':0
+            'max_set_item_num':0,
+            'prev_item':'[]'
         }
         ret = null
         if data[key] is undefined
             console.error(key+'のデータのロードに失敗しました。')
+        else
             ret = data[key]
         return ret
 
@@ -286,7 +369,6 @@ class LoveliveGame extends catchAndSlotGame
             'tension'  : @tension,
             'past_fever_num' : @past_fever_num,
             'item_point' : @item_point,
-            'prev_muse': JSON.stringify(@slot_setting.prev_muse),
             'now_muse_num': @slot_setting.now_muse_num,
             'next_add_member_key': @next_add_member_key,
             'left_lille': JSON.stringify(@main_scene.gp_slot.left_lille.lilleArray),
@@ -296,7 +378,8 @@ class LoveliveGame extends catchAndSlotGame
             'item_set_now':JSON.stringify(@item_set_now),
             'member_set_now':JSON.stringify(@member_set_now),
             'prev_fever_muse':JSON.stringify(@prev_fever_muse),
-            'max_set_item_num':@max_set_item_num
+            'max_set_item_num':@max_set_item_num,
+            'prev_item':JSON.stringify(@prev_item)
         }
         for key, val of saveData
             @local_storage.setItem(key, val)
@@ -315,7 +398,6 @@ class LoveliveGame extends catchAndSlotGame
             @past_fever_num = @_loadStorage('past_fever_num', 'num')
             @item_point = @_loadStorage('item_point', 'num')
             @next_add_member_key = @_loadStorage('next_add_member_key', 'num')
-            @slot_setting.prev_muse = @_loadStorage('prev_muse', 'json')
             @slot_setting.now_muse_num = @_loadStorage('now_muse_num', 'num')
             @main_scene.gp_slot.left_lille.lilleArray = @_loadStorage('left_lille', 'json')
             @main_scene.gp_slot.middle_lille.lilleArray = @_loadStorage('middle_lille', 'json')
@@ -325,6 +407,7 @@ class LoveliveGame extends catchAndSlotGame
             @member_set_now = @_loadStorage('member_set_now', 'json')
             @prev_fever_muse = @_loadStorage('prev_fever_muse', 'json')
             @max_set_item_num = @_loadStorage('max_set_item_num', 'num')
+            @prev_item = @_loadStorage('prev_item', 'json')
     ###
     ローカルストレージから指定のキーの値を取り出して返す
     @param string key ロードするデータのキー
@@ -333,7 +416,7 @@ class LoveliveGame extends catchAndSlotGame
     _loadStorage:(key, type)->
         ret = null
         val = @local_storage.getItem(key)
-        if val is null
+        if val is undefined || val is null
             ret = @_defaultLoadData(key)
         else
             switch type
@@ -346,22 +429,44 @@ class LoveliveGame extends catchAndSlotGame
     ゲームのロードテスト用、デバッグの決まった値
     ###
     _loadGameTest:()->
-        data = @debug.test_load_val
-        @money = data.money
-        @bet = data.bet
-        @combo = data.combo
-        @max_combo = data.max_combo
-        @tension = data.tension
-        @past_fever_num = data.past_fever_num
-        @item_point = data.item_point
-        @next_add_member_key = data.next_add_member_key
-        @slot_setting.prev_muse = data.prev_muse
-        @slot_setting.now_muse_num = data.now_muse_num
-        @item_have_now = data.item_have_now
-        @item_set_now = data.item_set_now
-        @prev_fever_muse = data.prev_fever_muse
-        @member_set_now = data.member_set_now
-        @max_set_item_num = data.max_set_item_num
+        @_loadGameFix(@debug.test_load_val)
+
+    ###
+    ゲームのロード、新規ゲーム用
+    ###
+    _loadGameInit:()->
+        @_loadGameFix(@init_load_val)
+
+    ###
+    ゲームのロード、固定値をロードする
+    ###
+    _loadGameFix:(data)->
+        @money = @_loadGameFixUnit(data, 'money')
+        @bet = @_loadGameFixUnit(data, 'bet')
+        @combo = @_loadGameFixUnit(data, 'combo')
+        @max_combo = @_loadGameFixUnit(data, 'max_combo')
+        @tension = @_loadGameFixUnit(data, 'tension')
+        @past_fever_num = @_loadGameFixUnit(data, 'past_fever_num')
+        @item_point = @_loadGameFixUnit(data, 'item_point')
+        @next_add_member_key = @_loadGameFixUnit(data, 'next_add_member_key')
+        @slot_setting.now_muse_num = @_loadGameFixUnit(data, 'now_muse_num')
+        @item_have_now = @_loadGameFixUnit(data, 'item_have_now')
+        @item_set_now = @_loadGameFixUnit(data, 'item_set_now')
+        @prev_fever_muse = @_loadGameFixUnit(data, 'prev_fever_muse')
+        @member_set_now = @_loadGameFixUnit(data, 'member_set_now')
+        @max_set_item_num = @_loadGameFixUnit(data, 'max_set_item_num')
+        @slot_setting.now_muse_num = @_loadGameFixUnit(data, 'now_muse_num')
+        @main_scene.gp_slot.left_lille.lilleArray = @_loadGameFixUnit(data, 'left_lille')
+        @main_scene.gp_slot.middle_lille.lilleArray = @_loadGameFixUnit(data, 'middle_lille')
+        @main_scene.gp_slot.right_lille.lilleArray = @_loadGameFixUnit(data, 'right_lille')
+        @prev_item = @_loadGameFixUnit(data, 'prev_item')
+
+    _loadGameFixUnit:(data, key)->
+        if data[key] != undefined
+            ret = data[key]
+        else
+            ret = @_defaultLoadData(key)
+        return ret
 
     ###
     ゲームロード後の画面表示等の初期値設定
@@ -385,5 +490,7 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.pause_record_layer.resetTrophyList()
         @slot_setting.setMemberItemPrice()
         @slot_setting.setItemPointMax()
+        @slot_setting.setItemDecreasePoint()
         @musePreLoadByMemberSetNow()
         @itemUseExe()
+        @main_scene.gp_system.whiteOut()

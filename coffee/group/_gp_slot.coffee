@@ -155,12 +155,14 @@ class gpSlot extends appGroup
                 if game.prev_fever_muse.indexOf(parseInt(hit_eye)) is -1
                     game.prev_fever_muse.push(@hit_role)
                     game.pause_scene.pause_record_layer.resetRecordList()
+                    game.pause_scene.pause_main_layer.save_game_button.makeDisable()
                     game.slot_setting.setMemberItemPrice()
                     game.tensionSetValue(game.slot_setting.tension_max)
                     game.fever = true
                     game.past_fever_num += 1
                     game.slot_setting.setMuseMember()
                     game.musePreLoad()
+                    game.autoMemberSetBeforeFever()
                     game.fever_hit_eye = hit_eye
                     game.main_scene.gp_system.changeBetChangeFlg(false)
                     game.main_scene.gp_effect.feverEffectSet()
