@@ -11,6 +11,10 @@ class LoveliveGame extends catchAndSlotGame
         @test = new Test()
         @width = 480
         @height = 720
+        if @debug.toubai
+            @scale = 1
+        else
+            @scale = @getWindowScale()
         @fps = 24
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
@@ -89,7 +93,7 @@ class LoveliveGame extends catchAndSlotGame
                 @main_scene = new mainScene()
                 @pause_scene = new pauseScene()
                 @loadGame()
-                @bgmPlay(@main_scene.bgm, true)
+                @bgmPlayOnTension()
                 @pushScene(@main_scene)
                 if @debug.force_pause_flg is true
                     @setPauseScene()
@@ -108,7 +112,7 @@ class LoveliveGame extends catchAndSlotGame
         @main_scene = new mainScene()
         @pause_scene = new pauseScene()
         @loadGame()
-        @bgmPlay(@main_scene.bgm, true)
+        @bgmPlayOnTension()
         @pushScene(@main_scene)
 
     ###
@@ -119,8 +123,13 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene = new pauseScene()
         @_loadGameInit()
         @_gameInitSetting()
-        @bgmPlay(@main_scene.bgm, true)
+        @bgmPlayOnTension()
         @pushScene(@main_scene)
+
+    bgmPlayOnTension:()->
+        half = Math.floor(@slot_setting.tension_max / 2)
+        if half <= @tension
+            @bgmPlay(@main_scene.bgm, true)
 
     ###
     現在セットされているメンバーをもとに素材をロードします
@@ -184,12 +193,22 @@ class LoveliveGame extends catchAndSlotGame
     ###
     tensionSetValue:(val)->
         @slot_setting.changeLilleForTension(@tension, val)
+        prev_tension = @tension
         @tension += val
         if @tension < 0
             @tension = 0
         else if @tension > @slot_setting.tension_max
             @tension = @slot_setting.tension_max
         @main_scene.gp_system.tension_gauge.setValue()
+        @_bgmPlayStopOnTension(prev_tension)
+
+    _bgmPlayStopOnTension:(prev_tension)->
+        if @fever is false
+            half = Math.floor(@slot_setting.tension_max / 2)
+            if prev_tension < half && half <= @tension
+                @bgmPlayOnTension()
+            if @tension < half && half <= prev_tension
+                @bgmStop(@main_scene.bgm)
 
     ###
     現在アイテムがセットされているかを確認する
@@ -319,11 +338,12 @@ class LoveliveGame extends catchAndSlotGame
     ゲームをロードする
     ###
     loadGame:()->
-        if @debug.not_load_flg is false
-            if @debug.test_load_flg is false
-                @_loadGameProduct()
-            else
-                @_loadGameTest()
+        if @debug.test_load_flg is true
+            @_loadGameTest()
+        else if @debug.not_load_flg is true
+            @_loadGameInit()
+        else
+            @_loadGameProduct()
         @_gameInitSetting()
 
     ###
@@ -429,7 +449,11 @@ class LoveliveGame extends catchAndSlotGame
     ゲームのロードテスト用、デバッグの決まった値
     ###
     _loadGameTest:()->
-        @_loadGameFix(@debug.test_load_val)
+        load_val = @debug.test_load_val
+        load_val.left_lille = @arrayCopy(@slot_setting.lille_array_0[0])
+        load_val.middle_lille = @arrayCopy(@slot_setting.lille_array_0[1])
+        load_val.right_lille = @arrayCopy(@slot_setting.lille_array_0[2])
+        @_loadGameFix(load_val)
 
     ###
     ゲームのロード、新規ゲーム用

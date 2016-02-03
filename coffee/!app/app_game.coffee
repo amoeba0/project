@@ -1,14 +1,36 @@
 class appGame extends Game
     constructor:(w, h)->
         super w, h
-        if @isSumaho() is false
-            @scale = 1
+        #if @isSumaho() is false
+        @scale = 1
         @is_server = false
         @mute = false #ミュート（消音）フラグ
         @imgList = []
         @soundList = []
         @nowPlayBgm = null
         @loadedFile = [] #ロード済みのファイル
+        @mstVolume = 1 #ゲームの全体的な音量
+        @_getIsServer()
+
+    ###
+    動かしてる環境がローカルか、サーバーかを判定
+    ###
+    _getIsServer:()->
+        if location.href.indexOf('file:/') != -1
+            @is_server = false
+        else
+            @is_server = true
+
+    getWindowScale:()->
+        scale = 1
+        browserAspect = window.innerHeight / window.innerWidth
+        gameAspect = @height / @width
+        if browserAspect < gameAspect
+            scale = Math.floor(window.innerHeight * 1000 / @height) / 1000
+        else
+            scale = Math.floor(window.innerWidth * 1000 / @width) / 1000
+        return scale
+
     ###
         画像の呼び出し
     ###

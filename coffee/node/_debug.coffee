@@ -6,7 +6,7 @@ class Debug extends appNode
         super
 
         #開始後いきなりメイン画面
-        @force_main_flg = false
+        @force_main_flg = true
         #開始後いきなりポーズ画面
         @force_pause_flg = false
 
@@ -16,7 +16,7 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':123456789000,
+            'money':9876543210,
             'bet':10000,
             'combo':0,
             'max_combo':200,
@@ -26,10 +26,14 @@ class Debug extends appNode
             'next_add_member_key':0,
             'now_muse_num':0,
             'max_set_item_num':3,
-            'item_have_now':[3,4,5,11,12,13,15,16,21,22,23],
+            'item_have_now':[3,4,5,12,21,22,23],
             'item_set_now':[5,7,8],
-            'member_set_now':[11,12,13],
-            'prev_fever_muse':[11,12,13,14,15,16,17,18,19,31]
+            'member_set_now':[12],
+            'prev_fever_muse':[11,12,13,14,15,16,17,19,31],
+            'prev_item':[],
+            'left_lille':[],
+            'middle_lille':[],
+            'right_lille':[]
         }
 
         #デバッグ用リールにすりかえる
@@ -51,6 +55,8 @@ class Debug extends appNode
 
         #画面が白一色で覆われる、ｃキーで切り替え可能
         @white_back = false
+        #ゲームのサイズが等倍
+        @toubai = false
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上
         @item_flg = false
@@ -80,5 +86,3 @@ class Debug extends appNode
 
         if @force_pause_flg is true
             @force_main_flg = true
-        if @test_load_flg is true
-            @not_load_flg = false

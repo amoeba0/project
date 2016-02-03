@@ -126,12 +126,21 @@
 .base-discription{
     font: 22px Consolas Monaco MSゴシック;
 }
+.base-discription-sp{
+	font-size:17px;
+}
 .title-discription{
     font-size: 34px;
+}
+.title-discription-sp{
+    font-size: 27px;
 }
 .head-title-discription{
     font-size: 34px;
     text-decoration: underline;
+}
+.head-title-discription-sp{
+	font-size: 27px;
 }
 
 .grayscale{

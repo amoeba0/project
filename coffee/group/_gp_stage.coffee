@@ -19,6 +19,8 @@ class stageFront extends gpStage
         @missItemFallSycleNow = 0
         @catchMissItems = []
         @nowCatchMissItemsNum = 0
+        @item_fall_se = game.soundload('dicision')
+        @miss_fall_se = game.soundload('cancel')
         @explotion_effect = new explosionEffect()
         @initial()
     initial:()->
@@ -65,25 +67,27 @@ class stageFront extends gpStage
     ###
     _catchFall:()->
         if game.bet > game.money
-            game.bet = 1
+            game.bet = game.slot_setting.betDown()
             game.main_scene.gp_system.bet_text.setValue()
-        if game.money >= game.bet
-            @catchItems.push(new MacaroonCatch())
-            @addChild(@catchItems[@nowCatchItemsNum])
-            @catchItems[@nowCatchItemsNum].setPosition()
-            @nowCatchItemsNum += 1
+        if 0 < game.money
             game.money -= game.bet
-            game.main_scene.gp_system.money_text.setValue()
-            game.main_scene.gp_slot.slotStart()
-            if game.slot_setting.getIsForceSlotHit() is true
-                game.main_scene.gp_slot.startForceSlotHit()
-            else
-                game.main_scene.gp_slot.endForceSlotHit()
+        @catchItems.push(new MacaroonCatch())
+        @addChild(@catchItems[@nowCatchItemsNum])
+        game.sePlay(@item_fall_se)
+        @catchItems[@nowCatchItemsNum].setPosition()
+        @nowCatchItemsNum += 1
+        game.main_scene.gp_system.money_text.setValue()
+        game.main_scene.gp_slot.slotStart()
+        if game.slot_setting.getIsForceSlotHit() is true
+            game.main_scene.gp_slot.startForceSlotHit()
+        else
+            game.main_scene.gp_slot.endForceSlotHit()
 
     _missCatchFall:()->
         if game.money >= game.bet
             @catchMissItems.push(new OnionCatch())
             @addChild(@catchMissItems[@nowCatchMissItemsNum])
+            game.sePlay(@miss_fall_se)
             @catchMissItems[@nowCatchMissItemsNum].setPosition()
             @nowCatchMissItemsNum += 1
 

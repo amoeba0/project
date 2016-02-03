@@ -23,6 +23,7 @@ class Test extends appNode
         #@nextMuse()
         #@getRoleByMemberSetNow()
         #@getRoleAbleMemberList()
+        #@betDown()
 
     #以下、テスト用関数
 
@@ -119,3 +120,9 @@ class Test extends appNode
         console.log(game.item_have_now)
         role = game.slot_setting.getRoleAbleMemberList()
         console.log(role)
+
+    betDown:()->
+        game.money = 8549655214758
+        console.log(game.money)
+        val = game.slot_setting.betDown()
+        console.log(val)

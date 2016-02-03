@@ -92,11 +92,15 @@ class discriptionTextDialogHtml extends dialogHtml
     constructor:(w, h)->
         super w, h
         @class.push('base-discription')
+        if game.isSumaho()
+            @class.push('base-discription-sp')
 
 class titleDiscription extends discriptionTextDialogHtml
     constructor:(width=400, height=20)->
         super width, height
         @class.push('title-discription')
+        if game.isSumaho()
+            @class.push('title-discription-sp')
 
 class itemItemBuyDiscription extends titleDiscription
     constructor:()->
@@ -208,6 +212,9 @@ class longTitleDiscription extends discriptionTextDialogHtml
     constructor:()->
         super 250, 20
         @class.push('head-title-discription')
+        if game.isSumaho()
+            @class.push('head-title-discription-sp')
+
 
 class itemUseDiscription extends longTitleDiscription
     constructor:()->

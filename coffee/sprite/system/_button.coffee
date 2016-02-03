@@ -20,12 +20,12 @@ class pauseButton extends Button
 ###
 class controllerButton extends Button
     constructor: () ->
-        super 50, 50
+        super 60, 60
         @color = "#888"
         @pushColor = "#333"
         @opacity = 0.4
         @x = 0
-        @y = 660
+        @y = 650
     changePushColor: () ->
         @image = @drawLeftTriangle(@pushColor)
     changePullColor: () ->
@@ -52,7 +52,7 @@ class rightButton extends controllerButton
         super
         @image = @drawLeftTriangle(@color)
         @scaleX = -1
-        @x = game.width - @w - 30
+        @x = game.width - @w - 40
     ontouchstart: () ->
         game.main_scene.buttonList.right = true
     ontouchend: () ->
@@ -79,8 +79,8 @@ class jumpButton extends controllerButton
 掛け金変更ボタン
 ###
 class betButton extends Button
-    constructor: () ->
-        super 22, 22
+    constructor: (width, height) ->
+        super width, height
         @color = "black"
         @pushColor = "white"
         @y = 7
@@ -94,7 +94,7 @@ class betButton extends Button
 ###
 class heighBetButton extends betButton
     constructor: () ->
-        super
+        super 22, 22
         @image = @drawUpTriangle(@color)
         @x = 7
     ontouchstart: () ->
@@ -104,9 +104,9 @@ class heighBetButton extends betButton
 
 class heighBetButtonPause extends betButton
     constructor: () ->
-        super
+        super 33, 33
         @image = @drawUpTriangle(@color)
-        @x = 100
+        @x = 90
         @y = 270
     ontouchend: () ->
         game.pause_scene.pause_main_layer.betSetting(true)
@@ -116,7 +116,7 @@ class heighBetButtonPause extends betButton
 ###
 class lowBetButton extends betButton
     constructor: () ->
-        super
+        super 22, 22
         @image = @drawUpTriangle(@color)
         @scaleY = -1
         @x = 121
@@ -129,10 +129,10 @@ class lowBetButton extends betButton
 
 class lowBetButtonPause extends betButton
     constructor: () ->
-        super
+        super 33, 33
         @image = @drawUpTriangle(@color)
         @scaleY = -1
-        @x = 110
+        @x = 90
         @y = 270
     ontouchend: () ->
         game.pause_scene.pause_main_layer.betSetting(false)

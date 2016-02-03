@@ -9,7 +9,7 @@ class Lille extends Slot
     onenterframe: (e) ->
         if @isRotation is true
             @eyeIncriment()
-            @soundLotateSe()
+            #@soundLotateSe()
     ###
     回転中にリールの目を１つ進める
     ###
