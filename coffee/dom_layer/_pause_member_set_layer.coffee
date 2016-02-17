@@ -1,8 +1,6 @@
-#TODO 持っていないものは半透明、セット中は透明
 class pauseMemberSetLayer extends appDomLayer
     constructor: () ->
         super
-        @max_set_member_num = 3
         @dialog = new memberSetDialogHtml()
         @close_button = new memberSetDialogCloseButton()
         @menu_title = new memberSetDiscription()
@@ -24,7 +22,7 @@ class pauseMemberSetLayer extends appDomLayer
         @set_member_list = {}
         for i in [11..19]
             @member_list[i] = new useMemberHtml(i)
-        for i in [1..@max_set_member_num]
+        for i in [1..game.max_set_member_num]
             @set_member_list[i] = new setMemberHtml(i)
             @addChild(@set_member_list[i])
         @setItemList()
@@ -106,7 +104,7 @@ class pauseMemberUseSelectLayer extends appDomLayer
         game.pause_scene.removeMemberUseSelectMenu()
     _memberSet:(kind)->
         if game.member_set_now.indexOf(parseInt(kind)) == -1
-            if (game.pause_scene.pause_member_set_layer.max_set_member_num <= game.member_set_now.length)
+            if (game.max_set_member_num <= game.member_set_now.length)
                 game.member_set_now.shift()
             game.member_set_now.push(kind)
         else

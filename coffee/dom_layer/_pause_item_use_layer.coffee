@@ -18,17 +18,29 @@ class pauseItemUseLayer extends appDomLayer
         @addChild(@speed_title)
         @item_list = {} #アイテム所持リスト
         @set_item_list = {} #アイテムセット中リスト
+        @speed_list = {}
         for i in [1..9]
             @item_list[i] = new useItemHtml(i)
         for i in [1..game.limit_set_item_num]
             @set_item_list[i] = new setItemHtml(i)
             @addChild(@set_item_list[i])
+        for i in [1..3]
+            @speed_list[i] = new speedHtml(i)
+            @addChild(@speed_list[i])
         @setItemList()
         @dspSetItemList()
+        @setSpeedList()
     setItemList:()->
         for item_key, item_val of @item_list
             @addChild(item_val)
             item_val.setPosition()
+    setSpeedList:()->
+        for speed_key, speed_val of @speed_list
+            speed_val.setPosition()
+            speed_val.opacity = 0.5
+            speed_val.addDomClass('grayscale', true)
+            speed_val.changeNotButton()
+            speed_val.is_exist = false
     resetItemList:()->
         for item_key, item_val of @item_list
             if game.item_set_now.indexOf(parseInt(item_key)) != -1

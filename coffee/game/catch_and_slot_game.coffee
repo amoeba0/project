@@ -36,6 +36,7 @@ class LoveliveGame extends catchAndSlotGame
         @now_item = 0 #現在セット中のアイテム（１つめ）
         @already_added_material = [] #ゲームを開いてから現在までにロードしたμ’ｓの画像や楽曲の素材の番号
         @limit_set_item_num = 3
+        @max_set_member_num = 3
         @next_auto_set_member = [] #ソロ楽曲全達成後にフィーバー後自動的に部員に設定されるリスト
 
         #セーブする変数(slot_settingにもあるので注意)
@@ -142,7 +143,7 @@ class LoveliveGame extends catchAndSlotGame
     現在セットされているメンバーをもとに組み合わせ可能な役の一覧を全て取得します
     ###
     getRoleByMemberSetNow:()->
-        max = @pause_scene.pause_member_set_layer.max_set_member_num
+        max = @max_set_member_num
         roles = game.arrayCopy(@member_set_now)
         tmp = game.arrayCopy(@member_set_now)
         if @slot_setting.now_muse_num != 0 && @member_set_now.length != max

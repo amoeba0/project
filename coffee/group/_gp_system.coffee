@@ -36,6 +36,13 @@ class gpSystem extends appGroup
         @low_bet_button = new lowBetButton()
         @addChild(@low_bet_button)
         @white_back = new whiteBack()
+        if game.isSumaho()
+            @large_jump_button = new largeJumpButton()
+            @addChild(@large_jump_button)
+            @large_left_button = new largeLeftButton()
+            @addChild(@large_left_button)
+            @large_right_button = new largeRightButton()
+            @addChild(@large_right_button)
         @keyList = {'up':false, 'down':false}
         @isWhiteBack = false
     onenterframe: (e) ->

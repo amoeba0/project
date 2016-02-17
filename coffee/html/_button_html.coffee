@@ -126,6 +126,8 @@ class baseOkButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
         @class.push('base-ok-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
         @text = 'ＯＫ'
         @setHtml()
     ontouchend: (e) ->
@@ -186,6 +188,8 @@ class baseCancelButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
         @class.push('base-cancel-button')
+        if game.isSumaho()
+            @class.push('base-cancel-button-sp')
         @text = 'キャンセル'
         @setHtml()
     ontouchend: (e) ->
@@ -251,6 +255,8 @@ class baseByuButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
         @class.push('base-buy-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
         @text = '購入'
         @setHtml()
     ontouchend: (e) ->
@@ -278,6 +284,8 @@ class baseSetButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
         @class.push('base-set-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
         @text = 'セット'
         @setHtml()
     ontouchend: (e) ->
@@ -409,6 +417,8 @@ class autoMemberSetButtonHtml extends buttonHtml
         @x = 45
         @y = 560
         @class.push('osusume-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
         @text = 'おすすめ'
         @setHtml()
     ontouchend: (e) ->
@@ -425,6 +435,8 @@ class autoMemberUnsetButtonHtml extends buttonHtml
         @x = 245
         @y = 560
         @class.push('osusume-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
         @text = '全解除'
         @setHtml()
     ontouchend: (e) ->

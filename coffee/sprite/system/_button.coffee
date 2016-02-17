@@ -44,6 +44,16 @@ class leftButton extends controllerButton
     ontouchend: () ->
         game.main_scene.buttonList.left = false
 
+class largeLeftButton extends Button
+    constructor: () ->
+        super 150 ,100
+        @x = 0
+        @y = game.height - @height
+    ontouchstart: () ->
+        game.main_scene.buttonList.left = true
+    ontouchend: () ->
+        game.main_scene.buttonList.left = false
+
 ###
 右ボタン
 ###
@@ -53,6 +63,16 @@ class rightButton extends controllerButton
         @image = @drawLeftTriangle(@color)
         @scaleX = -1
         @x = game.width - @w - 40
+    ontouchstart: () ->
+        game.main_scene.buttonList.right = true
+    ontouchend: () ->
+        game.main_scene.buttonList.right = false
+
+class largeRightButton extends Button
+    constructor: () ->
+        super 150 ,100
+        @x = game.width - @width
+        @y = game.height - @height
     ontouchstart: () ->
         game.main_scene.buttonList.right = true
     ontouchend: () ->
@@ -74,6 +94,16 @@ class jumpButton extends controllerButton
         @image = @drawCircle(@pushColor)
     changePullColor: () ->
         @image = @drawCircle(@color)
+
+class largeJumpButton extends Button
+    constructor: () ->
+        super game.width, 400
+        @x = 0
+        @y = 230
+    ontouchstart: () ->
+        game.main_scene.buttonList.jump = true
+    ontouchend: () ->
+        game.main_scene.buttonList.jump = false
 
 ###
 掛け金変更ボタン

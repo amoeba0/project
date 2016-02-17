@@ -503,17 +503,29 @@ class pauseItemUseLayer extends appDomLayer
         @addChild(@speed_title)
         @item_list = {} #アイテム所持リスト
         @set_item_list = {} #アイテムセット中リスト
+        @speed_list = {}
         for i in [1..9]
             @item_list[i] = new useItemHtml(i)
         for i in [1..game.limit_set_item_num]
             @set_item_list[i] = new setItemHtml(i)
             @addChild(@set_item_list[i])
+        for i in [1..3]
+            @speed_list[i] = new speedHtml(i)
+            @addChild(@speed_list[i])
         @setItemList()
         @dspSetItemList()
+        @setSpeedList()
     setItemList:()->
         for item_key, item_val of @item_list
             @addChild(item_val)
             item_val.setPosition()
+    setSpeedList:()->
+        for speed_key, speed_val of @speed_list
+            speed_val.setPosition()
+            speed_val.opacity = 0.5
+            speed_val.addDomClass('grayscale', true)
+            speed_val.changeNotButton()
+            speed_val.is_exist = false
     resetItemList:()->
         for item_key, item_val of @item_list
             if game.item_set_now.indexOf(parseInt(item_key)) != -1
@@ -644,11 +656,9 @@ class pauseMainLayer extends appDomLayer
             @bet_text.setValue()
             @bet_text.setPositionPause()
             @low_bet_button.setXposition()
-#TODO 持っていないものは半透明、セット中は透明
 class pauseMemberSetLayer extends appDomLayer
     constructor: () ->
         super
-        @max_set_member_num = 3
         @dialog = new memberSetDialogHtml()
         @close_button = new memberSetDialogCloseButton()
         @menu_title = new memberSetDiscription()
@@ -670,7 +680,7 @@ class pauseMemberSetLayer extends appDomLayer
         @set_member_list = {}
         for i in [11..19]
             @member_list[i] = new useMemberHtml(i)
-        for i in [1..@max_set_member_num]
+        for i in [1..game.max_set_member_num]
             @set_member_list[i] = new setMemberHtml(i)
             @addChild(@set_member_list[i])
         @setItemList()
@@ -752,7 +762,7 @@ class pauseMemberUseSelectLayer extends appDomLayer
         game.pause_scene.removeMemberUseSelectMenu()
     _memberSet:(kind)->
         if game.member_set_now.indexOf(parseInt(kind)) == -1
-            if (game.pause_scene.pause_member_set_layer.max_set_member_num <= game.member_set_now.length)
+            if (game.max_set_member_num <= game.member_set_now.length)
                 game.member_set_now.shift()
             game.member_set_now.push(kind)
         else
@@ -778,7 +788,9 @@ class pauseRecordLayer extends appDomLayer
         for i in [21..24]
             @trophyList[i] = new trophyItemHtml(i - 21, i)
         @setRecordList()
+        @resetRecordList()
         @setTrophyList()
+        @resetTrophyList()
     setRecordList:()->
         for record_key, record_val of @recordList
             @addChild(record_val)
@@ -787,10 +799,10 @@ class pauseRecordLayer extends appDomLayer
         for record_key, record_val of @recordList
             if game.prev_fever_muse.indexOf(parseInt(record_val.kind)) != -1
                 record_val.opacity = 1
-                record_val.removeDomClass('grayscale', true)
+                #record_val.removeDomClass('grayscale', true)
             else
                 record_val.opacity = 0.5
-                record_val.addDomClass('grayscale', true)
+                #record_val.addDomClass('grayscale', true)
     setTrophyList:()->
         for trophy_key, trophy_val of @trophyList
             @addChild(trophy_val)
@@ -832,11 +844,11 @@ class pauseRecordSelectLayer extends pauseBaseRecordSelectLayer
         @item_image.setImage(@item_options.image)
         if game.prev_fever_muse.indexOf(parseInt(kind)) != -1
             @item_image.opacity = 1
-            @item_image.removeDomClass('grayscale', true)
+            #@item_image.removeDomClass('grayscale', true)
             @item_name.setText(@item_options.title)
         else
             @item_image.opacity = 0.5
-            @item_image.addDomClass('grayscale', true)
+            #@item_image.addDomClass('grayscale', true)
             @item_name.setText('？？？')
         discription = @_setDiscription()
         @item_discription.setText(discription)
@@ -954,6 +966,7 @@ class LoveliveGame extends catchAndSlotGame
         @now_item = 0 #現在セット中のアイテム（１つめ）
         @already_added_material = [] #ゲームを開いてから現在までにロードしたμ’ｓの画像や楽曲の素材の番号
         @limit_set_item_num = 3
+        @max_set_member_num = 3
         @next_auto_set_member = [] #ソロ楽曲全達成後にフィーバー後自動的に部員に設定されるリスト
 
         #セーブする変数(slot_settingにもあるので注意)
@@ -1060,7 +1073,7 @@ class LoveliveGame extends catchAndSlotGame
     現在セットされているメンバーをもとに組み合わせ可能な役の一覧を全て取得します
     ###
     getRoleByMemberSetNow:()->
-        max = @pause_scene.pause_member_set_layer.max_set_member_num
+        max = @max_set_member_num
         roles = game.arrayCopy(@member_set_now)
         tmp = game.arrayCopy(@member_set_now)
         if @slot_setting.now_muse_num != 0 && @member_set_now.length != max
@@ -2299,6 +2312,13 @@ class gpSystem extends appGroup
         @low_bet_button = new lowBetButton()
         @addChild(@low_bet_button)
         @white_back = new whiteBack()
+        if game.isSumaho()
+            @large_jump_button = new largeJumpButton()
+            @addChild(@large_jump_button)
+            @large_left_button = new largeLeftButton()
+            @addChild(@large_left_button)
+            @large_right_button = new largeRightButton()
+            @addChild(@large_right_button)
         @keyList = {'up':false, 'down':false}
         @isWhiteBack = false
     onenterframe: (e) ->
@@ -2584,6 +2604,8 @@ class baseOkButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
         @class.push('base-ok-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
         @text = 'ＯＫ'
         @setHtml()
     ontouchend: (e) ->
@@ -2644,6 +2666,8 @@ class baseCancelButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
         @class.push('base-cancel-button')
+        if game.isSumaho()
+            @class.push('base-cancel-button-sp')
         @text = 'キャンセル'
         @setHtml()
     ontouchend: (e) ->
@@ -2709,6 +2733,8 @@ class baseByuButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
         @class.push('base-buy-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
         @text = '購入'
         @setHtml()
     ontouchend: (e) ->
@@ -2736,6 +2762,8 @@ class baseSetButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
         @class.push('base-set-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
         @text = 'セット'
         @setHtml()
     ontouchend: (e) ->
@@ -2867,6 +2895,8 @@ class autoMemberSetButtonHtml extends buttonHtml
         @x = 45
         @y = 560
         @class.push('osusume-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
         @text = 'おすすめ'
         @setHtml()
     ontouchend: (e) ->
@@ -2883,6 +2913,8 @@ class autoMemberUnsetButtonHtml extends buttonHtml
         @x = 245
         @y = 560
         @class.push('osusume-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
         @text = '全解除'
         @setHtml()
     ontouchend: (e) ->
@@ -3209,6 +3241,15 @@ class setItemHtml extends baseItemHtml
         if @kind != 0
             game.sePlay(@dicisionSe)
             game.pause_scene.setItemUseSelectMenu(@kind)
+
+class speedHtml extends baseItemHtml
+    constructor:(kind)->
+        super kind
+        @image_name = 'speed_'+kind
+        @setImageHtml()
+        @positionY = 560
+        @positionX = 45
+
 ###
 部員
 ###
@@ -4431,7 +4472,7 @@ class slotSetting extends appNode
     ###
     getAddMuseNum:()->
         member = game.member_set_now
-        max = game.pause_scene.pause_member_set_layer.max_set_member_num
+        max = game.max_set_member_num
         if member.length is 0
             ret = @now_muse_num
         else
@@ -4712,10 +4753,14 @@ class mainScene extends appScene
         @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false, 'white':false}
         #ソフトキーのリスト
         @buttonList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
+        #ジャイロセンサのリスト
+        @gyroList = {'left':false, 'right':false}
         @bgm = game.soundload("bgm/bgm1")
         @initial()
     initial:()->
         @setGroup()
+        if game.isSumaho()
+            @_gyroMove()
     setGroup:()->
         @gp_back_panorama = new gpBackPanorama()
         @addChild(@gp_back_panorama)
@@ -4739,7 +4784,7 @@ class mainScene extends appScene
     ###ボタン操作、物理キーとソフトキー両方に対応###
     buttonPush:()->
         # 左
-        if game.input.left is true || @buttonList.left is true
+        if game.input.left is true || @buttonList.left is true || (@buttonList.right is false && @gyroList.left is true)
             if @keyList.left is false
                 @keyList.left = true
                 @gp_system.left_button.changePushColor()
@@ -4748,7 +4793,7 @@ class mainScene extends appScene
                 @keyList.left = false
                 @gp_system.left_button.changePullColor()
         # 右
-        if game.input.right is true || @buttonList.right is true
+        if game.input.right is true || @buttonList.right is true || (@buttonList.left is false && @gyroList.right is true)
             if @keyList.right is false
                 @keyList.right = true
                 @gp_system.right_button.changePushColor()
@@ -4816,6 +4861,20 @@ class mainScene extends appScene
                 @gp_system.changeBetChangeFlg(true)
                 @gp_effect.feverEffectEnd()
                 game.fever = false
+
+    _gyroMove:()->
+        window.addEventListener("deviceorientation",
+            (evt)->
+                x = evt.gamma
+                if 15 < x
+                    game.main_scene.gyroList.right = true
+                else if x < -15
+                    game.main_scene.gyroList.left = true
+                else
+                    game.main_scene.gyroList.right = false
+                    game.main_scene.gyroList.left = false
+            , false
+        )
 class pauseScene extends appScene
     constructor: () ->
         super
@@ -4839,25 +4898,33 @@ class pauseScene extends appScene
         @addChild(@pause_main_layer)
         @isAblePopPause = true
     setSaveConfirmMenu: () ->
+        @pause_save_confirm_layer = new pauseSaveConfirmLayer()
         @addChild(@pause_save_confirm_layer)
         @isAblePopPause = false
     setSaveMenu:()->
+        @pause_save_layer = new pauseSaveLayer()
         @addChild(@pause_save_layer)
         game.saveGame()
     setTitleConfirmMenu:()->
+        @pause_title_confirm_layer = new pauseTitleConfirmLayer()
         @addChild(@pause_title_confirm_layer)
         @isAblePopPause = false
     removeSaveConfirmMenu:()->
         @removeChild(@pause_save_confirm_layer)
+        @pause_save_confirm_layer = null
         @isAblePopPause = true
     removeTitleConfirmMenu:()->
         @removeChild(@pause_title_confirm_layer)
+        @pause_title_confirm_layer = null
         @isAblePopPause = true
     removeSaveMenu:()->
         @removeChild(@pause_save_layer)
         @removeChild(@pause_save_confirm_layer)
+        @pause_save_layer = null
+        @pause_save_confirm_layer = null
         @isAblePopPause = true
     setItemBuyMenu:()->
+        @pause_item_buy_layer = new pauseItemBuyLayer()
         @addChild(@pause_item_buy_layer)
         @isAblePopPause = false
     removeItemBuyMenu:()->
@@ -4865,54 +4932,70 @@ class pauseScene extends appScene
         @isAblePopPause = true
         game.setItemSlot()
     setItemUseMenu:()->
+        @pause_item_use_layer = new pauseItemUseLayer()
         @pause_item_use_layer.resetItemList()
         @pause_item_use_layer.dspSetItemList()
         @addChild(@pause_item_use_layer)
         @isAblePopPause = false
     removeItemUseMenu:()->
         @removeChild(@pause_item_use_layer)
+        @pause_item_use_layer = null
         @isAblePopPause = true
     setMemberSetMenu:()->
+        @pause_member_set_layer = new pauseMemberSetLayer()
         @pause_member_set_layer.resetItemList()
         @addChild(@pause_member_set_layer)
         @isAblePopPause = false
     removeMemberSetMenu:()->
         @removeChild(@pause_member_set_layer)
+        @pause_member_set_layer = null
         game.musePreLoadByMemberSetNow()
         @isAblePopPause = true
     setItemBuySelectMenu:(kind)->
+        @pause_item_buy_select_layer = new pauseItemBuySelectLayer()
         @addChild(@pause_item_buy_select_layer)
         @pause_item_buy_select_layer.setSelectItem(kind)
     removeItemBuySelectMenu:()->
         @removeChild(@pause_item_buy_select_layer)
+        @pause_item_buy_select_layer = null
         game.itemUseExe()
     setItemUseSelectMenu:(kind)->
+        @pause_item_use_select_layer = new pauseItemUseSelectLayer()
         @addChild(@pause_item_use_select_layer)
         @pause_item_use_select_layer.setSelectItem(kind)
     removeItemUseSelectMenu:()->
         @removeChild(@pause_item_use_select_layer)
+        @pause_item_use_select_layer = null
         game.itemUseExe()
     setMemberUseSelectMenu:(kind)->
+        @pause_member_use_select_layer = new pauseMemberUseSelectLayer()
         @addChild(@pause_member_use_select_layer)
         @pause_member_use_select_layer.setSelectItem(kind)
     removeMemberUseSelectMenu:()->
         @removeChild(@pause_member_use_select_layer)
+        @pause_member_use_select_layer = null
     setRecordMenu:()->
+        @pause_record_layer = new pauseRecordLayer()
         @addChild(@pause_record_layer)
         @isAblePopPause = false
     removeRecordMenu:()->
         @removeChild(@pause_record_layer)
+        @pause_record_layer = null
         @isAblePopPause = true
     setRecordSelectMenu:(kind)->
+        @pause_record_select_layer = new pauseRecordSelectLayer()
         @addChild(@pause_record_select_layer)
         @pause_record_select_layer.setSelectItem(kind)
     removeRecordSelectMenu:()->
         @removeChild(@pause_record_select_layer)
+        @pause_record_select_layer = null
     setTrophySelectMenu:(kind)->
+        @pause_trophy_select_layer = new pauseTrophySelectLayer()
         @addChild(@pause_trophy_select_layer)
         @pause_trophy_select_layer.setSelectItem(kind)
     removeTrophySelectmenu:()->
         @removeChild(@pause_trophy_select_layer)
+        @pause_trophy_select_layer = null
     onenterframe: (e) ->
         @_pauseKeyPush()
     ###
@@ -5999,6 +6082,16 @@ class leftButton extends controllerButton
     ontouchend: () ->
         game.main_scene.buttonList.left = false
 
+class largeLeftButton extends Button
+    constructor: () ->
+        super 150 ,100
+        @x = 0
+        @y = game.height - @height
+    ontouchstart: () ->
+        game.main_scene.buttonList.left = true
+    ontouchend: () ->
+        game.main_scene.buttonList.left = false
+
 ###
 右ボタン
 ###
@@ -6008,6 +6101,16 @@ class rightButton extends controllerButton
         @image = @drawLeftTriangle(@color)
         @scaleX = -1
         @x = game.width - @w - 40
+    ontouchstart: () ->
+        game.main_scene.buttonList.right = true
+    ontouchend: () ->
+        game.main_scene.buttonList.right = false
+
+class largeRightButton extends Button
+    constructor: () ->
+        super 150 ,100
+        @x = game.width - @width
+        @y = game.height - @height
     ontouchstart: () ->
         game.main_scene.buttonList.right = true
     ontouchend: () ->
@@ -6029,6 +6132,16 @@ class jumpButton extends controllerButton
         @image = @drawCircle(@pushColor)
     changePullColor: () ->
         @image = @drawCircle(@color)
+
+class largeJumpButton extends Button
+    constructor: () ->
+        super game.width, 400
+        @x = 0
+        @y = 230
+    ontouchstart: () ->
+        game.main_scene.buttonList.jump = true
+    ontouchend: () ->
+        game.main_scene.buttonList.jump = false
 
 ###
 掛け金変更ボタン

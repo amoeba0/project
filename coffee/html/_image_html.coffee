@@ -85,6 +85,15 @@ class setItemHtml extends baseItemHtml
         if @kind != 0
             game.sePlay(@dicisionSe)
             game.pause_scene.setItemUseSelectMenu(@kind)
+
+class speedHtml extends baseItemHtml
+    constructor:(kind)->
+        super kind
+        @image_name = 'speed_'+kind
+        @setImageHtml()
+        @positionY = 560
+        @positionX = 45
+
 ###
 部員
 ###

@@ -6,10 +6,14 @@ class mainScene extends appScene
         @keyList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false, 'white':false}
         #ソフトキーのリスト
         @buttonList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
+        #ジャイロセンサのリスト
+        @gyroList = {'left':false, 'right':false}
         @bgm = game.soundload("bgm/bgm1")
         @initial()
     initial:()->
         @setGroup()
+        if game.isSumaho()
+            @_gyroMove()
     setGroup:()->
         @gp_back_panorama = new gpBackPanorama()
         @addChild(@gp_back_panorama)
@@ -33,7 +37,7 @@ class mainScene extends appScene
     ###ボタン操作、物理キーとソフトキー両方に対応###
     buttonPush:()->
         # 左
-        if game.input.left is true || @buttonList.left is true
+        if game.input.left is true || @buttonList.left is true || (@buttonList.right is false && @gyroList.left is true)
             if @keyList.left is false
                 @keyList.left = true
                 @gp_system.left_button.changePushColor()
@@ -42,7 +46,7 @@ class mainScene extends appScene
                 @keyList.left = false
                 @gp_system.left_button.changePullColor()
         # 右
-        if game.input.right is true || @buttonList.right is true
+        if game.input.right is true || @buttonList.right is true || (@buttonList.left is false && @gyroList.right is true)
             if @keyList.right is false
                 @keyList.right = true
                 @gp_system.right_button.changePushColor()
@@ -110,3 +114,17 @@ class mainScene extends appScene
                 @gp_system.changeBetChangeFlg(true)
                 @gp_effect.feverEffectEnd()
                 game.fever = false
+
+    _gyroMove:()->
+        window.addEventListener("deviceorientation",
+            (evt)->
+                x = evt.gamma
+                if 15 < x
+                    game.main_scene.gyroList.right = true
+                else if x < -15
+                    game.main_scene.gyroList.left = true
+                else
+                    game.main_scene.gyroList.right = false
+                    game.main_scene.gyroList.left = false
+            , false
+        )

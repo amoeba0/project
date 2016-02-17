@@ -60,6 +60,9 @@
     border: solid 3px #cccccc;
     color: white;
 }
+.base-ok-button-sp {
+	font-size: 29px;
+}
 .base-cancel-button {
     background-color: #4FA2E8;
     width: 150px;
@@ -67,6 +70,9 @@
     font: 30px Consolas Monaco MSゴシック;
     border: solid 3px #cccccc;
     color: white;
+}
+.base-cancel-button-sp {
+	font-size: 24px;
 }
 .base-buy-button {
     background-color: #29DE7A;

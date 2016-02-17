@@ -937,7 +937,7 @@ class slotSetting extends appNode
     ###
     getAddMuseNum:()->
         member = game.member_set_now
-        max = game.pause_scene.pause_member_set_layer.max_set_member_num
+        max = game.max_set_member_num
         if member.length is 0
             ret = @now_muse_num
         else
