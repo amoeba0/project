@@ -24,6 +24,7 @@ class Test extends appNode
         #@getRoleByMemberSetNow()
         #@getRoleAbleMemberList()
         #@betDown()
+        @setForceFeverRole()
 
     #以下、テスト用関数
 
@@ -126,3 +127,8 @@ class Test extends appNode
         console.log(game.money)
         val = game.slot_setting.betDown()
         console.log(val)
+
+    setForceFeverRole:()->
+        lille = [15,4,1,4,11,2,5,1,4,2,5,12,4,1,2,3,1,4,13,3]
+        role = game.slot_setting.setForceFeverRole(lille)
+        console.log(role)

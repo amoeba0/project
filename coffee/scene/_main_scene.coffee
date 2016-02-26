@@ -12,8 +12,10 @@ class mainScene extends appScene
         @initial()
     initial:()->
         @setGroup()
+        ###
         if game.isSumaho()
             @_gyroMove()
+        ###
     setGroup:()->
         @gp_back_panorama = new gpBackPanorama()
         @addChild(@gp_back_panorama)
@@ -101,6 +103,7 @@ class mainScene extends appScene
     ###
     フィーバー中に一定時間でテンションが下がる
     テンションが0になったらフィーバーを解く
+    TODO フィーバー中にタイトルに戻ってロードするとテンションが下がり続ける
     ###
     tensionSetValueFever:()->
         if game.fever is true
@@ -114,6 +117,8 @@ class mainScene extends appScene
                 @gp_system.changeBetChangeFlg(true)
                 @gp_effect.feverEffectEnd()
                 game.fever = false
+                if game.debug.not_auto_save is false
+                    game.saveGame()
 
     _gyroMove:()->
         window.addEventListener("deviceorientation",

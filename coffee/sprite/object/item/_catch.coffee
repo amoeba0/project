@@ -31,7 +31,7 @@ class Catch extends Item
         if @y > game.height + @h
             game.sePlay(@miss_se)
             game.main_scene.gp_stage_front.removeChild(@)
-            if game.isItemSet(6) is false
+            if game.isItemSet(5) is false
                 game.combo = 0
             game.main_scene.gp_system.combo_text.setValue()
             game.tensionSetValueItemFall()
@@ -54,12 +54,13 @@ class Catch extends Item
             ret_x = game.main_scene.gp_stage_front.player.x
         else
             ret_x = Math.floor((game.width - @w) * Math.random())
-        if game.isItemSet(9)
-            ret_x = Math.floor(game.main_scene.gp_stage_front.player.x + (game.width * 0.5 * Math.random()) - (game.width * 0.25))
-            if ret_x < 0
-                ret_x = 0
-            if ret_x > (game.width - @w)
-                ret_x = game.width - @w
+            if @is_miss_item is false && (game.isItemSet(7) || game.past_fever_num < 1)
+                #TODO 画面端っこにいれば取りやすい、画面端の方にいるとステージ半分の位置になるように調整
+                ret_x = Math.floor(game.main_scene.gp_stage_front.player.x + (game.width * 0.5 * Math.random()) - (game.width * 0.25))
+                if ret_x < 0
+                    ret_x = 0
+                if ret_x > (game.width - @w)
+                    ret_x = game.width - @w
         return ret_x
 
 ###
@@ -72,6 +73,7 @@ class MacaroonCatch extends Catch
         @frame = 1
         @scaleX = 1.5
         @scaleY = 1.5
+        @is_miss_item = false
 
 class OnionCatch extends Catch
     constructor: (w, h) ->
@@ -80,6 +82,7 @@ class OnionCatch extends Catch
         @frame = 5
         @scaleX = 1.5
         @scaleY = 1.5
+        @is_miss_item = true
     hitPlayer:()->
         if game.main_scene.gp_stage_front.player.intersect(@)
             game.main_scene.gp_stage_front.setExplosionEffect(@x, @y)

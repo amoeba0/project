@@ -16,20 +16,21 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':9876543210,
+            'money':98765432100,
             'bet':10000,
             'combo':0,
             'max_combo':200,
-            'tension':500,
+            'tension':0,
             'past_fever_num':0,
-            'item_point':100,
+            'item_point':500,
             'next_add_member_key':0,
             'now_muse_num':0,
-            'max_set_item_num':3,
-            'item_have_now':[3,4,5,12,21,22,23],
-            'item_set_now':[5,7,8],
-            'member_set_now':[12],
-            'prev_fever_muse':[11,12,13,14,15,16,17,19,31],
+            'max_set_item_num':1,
+            'now_speed':1,
+            'item_have_now':[3,4,5,12,13],
+            'item_set_now':[3],
+            'member_set_now':[12,13],
+            'prev_fever_muse':[12,13,14,15,16,17,18,19],
             'prev_item':[],
             'left_lille':[],
             'middle_lille':[],
@@ -41,9 +42,9 @@ class Debug extends appNode
 
         #デバッグ用リール配列
         @lille_array = [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+            [11,4,13,4,1,2,5,12,4,2,5,15,4,1,2,3,1,4,1,3],
+            [4,3,13,15,2,4,3,1,2,4,5,12,2,4,3,1,2,11,5,1],
+            [15,5,4,2,1,3,1,2,11,3,5,4,2,1,3,4,2,12,4,13]
         ]
         ###
         @lille_array = [
@@ -57,6 +58,8 @@ class Debug extends appNode
         @white_back = false
         #ゲームのサイズが等倍
         @toubai = false
+        #自動セーブしない
+        @not_auto_save = false
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上
         @item_flg = false

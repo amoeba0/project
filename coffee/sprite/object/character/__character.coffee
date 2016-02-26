@@ -188,11 +188,11 @@ class Character extends appObject
             @frame = 3
 
     setMxUp:()->
-        if game.isItemHave(21) && game.isItemHave(23)
+        if game.now_speed is 3
             @mx = @mx_up3
             @ax = @ax_up3
             @friction = @friction_up3
-        else if game.isItemHave(21) || game.isItemHave(23)
+        else if game.now_speed is 2
             @mx = @mx_up2
             @ax = @ax_up2
             @friction = @friction_up2
@@ -202,11 +202,11 @@ class Character extends appObject
             @friction = @friction_up
 
     resetMxUp:()->
-        if game.isItemHave(21) && game.isItemHave(23)
+        if game.now_speed is 3
             @mx = @mx_up2
             @ax = @ax_up2
             @friction = @friction_up2
-        else if game.isItemHave(21) || game.isItemHave(23)
+        else if game.now_speed is 2
             @mx = @mx_up
             @ax = @ax_up
             @friction = @friction_up
@@ -216,17 +216,17 @@ class Character extends appObject
             @friction = @friction_init
 
     setMyUp:()->
-        if game.isItemHave(21) && game.isItemHave(23)
+        if game.now_speed is 3
             @my = @my_up3
-        else if game.isItemHave(21) || game.isItemHave(23)
+        else if game.now_speed is 2
             @my = @my_up2
         else
             @my = @my_up
 
     resetMyUp:()->
-        if game.isItemHave(21) && game.isItemHave(23)
+        if game.now_speed is 3
             @my = @my_up2
-        else if game.isItemHave(21) || game.isItemHave(23)
+        else if game.now_speed is 2
             @my = @my_up
         else
             @my = @my_init

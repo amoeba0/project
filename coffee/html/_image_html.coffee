@@ -90,9 +90,16 @@ class speedHtml extends baseItemHtml
     constructor:(kind)->
         super kind
         @image_name = 'speed_'+kind
+        @kind = kind
         @setImageHtml()
         @positionY = 560
         @positionX = 45
+        @is_exist = false
+    ontouchend:()->
+        if @is_exist is true
+            game.sePlay(@dicisionSe)
+            game.now_speed = @kind
+            game.pause_scene.pause_item_use_layer.setSpeedList()
 
 ###
 部員

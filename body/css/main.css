@@ -156,3 +156,22 @@
     -ms-filter: grayscale(100%);
     filter: grayscale(100%);
 }
+
+.triangle-top:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    border-bottom: 35px solid #333;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+}
+.triangle-bottom:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 35px solid #333;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+}

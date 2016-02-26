@@ -43,6 +43,12 @@ class gpSystem extends appGroup
             @addChild(@large_left_button)
             @large_right_button = new largeRightButton()
             @addChild(@large_right_button)
+            @large_heigh_bet_button = new largeHeighBetButton()
+            @addChild(@large_heigh_bet_button)
+            @large_low_bet_button = new largeLowBetButton()
+            @addChild(@large_low_bet_button)
+            @large_pause_button = new largePauseButton()
+            @addChild(@large_pause_button)
         @keyList = {'up':false, 'down':false}
         @isWhiteBack = false
     onenterframe: (e) ->
@@ -130,7 +136,7 @@ class gpSystem extends appGroup
             if game.prev_item.length != 0
                 game.item_set_now = game.prev_item
                 @itemDsp()
-                game.pause_scene.pause_item_use_layer.dspSetItemList()
+                #game.pause_scene.pause_item_use_layer.dspSetItemList()
                 game.itemUseExe()
     ###
     アイテムゲージを決められた数値だけ回復する
@@ -147,7 +153,7 @@ class gpSystem extends appGroup
         game.prev_item = game.item_set_now
         game.item_set_now = []
         @itemDsp()
-        game.pause_scene.pause_item_use_layer.dspSetItemList()
+        #game.pause_scene.pause_item_use_layer.dspSetItemList()
         game.itemUseExe()
     _dspItemPoint:()->
         @item_gauge.scaleX = Math.floor(100 * (game.item_point / game.slot_setting.item_point_max)) / 100

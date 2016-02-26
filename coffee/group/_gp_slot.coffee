@@ -14,6 +14,7 @@ class gpSlot extends appGroup
         @feverSec = 0 #フィーバーの時間
         @hit_role = 0 #スロットが揃った目の役
         @isForceSlotHit = false
+        @forceFeverRole = [] #強制的にフィーバーになるときにセットされる役
         @slotSet()
         @debugSlot()
         @upperFrame = new UpperFrame()
@@ -36,12 +37,12 @@ class gpSlot extends appGroup
             if @age is @stopStartAge + @stopIntervalFrame + @slotIntervalFrameRandom
                 game.sePlay(@lille_stop_se)
                 @middle_lille.isRotation = false
-                @forceHit(@middle_lille)
+                @forceHit(@middle_lille, 1)
                 @setIntervalFrame()
             if @age is @stopStartAge + @stopIntervalFrame * 2 + @slotIntervalFrameRandom
                 game.sePlay(@lille_stop_se)
                 @right_lille.isRotation = false
-                @forceHit(@right_lille)
+                @forceHit(@right_lille, 2)
                 @forceHitEnd()
                 @isStopping = false
                 @slotHitTest()
@@ -62,44 +63,61 @@ class gpSlot extends appGroup
     ###
     確率でスロットを強制的に当たりにする
     ###
-    forceHit:(target)->
+    forceHit:(target, position=0)->
         if @isForceSlotHit is true
-            tmp_eye = @_searchEye(target)
+            tmp_eye = @_searchEye(target, position)
             if tmp_eye != 0
                 target.nowEye = tmp_eye
                 target.frameChange()
 
     ###
     確率で左のスロットを強制的にμ'sにする
+    左のスロットからμ’sの役が作成可能かを判定、作成可能なら記憶する
     ###
     forceHitLeftLille:()->
         target = @left_lille
-        if @isForceSlotHit is true && game.slot_setting.isForceFever() is true
-            tmp_eye = @_searchMuseEye(target)
-            if tmp_eye != 0
-                target.nowEye = tmp_eye
-                target.frameChange()
+        if game.fever is false && @isForceSlotHit is true && game.slot_setting.isForceFever() is true
+            if game.slot_setting.isForceFever() is true
+                @forceFeverRole = game.slot_setting.setForceFeverRole(@left_lille.lilleArray)
+            else
+                @forceFeverRole = []
+            if @forceFeverRole.length != 0
+                tmp_eye = @_searchMuseEye(target, 0)
+                if tmp_eye != 0
+                    target.nowEye = tmp_eye
+                    target.frameChange()
 
     ###
     スロットが強制的に当たりになるようにリールから左のリールの当たり目と同じ目を探して配列のキーを返す
     左の当たり目がμ’ｓならリールからμ’ｓの目をランダムで取り出して返す
     ###
-    _searchEye:(target)->
+    _searchEye:(target, position=0)->
         result = 0
         if @leftSlotEye < 10
             for key, val of target.lilleArray
                 if val is @leftSlotEye
                     result = key
         else
-            result = @_searchMuseEye(target)
+            result = @_searchMuseEye(target, position)
         return result
 
     ###
     リールからμ'sを探してきてそのキーを返します
     リールにμ'sがいなければランダムでキーを返します
+    指定の役が存在すれば役を指定で返す
     @pram target
     ###
-    _searchMuseEye:(target)->
+    _searchMuseEye:(target, position=0)->
+        result = 0
+        if @forceFeverRole.length != 0
+            for key, val of target.lilleArray
+                if val is @forceFeverRole[position]
+                    result = key
+        else
+            result = @_searchMuseEyeRandom(target)
+        return result
+
+    _searchMuseEyeRandom:(target)->
         arr = []
         for key, val of target.lilleArray
             if val > 10
@@ -154,7 +172,7 @@ class gpSlot extends appGroup
             if (11 <= hit_eye && hit_eye <= 19) || (21 <= hit_eye)
                 if game.prev_fever_muse.indexOf(parseInt(hit_eye)) is -1
                     game.prev_fever_muse.push(@hit_role)
-                    game.pause_scene.pause_record_layer.resetRecordList()
+                    #game.pause_scene.pause_record_layer.resetRecordList()
                     game.pause_scene.pause_main_layer.save_game_button.makeDisable()
                     game.slot_setting.setMemberItemPrice()
                     game.tensionSetValue(game.slot_setting.tension_max)
@@ -167,6 +185,7 @@ class gpSlot extends appGroup
                     game.main_scene.gp_system.changeBetChangeFlg(false)
                     game.main_scene.gp_effect.feverEffectSet()
                     @slotAddMuseAll(hit_eye)
+                    @forceFeverRole = []
                     @_feverBgmStart(hit_eye)
 
     ###

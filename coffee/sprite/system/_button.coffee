@@ -15,6 +15,14 @@ class pauseButton extends Button
     ontouchend: (e)->
         game.setPauseScene()
 
+class largePauseButton extends Button
+    constructor:()->
+        super 100, 150
+        @x = 380
+        @y = 40
+    ontouchend: (e)->
+        game.setPauseScene()
+
 ###
 コントローラボタン
 ###
@@ -46,7 +54,7 @@ class leftButton extends controllerButton
 
 class largeLeftButton extends Button
     constructor: () ->
-        super 150 ,100
+        super 150 ,150
         @x = 0
         @y = game.height - @height
     ontouchstart: () ->
@@ -70,7 +78,7 @@ class rightButton extends controllerButton
 
 class largeRightButton extends Button
     constructor: () ->
-        super 150 ,100
+        super 150 ,150
         @x = game.width - @width
         @y = game.height - @height
     ontouchstart: () ->
@@ -132,12 +140,21 @@ class heighBetButton extends betButton
     ontouchend: () ->
         game.main_scene.buttonList.up = false
 
-class heighBetButtonPause extends betButton
+class largeHeighBetButton extends Button
+    constructor:()->
+        super 80, 160
+    ontouchstart: () ->
+        game.main_scene.buttonList.up = true
+    ontouchend: () ->
+        game.main_scene.buttonList.up = false
+
+class heighBetButtonPause extends buttonHtml
     constructor: () ->
         super 33, 33
-        @image = @drawUpTriangle(@color)
+        @class.push('triangle-top')
         @x = 90
         @y = 270
+        @setHtml()
     ontouchend: () ->
         game.pause_scene.pause_main_layer.betSetting(true)
 
@@ -157,14 +174,23 @@ class lowBetButton extends betButton
     ontouchend: () ->
         game.main_scene.buttonList.down = false
 
-class lowBetButtonPause extends betButton
+class largeLowBetButton extends Button
+    constructor:()->
+        super 80, 160
+        @x = 110
+    ontouchstart: () ->
+        game.main_scene.buttonList.down = true
+    ontouchend: () ->
+        game.main_scene.buttonList.down = false
+
+class lowBetButtonPause extends buttonHtml
     constructor: () ->
         super 33, 33
-        @image = @drawUpTriangle(@color)
-        @scaleY = -1
+        @class.push('triangle-bottom')
         @x = 90
         @y = 270
+        @setHtml()
     ontouchend: () ->
         game.pause_scene.pause_main_layer.betSetting(false)
     setXposition:()->
-        @x = 110 + game.pause_scene.pause_main_layer.bet_text._boundWidth + @w + 20
+        @x = 160 + game.pause_scene.pause_main_layer.bet_text._boundWidth

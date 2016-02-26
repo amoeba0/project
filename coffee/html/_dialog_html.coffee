@@ -105,9 +105,9 @@ class titleDiscription extends discriptionTextDialogHtml
 class itemItemBuyDiscription extends titleDiscription
     constructor:()->
         super 100, 20
-        @x = 220
+        @x = 210
         @y = 80
-        @text = '魔法'
+        @text = 'スキル'
         @setHtml()
 
 class memberItemBuyDiscription extends titleDiscription
@@ -210,7 +210,7 @@ class saveEndDiscription extends discriptionTextDialogHtml
 
 class longTitleDiscription extends discriptionTextDialogHtml
     constructor:()->
-        super 250, 20
+        super 270, 20
         @class.push('head-title-discription')
         if game.isSumaho()
             @class.push('head-title-discription-sp')
@@ -219,9 +219,9 @@ class longTitleDiscription extends discriptionTextDialogHtml
 class itemUseDiscription extends longTitleDiscription
     constructor:()->
         super
-        @x = 120
+        @x = 110
         @y = 80
-        @text = '魔法をセットする'
+        @text = 'スキルをセットする'
         @setHtml()
 
 class memberSetDiscription extends longTitleDiscription

@@ -54,6 +54,7 @@ class LoveliveGame extends catchAndSlotGame
         @member_set_now = [] #現在セットされているメンバー
         @prev_fever_muse = [] #過去にフィーバーになったμ’ｓメンバー（ユニット番号も含む）
         @prev_item = [] #前にセットしていたアイテム
+        @now_speed = 1 #現在の移動速度とジャンプ力
 
         @init_load_val = {
             'money':100,
@@ -66,6 +67,7 @@ class LoveliveGame extends catchAndSlotGame
             'next_add_member_key':0,
             'now_muse_num':0,
             'max_set_item_num':1,
+            'now_speed':1,
             'item_have_now':[],
             'item_set_now':[],
             'member_set_now':[],
@@ -229,11 +231,20 @@ class LoveliveGame extends catchAndSlotGame
             rslt = true
         return rslt
 
+    speedItemHave:()->
+        if @isItemHave(21) && @isItemHave(23)
+            rslt = 3
+        else if @isItemHave(21) || @isItemHave(23)
+            rslt = 2
+        else
+            rslt = 1
+        return rslt
+
     ###
     アイテムの効果を発動する
     ###
     itemUseExe:()->
-        if @isItemSet(4)
+        if @isItemSet(3)
             @main_scene.gp_stage_front.player.setMxUp()
         else
             @main_scene.gp_stage_front.player.resetMxUp()
@@ -278,7 +289,7 @@ class LoveliveGame extends catchAndSlotGame
             @member_set_now = []
             @next_auto_set_member = @slot_setting.getRoleAbleMemberList()
             @musePreLoadMulti(@next_auto_set_member)
-            @pause_scene.pause_member_set_layer.dispSetMemberList()
+            #@pause_scene.pause_member_set_layer.dispSetMemberList()
 
     ###
     フィーバー終了直後にあらかじめロードしておいた次の部員を自動的に設定
@@ -287,7 +298,7 @@ class LoveliveGame extends catchAndSlotGame
     autoMemberSetAfeterFever:()->
         if @next_auto_set_member.length != 0 && @member_set_now.length is 0
             @member_set_now = @next_auto_set_member
-            @pause_scene.pause_member_set_layer.dispSetMemberList()
+            #@pause_scene.pause_member_set_layer.dispSetMemberList()
 
     ###
     アイテムを取った時にテンションゲージを増減する
@@ -361,6 +372,7 @@ class LoveliveGame extends catchAndSlotGame
             'item_point' : 0,
             'now_muse_num': 0,
             'next_add_member_key': 0,
+            'now_speed':0,
             'left_lille': '[]',
             'middle_lille': '[]',
             'right_lille': '[]',
@@ -382,6 +394,7 @@ class LoveliveGame extends catchAndSlotGame
     ゲームをセーブする、ブラウザのローカルストレージへ
     ###
     saveGame:()->
+        @local_storage.clear()
         saveData = {
             'money'    : @money,
             'bet'      : @bet,
@@ -400,7 +413,8 @@ class LoveliveGame extends catchAndSlotGame
             'member_set_now':JSON.stringify(@member_set_now),
             'prev_fever_muse':JSON.stringify(@prev_fever_muse),
             'max_set_item_num':@max_set_item_num,
-            'prev_item':JSON.stringify(@prev_item)
+            'prev_item':JSON.stringify(@prev_item),
+            'now_speed': @now_speed
         }
         for key, val of saveData
             @local_storage.setItem(key, val)
@@ -429,6 +443,7 @@ class LoveliveGame extends catchAndSlotGame
             @prev_fever_muse = @_loadStorage('prev_fever_muse', 'json')
             @max_set_item_num = @_loadStorage('max_set_item_num', 'num')
             @prev_item = @_loadStorage('prev_item', 'json')
+            @now_speed = @_loadStorage('now_speed', 'num')
     ###
     ローカルストレージから指定のキーの値を取り出して返す
     @param string key ロードするデータのキー
@@ -485,6 +500,7 @@ class LoveliveGame extends catchAndSlotGame
         @main_scene.gp_slot.middle_lille.lilleArray = @_loadGameFixUnit(data, 'middle_lille')
         @main_scene.gp_slot.right_lille.lilleArray = @_loadGameFixUnit(data, 'right_lille')
         @prev_item = @_loadGameFixUnit(data, 'prev_item')
+        @now_speed = @_loadGameFixUnit(data, 'now_speed')
 
     _loadGameFixUnit:(data, key)->
         if data[key] != undefined
@@ -510,6 +526,7 @@ class LoveliveGame extends catchAndSlotGame
         sys.itemDsp()
         @pause_scene.pause_item_buy_layer.resetItemList()
         @pause_scene.pause_item_use_layer.dspSetItemList()
+        @pause_scene.pause_item_use_layer.setSpeedList()
         @pause_scene.pause_member_set_layer.dispSetMemberList()
         @pause_scene.pause_record_layer.resetRecordList()
         @pause_scene.pause_record_layer.resetTrophyList()

@@ -89,16 +89,16 @@ class pauseItemBuySelectLayer extends appDomLayer
         @_setButton()
     _setDiscription:()->
         text = '効果：'+@item_options.discription
-        if @item_options.durationSec != undefined
-            text += '<br>持続時間：'+@item_options.durationSec+'秒'
+        #if @item_options.durationSec != undefined
+        #    text += '<br>持続時間：'+@item_options.durationSec+'秒'
         if @item_options.condFunc() is true || 20 < @item_kind
             text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'+'(所持金'+game.toJPUnit(game.money)+'円)'
         if @item_options.condFunc() is false || 20 < @item_kind
             text += '<br>出現条件：'+@item_options.conditoin
-            if @item_kind is 21 || @item_kind is 23
+            if @item_kind is 21
                 text += '<br>(MAXコンボ'+game.max_combo+')'
-            if @item_kind is 22
-                text += '<br>('+game.countSoloMusic()+'曲達成済)'
+            if @item_kind is 22 || @item_kind is 23
+                text += '<br>(MAXコンボ'+game.max_combo+'、'+game.countFullMusic()+'曲達成済)'
             if @item_kind is 24
                 text += '<br>('+game.countFullMusic()+'曲達成済)'
         return text
@@ -121,3 +121,4 @@ class pauseItemBuySelectLayer extends appDomLayer
         game.main_scene.gp_system.money_text.setValue()
         if 21 <= @item_kind
             game.pause_scene.pause_record_layer.resetTrophyList()
+            game.now_speed = game.speedItemHave()

@@ -85,7 +85,7 @@ class useItemButtonHtml extends pauseMainMenuButtonHtml
         super 100, 45
         @x = 30
         @y = 490
-        @text = '魔法'
+        @text = 'スキル'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-green')
         @setHtml()

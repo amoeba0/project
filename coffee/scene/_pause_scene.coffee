@@ -64,6 +64,7 @@ class pauseScene extends appScene
         @removeChild(@pause_item_use_layer)
         @pause_item_use_layer = null
         @isAblePopPause = true
+        game.itemUseExe()
     setMemberSetMenu:()->
         @pause_member_set_layer = new pauseMemberSetLayer()
         @pause_member_set_layer.resetItemList()

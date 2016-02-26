@@ -58,7 +58,7 @@ class stageFront extends gpStage
             if @itemFallSec != @itemFallSecInit
                 @setItemFallFrm(@itemFallSecInit)
         if @missItemFallSycleNow is @missItemFallSycle && @age % @itemFallFrm is @itemFallFrm / 2
-            if game.isItemSet(1) is false && game.fever is false
+            if game.isItemSet(2) is false && game.fever is false
                 @_missCatchFall()
             @missItemFallSycleNow = 0
 
@@ -84,7 +84,7 @@ class stageFront extends gpStage
             game.main_scene.gp_slot.endForceSlotHit()
 
     _missCatchFall:()->
-        if game.money >= game.bet
+        if game.money >= game.bet && game.past_fever_num >= 2
             @catchMissItems.push(new OnionCatch())
             @addChild(@catchMissItems[@nowCatchMissItemsNum])
             game.sePlay(@miss_fall_se)

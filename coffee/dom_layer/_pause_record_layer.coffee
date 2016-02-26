@@ -108,10 +108,10 @@ class pauseTrophySelectLayer extends pauseBaseRecordSelectLayer
         text = '効果：'+@item_options.discription
         text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'+'(所持金'+game.toJPUnit(game.money)+'円)'
         text += '<br>出現条件：'+@item_options.conditoin
-        if @kind is 21 || @kind is 23
+        if @kind is 21
             text += '<br>(MAXコンボ'+game.max_combo+')'
-        if @kind is 22
-            text += '<br>('+game.countSoloMusic()+'曲達成済)'
+        if @kind is 22 || @kind is 23
+            text += '<br>(MAXコンボ'+game.max_combo+'、'+game.countFullMusic()+'曲達成済)'
         if @kind is 24
             text += '<br>('+game.countFullMusic()+'曲達成済)'
         return text

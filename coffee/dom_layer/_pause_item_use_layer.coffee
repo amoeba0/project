@@ -36,11 +36,31 @@ class pauseItemUseLayer extends appDomLayer
             item_val.setPosition()
     setSpeedList:()->
         for speed_key, speed_val of @speed_list
-            speed_val.setPosition()
-            speed_val.opacity = 0.5
-            speed_val.addDomClass('grayscale', true)
-            speed_val.changeNotButton()
-            speed_val.is_exist = false
+            speed_key = parseInt(speed_key)
+            if speed_key is 1 || (speed_key is 2 && game.now_speed is 2) || game.now_speed is 3
+                @_setSpeedActiveBtn(speed_val)
+            else if (speed_key is 3 && game.speedItemHave() is 3 && game.now_speed <= 2) || (speed_key is 2 && 2 <= game.speedItemHave() && game.now_speed is 1)
+                @_setSpeedTransBtn(speed_val)
+            else
+                @_setSpeedGrayBtn(speed_val)
+    _setSpeedGrayBtn:(speed_val)->
+        speed_val.setPosition()
+        speed_val.opacity = 0.5
+        speed_val.addDomClass('grayscale', true)
+        speed_val.changeNotButton()
+        speed_val.is_exist = false
+    _setSpeedTransBtn:(speed_val)->
+        speed_val.setPosition()
+        speed_val.opacity = 0.5
+        speed_val.removeDomClass('grayscale', true)
+        speed_val.changeIsButton()
+        speed_val.is_exist = true
+    _setSpeedActiveBtn:(speed_val)->
+        speed_val.setPosition()
+        speed_val.opacity = 1
+        speed_val.removeDomClass('grayscale', true)
+        speed_val.changeIsButton()
+        speed_val.is_exist = true
     resetItemList:()->
         for item_key, item_val of @item_list
             if game.item_set_now.indexOf(parseInt(item_key)) != -1
@@ -107,8 +127,8 @@ class pauseItemUseSelectLayer extends appDomLayer
         @item_discription.setText(discription)
     _setDiscription:()->
         text = '効果：'+@item_options.discription
-        if @item_options.durationSec != undefined
-            text += '<br>持続時間：'+@item_options.durationSec+'秒'
+        #if @item_options.durationSec != undefined
+        #    text += '<br>持続時間：'+@item_options.durationSec+'秒'
         return text
     setItem:()->
         @_itemSet(@item_kind)
