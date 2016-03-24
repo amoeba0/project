@@ -1141,6 +1141,8 @@ class slotSetting extends appNode
             game.bet -= val
         else if game.bet > 100000000000
             game.bet = 100000000000
+        if up is false and game.auto_bet is 1 and game.bet < Math.floor(game.money / 100)
+            game.auto_bet = 0
 
     ###
     掛け金が所持金を上回った時に掛け金を減らす
@@ -1151,3 +1153,11 @@ class slotSetting extends appNode
         if val < 1
             val = 1
         return val
+
+    betUp:()->
+        if game.auto_bet is 1 and game.fever is false and @isForceSlotHit is false
+            tmp_bet = Math.floor(game.money / 100)
+            if game.bet < tmp_bet
+                digit = Math.pow(10, (String(tmp_bet).length - 1))
+                game.bet = Math.floor(tmp_bet / digit) * digit
+                game.main_scene.gp_system.bet_text.setValue()

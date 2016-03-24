@@ -9,7 +9,7 @@ class moneyText extends text
         super
         @text = 0
         @color = 'black'
-        @font_size = 22
+        @font_size = 24
         @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
         @x = 0
         @y = 7
@@ -30,7 +30,7 @@ class moneyText extends text
         @x = game.width - @_boundWidth - 7
     setPositionPause:()->
         @x = 100
-        @y = 210
+        @y = 190
 
 class betText extends text
     constructor: () ->
@@ -49,7 +49,7 @@ class betText extends text
         game.main_scene.gp_system.low_bet_button.setXposition()
     setPositionPause:()->
         @x = 140
-        @y = 270
+        @y = 245
 
 class comboText extends text
     constructor: () ->
@@ -77,3 +77,37 @@ class comboUnitText extends text
         @font = "22px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
         @x = 217
         @y = 90
+
+class storyBackTxt extends text
+    constructor: (width, height) ->
+        super
+        @text = '戻る'
+        @color = 'black'
+        @font = (height - 8) + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = game.width - width - 10 + 9
+        @y = game.height - height - 50 + 2
+    ontouchend: () ->
+        game.endStory()
+
+class storyMessage extends text
+    constructor: (width, height) ->
+        super width, height
+        @text = ''
+        @fontInit = "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @font = ''
+        @color = "white"
+        @message = ''
+        @speed = 4
+        @x = 30
+        @y = game.width + Math.floor((game.height - game.width) / 2) - height - 5
+    onenterframe:()->
+        if @all_length > @now_length
+            @now_length += @speed
+            @text = @message.substring(0, @now_length)
+    init:(message, fontSize=22, speed=4)->
+        @font = fontSize + @fontInit
+        @speed = speed
+        @all_length = message.length
+        @now_length = 0
+        @message = message
+        @text = ""

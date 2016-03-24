@@ -112,9 +112,11 @@ class appGame extends Game
     ロード終了後にloadedFileにロードしたファイルを置いておいて、ロード済みかどうかの判別に使う
     ###
     appLoad:(file)->
-        @load(file)
-        #if @loadedFile.indexOf(file) is -1
-        #@load(file, @setLoadedFile(file))
+        #@load(file)
+        if @loadedFile.indexOf(file) is -1
+            @load(file, =>
+                @setLoadedFile(file)
+            )
 
     ###
     ロード済みのファイルを記憶しておく

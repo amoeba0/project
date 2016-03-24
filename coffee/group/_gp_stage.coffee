@@ -67,6 +67,7 @@ class stageFront extends gpStage
     ###
     _catchFall:()->
         if game.bet > game.money
+            game.auto_bet = 0
             game.bet = game.slot_setting.betDown()
             game.main_scene.gp_system.bet_text.setValue()
         if 0 < game.money

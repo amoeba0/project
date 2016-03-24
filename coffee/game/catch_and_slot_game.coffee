@@ -55,6 +55,7 @@ class LoveliveGame extends catchAndSlotGame
         @prev_fever_muse = [] #過去にフィーバーになったμ’ｓメンバー（ユニット番号も含む）
         @prev_item = [] #前にセットしていたアイテム
         @now_speed = 1 #現在の移動速度とジャンプ力
+        @auto_bet = 1 #自動的に掛け金を上げる
 
         @init_load_val = {
             'money':100,
@@ -73,6 +74,7 @@ class LoveliveGame extends catchAndSlotGame
             'member_set_now':[],
             'prev_fever_muse':[],
             'prev_item':[],
+            'auto_bet':1,
             'left_lille':@arrayCopy(@slot_setting.lille_array_0[0]),
             'middle_lille':@arrayCopy(@slot_setting.lille_array_0[1]),
             'right_lille':@arrayCopy(@slot_setting.lille_array_0[2])
@@ -100,6 +102,9 @@ class LoveliveGame extends catchAndSlotGame
                 @pushScene(@main_scene)
                 if @debug.force_pause_flg is true
                     @setPauseScene()
+            else if @debug.foece_story_flg is true
+                @startOpStory()
+
 
     ###
     タイトルへ戻る
@@ -335,6 +340,7 @@ class LoveliveGame extends catchAndSlotGame
         @pushScene(@pause_scene)
         @pause_scene.pause_item_buy_layer.resetItemList()
         @pause_scene.pause_main_layer.statusDsp()
+        @pause_scene.pause_main_layer.bet_checkbox.setCheck()
         @nowPlayBgmPause()
     ###
     ポーズシーンをポップする
@@ -345,6 +351,35 @@ class LoveliveGame extends catchAndSlotGame
         @main_scene.gp_system.bet_text.setValue()
         @popScene(@pause_scene)
         @nowPlayBgmRestart()
+
+    ###
+    オープニング開始
+    ###
+    startOpStory:()->
+        @_pushStory()
+        #@story_scene.opStart()
+        @story_scene.testStart()
+
+    ###
+    エンディング開始
+    ###
+    startEdStory:()->
+        @_pushStory()
+        #@story_scene.edStart()
+        @story_scene.testStart()
+
+    ###
+    ストーリー開始
+    ###
+    _pushStory:()->
+        @story_scene = new stolyScene()
+        @pushScene(@story_scene)
+
+    ###
+    ストーリー終了
+    ###
+    endStory:()->
+        @popScene(@story_scene)
 
     ###
     ゲームをロードする
@@ -381,7 +416,8 @@ class LoveliveGame extends catchAndSlotGame
             'member_set_now':'[]',
             'prev_fever_muse':'[]',
             'max_set_item_num':0,
-            'prev_item':'[]'
+            'prev_item':'[]',
+            'auto_bet':0
         }
         ret = null
         if data[key] is undefined
@@ -414,7 +450,8 @@ class LoveliveGame extends catchAndSlotGame
             'prev_fever_muse':JSON.stringify(@prev_fever_muse),
             'max_set_item_num':@max_set_item_num,
             'prev_item':JSON.stringify(@prev_item),
-            'now_speed': @now_speed
+            'now_speed': @now_speed,
+            'auto_bet':@auto_bet
         }
         for key, val of saveData
             @local_storage.setItem(key, val)
@@ -444,6 +481,7 @@ class LoveliveGame extends catchAndSlotGame
             @max_set_item_num = @_loadStorage('max_set_item_num', 'num')
             @prev_item = @_loadStorage('prev_item', 'json')
             @now_speed = @_loadStorage('now_speed', 'num')
+            @auto_bet = @_loadStorage('auto_bet', 'num')
     ###
     ローカルストレージから指定のキーの値を取り出して返す
     @param string key ロードするデータのキー
@@ -501,6 +539,7 @@ class LoveliveGame extends catchAndSlotGame
         @main_scene.gp_slot.right_lille.lilleArray = @_loadGameFixUnit(data, 'right_lille')
         @prev_item = @_loadGameFixUnit(data, 'prev_item')
         @now_speed = @_loadGameFixUnit(data, 'now_speed')
+        @auto_bet = @_loadGameFixUnit(data, 'auto_bet')
 
     _loadGameFixUnit:(data, key)->
         if data[key] != undefined

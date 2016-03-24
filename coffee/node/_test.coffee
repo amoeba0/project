@@ -24,7 +24,8 @@ class Test extends appNode
         #@getRoleByMemberSetNow()
         #@getRoleAbleMemberList()
         #@betDown()
-        @setForceFeverRole()
+        #@setForceFeverRole()
+        @betUp()
 
     #以下、テスト用関数
 
@@ -132,3 +133,12 @@ class Test extends appNode
         lille = [15,4,1,4,11,2,5,1,4,2,5,12,4,1,2,3,1,4,13,3]
         role = game.slot_setting.setForceFeverRole(lille)
         console.log(role)
+
+    betUp:()->
+        game.auto_bet = 1
+        game.money = 62345
+        game.bet = 520
+        console.log(game.money)
+        console.log(game.bet)
+        game.slot_setting.betUp()
+        console.log(game.bet)

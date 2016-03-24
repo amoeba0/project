@@ -55,12 +55,12 @@ class Catch extends Item
         else
             ret_x = Math.floor((game.width - @w) * Math.random())
             if @is_miss_item is false && (game.isItemSet(7) || game.past_fever_num < 1)
-                #TODO 画面端っこにいれば取りやすい、画面端の方にいるとステージ半分の位置になるように調整
                 ret_x = Math.floor(game.main_scene.gp_stage_front.player.x + (game.width * 0.5 * Math.random()) - (game.width * 0.25))
                 if ret_x < 0
-                    ret_x = 0
+                    ret_x = (game.width - @w) * 0.5 * Math.random()
                 if ret_x > (game.width - @w)
-                    ret_x = game.width - @w
+                    ret_x = (game.width - @w) * 0.5 * Math.random() + (game.width * 0.5) - @w
+                    console.log(ret_x)
         return ret_x
 
 ###

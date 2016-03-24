@@ -153,7 +153,7 @@ class heighBetButtonPause extends buttonHtml
         super 33, 33
         @class.push('triangle-top')
         @x = 90
-        @y = 270
+        @y = 245
         @setHtml()
     ontouchend: () ->
         game.pause_scene.pause_main_layer.betSetting(true)
@@ -188,9 +188,18 @@ class lowBetButtonPause extends buttonHtml
         super 33, 33
         @class.push('triangle-bottom')
         @x = 90
-        @y = 270
+        @y = 245
         @setHtml()
     ontouchend: () ->
         game.pause_scene.pause_main_layer.betSetting(false)
     setXposition:()->
         @x = 160 + game.pause_scene.pause_main_layer.bet_text._boundWidth
+
+class storyBackBtn extends Button
+    constructor: (w, h)->
+        super w, h
+        @image = @drawRect("#aaa")
+        @x = game.width - @width - 10
+        @y = game.height - @height - 50
+    ontouchend: () ->
+        game.endStory()

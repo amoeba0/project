@@ -33,7 +33,7 @@ class pauseMainMenuButtonHtml extends buttonHtml
 class returnGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 300, 45
-        @y = 80
+        @y = 60
         @text = 'ゲームに戻る'
         @class.push('pause-main-menu-button-white')
         @setHtml()
@@ -47,7 +47,7 @@ class returnGameButtonHtml extends pauseMainMenuButtonHtml
 class saveGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 180, 45
-        @y = 620
+        @y = 640
         @text = 'セーブ'
         @class.push('pause-main-menu-button-middle')
         @class.push('pause-main-menu-button-blue')
@@ -61,7 +61,7 @@ class returnTitleButtonHtml extends pauseMainMenuButtonHtml
     constructor:()->
         super 180, 45
         @x = 250
-        @y = 620
+        @y = 640
         @text = 'タイトル'
         @class.push('pause-main-menu-button-middle')
         @setHtml()
@@ -72,7 +72,7 @@ class returnTitleButtonHtml extends pauseMainMenuButtonHtml
 class buyItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 400, 45
-        @y = 370
+        @y = 390
         @text = 'アイテムSHOP'
         @class.push('pause-main-menu-button-purple')
         @setHtml()
@@ -84,7 +84,7 @@ class useItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 100, 45
         @x = 30
-        @y = 490
+        @y = 510
         @text = 'スキル'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-green')
@@ -97,7 +97,7 @@ class setMemberButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 100, 45
         @x = 170
-        @y = 490
+        @y = 510
         @text = '部員'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-red')
@@ -110,7 +110,7 @@ class recordButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 100, 45
         @x = 310
-        @y = 490
+        @y = 510
         @text = '実績'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-orange')
@@ -348,7 +348,7 @@ class titleMenuButtonHtml extends buttonHtml
 class startGameButtonHtml extends titleMenuButtonHtml
     constructor: () ->
         super
-        @y = 350
+        @y = 610
         @text = '続きから'
         @setHtml()
     touchendEvent:() ->
@@ -357,11 +357,20 @@ class startGameButtonHtml extends titleMenuButtonHtml
 class newGameButtonHtml extends titleMenuButtonHtml
     constructor: () ->
         super
-        @y = 430
+        @y = 530
         @text = '初めから'
         @setHtml()
     touchendEvent:() ->
         game.newGameStart()
+
+class storyButtonHtml extends titleMenuButtonHtml
+    constructor: () ->
+        super
+        @y = 450
+        @text = 'ストーリー'
+        @setHtml()
+    touchendEvent:() ->
+        game.startOpStory()
 
 ###
 ダイアログを閉じるボタン
@@ -443,3 +452,14 @@ class autoMemberUnsetButtonHtml extends buttonHtml
         game.sePlay(@dicisionSe)
         game.member_set_now = []
         game.pause_scene.pause_member_set_layer.dispSetMemberList()
+
+class endingButtonHtml extends buttonHtml
+    constructor:()->
+        super 150, 45
+        @x = 70
+        @y = 480
+        @class.push('ending-button')
+        @text = '使う'
+        @setHtml()
+    ontouchend: (e) ->
+        game.startEdStory()

@@ -36,6 +36,7 @@ class Money extends Item
             game.main_scene.gp_stage_back.removeChild(@)
             game.money += @price
             game.main_scene.gp_system.money_text.setValue()
+            game.slot_setting.betUp()
 
     ###
     地面に落ちたら消す

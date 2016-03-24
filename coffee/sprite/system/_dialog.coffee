@@ -17,3 +17,16 @@ class whiteBack extends Dialog
         super game.width, game.height
         @image = @drawRect('#FFFFFF')
         @opacity = 1
+
+class blackBack extends Dialog
+    constructor: (w, h) ->
+        super game.width, game.height
+        @image = @drawRect('#000000')
+        @opacity = 1
+
+class storyTextWindow extends Dialog
+    constructor:(w, h)->
+        super w, h
+        @image = @drawRect('#000000')
+        @x = 10
+        @y = game.width + Math.floor((game.height - game.width) / 2) - h - 10

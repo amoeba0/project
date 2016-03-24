@@ -20,9 +20,9 @@ class saveDialogHtml extends baseDialogHtml
         @setHtml()
 class betDialogHtml extends baseDialogHtml
     constructor:()->
-        super 340, 200
+        super 340, 240
         @x = 60
-        @y = 180
+        @y = 160
         @class.push('base-dialog-bet')
         @setHtml()
 class menuDialogHtml extends baseDialogHtml

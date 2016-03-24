@@ -25,6 +25,8 @@ class pauseMainLayer extends appDomLayer
         @addChild(@heigh_bet_button)
         @low_bet_button = new lowBetButtonPause()
         @addChild(@low_bet_button)
+        @bet_checkbox = new betCheckboxHtml()
+        @addChild(@bet_checkbox)
         @y = -20
     statusDsp:()->
         @money_text.setValue()
