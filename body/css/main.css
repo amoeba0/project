@@ -77,7 +77,7 @@
 .base-buy-button {
     background-color: #29DE7A;
     width: 150px;
-    padding: 7px 0px;
+    padding: 5px 0px;
     font: 37px Consolas Monaco MSゴシック;
     border: solid 3px #cccccc;
     color: white;
@@ -90,10 +90,10 @@
     border: solid 3px #cccccc;
     color: white;
 }
-.ending-button {
+.story-button {
     background-color: #29DE7A;
     width: 150px;
-    padding: 12px 0px;
+    padding: 10px 0px;
     font: 37px Consolas Monaco MSゴシック;
     border: solid 3px #cccccc;
     color: white;
@@ -135,10 +135,14 @@
     padding: 200px 0px 200px 0px;
     width: 400px;
 }
-
+.base-dialog-select-high {
+    padding: 200px 0px 230px 0px;
+    width: 400px;
+}
 
 .base-discription{
-    font: 22px Consolas Monaco MSゴシック;
+    font: 20px Consolas Monaco MSゴシック;
+    line-height: 1.2em;
 }
 .base-discription-sp{
 	font-size:17px;

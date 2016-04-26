@@ -6,6 +6,9 @@ class gpEffect extends appGroup
         @fever_overlay = new feverOverlay()
         @kirakira_effect = []
         @kirakira_num = 40
+        #スマホの処理落ちはこのキラキラが重いせいかも
+        if game.isSumaho()
+            @kirakira_num = 10
         @item_catch_effect = []
 
     cutInSet:(num = 0)->

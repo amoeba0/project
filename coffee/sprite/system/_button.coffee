@@ -105,6 +105,16 @@ class jumpButton extends controllerButton
 
 class largeJumpButton extends Button
     constructor: () ->
+        super 150, 150
+        @x = (game.width - @w) / 2
+        @y = game.height - @height
+    ontouchstart: () ->
+        game.main_scene.buttonList.jump = true
+    ontouchend: () ->
+        game.main_scene.buttonList.jump = false
+
+class megaJumpButton extends Button
+    constructor: () ->
         super game.width, 400
         @x = 0
         @y = 230

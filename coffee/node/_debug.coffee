@@ -6,16 +6,16 @@ class Debug extends appNode
         super
 
         #開始後いきなりメイン画面
-        @force_main_flg = false
+        @force_main_flg = true
         #開始後いきなりポーズ画面
         @force_pause_flg = false
         #開始後いきなりオープニング
-        @foece_story_flg = true
+        @foece_story_flg = false
 
         #ゲーム開始時ロードをしない
         @not_load_flg = false
         #テストロードに切り替え
-        @test_load_flg = true
+        @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
             'money':98765432100,
@@ -29,7 +29,7 @@ class Debug extends appNode
             'now_muse_num':0,
             'max_set_item_num':1,
             'now_speed':1,
-            'item_have_now':[3,4,5,12,13,23,24],
+            'item_have_now':[3,4,5,12,13,14,15,21,22,23,24],
             'item_set_now':[3],
             'member_set_now':[12,13],
             'prev_fever_muse':[12,13,14,15,16,17,18,19],

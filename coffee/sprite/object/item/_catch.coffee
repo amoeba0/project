@@ -23,6 +23,7 @@ class Catch extends Item
             game.main_scene.gp_system.combo_text.setValue()
             game.main_scene.gp_slot.slotStop()
             game.tensionSetValueItemCatch()
+            game.main_scene.gp_stage_front.isCatchItemExist = false
 
     ###
     地面に落ちたら消す
@@ -35,6 +36,7 @@ class Catch extends Item
                 game.combo = 0
             game.main_scene.gp_system.combo_text.setValue()
             game.tensionSetValueItemFall()
+            game.main_scene.gp_stage_front.isCatchItemExist = false
 
     ###
     座標と落下速度の設定
@@ -60,7 +62,6 @@ class Catch extends Item
                     ret_x = (game.width - @w) * 0.5 * Math.random()
                 if ret_x > (game.width - @w)
                     ret_x = (game.width - @w) * 0.5 * Math.random() + (game.width * 0.5) - @w
-                    console.log(ret_x)
         return ret_x
 
 ###

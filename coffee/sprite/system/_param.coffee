@@ -4,16 +4,17 @@ class Param extends System
 
 class TensionGaugeBack extends Param
     constructor: (w, h) ->
-        super 457, 19
+        super 387, 19
         @image = @drawRect('#FFFFFF')
-        @x = 11
+        @x = 81
         @y = 46
 
 class TensionGauge extends Param
     constructor: (w, h) ->
-        super 450, 11
+        super 380, 11
         @image = @drawRect('#6EB7DB')
-        @x = 15
+        @initX = 85
+        @x = @initX
         @y = 50
         @setValue()
 
@@ -22,7 +23,7 @@ class TensionGauge extends Param
         if game.tension != 0
             tension = game.tension / game.slot_setting.tension_max
         @scaleX = tension
-        @x = 15 - ((@w - tension * @w) / 2)
+        @x = @initX - ((@w - tension * @w) / 2)
         if tension < 0.25
             @image = @drawRect('#6EB7DB')
         else if tension < 0.5
@@ -62,3 +63,34 @@ class ItemGauge extends Param
         @y = 112
     setWidth:()->
         @width = 51 * game.max_set_item_num
+
+class ItemGaugeShine extends Param
+    constructor:()->
+        super 51, 8
+        @image = @drawRect('#FFF')
+        @x = 0
+        @y = 112
+        @opacity = 0
+    onenterframe:(e)->
+        if 0 < @opacity
+            @opacity -= 0.1
+            if @opacity <= 0
+                @opacity = 0
+
+class loadArc extends Param
+    constructor:()->
+        super 80, 80
+        @angle = 0
+        @wait = game.fps * 1.5
+        @angle_frame = 360 / @wait
+        @image = @drawArc('#FFF', 10, @angle)
+        itemX = game.main_scene.gp_stage_front.getCatchItemsXposition()
+        if itemX != 0
+            @x = itemX - 15
+        else
+            @x = game.width / 2 - @width / 2
+        @y = game.height / 2 - @height / 2
+    onenterframe:(e)->
+        if @angle < 360
+            @angle += @angle_frame
+            @image = @drawArc('#FFF', 10, @angle)

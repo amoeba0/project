@@ -79,6 +79,11 @@ class pauseItemBuySelectLayer extends appDomLayer
         @item_options = []
     setSelectItem:(kind)->
         @item_kind = kind
+        if 21 <= kind
+            @dialog.class.push('base-dialog-select-high')
+            @buy_button.y += 20
+            @cancel_button.y += 20
+            @dialog.setHtml()
         @item_options = game.slot_setting.item_list[kind]
         if @item_options is undefined
             @item_options = game.slot_setting.item_list[0]

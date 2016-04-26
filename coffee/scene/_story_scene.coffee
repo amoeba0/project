@@ -19,23 +19,22 @@ class stolyScene extends appScene
                 @gp_object.honoka.moveToStatic()
             3:=>
                 @gp_panorama.haiko.tl.fadeOut(24)
-                @gp_sentence.txtSet('test', 48, 0.5)
+                @gp_sentence.txtSet('test', 52, 0.5)
                 @gp_object.honoka.tateShake()
                 @gp_object.kotori.moveToStatic()
             5:=>
                 @gp_sentence.txtSet(
-                    'hoge<br>hoge
-                    hogehoge'
+                    '穂乃果<br>それだ！,さすがことりちゃん！<br>,腹黒いね！,でも、廃校を阻止するほどお金ないよ？<br>,どうするの？'
                 )
                 @gp_object.kotori.yokoShake()
-            6:=>
+            9:=>
                 @gp_sentence.txtEnd()
                 @gp_object.honoka.rotate()
                 @gp_object.kotori.scale()
-            9:=>
+            12:=>
                 @gp_object.honoka.moveToInit()
                 @gp_object.kotori.moveToInit()
-            11:=>
+            14:=>
                 game.endStory()
         })
     opStart:()->

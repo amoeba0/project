@@ -377,18 +377,18 @@ class storyButtonHtml extends titleMenuButtonHtml
 ###
 class dialogCloseButton extends systemHtml
     constructor:()->
-        super 30, 30
+        super 90, 90
         @image_name = 'close'
         @is_button = true
-        @x = 400
-        @y = 100
+        @x = 370
+        @y = 70
         @setImageHtml()
         @cancelSe = game.soundload('cancel')
 
 class itemBuyDialogCloseButton extends dialogCloseButton
     constructor:()->
         super
-        @y = 70
+        @y = 40
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeItemBuyMenu()
@@ -396,7 +396,7 @@ class itemBuyDialogCloseButton extends dialogCloseButton
 class itemUseDialogCloseButton extends dialogCloseButton
     constructor:()->
         super
-        @y = 70
+        @y = 40
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeItemUseMenu()
@@ -404,7 +404,7 @@ class itemUseDialogCloseButton extends dialogCloseButton
 class memberSetDialogCloseButton extends dialogCloseButton
     constructor:()->
         super
-        @y = 70
+        @y = 40
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeMemberSetMenu()
@@ -412,7 +412,7 @@ class memberSetDialogCloseButton extends dialogCloseButton
 class recordDialogCloseButton extends dialogCloseButton
     constructor:()->
         super
-        @y = 70
+        @y = 40
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeRecordMenu()
@@ -453,13 +453,44 @@ class autoMemberUnsetButtonHtml extends buttonHtml
         game.member_set_now = []
         game.pause_scene.pause_member_set_layer.dispSetMemberList()
 
-class endingButtonHtml extends buttonHtml
+class storyButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
         @x = 70
         @y = 480
-        @class.push('ending-button')
-        @text = '使う'
+        @class.push('story-button')
+        @text = ''
+    ontouchend: (e) ->
+        game.startEdStory()
+
+class secondButtonHtml extends storyButtonHtml
+    constructor:()->
+        super
+        @text = '第２話'
+        @setHtml()
+    ontouchend: (e) ->
+        game.start2ndStory()
+
+class thirdButtonHtml extends storyButtonHtml
+    constructor:()->
+        super
+        @text = '第３話'
+        @setHtml()
+    ontouchend: (e) ->
+        game.start3rdStory()
+
+class fourthButtonHtml extends storyButtonHtml
+    constructor:()->
+        super
+        @text = '第４話'
+        @setHtml()
+    ontouchend: (e) ->
+        game.start4thStory()
+
+class endingButtonHtml extends storyButtonHtml
+    constructor:()->
+        super
+        @text = '最終話'
         @setHtml()
     ontouchend: (e) ->
         game.startEdStory()

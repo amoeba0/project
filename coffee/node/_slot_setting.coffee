@@ -266,7 +266,7 @@ class slotSetting extends appNode
             3:{
                 'name':'テンション上がるにゃー！',
                 'image':'item_3',
-                'discription':'移動速度とジャンプ力が上がる',
+                'discription':'移動速度とジャンプ力が上がる<br>テンションの上がり幅が1.3倍になる',
                 'price':100000,
                 'durationSec':90,
                 'conditoin':'',
@@ -316,7 +316,7 @@ class slotSetting extends appNode
             8:{
                 'name':'鈍いのですね',
                 'image':'item_8',
-                'discription':'おやつが降ってくる速度が<br>だいぶ遅くなる<br>チョットマッテテーと組み合わせると<br>更に遅くなる',
+                'discription':'おやつが降ってくる速度が<br>だいぶ遅くなる<br>チョットマッテテー（遅）と組み合わせると<br>更に遅くなる',
                 'price':500000000,
                 'durationSec':90,
                 'conditoin':'',
@@ -418,34 +418,34 @@ class slotSetting extends appNode
             21:{
                 'name':'ブロンズことり',
                 'image':'item_21',
-                'discription':'移動速度とジャンプ力がアップする',
+                'discription':'第２話が見れる<br>移動速度とジャンプ力がアップする',
                 'price':1000000,
-                'conditoin':'100コンボ達成する',
+                'conditoin':'75コンボ達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(21)
             },
             22:{
                 'name':'シルバーことり',
                 'image':'item_22',
-                'discription':'スキルのスロットが1つ増える',
+                'discription':'第３話が見れる<br>スキルのスロットが1つ増える',
                 'price':100000000,
-                'conditoin':'200コンボ達成する<br>または、楽曲を9曲以上達成する',
+                'conditoin':'150コンボ達成する<br>または、楽曲を9曲以上達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(22)
             },
             23:{
                 'name':'ゴールドことり',
                 'image':'item_23',
-                'discription':'移動速度とジャンプ力がアップする<br>スキルのスロットが1つ増える',
+                'discription':'第４話が見れる<br>移動速度とジャンプ力がアップする<br>スキルのスロットが1つ増える',
                 'price':10000000000,
-                'conditoin':'200コンボ達成する<br>かつ、楽曲を9曲以上達成する',
+                'conditoin':'150コンボ達成する<br>かつ、楽曲を9曲以上達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(23)
             },
             24:{
                 'name':'プラチナことり',
                 'image':'item_24',
-                'discription':'エンディングが見れる',
+                'discription':'最終話が見れる',
                 'price':1000000000000,
                 'conditoin':'楽曲を15曲以上達成する',
                 'condFunc':()->
@@ -593,7 +593,7 @@ class slotSetting extends appNode
         div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
-            div = Math.floor((game.combo - 100) / 30) / 10
+            div = Math.floor((game.combo - 100) / 50) / 10
             if div < 0
                 div = 0
             if 2 < div
@@ -732,15 +732,16 @@ class slotSetting extends appNode
     _upItemPointIfPlayerIsAir:()->
         playerY = game.main_scene.gp_stage_front.player.y
         if playerY < game.height * 0.4
-            val = 60
+            val = 100
         else if playerY < game.height * 0.5
-            val = 50
+            val = 80
         else if playerY < game.height * 0.6
-            val = 40
+            val = 60
         else
-            val = 30
+            val = 40
         val *= game.max_set_item_num
         game.main_scene.gp_system.upItemPoint(val)
+        game.main_scene.gp_system.shineItemPoint()
 
     ###
     所持金と掛け金の比でテンションの増値に補正を加える
@@ -928,13 +929,13 @@ class slotSetting extends appNode
             if game.prev_fever_muse.indexOf(parseInt(num)) != -1
                 rslt = true
         else if num is 21
-            if 100 <= game.max_combo
+            if 75 <= game.max_combo
                 rslt = true
         else if num is 22
-            if 9 <= game.countFullMusic() || 200 <= game.max_combo
+            if 9 <= game.countFullMusic() || 150 <= game.max_combo
                 rslt = true
         else if num is 23
-            if 9 <= game.countFullMusic() && 200 <= game.max_combo
+            if 9 <= game.countFullMusic() && 150 <= game.max_combo
                 rslt = true
         else if num is 24
             if 15 <= game.countFullMusic()
@@ -986,9 +987,9 @@ class slotSetting extends appNode
             if game.past_fever_num <= 3
                 rate = 20
             else if game.past_fever_num <= 6
-                rate = 16
+                rate = 18
             else
-                rate = 12
+                rate = 16
         else if tension_rate is 100
             if game.past_fever_num <= 3
                 rate = 16

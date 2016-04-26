@@ -20,6 +20,8 @@ class appGame extends Game
         @loadedFile = [] #ロード済みのファイル
         @mstVolume = 1 #ゲームの全体的な音量
         @_getIsServer()
+        if @isSumaho()
+            @beforeunload()
 
     ###
     動かしてる環境がローカルか、サーバーかを判定
@@ -270,6 +272,21 @@ class appGame extends Game
         if ua.Mobile[0] is true || ua.Tablet is true
             rslt = true
         return rslt
+    ###
+    ページ離脱前に警告を出す
+    ###
+    beforeunload:()->
+        msg = 'ゲームを終了します。'
+        ua = @userAgent()
+        if !ua.Mobile.iPhone
+            $(window).on('beforeunload', ()->
+                return msg
+            )
+        else
+            window.addEventListener('pagehide', ()->
+                if !confirm(msg)
+                    return false
+            )
 class appGroup extends Group
     constructor: () ->
         super
@@ -361,6 +378,22 @@ class appSprite extends Sprite
         @context.arc(@w / 2, @h / 2, @w / 2, 0, Math.PI * 2, true)
         @context.fill()
         return @surface
+
+    ###
+    円弧
+    @param color 色
+    @param width 太さ
+    @param angle 角度
+    ###
+    drawArc: (color, width, angle) ->
+        @_makeContext()
+        @context.strokeStyle = color
+        @context.lineWidth = width
+        pi = Math.PI / 180
+        @context.arc(@w / 2, @h / 2, (@w - width) / 2, (-90) * pi, (angle - 90) * pi, false)
+        @context.stroke()
+        return @surface
+
 class pauseItemBuyLayer extends appDomLayer
     constructor: () ->
         super
@@ -442,6 +475,11 @@ class pauseItemBuySelectLayer extends appDomLayer
         @item_options = []
     setSelectItem:(kind)->
         @item_kind = kind
+        if 21 <= kind
+            @dialog.class.push('base-dialog-select-high')
+            @buy_button.y += 20
+            @cancel_button.y += 20
+            @dialog.setHtml()
         @item_options = game.slot_setting.item_list[kind]
         if @item_options is undefined
             @item_options = game.slot_setting.item_list[0]
@@ -898,10 +936,17 @@ class pauseTrophySelectLayer extends pauseBaseRecordSelectLayer
         @item_name.setText(@item_options.name)
         discription = @_setDiscription()
         @item_discription.setText(discription)
-        if @kind is 24
-            @ending_button = new endingButtonHtml()
-            @addChild(@ending_button)
-            @ok_button.x = 250
+        switch @kind
+            when 21 then @story_button = new secondButtonHtml()
+            when 22 then @story_button = new thirdButtonHtml()
+            when 23 then @story_button = new fourthButtonHtml()
+            when 24 then @story_button = new endingButtonHtml()
+        @addChild(@story_button)
+        @dialog.class.push('base-dialog-select-high')
+        @ok_button.y += 30
+        @story_button.y += 30
+        @dialog.setHtml()
+        @ok_button.x = 250
     _setDiscription:()->
         text = '効果：'+@item_options.discription
         text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'+'(所持金'+game.toJPUnit(game.money)+'円)'
@@ -979,7 +1024,7 @@ class LoveliveGame extends catchAndSlotGame
         @fps = 24
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
-                    'heart', 'explosion', 'items', 'coin_pla']
+                    'heart', 'explosion', 'items', 'coin_pla', 'face_honoka', 'face_kotori', 'face_haiko']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm/bgm1']
 
@@ -1161,6 +1206,8 @@ class LoveliveGame extends catchAndSlotGame
     @param number val 増減値
     ###
     tensionSetValue:(val)->
+        if @isItemSet(3) and 0 < val
+            val = Math.floor(val * 1.3)
         @slot_setting.changeLilleForTension(@tension, val)
         prev_tension = @tension
         @tension += val
@@ -1297,6 +1344,7 @@ class LoveliveGame extends catchAndSlotGame
     ポーズシーンをセットする
     ###
     setPauseScene:()->
+        @pause_scene = new pauseScene()
         @pause_scene.keyList.pause = true
         @pushScene(@pause_scene)
         @pause_scene.pause_item_buy_layer.resetItemList()
@@ -1311,6 +1359,13 @@ class LoveliveGame extends catchAndSlotGame
         @main_scene.keyList.pause = true
         @main_scene.gp_system.bet_text.setValue()
         @popScene(@pause_scene)
+
+    setLoadScene:()->
+        @load_scene = new loadScene()
+        @pushScene(@load_scene)
+
+    popLoadScene:()->
+        @popScene(@load_scene)
         @nowPlayBgmRestart()
 
     ###
@@ -1319,6 +1374,18 @@ class LoveliveGame extends catchAndSlotGame
     startOpStory:()->
         @_pushStory()
         #@story_scene.opStart()
+        @story_scene.testStart()
+
+    start2ndStory:()->
+        @_pushStory()
+        @story_scene.testStart()
+
+    start3rdStory:()->
+        @_pushStory()
+        @story_scene.testStart()
+
+    start4thStory:()->
+        @_pushStory()
         @story_scene.testStart()
 
     ###
@@ -1544,6 +1611,9 @@ class gpEffect extends appGroup
         @fever_overlay = new feverOverlay()
         @kirakira_effect = []
         @kirakira_num = 40
+        #スマホの処理落ちはこのキラキラが重いせいかも
+        if game.isSumaho()
+            @kirakira_num = 10
         @item_catch_effect = []
 
     cutInSet:(num = 0)->
@@ -1581,6 +1651,14 @@ class gpEffect extends appGroup
         for i in [1..4]
             @item_catch_effect.push(new itemCatchEffect(i, x, y))
             @addChild(@item_catch_effect[i-1])
+class gpLoad extends appGroup
+    constructor: () ->
+        super
+        @modal = new blackBack()
+        @modal.opacity = 0.2
+        @addChild(@modal)
+        @arc = new loadArc()
+        @addChild(@arc)
 class gpPanorama extends appGroup
     constructor:()->
         super
@@ -1989,6 +2067,7 @@ class stageFront extends gpStage
         @missItemFallSycleNow = 0
         @catchMissItems = []
         @nowCatchMissItemsNum = 0
+        @isCatchItemExist = false
         @item_fall_se = game.soundload('dicision')
         @miss_fall_se = game.soundload('cancel')
         @explotion_effect = new explosionEffect()
@@ -2047,6 +2126,7 @@ class stageFront extends gpStage
         game.sePlay(@item_fall_se)
         @catchItems[@nowCatchItemsNum].setPosition()
         @nowCatchItemsNum += 1
+        @isCatchItemExist = true
         game.main_scene.gp_system.money_text.setValue()
         game.main_scene.gp_slot.slotStart()
         if game.slot_setting.getIsForceSlotHit() is true
@@ -2065,6 +2145,12 @@ class stageFront extends gpStage
     setExplosionEffect:(x, y)->
         @addChild(@explotion_effect)
         @explotion_effect.setInit(x, y)
+
+    getCatchItemsXposition:()->
+        x = 0
+        if @isCatchItemExist
+            x = @catchItems[@nowCatchItemsNum-1].x
+        return x
 
 
 ###
@@ -2410,7 +2496,7 @@ class gpStorySentence extends appGroup
         w = game.width - 20
         h = Math.floor(game.width / 3)
         @window = new storyTextWindow(w, h)
-        @message = new storyMessage(w, h)
+        @message = new storyMessage(w - 80, h)
         @addChild(@window)
     txtSet:(txt, fontSize, speed)->
         @message.init(txt, fontSize, speed)
@@ -2433,6 +2519,8 @@ class gpSystem extends appGroup
         @addChild(@tension_gauge_back)
         @tension_gauge = new TensionGauge()
         @addChild(@tension_gauge)
+        @tension_text = new tensionText()
+        @addChild(@tension_text)
         @pause_button = new pauseButton()
         @addChild(@pause_button)
         @item_slot = {}
@@ -2444,6 +2532,8 @@ class gpSystem extends appGroup
         @addChild(@item_gauge_back)
         @item_gauge = new ItemGauge()
         @addChild(@item_gauge)
+        @item_gauge_shine = new ItemGaugeShine()
+        @addChild(@item_gauge_shine)
         @left_button = new leftButton()
         @addChild(@left_button)
         @right_button = new rightButton()
@@ -2456,6 +2546,8 @@ class gpSystem extends appGroup
         @addChild(@low_bet_button)
         @white_back = new whiteBack()
         if game.isSumaho()
+            @mega_jump_button = new megaJumpButton()
+            @addChild(@mega_jump_button)
             @large_jump_button = new largeJumpButton()
             @addChild(@large_jump_button)
             @large_left_button = new largeLeftButton()
@@ -2585,6 +2677,14 @@ class gpSystem extends appGroup
             else
                 @addChild(@white_back)
                 @isWhiteBack = true
+    ###
+    アイテムゲージが1瞬光る
+    ###
+    shineItemPoint:()->
+        @item_gauge_shine.width = @item_gauge.width
+        @item_gauge_shine.scaleX = @item_gauge.scaleX
+        @item_gauge_shine.x = @item_gauge.x
+        @item_gauge_shine.opacity = 1
 class systemHtml extends appHtml
     constructor: (width, height) ->
         super width, height
@@ -3004,18 +3104,18 @@ class storyButtonHtml extends titleMenuButtonHtml
 ###
 class dialogCloseButton extends systemHtml
     constructor:()->
-        super 30, 30
+        super 90, 90
         @image_name = 'close'
         @is_button = true
-        @x = 400
-        @y = 100
+        @x = 370
+        @y = 70
         @setImageHtml()
         @cancelSe = game.soundload('cancel')
 
 class itemBuyDialogCloseButton extends dialogCloseButton
     constructor:()->
         super
-        @y = 70
+        @y = 40
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeItemBuyMenu()
@@ -3023,7 +3123,7 @@ class itemBuyDialogCloseButton extends dialogCloseButton
 class itemUseDialogCloseButton extends dialogCloseButton
     constructor:()->
         super
-        @y = 70
+        @y = 40
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeItemUseMenu()
@@ -3031,7 +3131,7 @@ class itemUseDialogCloseButton extends dialogCloseButton
 class memberSetDialogCloseButton extends dialogCloseButton
     constructor:()->
         super
-        @y = 70
+        @y = 40
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeMemberSetMenu()
@@ -3039,7 +3139,7 @@ class memberSetDialogCloseButton extends dialogCloseButton
 class recordDialogCloseButton extends dialogCloseButton
     constructor:()->
         super
-        @y = 70
+        @y = 40
     ontouchend: () ->
         game.sePlay(@cancelSe)
         game.pause_scene.removeRecordMenu()
@@ -3080,13 +3180,44 @@ class autoMemberUnsetButtonHtml extends buttonHtml
         game.member_set_now = []
         game.pause_scene.pause_member_set_layer.dispSetMemberList()
 
-class endingButtonHtml extends buttonHtml
+class storyButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
         @x = 70
         @y = 480
-        @class.push('ending-button')
-        @text = '使う'
+        @class.push('story-button')
+        @text = ''
+    ontouchend: (e) ->
+        game.startEdStory()
+
+class secondButtonHtml extends storyButtonHtml
+    constructor:()->
+        super
+        @text = '第２話'
+        @setHtml()
+    ontouchend: (e) ->
+        game.start2ndStory()
+
+class thirdButtonHtml extends storyButtonHtml
+    constructor:()->
+        super
+        @text = '第３話'
+        @setHtml()
+    ontouchend: (e) ->
+        game.start3rdStory()
+
+class fourthButtonHtml extends storyButtonHtml
+    constructor:()->
+        super
+        @text = '第４話'
+        @setHtml()
+    ontouchend: (e) ->
+        game.start4thStory()
+
+class endingButtonHtml extends storyButtonHtml
+    constructor:()->
+        super
+        @text = '最終話'
         @setHtml()
     ontouchend: (e) ->
         game.startEdStory()
@@ -3593,7 +3724,7 @@ class moneyText extends text
         super
         @text = 0
         @color = 'black'
-        @font_size = 24
+        @font_size = 22
         @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
         @x = 0
         @y = 7
@@ -3662,6 +3793,17 @@ class comboUnitText extends text
         @x = 217
         @y = 90
 
+class tensionText extends text
+    constructor:()->
+        super
+        @text = 'テンション'
+        @color = 'black'
+        @font_size = 22
+        @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ Ｐゴシック'"
+        @x = -40
+        @y = 43
+        @scaleX = 0.7
+
 class storyBackTxt extends text
     constructor: (width, height) ->
         super
@@ -3675,25 +3817,52 @@ class storyBackTxt extends text
 
 class storyMessage extends text
     constructor: (width, height) ->
-        super width, height
+        super
+        @width = width
+        @height = height
         @text = ''
         @fontInit = "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
         @font = ''
         @color = "white"
-        @message = ''
         @speed = 4
+        @waitTime = 12
         @x = 30
-        @y = game.width + Math.floor((game.height - game.width) / 2) - height - 5
+        @y = game.width + Math.floor((game.height - game.width) / 2) - height
+        @splited = []
+        @splitedLength = []
+        @nowSplited = 0
+        @wait = 0
+        @splitedNum = 0
     onenterframe:()->
-        if @all_length > @now_length
-            @now_length += @speed
-            @text = @message.substring(0, @now_length)
-    init:(message, fontSize=22, speed=4)->
+        if @nowSplited <= @splitedNum
+            if @wait is 0
+                if @splitedLength[@nowSplited] > @now_length
+                    @now_length += @speed
+                    init_text = ''
+                    if 1 <= @nowSplited
+                        for i in [0..@nowSplited-1]
+                            init_text += @splited[i]
+                    tmp_txt = init_text + @splited[@nowSplited].substring(0, @now_length)
+                    if tmp_txt.indexOf('<') != -1
+                        @now_length += 3
+                        tmp_txt = init_text + @splited[@nowSplited].substring(0, @now_length + 3)
+                    @text = tmp_txt
+                else
+                    @now_length = 0
+                    @nowSplited += 1
+                    @wait = @waitTime
+            else
+                @wait -= 1
+    init:(message, fontSize=26, speed=1)->
         @font = fontSize + @fontInit
         @speed = speed
-        @all_length = message.length
+        @splited = message.split(',')
+        @splitedNum = @splited.length
+        for i, val of @splited
+            @splitedLength[i] = val.length
         @now_length = 0
-        @message = message
+        @nowSplited = 0
+        @wait = 0
         @text = ""
 ###
 デバッグ用設定
@@ -3703,16 +3872,16 @@ class Debug extends appNode
         super
 
         #開始後いきなりメイン画面
-        @force_main_flg = false
+        @force_main_flg = true
         #開始後いきなりポーズ画面
         @force_pause_flg = false
         #開始後いきなりオープニング
-        @foece_story_flg = true
+        @foece_story_flg = false
 
         #ゲーム開始時ロードをしない
         @not_load_flg = false
         #テストロードに切り替え
-        @test_load_flg = true
+        @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
             'money':98765432100,
@@ -3726,7 +3895,7 @@ class Debug extends appNode
             'now_muse_num':0,
             'max_set_item_num':1,
             'now_speed':1,
-            'item_have_now':[3,4,5,12,13,23,24],
+            'item_have_now':[3,4,5,12,13,14,15,21,22,23,24],
             'item_set_now':[3],
             'member_set_now':[12,13],
             'prev_fever_muse':[12,13,14,15,16,17,18,19],
@@ -4056,7 +4225,7 @@ class slotSetting extends appNode
             3:{
                 'name':'テンション上がるにゃー！',
                 'image':'item_3',
-                'discription':'移動速度とジャンプ力が上がる',
+                'discription':'移動速度とジャンプ力が上がる<br>テンションの上がり幅が1.3倍になる',
                 'price':100000,
                 'durationSec':90,
                 'conditoin':'',
@@ -4106,7 +4275,7 @@ class slotSetting extends appNode
             8:{
                 'name':'鈍いのですね',
                 'image':'item_8',
-                'discription':'おやつが降ってくる速度が<br>だいぶ遅くなる<br>チョットマッテテーと組み合わせると<br>更に遅くなる',
+                'discription':'おやつが降ってくる速度が<br>だいぶ遅くなる<br>チョットマッテテー（遅）と組み合わせると<br>更に遅くなる',
                 'price':500000000,
                 'durationSec':90,
                 'conditoin':'',
@@ -4208,34 +4377,34 @@ class slotSetting extends appNode
             21:{
                 'name':'ブロンズことり',
                 'image':'item_21',
-                'discription':'移動速度とジャンプ力がアップする',
+                'discription':'第２話が見れる<br>移動速度とジャンプ力がアップする',
                 'price':1000000,
-                'conditoin':'100コンボ達成する',
+                'conditoin':'75コンボ達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(21)
             },
             22:{
                 'name':'シルバーことり',
                 'image':'item_22',
-                'discription':'スキルのスロットが1つ増える',
+                'discription':'第３話が見れる<br>スキルのスロットが1つ増える',
                 'price':100000000,
-                'conditoin':'200コンボ達成する<br>または、楽曲を9曲以上達成する',
+                'conditoin':'150コンボ達成する<br>または、楽曲を9曲以上達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(22)
             },
             23:{
                 'name':'ゴールドことり',
                 'image':'item_23',
-                'discription':'移動速度とジャンプ力がアップする<br>スキルのスロットが1つ増える',
+                'discription':'第４話が見れる<br>移動速度とジャンプ力がアップする<br>スキルのスロットが1つ増える',
                 'price':10000000000,
-                'conditoin':'200コンボ達成する<br>かつ、楽曲を9曲以上達成する',
+                'conditoin':'150コンボ達成する<br>かつ、楽曲を9曲以上達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(23)
             },
             24:{
                 'name':'プラチナことり',
                 'image':'item_24',
-                'discription':'エンディングが見れる',
+                'discription':'最終話が見れる',
                 'price':1000000000000,
                 'conditoin':'楽曲を15曲以上達成する',
                 'condFunc':()->
@@ -4383,7 +4552,7 @@ class slotSetting extends appNode
         div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
-            div = Math.floor((game.combo - 100) / 30) / 10
+            div = Math.floor((game.combo - 100) / 50) / 10
             if div < 0
                 div = 0
             if 2 < div
@@ -4522,15 +4691,16 @@ class slotSetting extends appNode
     _upItemPointIfPlayerIsAir:()->
         playerY = game.main_scene.gp_stage_front.player.y
         if playerY < game.height * 0.4
-            val = 60
+            val = 100
         else if playerY < game.height * 0.5
-            val = 50
+            val = 80
         else if playerY < game.height * 0.6
-            val = 40
+            val = 60
         else
-            val = 30
+            val = 40
         val *= game.max_set_item_num
         game.main_scene.gp_system.upItemPoint(val)
+        game.main_scene.gp_system.shineItemPoint()
 
     ###
     所持金と掛け金の比でテンションの増値に補正を加える
@@ -4718,13 +4888,13 @@ class slotSetting extends appNode
             if game.prev_fever_muse.indexOf(parseInt(num)) != -1
                 rslt = true
         else if num is 21
-            if 100 <= game.max_combo
+            if 75 <= game.max_combo
                 rslt = true
         else if num is 22
-            if 9 <= game.countFullMusic() || 200 <= game.max_combo
+            if 9 <= game.countFullMusic() || 150 <= game.max_combo
                 rslt = true
         else if num is 23
-            if 9 <= game.countFullMusic() && 200 <= game.max_combo
+            if 9 <= game.countFullMusic() && 150 <= game.max_combo
                 rslt = true
         else if num is 24
             if 15 <= game.countFullMusic()
@@ -4776,9 +4946,9 @@ class slotSetting extends appNode
             if game.past_fever_num <= 3
                 rate = 20
             else if game.past_fever_num <= 6
-                rate = 16
+                rate = 18
             else
-                rate = 12
+                rate = 16
         else if tension_rate is 100
             if game.past_fever_num <= 3
                 rate = 16
@@ -5096,6 +5266,15 @@ class Test extends appNode
         game.slot_setting.betUp()
         console.log(game.bet)
 
+class loadScene extends appScene
+    constructor: () ->
+        super
+        @gp_load = new gpLoad()
+        @addChild(@gp_load)
+        @wait = game.fps * 1.5
+    onenterframe: (e) ->
+        if @wait < @age
+            game.popLoadScene()
 class mainScene extends appScene
     constructor:()->
         super
@@ -5252,11 +5431,9 @@ class pauseScene extends appScene
         @pause_trophy_select_layer = new pauseTrophySelectLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
-        @isAblePopPause = true
     setSaveConfirmMenu: () ->
         @pause_save_confirm_layer = new pauseSaveConfirmLayer()
         @addChild(@pause_save_confirm_layer)
-        @isAblePopPause = false
     setSaveMenu:()->
         @pause_save_layer = new pauseSaveLayer()
         @addChild(@pause_save_layer)
@@ -5264,50 +5441,40 @@ class pauseScene extends appScene
     setTitleConfirmMenu:()->
         @pause_title_confirm_layer = new pauseTitleConfirmLayer()
         @addChild(@pause_title_confirm_layer)
-        @isAblePopPause = false
     removeSaveConfirmMenu:()->
         @removeChild(@pause_save_confirm_layer)
         @pause_save_confirm_layer = null
-        @isAblePopPause = true
     removeTitleConfirmMenu:()->
         @removeChild(@pause_title_confirm_layer)
         @pause_title_confirm_layer = null
-        @isAblePopPause = true
     removeSaveMenu:()->
         @removeChild(@pause_save_layer)
         @removeChild(@pause_save_confirm_layer)
         @pause_save_layer = null
         @pause_save_confirm_layer = null
-        @isAblePopPause = true
     setItemBuyMenu:()->
         @pause_item_buy_layer = new pauseItemBuyLayer()
         @addChild(@pause_item_buy_layer)
-        @isAblePopPause = false
     removeItemBuyMenu:()->
         @removeChild(@pause_item_buy_layer)
-        @isAblePopPause = true
         game.setItemSlot()
     setItemUseMenu:()->
         @pause_item_use_layer = new pauseItemUseLayer()
         @pause_item_use_layer.resetItemList()
         @pause_item_use_layer.dspSetItemList()
         @addChild(@pause_item_use_layer)
-        @isAblePopPause = false
     removeItemUseMenu:()->
         @removeChild(@pause_item_use_layer)
         @pause_item_use_layer = null
-        @isAblePopPause = true
         game.itemUseExe()
     setMemberSetMenu:()->
         @pause_member_set_layer = new pauseMemberSetLayer()
         @pause_member_set_layer.resetItemList()
         @addChild(@pause_member_set_layer)
-        @isAblePopPause = false
     removeMemberSetMenu:()->
         @removeChild(@pause_member_set_layer)
         @pause_member_set_layer = null
         game.musePreLoadByMemberSetNow()
-        @isAblePopPause = true
     setItemBuySelectMenu:(kind)->
         @pause_item_buy_select_layer = new pauseItemBuySelectLayer()
         @addChild(@pause_item_buy_select_layer)
@@ -5334,11 +5501,9 @@ class pauseScene extends appScene
     setRecordMenu:()->
         @pause_record_layer = new pauseRecordLayer()
         @addChild(@pause_record_layer)
-        @isAblePopPause = false
     removeRecordMenu:()->
         @removeChild(@pause_record_layer)
         @pause_record_layer = null
-        @isAblePopPause = true
     setRecordSelectMenu:(kind)->
         @pause_record_select_layer = new pauseRecordSelectLayer()
         @addChild(@pause_record_select_layer)
@@ -5361,12 +5526,19 @@ class pauseScene extends appScene
     _pauseKeyPush:()->
         if game.input.x is true || @buttonList.pause is true
             if @keyList.pause is false
-                if @isAblePopPause is true
-                    game.popPauseScene()
+                game.popPauseScene()
+                game.setLoadScene()
+                @_pauseEndRun()
                 @keyList.pause = true
         else
             if @keyList.pause = true
                 @keyList.pause = false
+    ###
+    ポーズメニューをXキーで閉じたとき、各メニューを閉じた時の必要な処理を一括で走らせる
+    ###
+    _pauseEndRun:()->
+        game.itemUseExe()
+        game.musePreLoadByMemberSetNow()
 
 class stolyScene extends appScene
     constructor: () ->
@@ -5389,23 +5561,22 @@ class stolyScene extends appScene
                 @gp_object.honoka.moveToStatic()
             3:=>
                 @gp_panorama.haiko.tl.fadeOut(24)
-                @gp_sentence.txtSet('test', 48, 0.5)
+                @gp_sentence.txtSet('test', 52, 0.5)
                 @gp_object.honoka.tateShake()
                 @gp_object.kotori.moveToStatic()
             5:=>
                 @gp_sentence.txtSet(
-                    'hoge<br>hoge
-                    hogehoge'
+                    '穂乃果<br>それだ！,さすがことりちゃん！<br>,腹黒いね！,でも、廃校を阻止するほどお金ないよ？<br>,どうするの？'
                 )
                 @gp_object.kotori.yokoShake()
-            6:=>
+            9:=>
                 @gp_sentence.txtEnd()
                 @gp_object.honoka.rotate()
                 @gp_object.kotori.scale()
-            9:=>
+            12:=>
                 @gp_object.honoka.moveToInit()
                 @gp_object.kotori.moveToInit()
-            11:=>
+            14:=>
                 game.endStory()
         })
     opStart:()->
@@ -6084,6 +6255,7 @@ class Catch extends Item
             game.main_scene.gp_system.combo_text.setValue()
             game.main_scene.gp_slot.slotStop()
             game.tensionSetValueItemCatch()
+            game.main_scene.gp_stage_front.isCatchItemExist = false
 
     ###
     地面に落ちたら消す
@@ -6096,6 +6268,7 @@ class Catch extends Item
                 game.combo = 0
             game.main_scene.gp_system.combo_text.setValue()
             game.tensionSetValueItemFall()
+            game.main_scene.gp_stage_front.isCatchItemExist = false
 
     ###
     座標と落下速度の設定
@@ -6121,7 +6294,6 @@ class Catch extends Item
                     ret_x = (game.width - @w) * 0.5 * Math.random()
                 if ret_x > (game.width - @w)
                     ret_x = (game.width - @w) * 0.5 * Math.random() + (game.width * 0.5) - @w
-                    console.log(ret_x)
         return ret_x
 
 ###
@@ -6565,6 +6737,16 @@ class jumpButton extends controllerButton
 
 class largeJumpButton extends Button
     constructor: () ->
+        super 150, 150
+        @x = (game.width - @w) / 2
+        @y = game.height - @height
+    ontouchstart: () ->
+        game.main_scene.buttonList.jump = true
+    ontouchend: () ->
+        game.main_scene.buttonList.jump = false
+
+class megaJumpButton extends Button
+    constructor: () ->
         super game.width, 400
         @x = 0
         @y = 230
@@ -6699,7 +6881,7 @@ class Face extends System
     constructor: (w, h) ->
         super w, h
         @x = 0
-        @y = 220
+        @y = 210
     ###
     縦揺れ
     ###
@@ -6738,21 +6920,21 @@ class Face extends System
         @tl.moveX(@x_init, 24, enchant.Easing.QUAD_EASEIN)
 class kotoriFace extends Face
     constructor: () ->
-        super 120, 120
-        @image = @drawRect('#aaa')
+        super 135, 135
+        @image = game.imageload("face_kotori")
         @x_init = 0 - @width
-        @x_static = 70
+        @x_static = 50
 class honokaFace extends Face
     constructor: () ->
-        super 120, 120
-        @image = @drawRect('#EDAD0B')
+        super 135, 135
+        @image = game.imageload("face_honoka")
         @x_init = game.width
         @x_static = 290
 class haikoFace extends Face
     constructor:()->
         super 140, 200
         @y = 180
-        @image = @drawRect('#fff')
+        @image = game.imageload("face_haiko")
         @x_init = game.width
         @x_static = 170
 class Param extends System
@@ -6761,16 +6943,17 @@ class Param extends System
 
 class TensionGaugeBack extends Param
     constructor: (w, h) ->
-        super 457, 19
+        super 387, 19
         @image = @drawRect('#FFFFFF')
-        @x = 11
+        @x = 81
         @y = 46
 
 class TensionGauge extends Param
     constructor: (w, h) ->
-        super 450, 11
+        super 380, 11
         @image = @drawRect('#6EB7DB')
-        @x = 15
+        @initX = 85
+        @x = @initX
         @y = 50
         @setValue()
 
@@ -6779,7 +6962,7 @@ class TensionGauge extends Param
         if game.tension != 0
             tension = game.tension / game.slot_setting.tension_max
         @scaleX = tension
-        @x = 15 - ((@w - tension * @w) / 2)
+        @x = @initX - ((@w - tension * @w) / 2)
         if tension < 0.25
             @image = @drawRect('#6EB7DB')
         else if tension < 0.5
@@ -6819,3 +7002,34 @@ class ItemGauge extends Param
         @y = 112
     setWidth:()->
         @width = 51 * game.max_set_item_num
+
+class ItemGaugeShine extends Param
+    constructor:()->
+        super 51, 8
+        @image = @drawRect('#FFF')
+        @x = 0
+        @y = 112
+        @opacity = 0
+    onenterframe:(e)->
+        if 0 < @opacity
+            @opacity -= 0.1
+            if @opacity <= 0
+                @opacity = 0
+
+class loadArc extends Param
+    constructor:()->
+        super 80, 80
+        @angle = 0
+        @wait = game.fps * 1.5
+        @angle_frame = 360 / @wait
+        @image = @drawArc('#FFF', 10, @angle)
+        itemX = game.main_scene.gp_stage_front.getCatchItemsXposition()
+        if itemX != 0
+            @x = itemX - 15
+        else
+            @x = game.width / 2 - @width / 2
+        @y = game.height / 2 - @height / 2
+    onenterframe:(e)->
+        if @angle < 360
+            @angle += @angle_frame
+            @image = @drawArc('#FFF', 10, @angle)

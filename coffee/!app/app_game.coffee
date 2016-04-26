@@ -11,6 +11,8 @@ class appGame extends Game
         @loadedFile = [] #ロード済みのファイル
         @mstVolume = 1 #ゲームの全体的な音量
         @_getIsServer()
+        if @isSumaho()
+            @beforeunload()
 
     ###
     動かしてる環境がローカルか、サーバーかを判定
@@ -261,3 +263,18 @@ class appGame extends Game
         if ua.Mobile[0] is true || ua.Tablet is true
             rslt = true
         return rslt
+    ###
+    ページ離脱前に警告を出す
+    ###
+    beforeunload:()->
+        msg = 'ゲームを終了します。'
+        ua = @userAgent()
+        if !ua.Mobile.iPhone
+            $(window).on('beforeunload', ()->
+                return msg
+            )
+        else
+            window.addEventListener('pagehide', ()->
+                if !confirm(msg)
+                    return false
+            )

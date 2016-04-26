@@ -2,7 +2,7 @@ class Face extends System
     constructor: (w, h) ->
         super w, h
         @x = 0
-        @y = 220
+        @y = 210
     ###
     縦揺れ
     ###
@@ -41,20 +41,20 @@ class Face extends System
         @tl.moveX(@x_init, 24, enchant.Easing.QUAD_EASEIN)
 class kotoriFace extends Face
     constructor: () ->
-        super 120, 120
-        @image = @drawRect('#aaa')
+        super 135, 135
+        @image = game.imageload("face_kotori")
         @x_init = 0 - @width
-        @x_static = 70
+        @x_static = 50
 class honokaFace extends Face
     constructor: () ->
-        super 120, 120
-        @image = @drawRect('#EDAD0B')
+        super 135, 135
+        @image = game.imageload("face_honoka")
         @x_init = game.width
         @x_static = 290
 class haikoFace extends Face
     constructor:()->
         super 140, 200
         @y = 180
-        @image = @drawRect('#fff')
+        @image = game.imageload("face_haiko")
         @x_init = game.width
         @x_static = 170

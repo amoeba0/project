@@ -71,3 +71,18 @@ class appSprite extends Sprite
         @context.arc(@w / 2, @h / 2, @w / 2, 0, Math.PI * 2, true)
         @context.fill()
         return @surface
+
+    ###
+    円弧
+    @param color 色
+    @param width 太さ
+    @param angle 角度
+    ###
+    drawArc: (color, width, angle) ->
+        @_makeContext()
+        @context.strokeStyle = color
+        @context.lineWidth = width
+        pi = Math.PI / 180
+        @context.arc(@w / 2, @h / 2, (@w - width) / 2, (-90) * pi, (angle - 90) * pi, false)
+        @context.stroke()
+        return @surface

@@ -104,10 +104,17 @@ class pauseTrophySelectLayer extends pauseBaseRecordSelectLayer
         @item_name.setText(@item_options.name)
         discription = @_setDiscription()
         @item_discription.setText(discription)
-        if @kind is 24
-            @ending_button = new endingButtonHtml()
-            @addChild(@ending_button)
-            @ok_button.x = 250
+        switch @kind
+            when 21 then @story_button = new secondButtonHtml()
+            when 22 then @story_button = new thirdButtonHtml()
+            when 23 then @story_button = new fourthButtonHtml()
+            when 24 then @story_button = new endingButtonHtml()
+        @addChild(@story_button)
+        @dialog.class.push('base-dialog-select-high')
+        @ok_button.y += 30
+        @story_button.y += 30
+        @dialog.setHtml()
+        @ok_button.x = 250
     _setDiscription:()->
         text = '効果：'+@item_options.discription
         text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'+'(所持金'+game.toJPUnit(game.money)+'円)'

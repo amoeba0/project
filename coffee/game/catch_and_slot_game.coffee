@@ -18,7 +18,7 @@ class LoveliveGame extends catchAndSlotGame
         @fps = 24
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
-                    'heart', 'explosion', 'items', 'coin_pla']
+                    'heart', 'explosion', 'items', 'coin_pla', 'face_honoka', 'face_kotori', 'face_haiko']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm/bgm1']
 
@@ -200,6 +200,8 @@ class LoveliveGame extends catchAndSlotGame
     @param number val 増減値
     ###
     tensionSetValue:(val)->
+        if @isItemSet(3) and 0 < val
+            val = Math.floor(val * 1.3)
         @slot_setting.changeLilleForTension(@tension, val)
         prev_tension = @tension
         @tension += val
@@ -336,6 +338,7 @@ class LoveliveGame extends catchAndSlotGame
     ポーズシーンをセットする
     ###
     setPauseScene:()->
+        @pause_scene = new pauseScene()
         @pause_scene.keyList.pause = true
         @pushScene(@pause_scene)
         @pause_scene.pause_item_buy_layer.resetItemList()
@@ -350,6 +353,13 @@ class LoveliveGame extends catchAndSlotGame
         @main_scene.keyList.pause = true
         @main_scene.gp_system.bet_text.setValue()
         @popScene(@pause_scene)
+
+    setLoadScene:()->
+        @load_scene = new loadScene()
+        @pushScene(@load_scene)
+
+    popLoadScene:()->
+        @popScene(@load_scene)
         @nowPlayBgmRestart()
 
     ###
@@ -358,6 +368,18 @@ class LoveliveGame extends catchAndSlotGame
     startOpStory:()->
         @_pushStory()
         #@story_scene.opStart()
+        @story_scene.testStart()
+
+    start2ndStory:()->
+        @_pushStory()
+        @story_scene.testStart()
+
+    start3rdStory:()->
+        @_pushStory()
+        @story_scene.testStart()
+
+    start4thStory:()->
+        @_pushStory()
         @story_scene.testStart()
 
     ###

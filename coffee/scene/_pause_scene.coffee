@@ -19,11 +19,9 @@ class pauseScene extends appScene
         @pause_trophy_select_layer = new pauseTrophySelectLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
-        @isAblePopPause = true
     setSaveConfirmMenu: () ->
         @pause_save_confirm_layer = new pauseSaveConfirmLayer()
         @addChild(@pause_save_confirm_layer)
-        @isAblePopPause = false
     setSaveMenu:()->
         @pause_save_layer = new pauseSaveLayer()
         @addChild(@pause_save_layer)
@@ -31,50 +29,40 @@ class pauseScene extends appScene
     setTitleConfirmMenu:()->
         @pause_title_confirm_layer = new pauseTitleConfirmLayer()
         @addChild(@pause_title_confirm_layer)
-        @isAblePopPause = false
     removeSaveConfirmMenu:()->
         @removeChild(@pause_save_confirm_layer)
         @pause_save_confirm_layer = null
-        @isAblePopPause = true
     removeTitleConfirmMenu:()->
         @removeChild(@pause_title_confirm_layer)
         @pause_title_confirm_layer = null
-        @isAblePopPause = true
     removeSaveMenu:()->
         @removeChild(@pause_save_layer)
         @removeChild(@pause_save_confirm_layer)
         @pause_save_layer = null
         @pause_save_confirm_layer = null
-        @isAblePopPause = true
     setItemBuyMenu:()->
         @pause_item_buy_layer = new pauseItemBuyLayer()
         @addChild(@pause_item_buy_layer)
-        @isAblePopPause = false
     removeItemBuyMenu:()->
         @removeChild(@pause_item_buy_layer)
-        @isAblePopPause = true
         game.setItemSlot()
     setItemUseMenu:()->
         @pause_item_use_layer = new pauseItemUseLayer()
         @pause_item_use_layer.resetItemList()
         @pause_item_use_layer.dspSetItemList()
         @addChild(@pause_item_use_layer)
-        @isAblePopPause = false
     removeItemUseMenu:()->
         @removeChild(@pause_item_use_layer)
         @pause_item_use_layer = null
-        @isAblePopPause = true
         game.itemUseExe()
     setMemberSetMenu:()->
         @pause_member_set_layer = new pauseMemberSetLayer()
         @pause_member_set_layer.resetItemList()
         @addChild(@pause_member_set_layer)
-        @isAblePopPause = false
     removeMemberSetMenu:()->
         @removeChild(@pause_member_set_layer)
         @pause_member_set_layer = null
         game.musePreLoadByMemberSetNow()
-        @isAblePopPause = true
     setItemBuySelectMenu:(kind)->
         @pause_item_buy_select_layer = new pauseItemBuySelectLayer()
         @addChild(@pause_item_buy_select_layer)
@@ -101,11 +89,9 @@ class pauseScene extends appScene
     setRecordMenu:()->
         @pause_record_layer = new pauseRecordLayer()
         @addChild(@pause_record_layer)
-        @isAblePopPause = false
     removeRecordMenu:()->
         @removeChild(@pause_record_layer)
         @pause_record_layer = null
-        @isAblePopPause = true
     setRecordSelectMenu:(kind)->
         @pause_record_select_layer = new pauseRecordSelectLayer()
         @addChild(@pause_record_select_layer)
@@ -128,9 +114,16 @@ class pauseScene extends appScene
     _pauseKeyPush:()->
         if game.input.x is true || @buttonList.pause is true
             if @keyList.pause is false
-                if @isAblePopPause is true
-                    game.popPauseScene()
+                game.popPauseScene()
+                game.setLoadScene()
+                @_pauseEndRun()
                 @keyList.pause = true
         else
             if @keyList.pause = true
                 @keyList.pause = false
+    ###
+    ポーズメニューをXキーで閉じたとき、各メニューを閉じた時の必要な処理を一括で走らせる
+    ###
+    _pauseEndRun:()->
+        game.itemUseExe()
+        game.musePreLoadByMemberSetNow()

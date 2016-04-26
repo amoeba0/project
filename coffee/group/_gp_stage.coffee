@@ -19,6 +19,7 @@ class stageFront extends gpStage
         @missItemFallSycleNow = 0
         @catchMissItems = []
         @nowCatchMissItemsNum = 0
+        @isCatchItemExist = false
         @item_fall_se = game.soundload('dicision')
         @miss_fall_se = game.soundload('cancel')
         @explotion_effect = new explosionEffect()
@@ -77,6 +78,7 @@ class stageFront extends gpStage
         game.sePlay(@item_fall_se)
         @catchItems[@nowCatchItemsNum].setPosition()
         @nowCatchItemsNum += 1
+        @isCatchItemExist = true
         game.main_scene.gp_system.money_text.setValue()
         game.main_scene.gp_slot.slotStart()
         if game.slot_setting.getIsForceSlotHit() is true
@@ -95,6 +97,12 @@ class stageFront extends gpStage
     setExplosionEffect:(x, y)->
         @addChild(@explotion_effect)
         @explotion_effect.setInit(x, y)
+
+    getCatchItemsXposition:()->
+        x = 0
+        if @isCatchItemExist
+            x = @catchItems[@nowCatchItemsNum-1].x
+        return x
 
 
 ###

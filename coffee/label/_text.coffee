@@ -9,7 +9,7 @@ class moneyText extends text
         super
         @text = 0
         @color = 'black'
-        @font_size = 24
+        @font_size = 22
         @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
         @x = 0
         @y = 7
@@ -78,6 +78,17 @@ class comboUnitText extends text
         @x = 217
         @y = 90
 
+class tensionText extends text
+    constructor:()->
+        super
+        @text = 'テンション'
+        @color = 'black'
+        @font_size = 22
+        @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ Ｐゴシック'"
+        @x = -40
+        @y = 43
+        @scaleX = 0.7
+
 class storyBackTxt extends text
     constructor: (width, height) ->
         super
@@ -91,23 +102,50 @@ class storyBackTxt extends text
 
 class storyMessage extends text
     constructor: (width, height) ->
-        super width, height
+        super
+        @width = width
+        @height = height
         @text = ''
         @fontInit = "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
         @font = ''
         @color = "white"
-        @message = ''
         @speed = 4
+        @waitTime = 12
         @x = 30
-        @y = game.width + Math.floor((game.height - game.width) / 2) - height - 5
+        @y = game.width + Math.floor((game.height - game.width) / 2) - height
+        @splited = []
+        @splitedLength = []
+        @nowSplited = 0
+        @wait = 0
+        @splitedNum = 0
     onenterframe:()->
-        if @all_length > @now_length
-            @now_length += @speed
-            @text = @message.substring(0, @now_length)
-    init:(message, fontSize=22, speed=4)->
+        if @nowSplited <= @splitedNum
+            if @wait is 0
+                if @splitedLength[@nowSplited] > @now_length
+                    @now_length += @speed
+                    init_text = ''
+                    if 1 <= @nowSplited
+                        for i in [0..@nowSplited-1]
+                            init_text += @splited[i]
+                    tmp_txt = init_text + @splited[@nowSplited].substring(0, @now_length)
+                    if tmp_txt.indexOf('<') != -1
+                        @now_length += 3
+                        tmp_txt = init_text + @splited[@nowSplited].substring(0, @now_length + 3)
+                    @text = tmp_txt
+                else
+                    @now_length = 0
+                    @nowSplited += 1
+                    @wait = @waitTime
+            else
+                @wait -= 1
+    init:(message, fontSize=26, speed=1)->
         @font = fontSize + @fontInit
         @speed = speed
-        @all_length = message.length
+        @splited = message.split(',')
+        @splitedNum = @splited.length
+        for i, val of @splited
+            @splitedLength[i] = val.length
         @now_length = 0
-        @message = message
+        @nowSplited = 0
+        @wait = 0
         @text = ""

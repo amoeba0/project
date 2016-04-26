@@ -14,6 +14,8 @@ class gpSystem extends appGroup
         @addChild(@tension_gauge_back)
         @tension_gauge = new TensionGauge()
         @addChild(@tension_gauge)
+        @tension_text = new tensionText()
+        @addChild(@tension_text)
         @pause_button = new pauseButton()
         @addChild(@pause_button)
         @item_slot = {}
@@ -25,6 +27,8 @@ class gpSystem extends appGroup
         @addChild(@item_gauge_back)
         @item_gauge = new ItemGauge()
         @addChild(@item_gauge)
+        @item_gauge_shine = new ItemGaugeShine()
+        @addChild(@item_gauge_shine)
         @left_button = new leftButton()
         @addChild(@left_button)
         @right_button = new rightButton()
@@ -37,6 +41,8 @@ class gpSystem extends appGroup
         @addChild(@low_bet_button)
         @white_back = new whiteBack()
         if game.isSumaho()
+            @mega_jump_button = new megaJumpButton()
+            @addChild(@mega_jump_button)
             @large_jump_button = new largeJumpButton()
             @addChild(@large_jump_button)
             @large_left_button = new largeLeftButton()
@@ -166,3 +172,11 @@ class gpSystem extends appGroup
             else
                 @addChild(@white_back)
                 @isWhiteBack = true
+    ###
+    アイテムゲージが1瞬光る
+    ###
+    shineItemPoint:()->
+        @item_gauge_shine.width = @item_gauge.width
+        @item_gauge_shine.scaleX = @item_gauge.scaleX
+        @item_gauge_shine.x = @item_gauge.x
+        @item_gauge_shine.opacity = 1
