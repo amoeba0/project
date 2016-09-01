@@ -76,7 +76,7 @@ class gpSlot extends appGroup
     ###
     forceHitLeftLille:()->
         target = @left_lille
-        if game.fever is false && @isForceSlotHit is true && game.slot_setting.isForceFever() is true
+        if game.fever is false && @isForceSlotHit is true
             if game.slot_setting.isForceFever() is true
                 @forceFeverRole = game.slot_setting.setForceFeverRole(@left_lille.lilleArray)
             else
@@ -117,6 +117,11 @@ class gpSlot extends appGroup
             result = @_searchMuseEyeRandom(target)
         return result
 
+    ###
+    リールからμ'sを探してきてそのキーを返します
+    リールにμ'sがいなければランダムでキーを返します
+    @pram target
+    ###
     _searchMuseEyeRandom:(target)->
         arr = []
         for key, val of target.lilleArray

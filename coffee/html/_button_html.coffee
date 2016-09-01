@@ -38,7 +38,7 @@ class returnGameButtonHtml extends pauseMainMenuButtonHtml
         @class.push('pause-main-menu-button-white')
         @setHtml()
     touchendEvent:() ->
-        game.sePlay(@cancelSe)
+        #game.sePlay(@cancelSe)
         game.pause_scene.buttonList.pause = true
 
 ###

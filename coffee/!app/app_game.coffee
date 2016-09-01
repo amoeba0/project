@@ -10,6 +10,7 @@ class appGame extends Game
         @nowPlayBgm = null
         @loadedFile = [] #ロード済みのファイル
         @mstVolume = 1 #ゲームの全体的な音量
+        @multiLoadFilesNum = 0 #複数ロードするファイルの残り数
         @_getIsServer()
         if @isSumaho()
             @beforeunload()
@@ -112,13 +113,41 @@ class appGame extends Game
     ###
     enchant.jsのload関数をラッピング
     ロード終了後にloadedFileにロードしたファイルを置いておいて、ロード済みかどうかの判別に使う
+    @param string   file ロードするファイル名
+    @param function callback ロード終了時に実行する関数
     ###
-    appLoad:(file)->
-        #@load(file)
+    appLoad:(file, callback=null)->
         if @loadedFile.indexOf(file) is -1
-            @load(file, =>
+            @load(file, file, =>
                 @setLoadedFile(file)
+                callback
             )
+
+    ###
+    複数のファイルをゲーム中にロードする
+    @param array    files ロードするファイル名を格納した配列
+    ###
+    multiLoad:(files)->
+        @multiLoadFilesNum = files.length
+        for file in files
+            if @loadedFile.indexOf(file) is -1
+                @load(file, file, =>
+                    @setLoadedFile(file)
+                    @_multiLoadOne(file)
+                )
+            else
+                @_multiLoadOne(file)
+
+    _multiLoadOne:(file)->
+        @multiLoadFilesNum -= 1
+        if @multiLoadFilesNum is 0
+            @multiLoadEnd()
+
+    ###
+    複数ファイルのロード終了時に実行する関数
+    ###
+    multiLoadEnd:()->
+        console.error('multiLoadEndにオーバーライドしてください')
 
     ###
     ロード済みのファイルを記憶しておく
@@ -217,12 +246,16 @@ class appGame extends Game
     数値の単位を漢数字で区切る
     ###
     toJPUnit:(num)->
+        fra = @_delFraction(num)
+        num = fra[0]
+        keta = fra[1]
         str = num + ''
         n = ''
         n_ = ''
         count = 0
         ptr = 0
-        kName = ['', '万', '億', '兆', '京', '垓']
+        kNameArr = ['', '万', '億', '兆', '京', '垓', '𥝱', '穣']
+        kName = kNameArr.slice(keta, kNameArr.length)
         i = str.length - 1
         while i >= 0
             n_ = str.charAt(i) + n_
@@ -236,6 +269,22 @@ class appGame extends Game
                 n = n_ + kName[ptr] + n
             i--
         return n
+
+    ###
+    数値の端数を0にする
+    1兆円超えたら下4桁削る
+    ###
+    _delFraction:(num)->
+        oku = 100000000
+        man = 10000
+        ketaMax = 4
+        ketaMin = 0
+        for i in [ketaMax..1]
+            keta = Math.pow(man, i)
+            if oku * keta < num
+                num = Math.floor(num / keta)
+                ketaMin = i
+        return [num, ketaMin]
 
     ###
     ユーザーエージェントの判定
@@ -274,7 +323,7 @@ class appGame extends Game
                 return msg
             )
         else
-            window.addEventListener('pagehide', ()->
+            window.addEventListener('unload', ()->
                 if !confirm(msg)
                     return false
             )

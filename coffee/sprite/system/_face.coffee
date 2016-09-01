@@ -6,55 +6,63 @@ class Face extends System
     ###
     縦揺れ
     ###
-    tateShake:(time=2, scale=10, speed=2)->
-        for i in [1..time]
-            @_tateShakeONe(scale, speed)
+    tateShake:()->
+        @tl.moveBy(0, -10, 4, enchant.Easing.QUAD_EASEOUT).moveBy(0, 10, 2, enchant.Easing.QUAD_EASEIN)
+        @tl.moveBy(0, 20, 6, enchant.Easing.QUAD_EASEOUT).moveBy(0, -20, 8, enchant.Easing.QUAD_EASEIN)
+    tateShake2:()->
+        @_tateShake()
+    _tateShake:()->
+        for i in [1..2]
+            @tl.moveBy(0, -10, 2, enchant.Easing.QUAD_EASEOUT).moveBy(0, 10, 1, enchant.Easing.QUAD_EASEIN)
+            @tl.moveBy(0, 10, 1, enchant.Easing.QUAD_EASEOUT).moveBy(0, -10, 2, enchant.Easing.QUAD_EASEIN)
     ###
-    横揺れ
+    回転揺れ
     ###
-    yokoShake:(time=2, scale=10, speed=2)->
-        for i in [1..time]
-            @_yokoShakeONe(scale, speed)
-    _tateShakeONe:(scale, speed)->
-        @tl.moveBy(0, scale * (-1), 2).moveBy(0, scale * 2, 2).moveBy(0, scale * (-1), 2)
-    _yokoShakeONe:(scale, speed)->
-        @tl.moveBy(scale * (-1), 0, 2).moveBy(scale * 2, 0, 2).moveBy(scale * (-1), 0, 2)
+    rotateShake:()->
+        @tl.rotateBy(-20, 4, enchant.Easing.QUAD_EASEOUT).rotateBy(20, 4, enchant.Easing.QUAD_EASEIN)
+        @tl.rotateBy(20, 4, enchant.Easing.QUAD_EASEOUT).rotateBy(-20, 4, enchant.Easing.QUAD_EASEIN)
+        @tl.rotateBy(-10, 2, enchant.Easing.QUAD_EASEOUT).rotateBy(10, 2, enchant.Easing.QUAD_EASEIN)
+        @tl.rotateBy(10, 2, enchant.Easing.QUAD_EASEOUT).rotateBy(-10, 2, enchant.Easing.QUAD_EASEIN)
     ###
-    回転
+    震える
     ###
-    rotate:(time=1,speed=24)->
-        @tl.rotateTo(360*time, 24)
+    randomShake:()->
+        max = 3
+        initx = @x
+        inity = @y
+        rdx = Math.floor(max * 2 * Math.random()) - max
+        rdy = Math.floor(max * 2 * Math.random()) - max
+        @tl.moveBy(rdx, rdy, 2, enchant.Easing.QUAD_EASEOUT)
+        for i in [1..24]
+            rdx = -rdx + Math.floor(max * 2 * Math.random()) - max
+            rdy = -rdy + Math.floor(max * 2 * Math.random()) - max
+            @tl.moveBy(rdx, rdy, 2, enchant.Easing.QUART_EASEINOUT)
+        @tl.moveTo(initx, inity, 2, enchant.Easing.QUAD_EASEIN)
+    ###
+    大きくなって戻る
+    ###
+    scale:()->
+        @tl.scaleTo(2, 2, 24, enchant.Easing.QUAD_EASEOUT).scaleTo(1, 1, 24, enchant.Easing.CUBIC_EASEIN)
     ###
     大きくなる
     ###
-    scale:(scale=2, speed=24)->
-        @tl.scaleTo(scale, scale, speed, enchant.Easing.QUAD_EASEOUT).scaleTo(1, 1, speed, enchant.Easing.CUBIC_EASEIN)
+    scaleIn:()->
+        @tl.scaleTo(1.5, 1.5, 24, enchant.Easing.QUAD_EASEOUT)
     ###
-    定位置に移動
+    元の大きさに戻る
     ###
-    moveToStatic:()->
-        @tl.moveX(@x_static, 24, enchant.Easing.QUAD_EASEIN)
-    ###
-    初期位置に移動
-    ###
-    moveToInit:()->
-        @tl.moveX(@x_init, 24, enchant.Easing.QUAD_EASEIN)
+    scaleOut:()->
+        @tl.scaleTo(1, 1, 24, enchant.Easing.CUBIC_EASEIN)
+
 class kotoriFace extends Face
     constructor: () ->
         super 135, 135
         @image = game.imageload("face_kotori")
-        @x_init = 0 - @width
-        @x_static = 50
 class honokaFace extends Face
     constructor: () ->
         super 135, 135
         @image = game.imageload("face_honoka")
-        @x_init = game.width
-        @x_static = 290
-class haikoFace extends Face
-    constructor:()->
-        super 140, 200
-        @y = 180
-        @image = game.imageload("face_haiko")
-        @x_init = game.width
-        @x_static = 170
+class umiFace extends Face
+    constructor: () ->
+        super 140, 140
+        @image = game.imageload("face_umi")

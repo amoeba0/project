@@ -190,6 +190,7 @@
 
 .base-checkbox {
     font: 22px Consolas Monaco MSゴシック;
+    cursor: pointer;
 }
 .check-grayout {
     color: #aaa;
@@ -197,4 +198,5 @@
 .checkbox-size {
     width: 20px;
     height: 20px;
+    cursor: pointer;
 }

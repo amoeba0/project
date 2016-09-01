@@ -20,8 +20,11 @@ class stageFront extends gpStage
         @catchMissItems = []
         @nowCatchMissItemsNum = 0
         @isCatchItemExist = false
+        @notItemFallFlg = false
         @item_fall_se = game.soundload('dicision')
         @miss_fall_se = game.soundload('cancel')
+        @dicision_se = @item_fall_se
+        @cancel_se = @miss_fall_se
         @explotion_effect = new explosionEffect()
         @initial()
     initial:()->
@@ -51,7 +54,7 @@ class stageFront extends gpStage
     一定周期でステージに発生するイベント
     ###
     _stageCycle:()->
-        if @age % @itemFallFrm is 0
+        if @notItemFallFlg is false && @age % @itemFallFrm is 0
             @_catchFall()
             @missItemFallSycleNow += 1
             game.main_scene.gp_stage_back.returnMoneyFallStart()
@@ -59,7 +62,7 @@ class stageFront extends gpStage
             if @itemFallSec != @itemFallSecInit
                 @setItemFallFrm(@itemFallSecInit)
         if @missItemFallSycleNow is @missItemFallSycle && @age % @itemFallFrm is @itemFallFrm / 2
-            if game.isItemSet(2) is false && game.fever is false
+            if game.debug.not_miss_item_flg is false && game.isItemSet(2) is false && game.fever is false
                 @_missCatchFall()
             @missItemFallSycleNow = 0
 

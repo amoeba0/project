@@ -6,16 +6,16 @@ class Debug extends appNode
         super
 
         #開始後いきなりメイン画面
-        @force_main_flg = true
+        @force_main_flg = false
         #開始後いきなりポーズ画面
         @force_pause_flg = false
         #開始後いきなりオープニング
-        @foece_story_flg = false
+        @foece_story_flg = true
 
         #ゲーム開始時ロードをしない
         @not_load_flg = false
         #テストロードに切り替え
-        @test_load_flg = false
+        @test_load_flg = true
         #テストロード用の値
         @test_load_val = {
             'money':98765432100,
@@ -32,7 +32,7 @@ class Debug extends appNode
             'item_have_now':[3,4,5,12,13,14,15,21,22,23,24],
             'item_set_now':[3],
             'member_set_now':[12,13],
-            'prev_fever_muse':[12,13,14,15,16,17,18,19],
+            'prev_fever_muse':[11,12,13,14,15,16,17,18,19],
             'prev_item':[],
             'left_lille':[],
             'middle_lille':[],
@@ -81,6 +81,8 @@ class Debug extends appNode
         @half_slot_hit = false
         #スロットが強制的に当たるときに必ずフィーバーになる
         @force_fever = false
+        #ミスアイテムが降らない
+        @not_miss_item_flg = false
 
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50

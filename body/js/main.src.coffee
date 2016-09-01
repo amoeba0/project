@@ -19,6 +19,7 @@ class appGame extends Game
         @nowPlayBgm = null
         @loadedFile = [] #ロード済みのファイル
         @mstVolume = 1 #ゲームの全体的な音量
+        @multiLoadFilesNum = 0 #複数ロードするファイルの残り数
         @_getIsServer()
         if @isSumaho()
             @beforeunload()
@@ -121,13 +122,41 @@ class appGame extends Game
     ###
     enchant.jsのload関数をラッピング
     ロード終了後にloadedFileにロードしたファイルを置いておいて、ロード済みかどうかの判別に使う
+    @param string   file ロードするファイル名
+    @param function callback ロード終了時に実行する関数
     ###
-    appLoad:(file)->
-        #@load(file)
+    appLoad:(file, callback=null)->
         if @loadedFile.indexOf(file) is -1
-            @load(file, =>
+            @load(file, file, =>
                 @setLoadedFile(file)
+                callback
             )
+
+    ###
+    複数のファイルをゲーム中にロードする
+    @param array    files ロードするファイル名を格納した配列
+    ###
+    multiLoad:(files)->
+        @multiLoadFilesNum = files.length
+        for file in files
+            if @loadedFile.indexOf(file) is -1
+                @load(file, file, =>
+                    @setLoadedFile(file)
+                    @_multiLoadOne(file)
+                )
+            else
+                @_multiLoadOne(file)
+
+    _multiLoadOne:(file)->
+        @multiLoadFilesNum -= 1
+        if @multiLoadFilesNum is 0
+            @multiLoadEnd()
+
+    ###
+    複数ファイルのロード終了時に実行する関数
+    ###
+    multiLoadEnd:()->
+        console.error('multiLoadEndにオーバーライドしてください')
 
     ###
     ロード済みのファイルを記憶しておく
@@ -226,12 +255,16 @@ class appGame extends Game
     数値の単位を漢数字で区切る
     ###
     toJPUnit:(num)->
+        fra = @_delFraction(num)
+        num = fra[0]
+        keta = fra[1]
         str = num + ''
         n = ''
         n_ = ''
         count = 0
         ptr = 0
-        kName = ['', '万', '億', '兆', '京', '垓']
+        kNameArr = ['', '万', '億', '兆', '京', '垓', '𥝱', '穣']
+        kName = kNameArr.slice(keta, kNameArr.length)
         i = str.length - 1
         while i >= 0
             n_ = str.charAt(i) + n_
@@ -245,6 +278,22 @@ class appGame extends Game
                 n = n_ + kName[ptr] + n
             i--
         return n
+
+    ###
+    数値の端数を0にする
+    1兆円超えたら下4桁削る
+    ###
+    _delFraction:(num)->
+        oku = 100000000
+        man = 10000
+        ketaMax = 4
+        ketaMin = 0
+        for i in [ketaMax..1]
+            keta = Math.pow(man, i)
+            if oku * keta < num
+                num = Math.floor(num / keta)
+                ketaMin = i
+        return [num, ketaMin]
 
     ###
     ユーザーエージェントの判定
@@ -283,7 +332,7 @@ class appGame extends Game
                 return msg
             )
         else
-            window.addEventListener('pagehide', ()->
+            window.addEventListener('unload', ()->
                 if !confirm(msg)
                     return false
             )
@@ -1024,7 +1073,7 @@ class LoveliveGame extends catchAndSlotGame
         @fps = 24
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
-                    'heart', 'explosion', 'items', 'coin_pla', 'face_honoka', 'face_kotori', 'face_haiko']
+                    'heart', 'explosion', 'items', 'coin_pla']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm/bgm1']
 
@@ -1344,6 +1393,7 @@ class LoveliveGame extends catchAndSlotGame
     ポーズシーンをセットする
     ###
     setPauseScene:()->
+        @sePlay(@main_scene.gp_stage_front.dicision_se)
         @pause_scene = new pauseScene()
         @pause_scene.keyList.pause = true
         @pushScene(@pause_scene)
@@ -1355,9 +1405,11 @@ class LoveliveGame extends catchAndSlotGame
     ポーズシーンをポップする
     ###
     popPauseScene:()->
+        @sePlay(@main_scene.gp_stage_front.cancel_se)
         @pause_scene.buttonList.pause = false
         @main_scene.keyList.pause = true
         @main_scene.gp_system.bet_text.setValue()
+        @main_scene.offNotItemFallFlg()
         @popScene(@pause_scene)
 
     setLoadScene:()->
@@ -1369,12 +1421,18 @@ class LoveliveGame extends catchAndSlotGame
         @nowPlayBgmRestart()
 
     ###
+    ストーリー素材ロード終了時に実行
+    ###
+    multiLoadEnd:()->
+        @story_scene.startSceneExe()
+
+    ###
     オープニング開始
     ###
     startOpStory:()->
         @_pushStory()
-        #@story_scene.opStart()
-        @story_scene.testStart()
+        @story_scene.opStart()
+        #@story_scene.testStart()
 
     start2ndStory:()->
         @_pushStory()
@@ -1603,6 +1661,7 @@ class LoveliveGame extends catchAndSlotGame
         @musePreLoadByMemberSetNow()
         @itemUseExe()
         @main_scene.gp_system.whiteOut()
+        @main_scene.setTension05()
 class gpEffect extends appGroup
     constructor: () ->
         super
@@ -1658,6 +1717,15 @@ class gpLoad extends appGroup
         @modal.opacity = 0.2
         @addChild(@modal)
         @arc = new loadArc()
+        @addChild(@arc)
+
+class gpLoadStory extends appGroup
+    constructor: () ->
+        super
+        @modal = new blackBack()
+        @modal.opacity = 0.2
+        @addChild(@modal)
+        @arc = new storyLoadArc()
         @addChild(@arc)
 class gpPanorama extends appGroup
     constructor:()->
@@ -1776,7 +1844,7 @@ class gpSlot extends appGroup
     ###
     forceHitLeftLille:()->
         target = @left_lille
-        if game.fever is false && @isForceSlotHit is true && game.slot_setting.isForceFever() is true
+        if game.fever is false && @isForceSlotHit is true
             if game.slot_setting.isForceFever() is true
                 @forceFeverRole = game.slot_setting.setForceFeverRole(@left_lille.lilleArray)
             else
@@ -1817,6 +1885,11 @@ class gpSlot extends appGroup
             result = @_searchMuseEyeRandom(target)
         return result
 
+    ###
+    リールからμ'sを探してきてそのキーを返します
+    リールにμ'sがいなければランダムでキーを返します
+    @pram target
+    ###
     _searchMuseEyeRandom:(target)->
         arr = []
         for key, val of target.lilleArray
@@ -2068,8 +2141,11 @@ class stageFront extends gpStage
         @catchMissItems = []
         @nowCatchMissItemsNum = 0
         @isCatchItemExist = false
+        @notItemFallFlg = false
         @item_fall_se = game.soundload('dicision')
         @miss_fall_se = game.soundload('cancel')
+        @dicision_se = @item_fall_se
+        @cancel_se = @miss_fall_se
         @explotion_effect = new explosionEffect()
         @initial()
     initial:()->
@@ -2099,7 +2175,7 @@ class stageFront extends gpStage
     一定周期でステージに発生するイベント
     ###
     _stageCycle:()->
-        if @age % @itemFallFrm is 0
+        if @notItemFallFlg is false && @age % @itemFallFrm is 0
             @_catchFall()
             @missItemFallSycleNow += 1
             game.main_scene.gp_stage_back.returnMoneyFallStart()
@@ -2107,7 +2183,7 @@ class stageFront extends gpStage
             if @itemFallSec != @itemFallSecInit
                 @setItemFallFrm(@itemFallSecInit)
         if @missItemFallSycleNow is @missItemFallSycle && @age % @itemFallFrm is @itemFallFrm / 2
-            if game.isItemSet(2) is false && game.fever is false
+            if game.debug.not_miss_item_flg is false && game.isItemSet(2) is false && game.fever is false
                 @_missCatchFall()
             @missItemFallSycleNow = 0
 
@@ -2476,27 +2552,27 @@ class gpStoryObject extends appGroup
         @addChild(@back_txt)
         @kotori = new kotoriFace()
         @honoka = new honokaFace()
-        @addChild(@kotori)
-        @addChild(@honoka)
-        @kotori.x = @kotori.x_init
-        @honoka.x = @honoka.x_init
+        @umi = new umiFace()
+        #@addChild(@kotori)
+        #@addChild(@honoka)
+        #@kotori.x = @kotori.x_init
+        #@honoka.x = @honoka.x_init
 class gpStoryPanorama extends appGroup
-    constructor: () ->
+    constructor: (panoramaImage) ->
         super
         @back = new blackBack()
-        @panorama = new StoryPanorama()
-        @haiko = new haikoFace()
+        @panorama = new StoryPanorama(panoramaImage)
         @addChild(@back)
         @addChild(@panorama)
-        @addChild(@haiko)
-        @haiko.x = @haiko.x_init
+    panoramaChange:(image)->
+        @panorama.image = game.imageload(image)
 class gpStorySentence extends appGroup
     constructor: () ->
         super
         w = game.width - 20
         h = Math.floor(game.width / 3)
         @window = new storyTextWindow(w, h)
-        @message = new storyMessage(w - 80, h)
+        @message = new storyMessage(w - 60, h)
         @addChild(@window)
     txtSet:(txt, fontSize, speed)->
         @message.init(txt, fontSize, speed)
@@ -2765,7 +2841,7 @@ class returnGameButtonHtml extends pauseMainMenuButtonHtml
         @class.push('pause-main-menu-button-white')
         @setHtml()
     touchendEvent:() ->
-        game.sePlay(@cancelSe)
+        #game.sePlay(@cancelSe)
         game.pause_scene.buttonList.pause = true
 
 ###
@@ -3843,9 +3919,10 @@ class storyMessage extends text
                         for i in [0..@nowSplited-1]
                             init_text += @splited[i]
                     tmp_txt = init_text + @splited[@nowSplited].substring(0, @now_length)
-                    if tmp_txt.indexOf('<') != -1
+                    end = tmp_txt.slice(-1)
+                    if end == '<'
                         @now_length += 3
-                        tmp_txt = init_text + @splited[@nowSplited].substring(0, @now_length + 3)
+                        tmp_txt = init_text + @splited[@nowSplited].substring(0, @now_length)
                     @text = tmp_txt
                 else
                     @now_length = 0
@@ -3853,11 +3930,12 @@ class storyMessage extends text
                     @wait = @waitTime
             else
                 @wait -= 1
-    init:(message, fontSize=26, speed=1)->
+    init:(message, fontSize=22, speed=1)->
         @font = fontSize + @fontInit
         @speed = speed
         @splited = message.split(',')
         @splitedNum = @splited.length
+        @splitedLength = []
         for i, val of @splited
             @splitedLength[i] = val.length
         @now_length = 0
@@ -3872,16 +3950,16 @@ class Debug extends appNode
         super
 
         #開始後いきなりメイン画面
-        @force_main_flg = true
+        @force_main_flg = false
         #開始後いきなりポーズ画面
         @force_pause_flg = false
         #開始後いきなりオープニング
-        @foece_story_flg = false
+        @foece_story_flg = true
 
         #ゲーム開始時ロードをしない
         @not_load_flg = false
         #テストロードに切り替え
-        @test_load_flg = false
+        @test_load_flg = true
         #テストロード用の値
         @test_load_val = {
             'money':98765432100,
@@ -3898,7 +3976,7 @@ class Debug extends appNode
             'item_have_now':[3,4,5,12,13,14,15,21,22,23,24],
             'item_set_now':[3],
             'member_set_now':[12,13],
-            'prev_fever_muse':[12,13,14,15,16,17,18,19],
+            'prev_fever_muse':[11,12,13,14,15,16,17,18,19],
             'prev_item':[],
             'left_lille':[],
             'middle_lille':[],
@@ -3947,6 +4025,8 @@ class Debug extends appNode
         @half_slot_hit = false
         #スロットが強制的に当たるときに必ずフィーバーになる
         @force_fever = false
+        #ミスアイテムが降らない
+        @not_miss_item_flg = false
 
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
@@ -4216,7 +4296,7 @@ class slotSetting extends appNode
                 'name':'チーズケーキ鍋',
                 'image':'item_2',
                 'discription':'チーズケーキしか降ってこなくなる<br>爆弾は降ってこなくなる',
-                'price':10000,
+                'price':7000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -4226,7 +4306,7 @@ class slotSetting extends appNode
                 'name':'テンション上がるにゃー！',
                 'image':'item_3',
                 'discription':'移動速度とジャンプ力が上がる<br>テンションの上がり幅が1.3倍になる',
-                'price':100000,
+                'price':60000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -4236,7 +4316,7 @@ class slotSetting extends appNode
                 'name':'チョットマッテテー',
                 'image':'item_4',
                 'discription':'おやつが降ってくる速度が<br>ちょっとだけ遅くなる',
-                'price':1000000,
+                'price':400000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -4246,7 +4326,7 @@ class slotSetting extends appNode
                 'name':'認められないわぁ',
                 'image':'item_5',
                 'discription':'アイテムを落としてもコンボが減らず<br>テンションも下がらないようになる',
-                'price':10000000,
+                'price':3000000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -4256,7 +4336,7 @@ class slotSetting extends appNode
                 'name':'完っ全にフルハウスね',
                 'image':'item_6',
                 'discription':'3回に1回の確率で<br>CHANCE!!状態になる',
-                'price':50000000,
+                'price':20000000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -4266,7 +4346,7 @@ class slotSetting extends appNode
                 'name':'ラブアローシュート',
                 'image':'item_7',
                 'discription':'おやつが近くに落ちてくる',
-                'price':100000000,
+                'price':200000000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -4276,7 +4356,7 @@ class slotSetting extends appNode
                 'name':'鈍いのですね',
                 'image':'item_8',
                 'discription':'おやつが降ってくる速度が<br>だいぶ遅くなる<br>チョットマッテテー（遅）と組み合わせると<br>更に遅くなる',
-                'price':500000000,
+                'price':1000000000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -4285,8 +4365,8 @@ class slotSetting extends appNode
             9:{
                 'name':'ファイトだよっ',
                 'image':'item_9',
-                'discription':'CHANCE!!でスロットが揃う時に<br>FEVER!!が出やすくなる',
-                'price':1000000000,
+                'discription':'CHANCE!!でスロットが揃う時に<br>3回に1回の確率でFEVER!!が出る',
+                'price':10000000000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -4417,7 +4497,7 @@ class slotSetting extends appNode
 
         #μ’ｓメンバーアイテムの値段、フィーバーになった順に
         #TODO タイトルに戻って最初からやりなおすと前回プレイ時の値段が残っている？
-        @member_item_price = [1000, 10000, 100000, 1000000, 10000000, 50000000, 100000000, 500000000, 1000000000]
+        @member_item_price = [1000, 5000, 30000, 100000, 1000000, 5000000, 30000000, 200000000, 1000000000]
 
         #テンションの最大値
         @tension_max = 500
@@ -4500,22 +4580,22 @@ class slotSetting extends appNode
             @prize_div = 1
         else if game.bet < 50000
             val = 0.58
-            @prize_div = 0.9
+            @prize_div = 1
         else if game.bet < 100000
             val = 0.61
-            @prize_div = 0.9
+            @prize_div = 1
         else if game.bet < 500000
             val = 0.64
-            @prize_div = 0.9
+            @prize_div = 1
         else if game.bet < 1000000 #100万
             val = 0.67
-            @prize_div = 0.9
+            @prize_div = 1
         else if game.bet < 5000000
             val = 0.7
             @prize_div = 0.9
         else if game.bet < 10000000
             val = 0.73
-            @prize_div = 0.8
+            @prize_div = 0.9
         else if game.bet < 50000000
             val = 0.76
             @prize_div = 0.8
@@ -4524,31 +4604,31 @@ class slotSetting extends appNode
             @prize_div = 0.8
         else if game.bet < 500000000
             val = 0.9
-            @prize_div = 0.8
+            @prize_div = 0.7
         else if game.bet < 1000000000
             val = 1
             @prize_div = 0.7
         else if game.bet < 5000000000
             val = 1.2
-            @prize_div = 0.7
+            @prize_div = 0.6
         else if game.bet < 10000000000 #100億
             val = 1.4
-            @prize_div = 0.7
+            @prize_div = 0.6
         else if game.bet < 50000000000
             val = 1.6
-            @prize_div = 0.7
+            @prize_div = 0.5
         else if game.bet < 100000000000
             val = 1.8
-            @prize_div = 0.6
+            @prize_div = 0.4
         else if game.bet < 500000000000
             val = 2
-            @prize_div = 0.6
+            @prize_div = 0.3
         else if game.bet < 1000000000000 #1兆
             val = 2.5
-            @prize_div = 0.5
+            @prize_div = 0.2
         else
             val = 3
-            @prize_div = 0.4
+            @prize_div = 0.1
         div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
@@ -4663,8 +4743,8 @@ class slotSetting extends appNode
             ret_money = Math.floor(ret_money / div)
         if game.main_scene.gp_back_panorama.now_back_effect_flg is true
             ret_money *= 3
-        if ret_money > 10000000000
-            ret_money = 10000000000
+        if ret_money > 100000000000000
+            ret_money = 100000000000000
         return ret_money
 
     ###
@@ -4944,29 +5024,18 @@ class slotSetting extends appNode
         tension_rate = Math.floor((game.tension * 100)/ @tension_max)
         if game.isItemSet(9)
             if game.past_fever_num <= 3
-                rate = 20
-            else if game.past_fever_num <= 6
-                rate = 18
-            else
-                rate = 16
+                rate = 30
         else if tension_rate is 100
-            if game.past_fever_num <= 3
-                rate = 16
-            else if game.past_fever_num <= 6
-                rate = 13
-            else if game.past_fever_num <= 9
-                rate = 10
-            else
-                rate = 7
+                rate = 20
         else if 85 <= tension_rate
             if game.past_fever_num <= 3
-                rate = 12
+                rate = 16
             else if game.past_fever_num <= 6
-                rate = 10
+                rate = 14
             else if game.past_fever_num <= 9
-                rate = 8
+                rate = 12
             else
-                rate = 6
+                rate = 10
         else if 70 <= tension_rate
             if game.past_fever_num <= 3
                 rate = 8
@@ -4977,7 +5046,7 @@ class slotSetting extends appNode
             else
                 rate = 5
         else
-            rate = 4
+            rate = 2
         result = false
         random = Math.floor(Math.random() * 100)
         if game.debug.force_fever is true || random <= rate
@@ -5014,6 +5083,7 @@ class slotSetting extends appNode
     ###
     強制的にフィーバーになるときに左のスロットから役が作成可能かを判定して、作成可能ならその役を返す
     過去にフィーバーになった役は除外
+    該当する役が無かった時、校章があれば校章を返すようにする
     ###
     setForceFeverRole:(left_lille)->
         role = []
@@ -5035,6 +5105,9 @@ class slotSetting extends appNode
                 ()->
                     Math.random() - 0.5
             )
+        else
+            if left_lille.indexOf(1) != -1
+                role = [1,1,1]
         return role
 
     betChange:(up)->
@@ -5114,12 +5187,15 @@ class slotSetting extends appNode
             val = 1
         return val
 
+    #TODO 掛け金が1000億円を超える
     betUp:()->
         if game.auto_bet is 1 and game.fever is false and @isForceSlotHit is false
-            tmp_bet = Math.floor(game.money / 100)
+            tmp_bet = Math.floor(game.money / 50)
             if game.bet < tmp_bet
                 digit = Math.pow(10, (String(tmp_bet).length - 1))
                 game.bet = Math.floor(tmp_bet / digit) * digit
+                if game.bet > 100000000000
+                    game.bet = 100000000000
                 game.main_scene.gp_system.bet_text.setValue()
 ###
 テストコード用
@@ -5148,7 +5224,9 @@ class Test extends appNode
         #@getRoleAbleMemberList()
         #@betDown()
         #@setForceFeverRole()
-        @betUp()
+        #@betUp()
+        #@appload()
+        @multiload()
 
     #以下、テスト用関数
 
@@ -5190,7 +5268,14 @@ class Test extends appNode
             console.log(num)
 
     moneyFormat:()->
-        console.log(game.toJPUnit(12000012340000))
+        console.log(game.toJPUnit(1234))
+        console.log(game.toJPUnit(123456))
+        console.log(game.toJPUnit(1234561234))
+        console.log(game.toJPUnit(12345612345678))
+        console.log(game.toJPUnit(123456123456789012))
+        console.log(game.toJPUnit(1234561234567890123456))
+        console.log(game.toJPUnit(12345612345678901234567890))
+        console.log(game.toJPUnit(123456123456789012345678901234))
 
     itemCatchTension:()->
         game.past_fever_num = 0
@@ -5253,7 +5338,7 @@ class Test extends appNode
         console.log(val)
 
     setForceFeverRole:()->
-        lille = [15,4,1,4,11,2,5,1,4,2,5,12,4,1,2,3,1,4,13,3]
+        lille = [15,4,1,4,11,2,5,11,4,2,5,11,4,12,2,3,11,4,11,3]
         role = game.slot_setting.setForceFeverRole(lille)
         console.log(role)
 
@@ -5266,6 +5351,17 @@ class Test extends appNode
         game.slot_setting.betUp()
         console.log(game.bet)
 
+    appload:()->
+        game.appLoad('sounds/bgm/bgm1.mp3')
+        game.appLoad('sounds/bgm/zenkai_no_lovelive.mp3', @callbackTest())
+        console.log(game.loadedFile)
+
+    callbackTest:()->
+        console.log('callbackTest')
+
+    multiload:()->
+        files = ['sounds/bgm/zenkai_no_lovelive.mp3', 'sounds/bgm/sweet_holiday.mp3']
+        game.multiLoad(files)
 class loadScene extends appScene
     constructor: () ->
         super
@@ -5286,6 +5382,7 @@ class mainScene extends appScene
         #ジャイロセンサのリスト
         @gyroList = {'left':false, 'right':false}
         @bgm = game.soundload("bgm/bgm1")
+        @tension_05 = 5
         @initial()
     initial:()->
         @setGroup()
@@ -5385,6 +5482,8 @@ class mainScene extends appScene
     tensionSetValueFever:()->
         if game.fever is true
             game.tensionSetValue(game.fever_down_tension)
+            #if @gp_stage_front.notItemFallFlg is false && game.tension <= @tension_05
+            #    @gp_stage_front.notItemFallFlg = true
             if game.tension <= 0
                 game.autoMemberSetAfeterFever()
                 game.main_scene.gp_slot.upperFrame.frame = 0
@@ -5396,6 +5495,8 @@ class mainScene extends appScene
                 game.fever = false
                 if game.debug.not_auto_save is false
                     game.saveGame()
+                game.slot_setting.betUp()
+                #game.setPauseScene()
 
     _gyroMove:()->
         window.addEventListener("deviceorientation",
@@ -5410,6 +5511,14 @@ class mainScene extends appScene
                     game.main_scene.gyroList.left = false
             , false
         )
+
+    setTension05:()->
+        @tension_05 = Math.floor(game.slot_setting.tension_max * 0.07)
+
+    offNotItemFallFlg:()->
+        if @gp_stage_front.notItemFallFlg is true
+            @gp_stage_front.notItemFallFlg = false
+
 class pauseScene extends appScene
     constructor: () ->
         super
@@ -5543,46 +5652,206 @@ class pauseScene extends appScene
 class stolyScene extends appScene
     constructor: () ->
         super
+        @gp_load = new gpLoadStory()
+        @loadFile = []
+        @cue = {}
+        @panorama = ''
     resetScene:()->
-        @gp_panorama = new gpStoryPanorama()
+        @gp_panorama = new gpStoryPanorama(@panorama)
         @gp_sentence = new gpStorySentence()
         @gp_object = new gpStoryObject()
         @addChild(@gp_panorama)
         @addChild(@gp_sentence)
         @addChild(@gp_object)
+    startScene:()->
+        @addChild(@gp_load)
+        game.multiLoad(@loadFile)
+    startSceneExe:()->
+        @removeChild(@gp_load)
+        @resetScene()
+        @cueSet(@cue)
+    faceSet:(face, x=0, y=0)->
+        @gp_object.addChild(face)
+        face.x =  @gp_panorama.panorama.x + x
+        face.y = @gp_panorama.panorama.y + y
     #http://wise9.github.io/enchant.js/doc/core/ja/symbols/enchant.Timeline.html
     #http://r.jsgames.jp/games/1687/
+    ###
+    必要な素材は必ずresetScene()で生成するクラス内で呼び出す
+    'back_gakko', 'back_busitu', 'back_stage'
+    'face_honoka','face_kotori', 'face_umi', 'face_maki', 'face_rin', 'face_hanayo', 'face_nico', 'face_nozomi', 'face_eli'
+    ###
     testStart:()->
-        @resetScene()
-        @cueSet({
+        @panorama = 'back_gakko'
+        @loadFile = ['images/back_gakko.png', 'images/face_honoka.png']
+        @cue = {
             0:=>
-                @gp_panorama.haiko.x = @gp_panorama.haiko.x_static
+                @faceSet(@gp_object.honoka, 170, 90)
             1:=>
-                @gp_object.honoka.moveToStatic()
-            3:=>
-                @gp_panorama.haiko.tl.fadeOut(24)
-                @gp_sentence.txtSet('test', 52, 0.5)
-                @gp_object.honoka.tateShake()
-                @gp_object.kotori.moveToStatic()
+                @gp_object.honoka.randomShake()
             5:=>
+                game.endStory()
+        }
+        @startScene()
+    opStart:()->
+        @panorama = 'back_gakko'
+        @loadFile = ['images/back_gakko.png', 'images/face_honoka.png', 'images/face_kotori.png', 'images/face_umi.png']
+        @cue = {
+            0:=>
                 @gp_sentence.txtSet(
-                    '穂乃果<br>それだ！,さすがことりちゃん！<br>,腹黒いね！,でも、廃校を阻止するほどお金ないよ？<br>,どうするの？'
+                    'ここは某音ノ木坂学院、<br>廃校が決まったあと、突然穂乃果が<br>スクールアイドルを始めると言い出した'
                 )
-                @gp_object.kotori.yokoShake()
+            4:=>
+                @faceSet(@gp_object.honoka, 170, 90)
+                @faceSet(@gp_object.kotori, 20, 95)
+                @faceSet(@gp_object.umi, 320, 85)
+            5:=>
+                @gp_sentence.txtEnd()
+                @gp_object.honoka.rotateShake()
+                @gp_sentence.txtSet(
+                    '穂乃果<br>海未ちゃん、,ことりちゃん、,<br>スクールアイドルを始めるよ！'
+                )
             9:=>
                 @gp_sentence.txtEnd()
-                @gp_object.honoka.rotate()
+                @gp_object.kotori.rotateShake()
+                @gp_sentence.txtSet(
+                    'ことり<br>スクールアイドルってあの？<br>学生たちでアイドルをやってる、,<br>ネットでPVなんかも公開してて、,<br>全国に有名なスクールアイドルもいる'
+                )
+            15:=>
+                @gp_sentence.txtEnd()
+                @gp_object.honoka.tateShake2()
+                @gp_sentence.txtSet(
+                    '穂乃果<br>そう、それだよ！,スクールアイドル！,<br>スクールアイドルを始めて有名になれば,<br>廃校を阻止することができるよ！'
+                )
+            21:->
+                @gp_sentence.txtEnd()
+                @gp_object.umi.tateShake()
+                @gp_sentence.txtSet(
+                    '海未<br>穂乃果、,簡単にスクールアイドルを<br>始めるとは言ってもですね、,<br>廃校を阻止するだけ有名になるには、'
+                )
+            26:->
+                @gp_sentence.txtEnd()
+                @gp_object.umi.rotateShake()
+                @gp_sentence.txtSet(
+                    '海未<br>歌や衣装、,ダンスにPV撮影等、,<br>それなりにプロに匹敵するだけのものが<br>必要になるんですよ。'
+                )
+            31:->
+                @gp_sentence.txtEnd()
+                @gp_object.umi.tateShake()
+                @gp_sentence.txtSet(
+                    '海未<br>私達３人だけでは到底<br>それだけの物は用意できません。'
+                )
+            35:->
+                @gp_sentence.txtEnd()
+                @gp_object.honoka.rotateShake()
+                @gp_sentence.txtSet(
+                    '穂乃果<br>それなら大丈夫だよ、,海未ちゃん！,<br>お金の力があればなんとかなるよ！'
+                )
+            40:->
+                @gp_sentence.txtEnd()
+                @gp_object.honoka.rotateShake()
+                @gp_sentence.txtSet(
+                    '穂乃果<br>プロの作詞者、,プロの作曲者、,<br>衣装や舞台装置、,<br>他にもいっぱいプロのスタッフたちを,<br>お金で雇えば、'
+                )
+            46:->
+                @gp_sentence.txtEnd()
+                @gp_object.honoka.tateShake2()
+                @gp_sentence.txtSet(
+                    '穂乃果<br>素敵なPVが撮影できるよ！'
+                )
+            49:->
+                @gp_sentence.txtEnd()
+                @gp_object.umi.tateShake()
+                @gp_sentence.txtSet(
+                    '海未<br>何を他力本願なことを<br>言っているのですか、,<br>それに、,仮にそうするとしても、,<br>そんなお金、,どこにあるというのですか、'
+                )
+            55:->
+                @gp_sentence.txtEnd()
+                @gp_object.umi.rotateShake()
+                @gp_sentence.txtSet(
+                    '海未<br>簡単に見積もっても,<br>『１００万円』程は必要ですよ！'
+                )
+            59:->
+                @gp_sentence.txtEnd()
+                @gp_object.honoka.rotateShake()
+                @gp_sentence.txtSet(
+                    '穂乃果<br>なーんだ、,『１００万円』か、,<br>そんなの簡単じゃん！,<br>スロットマシンで稼げばいいじゃない！'
+                )
+            64:->
+                @gp_sentence.txtEnd()
+                @gp_object.umi.scale()
+                @gp_sentence.txtSet(
+                    '海未<br>ちょっと穂乃果、,<br>それ本気で言っているのですか！？'
+                )
+            68:->
+                @gp_sentence.txtEnd()
                 @gp_object.kotori.scale()
-            12:=>
-                @gp_object.honoka.moveToInit()
-                @gp_object.kotori.moveToInit()
-            14:=>
+                @gp_sentence.txtSet(
+                    'ことり<br>そうだよホノカチャン！,<br>さすがにギャンブルは無茶だよ！'
+                )
+            72:->
+                @gp_sentence.txtEnd()
+                @gp_object.honoka.scaleIn()
+                @gp_sentence.txtSet(
+                    '穂乃果<br>ダイジョーブ、,ダイジョーブ！<br>ここに穂乃果のなけなしのお小遣い,<br>『１００円』があるから、'
+                )
+            77:->
+                @gp_sentence.txtEnd()
+                @gp_object.honoka.tateShake()
+                @gp_sentence.txtSet(
+                    '穂乃果<br>これを元手に頑張ってね！,<br>それじゃあ任せたよ！,ことりちゃん！'
+                )
+            79:->
+                @gp_object.honoka.scaleOut()
+            81:->
+                @gp_sentence.txtEnd()
+                @gp_object.kotori.randomShake()
+                @gp_sentence.txtSet(
+                    'ことり<br>『１００円』！？,<br>ちょっとホノカチャン、,無理だよぉ！,<br>それに何で私！？'
+                )
+            85:->
+                @gp_sentence.txtEnd()
+                @gp_object.honoka.rotateShake()
+                @gp_sentence.txtSet(
+                    '穂乃果<br>ことりちゃん、,大好き！,<br>頑張ってね！'
+                )
+            89:->
+                @gp_sentence.txtEnd()
+                @gp_object.kotori.tateShake2()
+                @gp_sentence.txtSet(
+                    'ことり<br>うん、,ホノカチャン！,<br>わたし頑張る！'
+                )
+            93:->
+                @gp_sentence.txtEnd()
+                @gp_object.umi.scale()
+                @gp_sentence.txtSet(
+                    '海未<br>穂乃果！,いいかげんにしなさい！,<br>ことりも、,、,無茶です！'
+                )
+            97:->
+                @gp_sentence.txtEnd()
+                @gp_object.honoka.rotateShake()
+                @gp_sentence.txtSet(
+                    '穂乃果<br>海未ちゃんも,だーいすき！！'
+                )
+            101:->
+                @gp_sentence.txtEnd()
+                @gp_object.umi.tateShake2()
+                @gp_sentence.txtSet(
+                    '海未<br>まったく、,仕方ないですね、,<br>ことり、,頼みましたよ。'
+                )
+            105:->
+                @gp_sentence.txtEnd()
+                @gp_object.kotori.tateShake2()
+                @gp_sentence.txtSet(
+                    'ことり<br>うん！,それじゃあ私に任せてね！,<br>『１００万円』稼いでくるから！'
+                )
+            110:->
+                @gp_sentence.txtEnd()
                 game.endStory()
-        })
-    opStart:()->
-        @resetScene()
+        }
+        @startScene()
     edStart:()->
-        @resetScene()
+
     ###
     タイムラインのキューの単位を秒数に変換してセット
     ###
@@ -5625,13 +5894,14 @@ class FrontPanorama extends Panorama
         @x = 0
         @y = game.height - @h + 3
 class StoryPanorama extends Panorama
-    constructor:()->
+    constructor:(image)->
         w = game.width - 10
         h = game.width
         super w, h
-        @image = @drawRect('#42AAC7')
+        @image = game.imageload(image)
         @x = 5
         @y = Math.floor((game.height - h) / 2)
+
 class effect extends appSprite
     constructor: (w, h) ->
         super w, h
@@ -6874,7 +7144,8 @@ class blackBack extends Dialog
 class storyTextWindow extends Dialog
     constructor:(w, h)->
         super w, h
-        @image = @drawRect('#000000')
+        @image = @drawRect('#ff69b4')
+        @opacity = 0.8
         @x = 10
         @y = game.width + Math.floor((game.height - game.width) / 2) - h - 10
 class Face extends System
@@ -6885,58 +7156,66 @@ class Face extends System
     ###
     縦揺れ
     ###
-    tateShake:(time=2, scale=10, speed=2)->
-        for i in [1..time]
-            @_tateShakeONe(scale, speed)
+    tateShake:()->
+        @tl.moveBy(0, -10, 4, enchant.Easing.QUAD_EASEOUT).moveBy(0, 10, 2, enchant.Easing.QUAD_EASEIN)
+        @tl.moveBy(0, 20, 6, enchant.Easing.QUAD_EASEOUT).moveBy(0, -20, 8, enchant.Easing.QUAD_EASEIN)
+    tateShake2:()->
+        @_tateShake()
+    _tateShake:()->
+        for i in [1..2]
+            @tl.moveBy(0, -10, 2, enchant.Easing.QUAD_EASEOUT).moveBy(0, 10, 1, enchant.Easing.QUAD_EASEIN)
+            @tl.moveBy(0, 10, 1, enchant.Easing.QUAD_EASEOUT).moveBy(0, -10, 2, enchant.Easing.QUAD_EASEIN)
     ###
-    横揺れ
+    回転揺れ
     ###
-    yokoShake:(time=2, scale=10, speed=2)->
-        for i in [1..time]
-            @_yokoShakeONe(scale, speed)
-    _tateShakeONe:(scale, speed)->
-        @tl.moveBy(0, scale * (-1), 2).moveBy(0, scale * 2, 2).moveBy(0, scale * (-1), 2)
-    _yokoShakeONe:(scale, speed)->
-        @tl.moveBy(scale * (-1), 0, 2).moveBy(scale * 2, 0, 2).moveBy(scale * (-1), 0, 2)
+    rotateShake:()->
+        @tl.rotateBy(-20, 4, enchant.Easing.QUAD_EASEOUT).rotateBy(20, 4, enchant.Easing.QUAD_EASEIN)
+        @tl.rotateBy(20, 4, enchant.Easing.QUAD_EASEOUT).rotateBy(-20, 4, enchant.Easing.QUAD_EASEIN)
+        @tl.rotateBy(-10, 2, enchant.Easing.QUAD_EASEOUT).rotateBy(10, 2, enchant.Easing.QUAD_EASEIN)
+        @tl.rotateBy(10, 2, enchant.Easing.QUAD_EASEOUT).rotateBy(-10, 2, enchant.Easing.QUAD_EASEIN)
     ###
-    回転
+    震える
     ###
-    rotate:(time=1,speed=24)->
-        @tl.rotateTo(360*time, 24)
+    randomShake:()->
+        max = 3
+        initx = @x
+        inity = @y
+        rdx = Math.floor(max * 2 * Math.random()) - max
+        rdy = Math.floor(max * 2 * Math.random()) - max
+        @tl.moveBy(rdx, rdy, 2, enchant.Easing.QUAD_EASEOUT)
+        for i in [1..24]
+            rdx = -rdx + Math.floor(max * 2 * Math.random()) - max
+            rdy = -rdy + Math.floor(max * 2 * Math.random()) - max
+            @tl.moveBy(rdx, rdy, 2, enchant.Easing.QUART_EASEINOUT)
+        @tl.moveTo(initx, inity, 2, enchant.Easing.QUAD_EASEIN)
+    ###
+    大きくなって戻る
+    ###
+    scale:()->
+        @tl.scaleTo(2, 2, 24, enchant.Easing.QUAD_EASEOUT).scaleTo(1, 1, 24, enchant.Easing.CUBIC_EASEIN)
     ###
     大きくなる
     ###
-    scale:(scale=2, speed=24)->
-        @tl.scaleTo(scale, scale, speed, enchant.Easing.QUAD_EASEOUT).scaleTo(1, 1, speed, enchant.Easing.CUBIC_EASEIN)
+    scaleIn:()->
+        @tl.scaleTo(1.5, 1.5, 24, enchant.Easing.QUAD_EASEOUT)
     ###
-    定位置に移動
+    元の大きさに戻る
     ###
-    moveToStatic:()->
-        @tl.moveX(@x_static, 24, enchant.Easing.QUAD_EASEIN)
-    ###
-    初期位置に移動
-    ###
-    moveToInit:()->
-        @tl.moveX(@x_init, 24, enchant.Easing.QUAD_EASEIN)
+    scaleOut:()->
+        @tl.scaleTo(1, 1, 24, enchant.Easing.CUBIC_EASEIN)
+
 class kotoriFace extends Face
     constructor: () ->
         super 135, 135
         @image = game.imageload("face_kotori")
-        @x_init = 0 - @width
-        @x_static = 50
 class honokaFace extends Face
     constructor: () ->
         super 135, 135
         @image = game.imageload("face_honoka")
-        @x_init = game.width
-        @x_static = 290
-class haikoFace extends Face
-    constructor:()->
-        super 140, 200
-        @y = 180
-        @image = game.imageload("face_haiko")
-        @x_init = game.width
-        @x_static = 170
+class umiFace extends Face
+    constructor: () ->
+        super 140, 140
+        @image = game.imageload("face_umi")
 class Param extends System
     constructor: (w, h) ->
         super w, h
@@ -7033,3 +7312,12 @@ class loadArc extends Param
         if @angle < 360
             @angle += @angle_frame
             @image = @drawArc('#FFF', 10, @angle)
+
+class storyLoadArc extends Param
+    constructor:()->
+        super 80, 80
+        @image = @drawArc('#FFF', 10, 90)
+        @x = game.width / 2 - @width / 2
+        @y = game.height / 2 - @height / 2
+    onenterframe:(e)->
+        @rotate(10)

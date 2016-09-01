@@ -9,6 +9,7 @@ class mainScene extends appScene
         #ジャイロセンサのリスト
         @gyroList = {'left':false, 'right':false}
         @bgm = game.soundload("bgm/bgm1")
+        @tension_05 = 5
         @initial()
     initial:()->
         @setGroup()
@@ -108,6 +109,8 @@ class mainScene extends appScene
     tensionSetValueFever:()->
         if game.fever is true
             game.tensionSetValue(game.fever_down_tension)
+            #if @gp_stage_front.notItemFallFlg is false && game.tension <= @tension_05
+            #    @gp_stage_front.notItemFallFlg = true
             if game.tension <= 0
                 game.autoMemberSetAfeterFever()
                 game.main_scene.gp_slot.upperFrame.frame = 0
@@ -119,6 +122,8 @@ class mainScene extends appScene
                 game.fever = false
                 if game.debug.not_auto_save is false
                     game.saveGame()
+                game.slot_setting.betUp()
+                #game.setPauseScene()
 
     _gyroMove:()->
         window.addEventListener("deviceorientation",
@@ -133,3 +138,10 @@ class mainScene extends appScene
                     game.main_scene.gyroList.left = false
             , false
         )
+
+    setTension05:()->
+        @tension_05 = Math.floor(game.slot_setting.tension_max * 0.07)
+
+    offNotItemFallFlg:()->
+        if @gp_stage_front.notItemFallFlg is true
+            @gp_stage_front.notItemFallFlg = false

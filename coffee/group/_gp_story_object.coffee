@@ -7,7 +7,8 @@ class gpStoryObject extends appGroup
         @addChild(@back_txt)
         @kotori = new kotoriFace()
         @honoka = new honokaFace()
-        @addChild(@kotori)
-        @addChild(@honoka)
-        @kotori.x = @kotori.x_init
-        @honoka.x = @honoka.x_init
+        @umi = new umiFace()
+        #@addChild(@kotori)
+        #@addChild(@honoka)
+        #@kotori.x = @kotori.x_init
+        #@honoka.x = @honoka.x_init

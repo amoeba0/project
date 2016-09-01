@@ -14,10 +14,10 @@ class FrontPanorama extends Panorama
         @x = 0
         @y = game.height - @h + 3
 class StoryPanorama extends Panorama
-    constructor:()->
+    constructor:(image)->
         w = game.width - 10
         h = game.width
         super w, h
-        @image = @drawRect('#42AAC7')
+        @image = game.imageload(image)
         @x = 5
         @y = Math.floor((game.height - h) / 2)

@@ -257,7 +257,7 @@ class slotSetting extends appNode
                 'name':'チーズケーキ鍋',
                 'image':'item_2',
                 'discription':'チーズケーキしか降ってこなくなる<br>爆弾は降ってこなくなる',
-                'price':10000,
+                'price':7000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -267,7 +267,7 @@ class slotSetting extends appNode
                 'name':'テンション上がるにゃー！',
                 'image':'item_3',
                 'discription':'移動速度とジャンプ力が上がる<br>テンションの上がり幅が1.3倍になる',
-                'price':100000,
+                'price':60000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -277,7 +277,7 @@ class slotSetting extends appNode
                 'name':'チョットマッテテー',
                 'image':'item_4',
                 'discription':'おやつが降ってくる速度が<br>ちょっとだけ遅くなる',
-                'price':1000000,
+                'price':400000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -287,7 +287,7 @@ class slotSetting extends appNode
                 'name':'認められないわぁ',
                 'image':'item_5',
                 'discription':'アイテムを落としてもコンボが減らず<br>テンションも下がらないようになる',
-                'price':10000000,
+                'price':3000000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -297,7 +297,7 @@ class slotSetting extends appNode
                 'name':'完っ全にフルハウスね',
                 'image':'item_6',
                 'discription':'3回に1回の確率で<br>CHANCE!!状態になる',
-                'price':50000000,
+                'price':20000000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -307,7 +307,7 @@ class slotSetting extends appNode
                 'name':'ラブアローシュート',
                 'image':'item_7',
                 'discription':'おやつが近くに落ちてくる',
-                'price':100000000,
+                'price':200000000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -317,7 +317,7 @@ class slotSetting extends appNode
                 'name':'鈍いのですね',
                 'image':'item_8',
                 'discription':'おやつが降ってくる速度が<br>だいぶ遅くなる<br>チョットマッテテー（遅）と組み合わせると<br>更に遅くなる',
-                'price':500000000,
+                'price':1000000000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -326,8 +326,8 @@ class slotSetting extends appNode
             9:{
                 'name':'ファイトだよっ',
                 'image':'item_9',
-                'discription':'CHANCE!!でスロットが揃う時に<br>FEVER!!が出やすくなる',
-                'price':1000000000,
+                'discription':'CHANCE!!でスロットが揃う時に<br>3回に1回の確率でFEVER!!が出る',
+                'price':10000000000,
                 'durationSec':90,
                 'conditoin':'',
                 'condFunc':()->
@@ -458,7 +458,7 @@ class slotSetting extends appNode
 
         #μ’ｓメンバーアイテムの値段、フィーバーになった順に
         #TODO タイトルに戻って最初からやりなおすと前回プレイ時の値段が残っている？
-        @member_item_price = [1000, 10000, 100000, 1000000, 10000000, 50000000, 100000000, 500000000, 1000000000]
+        @member_item_price = [1000, 5000, 30000, 100000, 1000000, 5000000, 30000000, 200000000, 1000000000]
 
         #テンションの最大値
         @tension_max = 500
@@ -541,22 +541,22 @@ class slotSetting extends appNode
             @prize_div = 1
         else if game.bet < 50000
             val = 0.58
-            @prize_div = 0.9
+            @prize_div = 1
         else if game.bet < 100000
             val = 0.61
-            @prize_div = 0.9
+            @prize_div = 1
         else if game.bet < 500000
             val = 0.64
-            @prize_div = 0.9
+            @prize_div = 1
         else if game.bet < 1000000 #100万
             val = 0.67
-            @prize_div = 0.9
+            @prize_div = 1
         else if game.bet < 5000000
             val = 0.7
             @prize_div = 0.9
         else if game.bet < 10000000
             val = 0.73
-            @prize_div = 0.8
+            @prize_div = 0.9
         else if game.bet < 50000000
             val = 0.76
             @prize_div = 0.8
@@ -565,31 +565,31 @@ class slotSetting extends appNode
             @prize_div = 0.8
         else if game.bet < 500000000
             val = 0.9
-            @prize_div = 0.8
+            @prize_div = 0.7
         else if game.bet < 1000000000
             val = 1
             @prize_div = 0.7
         else if game.bet < 5000000000
             val = 1.2
-            @prize_div = 0.7
+            @prize_div = 0.6
         else if game.bet < 10000000000 #100億
             val = 1.4
-            @prize_div = 0.7
+            @prize_div = 0.6
         else if game.bet < 50000000000
             val = 1.6
-            @prize_div = 0.7
+            @prize_div = 0.5
         else if game.bet < 100000000000
             val = 1.8
-            @prize_div = 0.6
+            @prize_div = 0.4
         else if game.bet < 500000000000
             val = 2
-            @prize_div = 0.6
+            @prize_div = 0.3
         else if game.bet < 1000000000000 #1兆
             val = 2.5
-            @prize_div = 0.5
+            @prize_div = 0.2
         else
             val = 3
-            @prize_div = 0.4
+            @prize_div = 0.1
         div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
@@ -704,8 +704,8 @@ class slotSetting extends appNode
             ret_money = Math.floor(ret_money / div)
         if game.main_scene.gp_back_panorama.now_back_effect_flg is true
             ret_money *= 3
-        if ret_money > 10000000000
-            ret_money = 10000000000
+        if ret_money > 100000000000000
+            ret_money = 100000000000000
         return ret_money
 
     ###
@@ -985,29 +985,18 @@ class slotSetting extends appNode
         tension_rate = Math.floor((game.tension * 100)/ @tension_max)
         if game.isItemSet(9)
             if game.past_fever_num <= 3
-                rate = 20
-            else if game.past_fever_num <= 6
-                rate = 18
-            else
-                rate = 16
+                rate = 30
         else if tension_rate is 100
-            if game.past_fever_num <= 3
-                rate = 16
-            else if game.past_fever_num <= 6
-                rate = 13
-            else if game.past_fever_num <= 9
-                rate = 10
-            else
-                rate = 7
+                rate = 20
         else if 85 <= tension_rate
             if game.past_fever_num <= 3
-                rate = 12
+                rate = 16
             else if game.past_fever_num <= 6
-                rate = 10
+                rate = 14
             else if game.past_fever_num <= 9
-                rate = 8
+                rate = 12
             else
-                rate = 6
+                rate = 10
         else if 70 <= tension_rate
             if game.past_fever_num <= 3
                 rate = 8
@@ -1018,7 +1007,7 @@ class slotSetting extends appNode
             else
                 rate = 5
         else
-            rate = 4
+            rate = 2
         result = false
         random = Math.floor(Math.random() * 100)
         if game.debug.force_fever is true || random <= rate
@@ -1055,6 +1044,7 @@ class slotSetting extends appNode
     ###
     強制的にフィーバーになるときに左のスロットから役が作成可能かを判定して、作成可能ならその役を返す
     過去にフィーバーになった役は除外
+    該当する役が無かった時、校章があれば校章を返すようにする
     ###
     setForceFeverRole:(left_lille)->
         role = []
@@ -1076,6 +1066,9 @@ class slotSetting extends appNode
                 ()->
                     Math.random() - 0.5
             )
+        else
+            if left_lille.indexOf(1) != -1
+                role = [1,1,1]
         return role
 
     betChange:(up)->
@@ -1155,10 +1148,13 @@ class slotSetting extends appNode
             val = 1
         return val
 
+    #TODO 掛け金が1000億円を超える
     betUp:()->
         if game.auto_bet is 1 and game.fever is false and @isForceSlotHit is false
-            tmp_bet = Math.floor(game.money / 100)
+            tmp_bet = Math.floor(game.money / 50)
             if game.bet < tmp_bet
                 digit = Math.pow(10, (String(tmp_bet).length - 1))
                 game.bet = Math.floor(tmp_bet / digit) * digit
+                if game.bet > 100000000000
+                    game.bet = 100000000000
                 game.main_scene.gp_system.bet_text.setValue()

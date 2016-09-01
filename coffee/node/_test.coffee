@@ -25,7 +25,9 @@ class Test extends appNode
         #@getRoleAbleMemberList()
         #@betDown()
         #@setForceFeverRole()
-        @betUp()
+        #@betUp()
+        #@appload()
+        @multiload()
 
     #以下、テスト用関数
 
@@ -67,7 +69,14 @@ class Test extends appNode
             console.log(num)
 
     moneyFormat:()->
-        console.log(game.toJPUnit(12000012340000))
+        console.log(game.toJPUnit(1234))
+        console.log(game.toJPUnit(123456))
+        console.log(game.toJPUnit(1234561234))
+        console.log(game.toJPUnit(12345612345678))
+        console.log(game.toJPUnit(123456123456789012))
+        console.log(game.toJPUnit(1234561234567890123456))
+        console.log(game.toJPUnit(12345612345678901234567890))
+        console.log(game.toJPUnit(123456123456789012345678901234))
 
     itemCatchTension:()->
         game.past_fever_num = 0
@@ -130,7 +139,7 @@ class Test extends appNode
         console.log(val)
 
     setForceFeverRole:()->
-        lille = [15,4,1,4,11,2,5,1,4,2,5,12,4,1,2,3,1,4,13,3]
+        lille = [15,4,1,4,11,2,5,11,4,2,5,11,4,12,2,3,11,4,11,3]
         role = game.slot_setting.setForceFeverRole(lille)
         console.log(role)
 
@@ -142,3 +151,15 @@ class Test extends appNode
         console.log(game.bet)
         game.slot_setting.betUp()
         console.log(game.bet)
+
+    appload:()->
+        game.appLoad('sounds/bgm/bgm1.mp3')
+        game.appLoad('sounds/bgm/zenkai_no_lovelive.mp3', @callbackTest())
+        console.log(game.loadedFile)
+
+    callbackTest:()->
+        console.log('callbackTest')
+
+    multiload:()->
+        files = ['sounds/bgm/zenkai_no_lovelive.mp3', 'sounds/bgm/sweet_holiday.mp3']
+        game.multiLoad(files)

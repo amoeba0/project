@@ -94,3 +94,12 @@ class loadArc extends Param
         if @angle < 360
             @angle += @angle_frame
             @image = @drawArc('#FFF', 10, @angle)
+
+class storyLoadArc extends Param
+    constructor:()->
+        super 80, 80
+        @image = @drawArc('#FFF', 10, 90)
+        @x = game.width / 2 - @width / 2
+        @y = game.height / 2 - @height / 2
+    onenterframe:(e)->
+        @rotate(10)

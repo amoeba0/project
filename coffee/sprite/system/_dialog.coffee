@@ -27,6 +27,7 @@ class blackBack extends Dialog
 class storyTextWindow extends Dialog
     constructor:(w, h)->
         super w, h
-        @image = @drawRect('#000000')
+        @image = @drawRect('#ff69b4')
+        @opacity = 0.8
         @x = 10
         @y = game.width + Math.floor((game.height - game.width) / 2) - h - 10

@@ -128,9 +128,10 @@ class storyMessage extends text
                         for i in [0..@nowSplited-1]
                             init_text += @splited[i]
                     tmp_txt = init_text + @splited[@nowSplited].substring(0, @now_length)
-                    if tmp_txt.indexOf('<') != -1
+                    end = tmp_txt.slice(-1)
+                    if end == '<'
                         @now_length += 3
-                        tmp_txt = init_text + @splited[@nowSplited].substring(0, @now_length + 3)
+                        tmp_txt = init_text + @splited[@nowSplited].substring(0, @now_length)
                     @text = tmp_txt
                 else
                     @now_length = 0
@@ -138,11 +139,12 @@ class storyMessage extends text
                     @wait = @waitTime
             else
                 @wait -= 1
-    init:(message, fontSize=26, speed=1)->
+    init:(message, fontSize=22, speed=1)->
         @font = fontSize + @fontInit
         @speed = speed
         @splited = message.split(',')
         @splitedNum = @splited.length
+        @splitedLength = []
         for i, val of @splited
             @splitedLength[i] = val.length
         @now_length = 0
