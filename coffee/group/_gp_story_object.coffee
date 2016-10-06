@@ -7,8 +7,19 @@ class gpStoryObject extends appGroup
         @addChild(@back_txt)
         @kotori = new kotoriFace()
         @honoka = new honokaFace()
-        @umi = new umiFace()
-        #@addChild(@kotori)
-        #@addChild(@honoka)
-        #@kotori.x = @kotori.x_init
-        #@honoka.x = @honoka.x_init
+        @umi    = new umiFace()
+        @maki   = new makiFace()
+        @rin    = new rinFace()
+        @hanayo = new hanayoFace()
+        @nico   = new nicoFace()
+        @nozomi = new nozomiFace()
+        @eli    = new eliFace()
+        @bgm = null
+    playBgm:(bgm)->
+        @bgm = game.soundload('bgm/'+bgm)
+        game.bgmPlay(@bgm)
+class gpStoryObjectUp extends appGroup
+    constructor: () ->
+        super
+        @emote = new Emote()
+        @addChild(@emote)

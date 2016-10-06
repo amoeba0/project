@@ -21,3 +21,8 @@ class StoryPanorama extends Panorama
         @image = game.imageload(image)
         @x = 5
         @y = Math.floor((game.height - h) / 2)
+        @opacity = 1
+    hide:()->
+        @opacity = 0
+    show:()->
+        @opacity = 1

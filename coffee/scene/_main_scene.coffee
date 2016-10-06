@@ -8,7 +8,7 @@ class mainScene extends appScene
         @buttonList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         #ジャイロセンサのリスト
         @gyroList = {'left':false, 'right':false}
-        @bgm = game.soundload("bgm/bgm1")
+        @bgm = game.soundload("bgm_maid")
         @tension_05 = 5
         @initial()
     initial:()->
@@ -109,21 +109,22 @@ class mainScene extends appScene
     tensionSetValueFever:()->
         if game.fever is true
             game.tensionSetValue(game.fever_down_tension)
-            #if @gp_stage_front.notItemFallFlg is false && game.tension <= @tension_05
-            #    @gp_stage_front.notItemFallFlg = true
+            if @gp_stage_front.notItemFallFlg is false && game.tension <= @tension_05
+                @gp_stage_front.notItemFallFlg = true
             if game.tension <= 0
                 game.autoMemberSetAfeterFever()
                 game.main_scene.gp_slot.upperFrame.frame = 0
                 game.pause_scene.pause_main_layer.save_game_button.makeAble()
                 game.bgmStop(game.main_scene.gp_slot.fever_bgm)
-                #game.bgmPlay(@bgm, true)
+                game.bgmPlay(@bgm, true)
                 @gp_system.changeBetChangeFlg(true)
                 @gp_effect.feverEffectEnd()
                 game.fever = false
                 if game.debug.not_auto_save is false
                     game.saveGame()
-                game.slot_setting.betUp()
-                #game.setPauseScene()
+                game.slot_setting.betUpExe()
+                game.resetMainScene()
+                game.setPauseScene()
 
     _gyroMove:()->
         window.addEventListener("deviceorientation",

@@ -34,7 +34,8 @@ class stageFront extends gpStage
         @_stageCycle()
     setPlayer:()->
         @player = new Bear()
-        @player.y = @floor
+        @player.y = @floor - @player.height
+        @player.x = game.width / 2 - (@player.width / 2)
         @addChild(@player)
     ###
     アイテムを降らせる間隔を初期化
@@ -74,8 +75,11 @@ class stageFront extends gpStage
             game.auto_bet = 0
             game.bet = game.slot_setting.betDown()
             game.main_scene.gp_system.bet_text.setValue()
-        if 0 < game.money
+        if 0 < game.money && game.retry is false
             game.money -= game.bet
+        if game.retry is true
+            game.retry = false
+            game.main_scene.gp_system.changeBetChangeFlg(true)
         @catchItems.push(new MacaroonCatch())
         @addChild(@catchItems[@nowCatchItemsNum])
         game.sePlay(@item_fall_se)

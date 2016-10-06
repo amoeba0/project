@@ -30,7 +30,7 @@ class moneyText extends text
         @x = game.width - @_boundWidth - 7
     setPositionPause:()->
         @x = 100
-        @y = 190
+        @y = 120
 
 class betText extends text
     constructor: () ->
@@ -49,7 +49,7 @@ class betText extends text
         game.main_scene.gp_system.low_bet_button.setXposition()
     setPositionPause:()->
         @x = 140
-        @y = 245
+        @y = 175
 
 class comboText extends text
     constructor: () ->

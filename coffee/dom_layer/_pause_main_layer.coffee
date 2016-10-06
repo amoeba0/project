@@ -9,6 +9,8 @@ class pauseMainLayer extends appDomLayer
         @set_member_button = new setMemberButtonHtml()
         @record_button = new recordButtonHtml()
         @bet_dialog = new betDialogHtml()
+        @menu_discription = new menuDiscription()
+        @batu_button = new batuButtonHtml()
         @addChild(@return_game_button)
         @addChild(@save_game_button)
         @addChild(@title_button)
@@ -17,6 +19,8 @@ class pauseMainLayer extends appDomLayer
         @addChild(@set_member_button)
         @addChild(@record_button)
         @addChild(@bet_dialog)
+        @addChild(@menu_discription)
+        @addChild(@batu_button)
         @money_text = new moneyText()
         @addChild(@money_text)
         @bet_text = new betText()
@@ -34,7 +38,7 @@ class pauseMainLayer extends appDomLayer
         @bet_text.setValue()
         @bet_text.setPositionPause()
         @low_bet_button.setXposition()
-        if game.fever is true
+        if game.fever is true || game.main_scene.gp_system.paermit_bet_change_flg is false
             @heigh_bet_button.opacity = 0
             @low_bet_button.opacity = 0
         else

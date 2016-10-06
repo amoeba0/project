@@ -8,18 +8,18 @@ class Button extends System
 ###
 class pauseButton extends Button
     constructor: () ->
-        super 36, 36
+        super 90, 36
         @image = game.imageload("pause")
-        @x = 430
+        @x = 380
         @y = 76
     ontouchend: (e)->
         game.setPauseScene()
 
 class largePauseButton extends Button
     constructor:()->
-        super 100, 150
-        @x = 380
-        @y = 40
+        super 130, 100
+        @x = 350
+        @y = 60
     ontouchend: (e)->
         game.setPauseScene()
 
@@ -163,7 +163,7 @@ class heighBetButtonPause extends buttonHtml
         super 33, 33
         @class.push('triangle-top')
         @x = 90
-        @y = 245
+        @y = 175
         @setHtml()
     ontouchend: () ->
         game.pause_scene.pause_main_layer.betSetting(true)
@@ -198,7 +198,7 @@ class lowBetButtonPause extends buttonHtml
         super 33, 33
         @class.push('triangle-bottom')
         @x = 90
-        @y = 245
+        @y = 175
         @setHtml()
     ontouchend: () ->
         game.pause_scene.pause_main_layer.betSetting(false)

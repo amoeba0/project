@@ -144,11 +144,14 @@ class gpSlot extends appGroup
             prize_money = game.slot_setting.calcPrizeMoney(@middle_lille.lilleArray[@middle_lille.nowEye])
             game.tensionSetValueSlotHit(@hit_role)
             @_feverStart(@hit_role)
-            if @hit_role is 1
+            if @hit_role < 10 && game.slot_setting.isAddMuse() is true
                 member = game.slot_setting.getAddMuseNum()
                 @slotAddMuse(member)
-            else
+            if @hit_role != 1
                 game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
+            else
+                game.retry = true
+                game.main_scene.gp_system.changeBetChangeFlg(false)
             if game.slot_setting.isForceSlotHit is true
                 @endForceSlotHit()
 
@@ -183,9 +186,17 @@ class gpSlot extends appGroup
                     game.tensionSetValue(game.slot_setting.tension_max)
                     game.fever = true
                     game.past_fever_num += 1
+
                     game.slot_setting.setMuseMember()
+                    if game.isSumaho() is true
+                        bgm = @_getFeverBgm(hit_eye)
+                        bgm2 = @_getFeverBgm(game.slot_setting.now_muse_num)
+                        game.spBeforeLoad([
+                            'sounds/bgm/' + bgm['name'] + '.mp3', 'sounds/bgm/' + bgm2['name'] + '.mp3'
+                        ])
                     game.musePreLoad()
                     game.autoMemberSetBeforeFever()
+
                     game.fever_hit_eye = hit_eye
                     game.main_scene.gp_system.changeBetChangeFlg(false)
                     game.main_scene.gp_effect.feverEffectSet()
@@ -198,7 +209,10 @@ class gpSlot extends appGroup
     ###
     _feverBgmStart:(hit_eye)->
         bgm = @_getFeverBgm(hit_eye)
-        @feverSec = bgm['time']
+        if game.debug.short_fever is true
+            @feverSec = 5
+        else
+            @feverSec = bgm['time']
         @fever_bgm = game.soundload('bgm/'+bgm['name'])
         game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (@feverSec * game.fps)) / 100
         game.fever_down_tension *= -1

@@ -7,3 +7,5 @@ class gpStoryPanorama extends appGroup
         @addChild(@panorama)
     panoramaChange:(image)->
         @panorama.image = game.imageload(image)
+    panoramaChangeRect:(color='black')->
+        @panorama.image = @panorama.drawRect(color)

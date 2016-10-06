@@ -27,7 +27,9 @@ class Test extends appNode
         #@setForceFeverRole()
         #@betUp()
         #@appload()
-        @multiload()
+        #@multiload()
+        #@isAddMuse()
+        @manySoundLoad()
 
     #以下、テスト用関数
 
@@ -153,7 +155,7 @@ class Test extends appNode
         console.log(game.bet)
 
     appload:()->
-        game.appLoad('sounds/bgm/bgm1.mp3')
+        game.appLoad('sounds/bgm_maid.mp3')
         game.appLoad('sounds/bgm/zenkai_no_lovelive.mp3', @callbackTest())
         console.log(game.loadedFile)
 
@@ -163,3 +165,24 @@ class Test extends appNode
     multiload:()->
         files = ['sounds/bgm/zenkai_no_lovelive.mp3', 'sounds/bgm/sweet_holiday.mp3']
         game.multiLoad(files)
+
+    isAddMuse:()->
+        console.log(game.member_set_now)
+        for i in [1..100]
+            rslt = game.slot_setting.isAddMuse()
+            console.log(rslt)
+
+    manySoundLoad:()->
+        #console.log(enchant.Core.instance.assets['sounds/bgm_maid.mp3'])
+        ###
+        files = [
+            'sounds/bgm/anemone_heart.mp3', 'sounds/bgm/anone_ganbare.mp3', 'sounds/bgm/arihureta.mp3', 'sounds/bgm/beat_in_angel.mp3',
+            'sounds/bgm/blueberry.mp3', 'sounds/bgm/daring.mp3', 'sounds/bgm/future_style.mp3', 'sounds/bgm/garasu.mp3',
+            'sounds/bgm/hatena_heart.mp3', 'sounds/bgm/hello_hoshi.mp3'
+        ]
+        game.multiLoad(files)
+        ###
+        game.appLoad('sounds/bgm/anemone_heart.mp3')
+        game.appLoad('sounds/bgm/anone_ganbare.mp3')
+        window.setTimeout(console.log(game.loadedFile), 5000)
+

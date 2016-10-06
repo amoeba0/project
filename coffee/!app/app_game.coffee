@@ -53,7 +53,8 @@ class appGame extends Game
     効果音を鳴らす
     ###
     sePlay:(se)->
-        se.clone().play()
+        if se != undefined
+            se.clone().play()
 
     ###
     BGMをならす
@@ -125,6 +126,7 @@ class appGame extends Game
 
     ###
     複数のファイルをゲーム中にロードする
+    全ファイルのロードが終了したらmultiLoadEnd()を実行する
     @param array    files ロードするファイル名を格納した配列
     ###
     multiLoad:(files)->
@@ -154,6 +156,18 @@ class appGame extends Game
     ###
     setLoadedFile:(file)->
         @loadedFile.push(file)
+
+    ###
+    スマホで音楽を複数ロードした時に落ちる対策
+    とりあえずロード前に他でロードした音楽を消してみる
+    @param array exclude 削除の対象から除外する曲
+    ###
+    spBeforeLoad:(exclude = [])->
+        if @isSumaho() is true
+            for key, val of enchant.Core.instance.assets
+                if key.indexOf('sounds/bgm/') != -1 and (exclude is [] or exclude.indexOf(key) is -1)
+                    delete enchant.Core.instance.assets[key]
+                    @loadedFile = @arrayValueDel(@loadedFile, key)
 
     ###
     数値から右から数えた特定の桁を取り出して数値で返す

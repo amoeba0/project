@@ -22,7 +22,7 @@ class betDialogHtml extends baseDialogHtml
     constructor:()->
         super 340, 240
         @x = 60
-        @y = 160
+        @y = 90
         @class.push('base-dialog-bet')
         @setHtml()
 class menuDialogHtml extends baseDialogHtml
@@ -164,6 +164,15 @@ class speedDiscription extends titleDiscription
         @x = 80
         @y = 530
         @text = '移動速度とジャンプ力'
+        @setHtml()
+
+class menuDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 170
+        @y = 30
+        @class.push('white-text')
+        @text = 'メニュー'
         @setHtml()
 
 class itemNameDiscription extends titleDiscription

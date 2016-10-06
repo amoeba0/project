@@ -10,15 +10,17 @@ class Debug extends appNode
         #開始後いきなりポーズ画面
         @force_pause_flg = false
         #開始後いきなりオープニング
-        @foece_story_flg = true
+        @foece_story_flg = false
+        #デバッグで流すストーリーのエピソード
+        @test_stroy_episode = 5
 
         #ゲーム開始時ロードをしない
         @not_load_flg = false
         #テストロードに切り替え
-        @test_load_flg = true
+        @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':98765432100,
+            'money':987654321,
             'bet':10000,
             'combo':0,
             'max_combo':200,
@@ -27,16 +29,17 @@ class Debug extends appNode
             'item_point':500,
             'next_add_member_key':0,
             'now_muse_num':0,
-            'max_set_item_num':1,
+            'max_set_item_num':4,
             'now_speed':1,
-            'item_have_now':[3,4,5,12,13,14,15,21,22,23,24],
-            'item_set_now':[3],
-            'member_set_now':[12,13],
+            'item_have_now':[3,4,5,11,12,13,14,15,16,17,18,19,21,22,23,24],
+            'item_set_now':[1,2,3],
+            'member_set_now':[11,12,13],
             'prev_fever_muse':[11,12,13,14,15,16,17,18,19],
             'prev_item':[],
             'left_lille':[],
             'middle_lille':[],
-            'right_lille':[]
+            'right_lille':[],
+            'retry':0
         }
 
         #デバッグ用リールにすりかえる
@@ -74,7 +77,7 @@ class Debug extends appNode
         #スロットが当たった時のテンション増減値を固定する
         @fix_tention_slot_hit_flg = false
         #スロットに必ずμ’ｓが追加される
-        #@force_insert_muse = false
+        @force_insert_muse = false
         #スロットが必ず当たる
         @force_slot_hit = false
         #スロットが2回に1回当たる
@@ -83,6 +86,8 @@ class Debug extends appNode
         @force_fever = false
         #ミスアイテムが降らない
         @not_miss_item_flg = false
+        #フィーバー時間が短い
+        @short_fever = false
 
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50

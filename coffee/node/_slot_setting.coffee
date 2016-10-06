@@ -244,7 +244,7 @@ class slotSetting extends appNode
                     return true
             },
             1:{
-                'name':'まきちゃん',
+                'name':'まきちゃんかわいい',
                 'image':'item_1',
                 'discription':'スロットが揃った時以外の<br>コインがたくさん降ってくるようになる',
                 'price':1000,
@@ -420,7 +420,7 @@ class slotSetting extends appNode
                 'image':'item_21',
                 'discription':'第２話が見れる<br>移動速度とジャンプ力がアップする',
                 'price':1000000,
-                'conditoin':'75コンボ達成する',
+                'conditoin':'50コンボ達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(21)
             },
@@ -429,7 +429,7 @@ class slotSetting extends appNode
                 'image':'item_22',
                 'discription':'第３話が見れる<br>スキルのスロットが1つ増える',
                 'price':100000000,
-                'conditoin':'150コンボ達成する<br>または、楽曲を9曲以上達成する',
+                'conditoin':'100コンボ達成する<br>または、楽曲を9曲以上達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(22)
             },
@@ -438,7 +438,7 @@ class slotSetting extends appNode
                 'image':'item_23',
                 'discription':'第４話が見れる<br>移動速度とジャンプ力がアップする<br>スキルのスロットが1つ増える',
                 'price':10000000000,
-                'conditoin':'150コンボ達成する<br>かつ、楽曲を9曲以上達成する',
+                'conditoin':'100コンボ達成する<br>かつ、楽曲を9曲以上達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(23)
             },
@@ -609,16 +609,19 @@ class slotSetting extends appNode
         return val
 
     ###
-    テンションからスロットにμ’sが入るかどうかを返す
-    初期値5％、テンションMAXで20％
-    過去のフィーバー回数が少ないほど上方補正かける 0回:+12,1回:+8,2回:+4
+    スロットにμ’sが入るかどうかを返す
+    カットインはリトライ以外が当たった時、確率で起こる
+    部員0-1人セットで40%、2人セットで60%、3人セットで80%
     @return boolean
     ###
     isAddMuse:()->
         result = false
-        rate = Math.floor((game.tension / @tension_max) * 15) + 5
-        if game.past_fever_num <= 2
-            rate += (3 - game.past_fever_num) * 4
+        length = game.member_set_now.length
+        rate = 40
+        if length is 2
+            rate = 60
+        else if 3 <= length
+            rate = 80
         random = Math.floor(Math.random() * 100)
         if random < rate
             result = true
@@ -698,7 +701,7 @@ class slotSetting extends appNode
         ret_money = Math.floor(game.bet * @bairitu[eye] * @prize_div)
         if game.fever is true
             time = @muse_material_list[game.fever_hit_eye]['bgm'][0]['time']
-            div = Math.floor(time / 90)
+            div = Math.floor(time * 10 / 90) / 10
             if div < 1
                 div = 1
             ret_money = Math.floor(ret_money / div)
@@ -929,13 +932,13 @@ class slotSetting extends appNode
             if game.prev_fever_muse.indexOf(parseInt(num)) != -1
                 rslt = true
         else if num is 21
-            if 75 <= game.max_combo
+            if 50 <= game.max_combo
                 rslt = true
         else if num is 22
-            if 9 <= game.countFullMusic() || 150 <= game.max_combo
+            if 9 <= game.countFullMusic() || 100 <= game.max_combo
                 rslt = true
         else if num is 23
-            if 9 <= game.countFullMusic() && 150 <= game.max_combo
+            if 9 <= game.countFullMusic() && 100 <= game.max_combo
                 rslt = true
         else if num is 24
             if 15 <= game.countFullMusic()
@@ -1150,7 +1153,11 @@ class slotSetting extends appNode
 
     #TODO 掛け金が1000億円を超える
     betUp:()->
-        if game.auto_bet is 1 and game.fever is false and @isForceSlotHit is false
+        if game.fever is false and @isForceSlotHit is false
+            @betUpExe()
+
+    betUpExe:()->
+        if game.auto_bet is 1
             tmp_bet = Math.floor(game.money / 50)
             if game.bet < tmp_bet
                 digit = Math.pow(10, (String(tmp_bet).length - 1))

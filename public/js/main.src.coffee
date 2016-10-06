@@ -62,7 +62,8 @@ class appGame extends Game
     効果音を鳴らす
     ###
     sePlay:(se)->
-        se.clone().play()
+        if se != undefined
+            se.clone().play()
 
     ###
     BGMをならす
@@ -134,6 +135,7 @@ class appGame extends Game
 
     ###
     複数のファイルをゲーム中にロードする
+    全ファイルのロードが終了したらmultiLoadEnd()を実行する
     @param array    files ロードするファイル名を格納した配列
     ###
     multiLoad:(files)->
@@ -163,6 +165,18 @@ class appGame extends Game
     ###
     setLoadedFile:(file)->
         @loadedFile.push(file)
+
+    ###
+    スマホで音楽を複数ロードした時に落ちる対策
+    とりあえずロード前に他でロードした音楽を消してみる
+    @param array exclude 削除の対象から除外する曲
+    ###
+    spBeforeLoad:(exclude = [])->
+        if @isSumaho() is true
+            for key, val of enchant.Core.instance.assets
+                if key.indexOf('sounds/bgm/') != -1 and (exclude is [] or exclude.indexOf(key) is -1)
+                    delete enchant.Core.instance.assets[key]
+                    @loadedFile = @arrayValueDel(@loadedFile, key)
 
     ###
     数値から右から数えた特定の桁を取り出して数値で返す
@@ -731,6 +745,8 @@ class pauseMainLayer extends appDomLayer
         @set_member_button = new setMemberButtonHtml()
         @record_button = new recordButtonHtml()
         @bet_dialog = new betDialogHtml()
+        @menu_discription = new menuDiscription()
+        @batu_button = new batuButtonHtml()
         @addChild(@return_game_button)
         @addChild(@save_game_button)
         @addChild(@title_button)
@@ -739,6 +755,8 @@ class pauseMainLayer extends appDomLayer
         @addChild(@set_member_button)
         @addChild(@record_button)
         @addChild(@bet_dialog)
+        @addChild(@menu_discription)
+        @addChild(@batu_button)
         @money_text = new moneyText()
         @addChild(@money_text)
         @bet_text = new betText()
@@ -756,7 +774,7 @@ class pauseMainLayer extends appDomLayer
         @bet_text.setValue()
         @bet_text.setPositionPause()
         @low_bet_button.setXposition()
-        if game.fever is true
+        if game.fever is true || game.main_scene.gp_system.paermit_bet_change_flg is false
             @heigh_bet_button.opacity = 0
             @low_bet_button.opacity = 0
         else
@@ -1050,7 +1068,7 @@ class titleMainLayer extends appDomLayer
         @addChild(@start_game_button)
         @new_game_button = new newGameButtonHtml()
         @addChild(@new_game_button)
-        @story_button = new storyButtonHtml()
+        @story_button = new story1stButtonHtml()
         @addChild(@story_button)
 
 class catchAndSlotGame extends appGame
@@ -1075,7 +1093,7 @@ class LoveliveGame extends catchAndSlotGame
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
                     'heart', 'explosion', 'items', 'coin_pla']
         #音声リスト
-        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm/bgm1']
+        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm_maid']
 
         @keybind(90, 'z')
         @keybind(88, 'x')
@@ -1093,6 +1111,8 @@ class LoveliveGame extends catchAndSlotGame
         @limit_set_item_num = 3
         @max_set_member_num = 3
         @next_auto_set_member = [] #ソロ楽曲全達成後にフィーバー後自動的に部員に設定されるリスト
+        @now_play_fever_bgm = null
+        @now_play_fever_bgm_time = 0
 
         #セーブする変数(slot_settingにもあるので注意)
         @money = 0 #現在の所持金
@@ -1111,6 +1131,7 @@ class LoveliveGame extends catchAndSlotGame
         @prev_item = [] #前にセットしていたアイテム
         @now_speed = 1 #現在の移動速度とジャンプ力
         @auto_bet = 1 #自動的に掛け金を上げる
+        @retry = false #リトライ中
 
         @init_load_val = {
             'money':100,
@@ -1130,6 +1151,7 @@ class LoveliveGame extends catchAndSlotGame
             'prev_fever_muse':[],
             'prev_item':[],
             'auto_bet':1,
+            'retry':0,
             'left_lille':@arrayCopy(@slot_setting.lille_array_0[0]),
             'middle_lille':@arrayCopy(@slot_setting.lille_array_0[1]),
             'right_lille':@arrayCopy(@slot_setting.lille_array_0[2])
@@ -1149,6 +1171,7 @@ class LoveliveGame extends catchAndSlotGame
         else
             @title_scene = new titleScene()
             @pushScene(@title_scene)
+            @startStoryIfNoData()
             if @debug.force_main_flg is true
                 @main_scene = new mainScene()
                 @pause_scene = new pauseScene()
@@ -1158,8 +1181,12 @@ class LoveliveGame extends catchAndSlotGame
                 if @debug.force_pause_flg is true
                     @setPauseScene()
             else if @debug.foece_story_flg is true
-                @startOpStory()
+                @startTestStory()
 
+    resetMainScene:()->
+        @popScene(@main_scene)
+        @main_scene = new mainScene()
+        @pushScene(@main_scene)
 
     ###
     タイトルへ戻る
@@ -1190,16 +1217,28 @@ class LoveliveGame extends catchAndSlotGame
         @pushScene(@main_scene)
 
     bgmPlayOnTension:()->
-        half = Math.floor(@slot_setting.tension_max / 2)
-        if half <= @tension
-            @bgmPlay(@main_scene.bgm, true)
+        @bgmPlay(@main_scene.bgm, true)
 
     ###
     現在セットされているメンバーをもとに素材をロードします
     ###
     musePreLoadByMemberSetNow:()->
         roles = @getRoleByMemberSetNow()
+        if game.isSumaho() is true
+            bgms = []
+            bgms.push(@_getFeverBgmName(game.slot_setting.now_muse_num))
+            for i, role of roles
+                bgms.push(@_getFeverBgmName(role))
+            game.spBeforeLoad(bgms)
         @musePreLoadMulti(roles)
+        @musePreLoad()
+
+    _getFeverBgmName:(role)->
+        material = game.slot_setting.muse_material_list
+        if material[role] is undefined
+            role = 20
+        bgm = material[role]['bgm'][0]
+        return 'sounds/bgm/' + bgm['name'] + '.mp3'
 
     ###
     現在セットされているメンバーをもとに組み合わせ可能な役の一覧を全て取得します
@@ -1400,7 +1439,16 @@ class LoveliveGame extends catchAndSlotGame
         @pause_scene.pause_item_buy_layer.resetItemList()
         @pause_scene.pause_main_layer.statusDsp()
         @pause_scene.pause_main_layer.bet_checkbox.setCheck()
+        if @fever is false
+            @nowPlayBgmPause()
+        else
+            @_remainFeverBgm()
+
+    #フィーバー中ならBGMの曲と位置を記憶
+    _remainFeverBgm:()->
+        @now_play_fever_bgm = @nowPlayBgm
         @nowPlayBgmPause()
+
     ###
     ポーズシーンをポップする
     ###
@@ -1418,7 +1466,14 @@ class LoveliveGame extends catchAndSlotGame
 
     popLoadScene:()->
         @popScene(@load_scene)
-        @nowPlayBgmRestart()
+        if @fever is false
+            @nowPlayBgmRestart()
+        else
+            @_restartFeverBgm()
+
+    #フィーバー中なら覚えたBGMの曲と位置から再開
+    _restartFeverBgm:()->
+        @bgmPlay(@now_play_fever_bgm)
 
     ###
     ストーリー素材ロード終了時に実行
@@ -1427,32 +1482,49 @@ class LoveliveGame extends catchAndSlotGame
         @story_scene.startSceneExe()
 
     ###
+    以前セーブしたデータが無ければタイトル直後にオープニングを流す
+    ###
+    startStoryIfNoData:()->
+        money = @local_storage.getItem('money')
+        if money is null
+            @startOpStory()
+
+    ###
     オープニング開始
     ###
     startOpStory:()->
         @_pushStory()
         @story_scene.opStart()
-        #@story_scene.testStart()
 
     start2ndStory:()->
         @_pushStory()
-        @story_scene.testStart()
+        @story_scene.story2ndStart()
 
     start3rdStory:()->
         @_pushStory()
-        @story_scene.testStart()
+        @story_scene.story3rdStart()
 
     start4thStory:()->
         @_pushStory()
-        @story_scene.testStart()
+        @story_scene.story4thStart()
 
     ###
     エンディング開始
     ###
     startEdStory:()->
         @_pushStory()
-        #@story_scene.edStart()
-        @story_scene.testStart()
+        @story_scene.edStart()
+
+    startTestStory:()->
+        switch @debug.test_stroy_episode
+            when 1 then @startOpStory()
+            when 2 then @start2ndStory()
+            when 3 then @start3rdStory()
+            when 4 then @start4thStory()
+            when 5 then @startEdStory()
+            else
+                @_pushStory()
+                @story_scene.testStart()
 
     ###
     ストーリー開始
@@ -1465,6 +1537,7 @@ class LoveliveGame extends catchAndSlotGame
     ストーリー終了
     ###
     endStory:()->
+        @story_scene.bgmStop()
         @popScene(@story_scene)
 
     ###
@@ -1503,7 +1576,8 @@ class LoveliveGame extends catchAndSlotGame
             'prev_fever_muse':'[]',
             'max_set_item_num':0,
             'prev_item':'[]',
-            'auto_bet':0
+            'auto_bet':0,
+            'retry':0
         }
         ret = null
         if data[key] is undefined
@@ -1537,7 +1611,8 @@ class LoveliveGame extends catchAndSlotGame
             'max_set_item_num':@max_set_item_num,
             'prev_item':JSON.stringify(@prev_item),
             'now_speed': @now_speed,
-            'auto_bet':@auto_bet
+            'auto_bet':@auto_bet,
+            'retry':@retry
         }
         for key, val of saveData
             @local_storage.setItem(key, val)
@@ -1568,6 +1643,7 @@ class LoveliveGame extends catchAndSlotGame
             @prev_item = @_loadStorage('prev_item', 'json')
             @now_speed = @_loadStorage('now_speed', 'num')
             @auto_bet = @_loadStorage('auto_bet', 'num')
+            @retry = @_loadStorage('retry', 'num')
     ###
     ローカルストレージから指定のキーの値を取り出して返す
     @param string key ロードするデータのキー
@@ -1626,6 +1702,7 @@ class LoveliveGame extends catchAndSlotGame
         @prev_item = @_loadGameFixUnit(data, 'prev_item')
         @now_speed = @_loadGameFixUnit(data, 'now_speed')
         @auto_bet = @_loadGameFixUnit(data, 'auto_bet')
+        @retry = @_loadGameFixUnit(data, 'retry')
 
     _loadGameFixUnit:(data, key)->
         if data[key] != undefined
@@ -1662,6 +1739,8 @@ class LoveliveGame extends catchAndSlotGame
         @itemUseExe()
         @main_scene.gp_system.whiteOut()
         @main_scene.setTension05()
+        if @retry is true
+            @main_scene.gp_system.changeBetChangeFlg(false)
 class gpEffect extends appGroup
     constructor: () ->
         super
@@ -1737,7 +1816,7 @@ class gpBackPanorama extends gpPanorama
         @back_panorama = new BackPanorama()
         @big_kotori = new bigKotori()
         @now_back_effect_flg = false #背景レイヤーのエフェクトを表示中ならtrue
-        @back_effect_rate = 200 #背景レイヤーのエフェクトが表示される確率
+        @back_effect_rate = 300 #背景レイヤーのエフェクトが表示される確率
         @addChild(@back_panorama)
     ###
     背景レイヤーのエフェクト表示を開始
@@ -1912,11 +1991,14 @@ class gpSlot extends appGroup
             prize_money = game.slot_setting.calcPrizeMoney(@middle_lille.lilleArray[@middle_lille.nowEye])
             game.tensionSetValueSlotHit(@hit_role)
             @_feverStart(@hit_role)
-            if @hit_role is 1
+            if @hit_role < 10 && game.slot_setting.isAddMuse() is true
                 member = game.slot_setting.getAddMuseNum()
                 @slotAddMuse(member)
-            else
+            if @hit_role != 1
                 game.main_scene.gp_stage_back.fallPrizeMoneyStart(prize_money)
+            else
+                game.retry = true
+                game.main_scene.gp_system.changeBetChangeFlg(false)
             if game.slot_setting.isForceSlotHit is true
                 @endForceSlotHit()
 
@@ -1951,9 +2033,17 @@ class gpSlot extends appGroup
                     game.tensionSetValue(game.slot_setting.tension_max)
                     game.fever = true
                     game.past_fever_num += 1
+
                     game.slot_setting.setMuseMember()
+                    if game.isSumaho() is true
+                        bgm = @_getFeverBgm(hit_eye)
+                        bgm2 = @_getFeverBgm(game.slot_setting.now_muse_num)
+                        game.spBeforeLoad([
+                            'sounds/bgm/' + bgm['name'] + '.mp3', 'sounds/bgm/' + bgm2['name'] + '.mp3'
+                        ])
                     game.musePreLoad()
                     game.autoMemberSetBeforeFever()
+
                     game.fever_hit_eye = hit_eye
                     game.main_scene.gp_system.changeBetChangeFlg(false)
                     game.main_scene.gp_effect.feverEffectSet()
@@ -1966,7 +2056,10 @@ class gpSlot extends appGroup
     ###
     _feverBgmStart:(hit_eye)->
         bgm = @_getFeverBgm(hit_eye)
-        @feverSec = bgm['time']
+        if game.debug.short_fever is true
+            @feverSec = 5
+        else
+            @feverSec = bgm['time']
         @fever_bgm = game.soundload('bgm/'+bgm['name'])
         game.fever_down_tension = Math.round(game.slot_setting.tension_max * 100 / (@feverSec * game.fps)) / 100
         game.fever_down_tension *= -1
@@ -2155,7 +2248,8 @@ class stageFront extends gpStage
         @_stageCycle()
     setPlayer:()->
         @player = new Bear()
-        @player.y = @floor
+        @player.y = @floor - @player.height
+        @player.x = game.width / 2 - (@player.width / 2)
         @addChild(@player)
     ###
     アイテムを降らせる間隔を初期化
@@ -2195,8 +2289,11 @@ class stageFront extends gpStage
             game.auto_bet = 0
             game.bet = game.slot_setting.betDown()
             game.main_scene.gp_system.bet_text.setValue()
-        if 0 < game.money
+        if 0 < game.money && game.retry is false
             game.money -= game.bet
+        if game.retry is true
+            game.retry = false
+            game.main_scene.gp_system.changeBetChangeFlg(true)
         @catchItems.push(new MacaroonCatch())
         @addChild(@catchItems[@nowCatchItemsNum])
         game.sePlay(@item_fall_se)
@@ -2552,11 +2649,22 @@ class gpStoryObject extends appGroup
         @addChild(@back_txt)
         @kotori = new kotoriFace()
         @honoka = new honokaFace()
-        @umi = new umiFace()
-        #@addChild(@kotori)
-        #@addChild(@honoka)
-        #@kotori.x = @kotori.x_init
-        #@honoka.x = @honoka.x_init
+        @umi    = new umiFace()
+        @maki   = new makiFace()
+        @rin    = new rinFace()
+        @hanayo = new hanayoFace()
+        @nico   = new nicoFace()
+        @nozomi = new nozomiFace()
+        @eli    = new eliFace()
+        @bgm = null
+    playBgm:(bgm)->
+        @bgm = game.soundload('bgm/'+bgm)
+        game.bgmPlay(@bgm)
+class gpStoryObjectUp extends appGroup
+    constructor: () ->
+        super
+        @emote = new Emote()
+        @addChild(@emote)
 class gpStoryPanorama extends appGroup
     constructor: (panoramaImage) ->
         super
@@ -2566,6 +2674,8 @@ class gpStoryPanorama extends appGroup
         @addChild(@panorama)
     panoramaChange:(image)->
         @panorama.image = game.imageload(image)
+    panoramaChangeRect:(color='black')->
+        @panorama.image = @panorama.drawRect(color)
 class gpStorySentence extends appGroup
     constructor: () ->
         super
@@ -2836,12 +2946,23 @@ class pauseMainMenuButtonHtml extends buttonHtml
 class returnGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 300, 45
-        @y = 60
+        @y = 640
         @text = 'ゲームに戻る'
         @class.push('pause-main-menu-button-white')
         @setHtml()
     touchendEvent:() ->
         #game.sePlay(@cancelSe)
+        game.pause_scene.buttonList.pause = true
+
+class batuButtonHtml extends buttonHtml
+    constructor: () ->
+        super 70, 70
+        @x = 400
+        @y = 30
+        @text = '　×'
+        @class = ['batu-button']
+        @setHtml()
+    ontouchend: (e) ->
         game.pause_scene.buttonList.pause = true
 
 ###
@@ -2850,7 +2971,7 @@ class returnGameButtonHtml extends pauseMainMenuButtonHtml
 class saveGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 180, 45
-        @y = 640
+        @y = 325
         @text = 'セーブ'
         @class.push('pause-main-menu-button-middle')
         @class.push('pause-main-menu-button-blue')
@@ -2864,7 +2985,7 @@ class returnTitleButtonHtml extends pauseMainMenuButtonHtml
     constructor:()->
         super 180, 45
         @x = 250
-        @y = 640
+        @y = 325
         @text = 'タイトル'
         @class.push('pause-main-menu-button-middle')
         @setHtml()
@@ -2875,7 +2996,7 @@ class returnTitleButtonHtml extends pauseMainMenuButtonHtml
 class buyItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 400, 45
-        @y = 390
+        @y = 430
         @text = 'アイテムSHOP'
         @class.push('pause-main-menu-button-purple')
         @setHtml()
@@ -2887,7 +3008,7 @@ class useItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 100, 45
         @x = 30
-        @y = 510
+        @y = 535
         @text = 'スキル'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-green')
@@ -2900,7 +3021,7 @@ class setMemberButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 100, 45
         @x = 170
-        @y = 510
+        @y = 535
         @text = '部員'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-red')
@@ -2913,7 +3034,7 @@ class recordButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 100, 45
         @x = 310
-        @y = 510
+        @y = 535
         @text = '実績'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-orange')
@@ -3166,11 +3287,11 @@ class newGameButtonHtml extends titleMenuButtonHtml
     touchendEvent:() ->
         game.newGameStart()
 
-class storyButtonHtml extends titleMenuButtonHtml
+class story1stButtonHtml extends titleMenuButtonHtml
     constructor: () ->
         super
         @y = 450
-        @text = 'ストーリー'
+        @text = '第1話'
         @setHtml()
     touchendEvent:() ->
         game.startOpStory()
@@ -3321,7 +3442,7 @@ class betDialogHtml extends baseDialogHtml
     constructor:()->
         super 340, 240
         @x = 60
-        @y = 160
+        @y = 90
         @class.push('base-dialog-bet')
         @setHtml()
 class menuDialogHtml extends baseDialogHtml
@@ -3465,6 +3586,15 @@ class speedDiscription extends titleDiscription
         @text = '移動速度とジャンプ力'
         @setHtml()
 
+class menuDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 170
+        @y = 30
+        @class.push('white-text')
+        @text = 'メニュー'
+        @setHtml()
+
 class itemNameDiscription extends titleDiscription
     constructor:()->
         super
@@ -3557,7 +3687,7 @@ class betCheckboxHtml extends checkboxHtml
         super
         @text = '掛け金を自動で上げる'
         @x = 90
-        @y = 305
+        @y = 235
         @setCheck()
     setCheck:()->
         if game.auto_bet is 1
@@ -3821,7 +3951,7 @@ class moneyText extends text
         @x = game.width - @_boundWidth - 7
     setPositionPause:()->
         @x = 100
-        @y = 190
+        @y = 120
 
 class betText extends text
     constructor: () ->
@@ -3840,7 +3970,7 @@ class betText extends text
         game.main_scene.gp_system.low_bet_button.setXposition()
     setPositionPause:()->
         @x = 140
-        @y = 245
+        @y = 175
 
 class comboText extends text
     constructor: () ->
@@ -3954,15 +4084,17 @@ class Debug extends appNode
         #開始後いきなりポーズ画面
         @force_pause_flg = false
         #開始後いきなりオープニング
-        @foece_story_flg = true
+        @foece_story_flg = false
+        #デバッグで流すストーリーのエピソード
+        @test_stroy_episode = 5
 
         #ゲーム開始時ロードをしない
         @not_load_flg = false
         #テストロードに切り替え
-        @test_load_flg = true
+        @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':98765432100,
+            'money':987654321,
             'bet':10000,
             'combo':0,
             'max_combo':200,
@@ -3971,16 +4103,17 @@ class Debug extends appNode
             'item_point':500,
             'next_add_member_key':0,
             'now_muse_num':0,
-            'max_set_item_num':1,
+            'max_set_item_num':4,
             'now_speed':1,
-            'item_have_now':[3,4,5,12,13,14,15,21,22,23,24],
-            'item_set_now':[3],
-            'member_set_now':[12,13],
+            'item_have_now':[3,4,5,11,12,13,14,15,16,17,18,19,21,22,23,24],
+            'item_set_now':[1,2,3],
+            'member_set_now':[11,12,13],
             'prev_fever_muse':[11,12,13,14,15,16,17,18,19],
             'prev_item':[],
             'left_lille':[],
             'middle_lille':[],
-            'right_lille':[]
+            'right_lille':[],
+            'retry':0
         }
 
         #デバッグ用リールにすりかえる
@@ -4018,7 +4151,7 @@ class Debug extends appNode
         #スロットが当たった時のテンション増減値を固定する
         @fix_tention_slot_hit_flg = false
         #スロットに必ずμ’ｓが追加される
-        #@force_insert_muse = false
+        @force_insert_muse = false
         #スロットが必ず当たる
         @force_slot_hit = false
         #スロットが2回に1回当たる
@@ -4027,6 +4160,8 @@ class Debug extends appNode
         @force_fever = false
         #ミスアイテムが降らない
         @not_miss_item_flg = false
+        #フィーバー時間が短い
+        @short_fever = false
 
         #アイテムを取った時のテンション増減固定値
         @fix_tention_item_catch_val = 50
@@ -4283,7 +4418,7 @@ class slotSetting extends appNode
                     return true
             },
             1:{
-                'name':'まきちゃん',
+                'name':'まきちゃんかわいい',
                 'image':'item_1',
                 'discription':'スロットが揃った時以外の<br>コインがたくさん降ってくるようになる',
                 'price':1000,
@@ -4459,7 +4594,7 @@ class slotSetting extends appNode
                 'image':'item_21',
                 'discription':'第２話が見れる<br>移動速度とジャンプ力がアップする',
                 'price':1000000,
-                'conditoin':'75コンボ達成する',
+                'conditoin':'50コンボ達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(21)
             },
@@ -4468,7 +4603,7 @@ class slotSetting extends appNode
                 'image':'item_22',
                 'discription':'第３話が見れる<br>スキルのスロットが1つ増える',
                 'price':100000000,
-                'conditoin':'150コンボ達成する<br>または、楽曲を9曲以上達成する',
+                'conditoin':'100コンボ達成する<br>または、楽曲を9曲以上達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(22)
             },
@@ -4477,7 +4612,7 @@ class slotSetting extends appNode
                 'image':'item_23',
                 'discription':'第４話が見れる<br>移動速度とジャンプ力がアップする<br>スキルのスロットが1つ増える',
                 'price':10000000000,
-                'conditoin':'150コンボ達成する<br>かつ、楽曲を9曲以上達成する',
+                'conditoin':'100コンボ達成する<br>かつ、楽曲を9曲以上達成する',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(23)
             },
@@ -4648,16 +4783,19 @@ class slotSetting extends appNode
         return val
 
     ###
-    テンションからスロットにμ’sが入るかどうかを返す
-    初期値5％、テンションMAXで20％
-    過去のフィーバー回数が少ないほど上方補正かける 0回:+12,1回:+8,2回:+4
+    スロットにμ’sが入るかどうかを返す
+    カットインはリトライ以外が当たった時、確率で起こる
+    部員0-1人セットで40%、2人セットで60%、3人セットで80%
     @return boolean
     ###
     isAddMuse:()->
         result = false
-        rate = Math.floor((game.tension / @tension_max) * 15) + 5
-        if game.past_fever_num <= 2
-            rate += (3 - game.past_fever_num) * 4
+        length = game.member_set_now.length
+        rate = 40
+        if length is 2
+            rate = 60
+        else if 3 <= length
+            rate = 80
         random = Math.floor(Math.random() * 100)
         if random < rate
             result = true
@@ -4737,7 +4875,7 @@ class slotSetting extends appNode
         ret_money = Math.floor(game.bet * @bairitu[eye] * @prize_div)
         if game.fever is true
             time = @muse_material_list[game.fever_hit_eye]['bgm'][0]['time']
-            div = Math.floor(time / 90)
+            div = Math.floor(time * 10 / 90) / 10
             if div < 1
                 div = 1
             ret_money = Math.floor(ret_money / div)
@@ -4968,13 +5106,13 @@ class slotSetting extends appNode
             if game.prev_fever_muse.indexOf(parseInt(num)) != -1
                 rslt = true
         else if num is 21
-            if 75 <= game.max_combo
+            if 50 <= game.max_combo
                 rslt = true
         else if num is 22
-            if 9 <= game.countFullMusic() || 150 <= game.max_combo
+            if 9 <= game.countFullMusic() || 100 <= game.max_combo
                 rslt = true
         else if num is 23
-            if 9 <= game.countFullMusic() && 150 <= game.max_combo
+            if 9 <= game.countFullMusic() && 100 <= game.max_combo
                 rslt = true
         else if num is 24
             if 15 <= game.countFullMusic()
@@ -5189,7 +5327,11 @@ class slotSetting extends appNode
 
     #TODO 掛け金が1000億円を超える
     betUp:()->
-        if game.auto_bet is 1 and game.fever is false and @isForceSlotHit is false
+        if game.fever is false and @isForceSlotHit is false
+            @betUpExe()
+
+    betUpExe:()->
+        if game.auto_bet is 1
             tmp_bet = Math.floor(game.money / 50)
             if game.bet < tmp_bet
                 digit = Math.pow(10, (String(tmp_bet).length - 1))
@@ -5226,7 +5368,9 @@ class Test extends appNode
         #@setForceFeverRole()
         #@betUp()
         #@appload()
-        @multiload()
+        #@multiload()
+        #@isAddMuse()
+        @manySoundLoad()
 
     #以下、テスト用関数
 
@@ -5352,7 +5496,7 @@ class Test extends appNode
         console.log(game.bet)
 
     appload:()->
-        game.appLoad('sounds/bgm/bgm1.mp3')
+        game.appLoad('sounds/bgm_maid.mp3')
         game.appLoad('sounds/bgm/zenkai_no_lovelive.mp3', @callbackTest())
         console.log(game.loadedFile)
 
@@ -5362,6 +5506,28 @@ class Test extends appNode
     multiload:()->
         files = ['sounds/bgm/zenkai_no_lovelive.mp3', 'sounds/bgm/sweet_holiday.mp3']
         game.multiLoad(files)
+
+    isAddMuse:()->
+        console.log(game.member_set_now)
+        for i in [1..100]
+            rslt = game.slot_setting.isAddMuse()
+            console.log(rslt)
+
+    manySoundLoad:()->
+        #console.log(enchant.Core.instance.assets['sounds/bgm_maid.mp3'])
+        ###
+        files = [
+            'sounds/bgm/anemone_heart.mp3', 'sounds/bgm/anone_ganbare.mp3', 'sounds/bgm/arihureta.mp3', 'sounds/bgm/beat_in_angel.mp3',
+            'sounds/bgm/blueberry.mp3', 'sounds/bgm/daring.mp3', 'sounds/bgm/future_style.mp3', 'sounds/bgm/garasu.mp3',
+            'sounds/bgm/hatena_heart.mp3', 'sounds/bgm/hello_hoshi.mp3'
+        ]
+        game.multiLoad(files)
+        ###
+        game.appLoad('sounds/bgm/anemone_heart.mp3')
+        game.appLoad('sounds/bgm/anone_ganbare.mp3')
+        window.setTimeout(console.log(game.loadedFile), 5000)
+
+
 class loadScene extends appScene
     constructor: () ->
         super
@@ -5381,7 +5547,7 @@ class mainScene extends appScene
         @buttonList = {'left':false, 'right':false, 'jump':false, 'up':false, 'down':false, 'pause':false}
         #ジャイロセンサのリスト
         @gyroList = {'left':false, 'right':false}
-        @bgm = game.soundload("bgm/bgm1")
+        @bgm = game.soundload("bgm_maid")
         @tension_05 = 5
         @initial()
     initial:()->
@@ -5482,21 +5648,22 @@ class mainScene extends appScene
     tensionSetValueFever:()->
         if game.fever is true
             game.tensionSetValue(game.fever_down_tension)
-            #if @gp_stage_front.notItemFallFlg is false && game.tension <= @tension_05
-            #    @gp_stage_front.notItemFallFlg = true
+            if @gp_stage_front.notItemFallFlg is false && game.tension <= @tension_05
+                @gp_stage_front.notItemFallFlg = true
             if game.tension <= 0
                 game.autoMemberSetAfeterFever()
                 game.main_scene.gp_slot.upperFrame.frame = 0
                 game.pause_scene.pause_main_layer.save_game_button.makeAble()
                 game.bgmStop(game.main_scene.gp_slot.fever_bgm)
-                #game.bgmPlay(@bgm, true)
+                game.bgmPlay(@bgm, true)
                 @gp_system.changeBetChangeFlg(true)
                 @gp_effect.feverEffectEnd()
                 game.fever = false
                 if game.debug.not_auto_save is false
                     game.saveGame()
-                game.slot_setting.betUp()
-                #game.setPauseScene()
+                game.slot_setting.betUpExe()
+                game.resetMainScene()
+                game.setPauseScene()
 
     _gyroMove:()->
         window.addEventListener("deviceorientation",
@@ -5660,9 +5827,11 @@ class stolyScene extends appScene
         @gp_panorama = new gpStoryPanorama(@panorama)
         @gp_sentence = new gpStorySentence()
         @gp_object = new gpStoryObject()
+        @gp_object_up = new gpStoryObjectUp()
         @addChild(@gp_panorama)
         @addChild(@gp_sentence)
         @addChild(@gp_object)
+        @addChild(@gp_object_up)
     startScene:()->
         @addChild(@gp_load)
         game.multiLoad(@loadFile)
@@ -5670,196 +5839,1710 @@ class stolyScene extends appScene
         @removeChild(@gp_load)
         @resetScene()
         @cueSet(@cue)
-    faceSet:(face, x=0, y=0)->
-        @gp_object.addChild(face)
+    faceSet:(face, x=0, y=0, move=false)->
+        if !move
+            @gp_object.addChild(face)
         face.x =  @gp_panorama.panorama.x + x
         face.y = @gp_panorama.panorama.y + y
+    unsetEmote:()->
+        @gp_object_up.emote.unset()
+    panoramaChange:(panorama)->
+        @panorama = panorama
+        @gp_panorama.panoramaChange(@panorama)
+    panoramaChangeRect:(color='black')->
+        @gp_panorama.panoramaChangeRect(color)
+    panoramaHide:()->
+        @gp_panorama.panorama.hide()
+    panoramaShow:()->
+        @gp_panorama.panorama.show()
+    ###
+    タイムラインのキューに秒数を累積しながらセット
+    ###
+    cueSet:(cue)->
+        ret = {}
+        total = 0
+        for num, func of cue
+            ret[Math.floor(total * game.fps)] = func[1]
+            total += func[0]
+        @tl.cue(ret)
+    addLoadFile:(files)->
+        init = ['images/emote.png', 'sounds/emote1.mp3', 'sounds/emote2.mp3', 'sounds/emote3.mp3', 'sounds/emote4.mp3']
+        files = files.concat(init)
+        @loadFile = files
+    bgmStop:()->
+        if @gp_object.bgm != null
+            game.bgmStop(@gp_object.bgm)
     #http://wise9.github.io/enchant.js/doc/core/ja/symbols/enchant.Timeline.html
     #http://r.jsgames.jp/games/1687/
     ###
     必要な素材は必ずresetScene()で生成するクラス内で呼び出す
-    'back_gakko', 'back_busitu', 'back_stage'
+    'back_gakko', 'back_busitu', 'back_stage', 'back_roka', 'back_okujou', 'back_kanda'
     'face_honoka','face_kotori', 'face_umi', 'face_maki', 'face_rin', 'face_hanayo', 'face_nico', 'face_nozomi', 'face_eli'
+    アクション
+    tateShake() tateShake2() rotateShake() randomShake() scale() scaleIn() scaleOut()
+    感情アイコン
+    'bikkuri':0, 'hatena':1,'onpu':2, 'heart':3, 'ase':4, 'gabin':5, 'ten':6
+    文字の表示時間
+    最低4秒、文字数／10秒＋小数点以下は四捨五入、カンマが3つ以上で1秒延長
     ###
     testStart:()->
-        @panorama = 'back_gakko'
-        @loadFile = ['images/back_gakko.png', 'images/face_honoka.png']
-        @cue = {
-            0:=>
-                @faceSet(@gp_object.honoka, 170, 90)
-            1:=>
-                @gp_object.honoka.randomShake()
-            5:=>
-                game.endStory()
-        }
+        @panorama = 'back_busitu'
+        @addLoadFile(['images/back_busitu.png', 'images/face_honoka.png', 'images/face_kotori.png',
+            'images/face_umi.png', 'images/face_maki.png', 'images/face_rin.png', 'images/face_hanayo.png',
+            'images/face_nico.png', 'images/face_nozomi.png', 'images/face_eli.png'
+        ])
+        @cue = [
+            [
+                1,
+                =>
+                    @faceSet(@gp_object.rin, 180, 0)
+                    @faceSet(@gp_object.hanayo, 50, 0)
+                    @faceSet(@gp_object.maki, 300, 0)
+                    @faceSet(@gp_object.honoka, 180, 90)
+                    @faceSet(@gp_object.kotori, 300, 90)
+                    @faceSet(@gp_object.umi, 50, 90)
+                    @faceSet(@gp_object.nozomi, 170, 190)
+                    @faceSet(@gp_object.nico, 40, 190)
+                    @faceSet(@gp_object.eli, 300, 190)
+                    @gp_object.rin.scaleChange(0.7)
+                    @gp_object.hanayo.scaleChange(0.7)
+                    @gp_object.maki.scaleChange(0.7)
+                    @gp_object.honoka.scaleChange(0.7)
+                    @gp_object.kotori.scaleChange(0.7)
+                    @gp_object.umi.scaleChange(0.7)
+                    @gp_object.nozomi.scaleChange(0.7)
+                    @gp_object.nico.scaleChange(0.7)
+                    @gp_object.eli.scaleChange(0.7)
+            ],
+            [
+                2,
+                =>
+                    @gp_object.rin.emoteSize = 0.7
+                    @gp_object.rin.rotateShake()
+                    @gp_object.rin.setEmote('onpu')
+            ],
+            [
+                1,
+                =>
+                    @unsetEmote()
+            ],
+            [
+                0,
+                =>
+                    #game.endStory()
+            ]
+        ]
         @startScene()
     opStart:()->
         @panorama = 'back_gakko'
-        @loadFile = ['images/back_gakko.png', 'images/face_honoka.png', 'images/face_kotori.png', 'images/face_umi.png']
-        @cue = {
-            0:=>
-                @gp_sentence.txtSet(
-                    'ここは某音ノ木坂学院、<br>廃校が決まったあと、突然穂乃果が<br>スクールアイドルを始めると言い出した'
-                )
-            4:=>
-                @faceSet(@gp_object.honoka, 170, 90)
-                @faceSet(@gp_object.kotori, 20, 95)
-                @faceSet(@gp_object.umi, 320, 85)
-            5:=>
-                @gp_sentence.txtEnd()
-                @gp_object.honoka.rotateShake()
-                @gp_sentence.txtSet(
-                    '穂乃果<br>海未ちゃん、,ことりちゃん、,<br>スクールアイドルを始めるよ！'
-                )
-            9:=>
-                @gp_sentence.txtEnd()
-                @gp_object.kotori.rotateShake()
-                @gp_sentence.txtSet(
-                    'ことり<br>スクールアイドルってあの？<br>学生たちでアイドルをやってる、,<br>ネットでPVなんかも公開してて、,<br>全国に有名なスクールアイドルもいる'
-                )
-            15:=>
-                @gp_sentence.txtEnd()
-                @gp_object.honoka.tateShake2()
-                @gp_sentence.txtSet(
-                    '穂乃果<br>そう、それだよ！,スクールアイドル！,<br>スクールアイドルを始めて有名になれば,<br>廃校を阻止することができるよ！'
-                )
-            21:->
-                @gp_sentence.txtEnd()
-                @gp_object.umi.tateShake()
-                @gp_sentence.txtSet(
-                    '海未<br>穂乃果、,簡単にスクールアイドルを<br>始めるとは言ってもですね、,<br>廃校を阻止するだけ有名になるには、'
-                )
-            26:->
-                @gp_sentence.txtEnd()
-                @gp_object.umi.rotateShake()
-                @gp_sentence.txtSet(
-                    '海未<br>歌や衣装、,ダンスにPV撮影等、,<br>それなりにプロに匹敵するだけのものが<br>必要になるんですよ。'
-                )
-            31:->
-                @gp_sentence.txtEnd()
-                @gp_object.umi.tateShake()
-                @gp_sentence.txtSet(
-                    '海未<br>私達３人だけでは到底<br>それだけの物は用意できません。'
-                )
-            35:->
-                @gp_sentence.txtEnd()
-                @gp_object.honoka.rotateShake()
-                @gp_sentence.txtSet(
-                    '穂乃果<br>それなら大丈夫だよ、,海未ちゃん！,<br>お金の力があればなんとかなるよ！'
-                )
-            40:->
-                @gp_sentence.txtEnd()
-                @gp_object.honoka.rotateShake()
-                @gp_sentence.txtSet(
-                    '穂乃果<br>プロの作詞者、,プロの作曲者、,<br>衣装や舞台装置、,<br>他にもいっぱいプロのスタッフたちを,<br>お金で雇えば、'
-                )
-            46:->
-                @gp_sentence.txtEnd()
-                @gp_object.honoka.tateShake2()
-                @gp_sentence.txtSet(
-                    '穂乃果<br>素敵なPVが撮影できるよ！'
-                )
-            49:->
-                @gp_sentence.txtEnd()
-                @gp_object.umi.tateShake()
-                @gp_sentence.txtSet(
-                    '海未<br>何を他力本願なことを<br>言っているのですか、,<br>それに、,仮にそうするとしても、,<br>そんなお金、,どこにあるというのですか、'
-                )
-            55:->
-                @gp_sentence.txtEnd()
-                @gp_object.umi.rotateShake()
-                @gp_sentence.txtSet(
-                    '海未<br>簡単に見積もっても,<br>『１００万円』程は必要ですよ！'
-                )
-            59:->
-                @gp_sentence.txtEnd()
-                @gp_object.honoka.rotateShake()
-                @gp_sentence.txtSet(
-                    '穂乃果<br>なーんだ、,『１００万円』か、,<br>そんなの簡単じゃん！,<br>スロットマシンで稼げばいいじゃない！'
-                )
-            64:->
-                @gp_sentence.txtEnd()
-                @gp_object.umi.scale()
-                @gp_sentence.txtSet(
-                    '海未<br>ちょっと穂乃果、,<br>それ本気で言っているのですか！？'
-                )
-            68:->
-                @gp_sentence.txtEnd()
-                @gp_object.kotori.scale()
-                @gp_sentence.txtSet(
-                    'ことり<br>そうだよホノカチャン！,<br>さすがにギャンブルは無茶だよ！'
-                )
-            72:->
-                @gp_sentence.txtEnd()
-                @gp_object.honoka.scaleIn()
-                @gp_sentence.txtSet(
-                    '穂乃果<br>ダイジョーブ、,ダイジョーブ！<br>ここに穂乃果のなけなしのお小遣い,<br>『１００円』があるから、'
-                )
-            77:->
-                @gp_sentence.txtEnd()
-                @gp_object.honoka.tateShake()
-                @gp_sentence.txtSet(
-                    '穂乃果<br>これを元手に頑張ってね！,<br>それじゃあ任せたよ！,ことりちゃん！'
-                )
-            79:->
-                @gp_object.honoka.scaleOut()
-            81:->
-                @gp_sentence.txtEnd()
-                @gp_object.kotori.randomShake()
-                @gp_sentence.txtSet(
-                    'ことり<br>『１００円』！？,<br>ちょっとホノカチャン、,無理だよぉ！,<br>それに何で私！？'
-                )
-            85:->
-                @gp_sentence.txtEnd()
-                @gp_object.honoka.rotateShake()
-                @gp_sentence.txtSet(
-                    '穂乃果<br>ことりちゃん、,大好き！,<br>頑張ってね！'
-                )
-            89:->
-                @gp_sentence.txtEnd()
-                @gp_object.kotori.tateShake2()
-                @gp_sentence.txtSet(
-                    'ことり<br>うん、,ホノカチャン！,<br>わたし頑張る！'
-                )
-            93:->
-                @gp_sentence.txtEnd()
-                @gp_object.umi.scale()
-                @gp_sentence.txtSet(
-                    '海未<br>穂乃果！,いいかげんにしなさい！,<br>ことりも、,、,無茶です！'
-                )
-            97:->
-                @gp_sentence.txtEnd()
-                @gp_object.honoka.rotateShake()
-                @gp_sentence.txtSet(
-                    '穂乃果<br>海未ちゃんも,だーいすき！！'
-                )
-            101:->
-                @gp_sentence.txtEnd()
-                @gp_object.umi.tateShake2()
-                @gp_sentence.txtSet(
-                    '海未<br>まったく、,仕方ないですね、,<br>ことり、,頼みましたよ。'
-                )
-            105:->
-                @gp_sentence.txtEnd()
-                @gp_object.kotori.tateShake2()
-                @gp_sentence.txtSet(
-                    'ことり<br>うん！,それじゃあ私に任せてね！,<br>『１００万円』稼いでくるから！'
-                )
-            110:->
-                @gp_sentence.txtEnd()
-                game.endStory()
-        }
+        @addLoadFile([
+            'images/back_gakko.png', 'images/back_roka.png', 'images/face_honoka.png', 'images/face_kotori.png', 'images/face_umi.png',
+            'sounds/bgm/bgm_sakusen.mp3'
+        ])
+        @cue = [
+            [
+                5,
+                =>
+                    @gp_sentence.txtSet(
+                        'ここは某音ノ木坂学院、<br>廃校が決まったあと、突然穂乃果が<br>スクールアイドルを始めると言い出した'
+                    )
+            ],
+            [
+                1,
+                =>
+                    @gp_sentence.txtEnd()
+                    @panoramaChange('back_roka')
+            ]
+            [
+                1,
+                =>
+                    @gp_object.playBgm('bgm_sakusen')
+                    @faceSet(@gp_object.honoka, 170, 90)
+                    @faceSet(@gp_object.kotori, 20, 95)
+                    @faceSet(@gp_object.umi, 320, 85)
+            ],
+            [
+                4,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.honoka.setEmote('bikkuri')
+                    @gp_object.honoka.rotateShake()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>海未ちゃん、,ことりちゃん、,<br>スクールアイドルを始めるよ！'
+                    )
+            ],
+            [
+                8,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.kotori.setEmote('hatena')
+                    @gp_object.kotori.rotateShake()
+                    @gp_sentence.txtSet(
+                        'ことり<br>スクールアイドルってあの？<br>学生たちでアイドルをやってる、,<br>ネットでPVなんかも公開してて、,<br>全国に有名なスクールアイドルもいる'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.honoka.setEmote('bikkuri')
+                    @gp_object.honoka.tateShake2()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>そう、それだよ！,スクールアイドル！,<br>スクールアイドルを始めて有名になれば,<br>廃校を阻止することができるよ！'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @gp_sentence.txtEnd()
+                    @unsetEmote()
+                    @gp_object.umi.tateShake()
+                    @gp_sentence.txtSet(
+                        '海未<br>穂乃果、,簡単にスクールアイドルを<br>始めるとは言ってもですね、,<br>廃校を阻止するだけ有名になるには、'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.umi.rotateShake()
+                    @gp_sentence.txtSet(
+                        '海未<br>歌や衣装、,ダンスにPV撮影等、,<br>それなりにプロに匹敵するだけのものが<br>必要になるんですよ。'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.umi.tateShake()
+                    @gp_sentence.txtSet(
+                        '海未<br>私達３人だけでは到底<br>それだけの物は用意できません。'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.honoka.setEmote('onpu')
+                    @gp_object.honoka.rotateShake()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>それなら大丈夫だよ、,海未ちゃん！,<br>お金の力があればなんとかなるよ！'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @gp_sentence.txtEnd()
+                    @unsetEmote()
+                    @gp_object.honoka.rotateShake()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>プロの作詞者、,プロの作曲者、,<br>衣装や舞台装置、,<br>他にもいっぱいプロのスタッフたちを,<br>お金で雇えば、'
+                    )
+            ],
+            [
+                3,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.honoka.tateShake2()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>素敵なPVが撮影できるよ！'
+                    )
+            ],
+            [
+                7,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.umi.setEmote('ase')
+                    @gp_object.umi.tateShake()
+                    @gp_sentence.txtSet(
+                        '海未<br>何を他力本願なことを<br>言っているのですか、,<br>それに、,仮にそうするとしても、,<br>そんなお金、,どこにあるというのですか、'
+                    )
+            ],
+            [
+                3,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.umi.setEmote('bikkuri')
+                    @gp_object.umi.rotateShake()
+                    @gp_sentence.txtSet(
+                        '海未<br>簡単に見積もっても,<br>『１００万円』程は必要ですよ！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.honoka.setEmote('onpu')
+                    @gp_object.honoka.rotateShake()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>なーんだ、,『１００万円』か、,<br>そんなの簡単じゃん！,<br>スロットマシンで稼げばいいじゃない！'
+                    )
+            ],
+            [
+                3,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.umi.setEmote('ten')
+            ],
+            [
+                4,
+                =>
+                    @unsetEmote()
+                    @gp_object.umi.scale()
+                    @gp_sentence.txtSet(
+                        '海未<br>ちょっと穂乃果、,<br>それ本気で言っているのですか！？'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.kotori.scale()
+                    @gp_sentence.txtSet(
+                        'ことり<br>そうだよホノカチャン！,<br>さすがにギャンブルは無茶だよ！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.honoka.setEmote('onpu')
+                    @gp_object.honoka.scaleIn()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>ダイジョーブ、,ダイジョーブ！<br>ここに穂乃果のなけなしのお小遣い,<br>『１００円』があるから、'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_sentence.txtEnd()
+                    @unsetEmote()
+                    @gp_object.honoka.tateShake()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>これを元手に頑張ってね！,<br>それじゃあ任せたよ！,ことりちゃん！'
+                    )
+            ],
+            [
+                3,
+                =>
+                    @gp_object.honoka.scaleOut()
+            ],
+            [
+                3,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.kotori.setEmote('ten')
+            ],
+            [
+                6,
+                =>
+
+                    @gp_object.kotori.setEmote('gabin')
+                    @gp_object.kotori.randomShake()
+                    @gp_sentence.txtSet(
+                        'ことり<br>『１００円』！？,<br>ちょっとホノカチャン、,無理だよぉ！,<br>それに何で私！？'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.honoka.setEmote('onpu')
+                    @gp_object.honoka.rotateShake()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>ことりちゃん、,大好き！,<br>頑張ってね！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.kotori.setEmote('heart')
+            ],
+            [
+                4,
+                =>
+                    @gp_object.kotori.tateShake2()
+                    @gp_sentence.txtSet(
+                        'ことり<br>うん、,ホノカチャン！,<br>わたし頑張る！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @unsetEmote()
+                    @gp_object.umi.scale()
+                    @gp_sentence.txtSet(
+                        '海未<br>穂乃果！,いいかげんにしなさい！,<br>ことりも、,、,無茶です！'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.honoka.setEmote('onpu')
+                    @gp_object.honoka.rotateShake()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>海未ちゃんも,だーいすき！！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.umi.setEmote('heart')
+            ],
+            [
+                4,
+                =>
+                    @gp_object.umi.tateShake2()
+                    @gp_sentence.txtSet(
+                        '海未<br>まったく、,仕方ないですね、,<br>ことり、,頼みましたよ。'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @gp_sentence.txtEnd()
+                    @unsetEmote()
+                    @gp_object.kotori.tateShake2()
+                    @gp_sentence.txtSet(
+                        'ことり<br>うん！,それじゃあ私に任せてね！,<br>『１００万円』稼いでくるから！'
+                    )
+            ],
+            [
+                0,
+                =>
+                    @gp_sentence.txtEnd()
+                    game.endStory()
+            ]
+        ]
+        @startScene()
+    story2ndStart:()->
+        @panorama = 'back_busitu'
+        @addLoadFile([
+            'images/back_busitu.png', 'images/face_maki.png', 'images/face_rin.png', 'images/face_hanayo.png',
+            'sounds/bgm/bgm_setumei.mp3'
+        ])
+        @cue = [
+            [
+                5,
+                =>
+                    @gp_sentence.txtSet(
+                        'なんやかんやあって、<br>穂乃果たちはメンバーを９人集め、<br>スクールアイドルμ’ｓを結成。'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことりが稼いだ１００万円で作った<br>「僕らのLIVE君とのLIFE」のPVは<br>好調に再生数を稼ぎ'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'μ’ｓは着々と<br>知名度を上げていくのであった。'
+                    )
+            ],
+            [
+                1,
+                =>
+                    @gp_object.playBgm('bgm_setumei')
+                    @gp_sentence.txtEnd()
+                    @faceSet(@gp_object.rin, 170, 90)
+                    @faceSet(@gp_object.hanayo, 20, 90)
+                    @faceSet(@gp_object.maki, 320, 90)
+            ],
+            [
+                5,
+                =>
+                    @gp_object.hanayo.setEmote('bikkuri')
+                    @gp_sentence.txtEnd()
+                    @gp_object.hanayo.rotateShake()
+                    @gp_sentence.txtSet(
+                        '花陽<br>大変です！大変です！,<br>ラブライブです！,<br>ラブライブが始まりました！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.rin.setEmote('hatena')
+                    @gp_sentence.txtEnd()
+                    @gp_object.rin.rotateShake()
+                    @gp_sentence.txtSet(
+                        '凛<br>ラブライブ！,<br>ラブライブって何だにゃ？,<br>そういうラーメンがあるのかにゃ？'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.hanayo.setEmote('bikkuri')
+                    @gp_sentence.txtEnd()
+                    @gp_object.hanayo.rotateShake()
+                    @gp_sentence.txtSet(
+                        '花陽<br>違います！,<br>ラブライブといえば,<br>スクールアイドルの甲子園！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.hanayo.setEmote('bikkuri')
+                    @gp_sentence.txtEnd()
+                    @gp_object.hanayo.tateShake2()
+                    @gp_sentence.txtSet(
+                        '花陽<br>優勝したらそれはそれは凄い<br>大人気アイドルになれるんです！'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @unsetEmote()
+                    @gp_sentence.txtEnd()
+                    @gp_object.hanayo.tateShake()
+                    @gp_sentence.txtSet(
+                        '花陽<br>それに、,<br>学校も廃校にならずに済みます！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.rin.setEmote('onpu')
+                    @gp_sentence.txtEnd()
+                    @gp_object.rin.tateShake2()
+                    @gp_sentence.txtSet(
+                        '凛<br>それじゃあ、,<br>今度も前みたいに<br>お金の力でなんとかするにゃ！'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @unsetEmote()
+                    @gp_sentence.txtEnd()
+                    @gp_object.maki.rotateShake()
+                    @gp_sentence.txtSet(
+                        '真姫<br>そうね、,ラブライブで優勝する為には、,<br>それ相応に必要な人気、,<br>知名度が必要になるから、'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.maki.rotateShake()
+                    @gp_sentence.txtSet(
+                        '真姫<br>ラブライブまでに人気を集めるために,<br>曲やPVも、,もっとたくさん<br>必要になってくるわ！'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @gp_object.hanayo.setEmote('bikkuri')
+                    @gp_sentence.txtEnd()
+                    @gp_object.hanayo.tateShake2()
+                    @gp_sentence.txtSet(
+                        '花陽<br>そうです！<br>それにPVのクオリティも<br>学校で撮影した「ぼららら」程度の<br>クオリティではダメです！'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @unsetEmote()
+                    @gp_sentence.txtEnd()
+                    @gp_object.hanayo.tateShake()
+                    @gp_sentence.txtSet(
+                        '花陽<br>もっとセットも演出も、,<br>もっともっと豪華にしていかないと！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.hanayo.setEmote('bikkuri')
+                    @gp_sentence.txtEnd()
+                    @gp_object.hanayo.scale()
+                    @gp_sentence.txtSet(
+                        '花陽<br>その費用を算出してみたら、,<br>『１億円』は必要になるんです！'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.rin.setEmote('onpu')
+                    @gp_sentence.txtEnd()
+                    @gp_object.rin.tateShake2()
+                    @gp_sentence.txtSet(
+                        '凛<br>真姫ちゃんのお小遣いがあれば<br>楽勝にゃ！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @unsetEmote()
+                    @gp_sentence.txtEnd()
+                    @gp_object.maki.rotateShake()
+                    @gp_sentence.txtSet(
+                        '真姫<br>そうね、,実はそのことなんだけど、,<br>あのスロットマシンから出てくるお金'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.maki.rotateShake()
+                    @gp_sentence.txtSet(
+                        '真姫<br>全部私のお小遣いから<br>出しているのよ。'
+                    )
+            ],
+            [
+                3,
+                =>
+                    @gp_object.rin.setEmote('ten')
+                    @gp_sentence.txtEnd()
+            ],
+            [
+                4,
+                =>
+                    @unsetEmote()
+                    @gp_sentence.txtEnd()
+                    @gp_object.rin.rotateShake()
+                    @gp_sentence.txtSet(
+                        '凛<br>何だ、,そんなことだったのかにゃ。'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.rin.setEmote('onpu')
+                    @gp_sentence.txtEnd()
+                    @gp_object.rin.tateShake()
+                    @gp_sentence.txtSet(
+                        '凛<br>それじゃあ、,<br>またことりちゃんに<br>頑張ってもらうしかないにゃ！'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.maki.setEmote('onpu')
+                    @gp_sentence.txtEnd()
+                    @gp_object.maki.tateShake()
+                    @gp_sentence.txtSet(
+                        '真姫<br>そうね、,散水。'
+                    )
+            ],
+            [
+                3,
+                =>
+                    @gp_object.hanayo.setEmote('ten')
+                    @gp_sentence.txtEnd()
+            ],
+            [
+                6,
+                =>
+                    @gp_object.hanayo.setEmote('ase')
+                    @gp_sentence.txtEnd()
+                    @gp_object.hanayo.randomShake()
+                    @gp_sentence.txtSet(
+                        '花陽<br>ちょっと待ってください、,<br>話がおかしいです！,<br>それならスロットマシンなんか<br>やらなくても'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @unsetEmote()
+                    @gp_sentence.txtEnd()
+                    @gp_object.hanayo.tateShake()
+                    @gp_sentence.txtSet(
+                        '花陽<br>真姫ちゃんが直接<br>お金を出してくれれば・・・'
+                    )
+            ],
+            [
+                3,
+                =>
+                    @gp_object.rin.setEmote('ten')
+                    @gp_sentence.txtEnd()
+            ],
+            [
+                6,
+                =>
+                    @unsetEmote()
+                    @gp_sentence.txtEnd()
+                    @gp_object.rin.tateShake2()
+                    @gp_sentence.txtSet(
+                        '凛<br>とにかくことりちゃんに<br>頑張って『１億円』<br>稼いできて貰うにゃ！'
+                    )
+            ],
+            [
+                0,
+                =>
+                    @gp_sentence.txtEnd()
+                    game.endStory()
+            ]
+        ]
+        @startScene()
+    story3rdStart:()->
+        @panorama = 'back_okujou'
+        @addLoadFile([
+            'images/back_okujou.png', 'images/face_honoka.png', 'images/face_kotori.png', 'images/face_umi.png',
+            'sounds/bgm/bgm_n.mp3'
+            ])
+        @cue = [
+            [
+                5,
+                =>
+                    @gp_sentence.txtSet(
+                        '予算を大漁にぶちこんだ<br>圧倒的なPVの数々が功を奏し、<br>μ’ｓは一躍人気者に。'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '音ノ木坂学園の入学希望者も増え、<br>廃校にならずに済んだのであった。'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'しかし、その後も何かと一悶着あり、<br>一度はラブライブの出場を<br>辞退したのであったが'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'なんやかんやで、<br>何故か2回目のラブライブが開催され、<br>再びエントリーしたのであった。'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_object.playBgm('bgm_n')
+                    @gp_sentence.txtEnd()
+                    @faceSet(@gp_object.honoka, 170, 90)
+                    @faceSet(@gp_object.kotori, 20, 95)
+                    @faceSet(@gp_object.umi, 320, 85)
+            ],
+            [
+                4,
+                =>
+                    @gp_object.honoka.setEmote('bikkuri')
+                    @gp_object.honoka.tateShake2()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>大変大変大変！'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @unsetEmote()
+                    @gp_object.umi.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '海未<br>一体どうしたというのですか、,<br>穂乃果'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.honoka.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>ラブライブの予選にエントリーした<br>私達みんなで作った曲なんだけど'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.kotori.setEmote('onpu')
+                    @gp_object.kotori.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>snow halationのことだね。,<br>いい曲だよね。'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @unsetEmote()
+                    @gp_object.honoka.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>そう、,そのことなんだけど、,<br>そのsnow halationの<br>最後のほうでの演出、'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.honoka.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>舞台全体をオレンジ一色に<br>ライトアップする装置なんだけど・・・'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.honoka.setEmote('bikkuri')
+                    @gp_object.honoka.scaleIn()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>ななななんと！,<br>その装置を作るのに『１００億円』も<br>かかるんだって！！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.umi.setEmote('bikkuri')
+                    @gp_object.umi.scaleIn()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '海未<br>『１００億円』！？,<br>穂乃果、,それはどう考えても<br>おかしいですよ。'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.kotori.setEmote('bikkuri')
+                    @gp_object.kotori.scaleIn()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>そうだよホノカチャン,<br>『１００億円』なんて、,<br>何かの間違いじゃない？'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @unsetEmote()
+                    @gp_sentence.txtEnd()
+                    @gp_object.kotori.scaleOut()
+                    @gp_object.honoka.scaleOut()
+                    @gp_object.umi.scaleOut()
+            ],
+            [
+                5,
+                =>
+                    @gp_object.honoka.tateShake2()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>もうっ！,<br>何が何でも『１００億円』集めるの！,<br>集めるったら集めるの！'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.umi.setEmote('ase')
+                    @gp_object.umi.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '海未<br>全く話を聞いていませんね。,<br>まあ、,仕方ないでしょう'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @unsetEmote()
+                    @gp_object.umi.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '海未<br>今回もまた、,<br>真姫のポケットマネーから<br>出ているという、'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.umi.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '海未<br>あの変なスロットマシンを<br>使うのでしょう？'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @gp_object.kotori.setEmote('ase')
+                    @gp_object.kotori.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>そうだね、,<br>あれ、,スロットマシンとは言っても、,<br>まさか屋上に<br>あんな巨大な装置があって'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @unsetEmote()
+                    @gp_object.kotori.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>空から降ってくるお菓子を<br>取って止めるなんて,<br>思わなかったよ。'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.kotori.setEmote('gabin')
+                    @gp_object.kotori.randomShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>爆弾降ってくるし、、、'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @unsetEmote()
+                    @gp_object.kotori.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>ことりちゃんの気ぐるみは<br>可愛いんだけど、,<br>あの中暑くて暑くて、、'
+                    )
+            ],
+            [
+                3,
+                =>
+                    @gp_object.kotori.setEmote('ten')
+                    @gp_sentence.txtEnd()
+            ],
+            [
+                4,
+                =>
+                    @gp_object.kotori.setEmote('bikkuri')
+                    @gp_object.kotori.tateShake2()
+                    @gp_sentence.txtSet(
+                        'ことり<br>大変だけど、,<br>私ホノカチャンのために頑張る！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.kotori.setEmote('bikkuri')
+                    @gp_object.kotori.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>待っててね！,ホノカチャン！'
+                    )
+            ],
+            [
+                3,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_object.honoka.tateShake2()
+                    @gp_object.honoka.setEmote('onpu')
+            ],
+            [
+                5,
+                =>
+                    @unsetEmote()
+                    @gp_object.honoka.tateShake2()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>頑張ってね！,ことりちゃん！,<br>ファイトだよっ！'
+                    )
+            ],
+            [
+                0,
+                =>
+                    game.endStory()
+            ]
+        ]
+        @startScene()
+    story4thStart:()->
+        @panorama = 'back_kanda'
+        @addLoadFile([
+            'images/back_kanda.png', 'images/face_nico.png', 'images/face_nozomi.png', 'images/face_eli.png',
+            'sounds/bgm/bgm_chace.mp3'
+        ])
+        @cue = [
+            [
+                6,
+                =>
+                    @gp_sentence.txtSet(
+                        'μ’ｓは２度目に出場した<br>ラブライブの予選を突破し、<br>A-RISEを公開処刑。<br>その勢いで優勝にまで至る。'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'その決戦のμ’ｓのパフォーマンスは<br>これまでかと注ぎ込んだ予算の影響で'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'とてもスクールアイドルが<br>やっているとは思えないような<br>クオリティであった。'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'そして、<br>3年生の卒業式が<br>終わったのも束の間、'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'μ’ｓのもとには<br>ラブライブ運営より<br>ニューヨークでのPV撮影の<br>依頼が届く。'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_object.playBgm('bgm_chace')
+                    @gp_sentence.txtEnd()
+                    @faceSet(@gp_object.nozomi, 165, 98)
+                    @faceSet(@gp_object.nico, 10, 90)
+                    @faceSet(@gp_object.eli, 330, 90)
+            ],
+            [
+                4,
+                =>
+                    @gp_object.nico.setEmote('onpu')
+                    @gp_object.nico.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'にこ<br>やったわ、,<br>私達もついに大人気アイドルね！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @unsetEmote()
+                    @gp_object.nico.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'にこ<br>それにしてもお金の力って凄いわ！,<br>出すPVはどんどん<br>クオリティが上がっていって、'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @gp_object.nico.setEmote('heart')
+                    @gp_object.nico.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'にこ<br>豪華な衣装をたくさん着たり、,<br>大掛かりなセットを使ったり、,<br>花火を打ち上げてみたり、'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.nico.setEmote('onpu')
+                    @gp_object.nico.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'にこ<br>果てには空港をジャックして,<br>飛行機をラッピングしたり・・・'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @gp_object.eli.setEmote('onpu')
+                    @gp_object.eli.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '絵里<br>まったくハラショーだわ。,<br>ラブライブに優勝して、,<br>ついに私達も卒業かと思ったら'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.eli.setEmote('heart')
+                    @gp_object.eli.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '絵里<br>今度はニューヨークで<br>PV撮影ですって！,<br>いまだに夢を見ているみたいだわ。'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.nozomi.setEmote('bikkuri')
+                    @gp_object.nozomi.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '希<br>それだけやないでエリチ。,<br>見える！,うちには見えるんや、,未来が！'
+                    )
+            ],
+            [
+                7,
+                =>
+                    @unsetEmote()
+                    @gp_object.nozomi.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '希<br>この後日本中の<br>スクールアイドルを集めて、,<br>秋葉原の歩行者天国を<br>開放して,ライブをするんや！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.nozomi.setEmote('bikkuri')
+                    @gp_object.nozomi.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '希<br>更に、,うちらのファイナルライブを,<br>東京ドームですることになるんやで！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.eli.setEmote('ase')
+                    @gp_object.eli.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '絵里<br>ちょっと希、,<br>いくらなんでもそれは、,、,<br>妄想が過ぎるわよ'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.nico.setEmote('bikkuri')
+                    @gp_object.nico.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'にこ<br>いや、,絵里、,<br>それありえなくもないわ。'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.nico.setEmote('bikkuri')
+                    @gp_object.nico.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'にこ<br>今からそのために<br>必要な資金を集めておかないと！,<br>大変なことになるわよ！'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @unsetEmote()
+                    @gp_object.nico.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'にこ<br>実は既に,<br>海未のゴーストライターである<br>畑亜貴さんに依頼して、,<br>次のシングル３曲'
+                    )
+            ],
+            [
+                8,
+                =>
+                    @gp_object.nico.setEmote('heart')
+                    @gp_object.nico.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'にこ<br>Angelic Angel、,<br>SUNNY DAY SONG、,<br>僕たちはひとつの光、,っていう<br>曲の歌詞が,既にできているのよ！'
+                    )
+            ],
+            [
+                3,
+                =>
+                    @gp_object.eli.setEmote('ten')
+                    @gp_sentence.txtEnd()
+            ],
+            [
+                6,
+                =>
+                    @gp_object.eli.setEmote('ase')
+                    @gp_object.eli.randomShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '絵里<br>何ちょっとにこ、,<br>何を言っているのかわからないわ。,<br>ゴーストライター？,ハターキ？'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @unsetEmote()
+                    @gp_object.eli.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '絵里<br>何それ初めて聞いたわ。,<br>ハラショーすぎるわ。'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @gp_object.nozomi.setEmote('onpu')
+                    @gp_object.nozomi.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '希<br>さすがにこっち、,<br>話が早くて助かるやん。,<br>そう、,そのためには金が必要なんや！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.nozomi.setEmote('bikkuri')
+                    @gp_object.nozomi.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '希<br>もっともっと、,金が！,<br>ざっと見て『1兆円』は必要やで！！！'
+                    )
+            ],
+            [
+                3,
+                =>
+                    @gp_object.eli.setEmote('ten')
+                    @gp_sentence.txtEnd()
+            ],
+            [
+                5,
+                =>
+                    @gp_object.eli.setEmote('gabin')
+                    @gp_object.eli.randomShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '絵里<br>ちょっと待って２人共、,<br>何もかもがおかしいわ？,<br>『1兆円』！？'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @unsetEmote()
+                    @gp_object.eli.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '絵里<br>国家予算じゃないんだから、,<br>それにさっきから聞いてて、,<br>突っ込みどころ満載よ？'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.nico.setEmote('onpu')
+                    @gp_object.nico.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'にこ<br>そういうことだから、,<br>頑張ってね！,『1兆円』！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.nico.setEmote('bikkuri')
+                    @gp_object.nico.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'にこ<br>ラストまであともう一踏ん張り！,<br>おやつの落下速度は<br>更に上がっていくわ！'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @gp_object.nozomi.setEmote('bikkuri')
+                    @gp_object.nozomi.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '希<br>コツはスキルを上手く駆使して,<br>おやつを取りやすくすることやで！,<br>ぎょーさん頑張ってな！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.eli.setEmote('ase')
+                    @gp_object.eli.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '絵里<br>それ誰に言ってるの？,<br>もう何でもいいわ。,ハラショーね。'
+                    )
+            ],
+            [
+                0,
+                =>
+                    game.endStory()
+            ]
+        ]
         @startScene()
     edStart:()->
-
-    ###
-    タイムラインのキューの単位を秒数に変換してセット
-    ###
-    cueSet:(cue)->
-        ret = {}
-        for sec, func of cue
-            ret[Math.floor(sec * game.fps)] = func
-        @tl.cue(ret)
+        @panorama = 'back_busitu'
+        @addLoadFile(['images/back_busitu.png', 'images/back_stage.png', 'images/face_honoka.png', 'images/face_kotori.png',
+            'images/face_umi.png', 'images/face_maki.png', 'images/face_rin.png', 'images/face_hanayo.png',
+            'images/face_nico.png', 'images/face_nozomi.png', 'images/face_eli.png',
+            'sounds/bgm/bgm_tanosii.mp3', 'sounds/bgm/bgm_sugisarisi.mp3', 'sounds/bgm/bgm_gyakkyou.mp3'
+        ])
+        @cue = [
+            #BGM楽しい部活
+            [
+                1,
+                =>
+                    @gp_object.playBgm('bgm_tanosii')
+                    @faceSet(@gp_object.honoka, 80, 90)
+                    @faceSet(@gp_object.kotori, 250, 90)
+            ],
+            [
+                4,
+                =>
+                    @gp_object.honoka.setEmote('onpu')
+                    @gp_object.honoka.tateShake2()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>すごいよすごいよ！,<br>１兆円だよ！,１兆円！'
+                    )
+            ],
+            [
+                7,
+                =>
+                    @gp_object.honoka.setEmote('heart')
+                    @gp_object.honoka.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>私達最強のスクールアイドルだよ！,<br>すごいね！,金の力って、,<br>お金最高！,お金万歳！！'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.kotori.setEmote('heart')
+                    @gp_object.kotori.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>そうだね！,ホノカチャン！'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @gp_object.honoka.setEmote('onpu')
+                    @gp_object.honoka.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>最終的には私達<br>何もしてなかったね！,<br>歌だって代理の声優さんたちが<br>やってくれたし！'
+                    )
+            ],
+            [
+                7
+                =>
+                    @gp_object.honoka.setEmote('heart')
+                    @gp_object.honoka.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>新田恵海さん、,<br>私の声そっくりだったよ！,<br>内田彩さんは<br>ことりちゃん以上に<br>ことりちゃんだったよ！'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.kotori.setEmote('bikkuri')
+                    @gp_object.kotori.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>ホノカチャン！,ホノカチャン！'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.honoka.setEmote('bikkuri')
+                    @gp_object.honoka.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>お、,ことりちゃんも興奮気味だね！'
+                    )
+            ],
+            [
+                7,
+                =>
+                    @gp_object.honoka.setEmote('onpu')
+                    @gp_object.honoka.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>サンライズさんが作ってくれた<br>私達のアニメ、,感動的だったね！,<br>穂乃果感動して<br>何回も泣いちゃったよ！'
+                    )
+            ],
+            #BGMフェードアウト
+            [
+                5,
+                =>
+                    @gp_object.kotori.setEmote('bikkuri')
+                    @gp_object.kotori.scaleIn()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>ホノカチャン！,起きて！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.honoka.setEmote('hatena')
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>何？,私なら起きてるよ？'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.kotori.setEmote('bikkuri')
+                    @gp_object.kotori.randomShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>ホノカチャン！,起きて！,<br>ライブ始まるよ！,ホノカチャン！！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @unsetEmote()
+                    @gp_sentence.txtEnd()
+                    @gp_object.kotori.scaleOut()
+                    @panoramaChangeRect()
+                    @gp_object.honoka.opacity = 0
+                    @gp_object.kotori.opacity = 0
+            ],
+            [
+                2,
+                =>
+                    @panoramaChange('back_stage')
+                    @gp_object.honoka.opacity = 1
+                    @gp_object.kotori.opacity = 1
+            ],
+            [
+                5,
+                =>
+                    @gp_object.honoka.setEmote('hatena')
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>あれ・・・？,私・・・？,ここは？'
+                    )
+            ],
+            #BGM過ぎ去りし日々
+            [
+                5,
+                =>
+                    @gp_object.playBgm('bgm_sugisarisi')
+                    @gp_object.kotori.setEmote('bikkuri')
+                    @gp_object.kotori.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>そろそろ始まるよ！,<br>私達のファイナルライブ！！'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @gp_object.honoka.setEmote('hatena')
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>ファイナルライブ？,<br>そんなのお金の力で<br>代理の人たちがやってくれるよ？'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @unsetEmote()
+                    @gp_object.honoka.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>CGだって凄い<br>豪華なのがあるんだよ？'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.kotori.setEmote('bikkuri')
+                    @gp_object.kotori.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>何を寝ぼけているの！？,<br>お金？,そんなのないよ！？'
+                    )
+            ],
+            [
+                6,
+                =>
+                    @unsetEmote()
+                    @gp_object.kotori.scale()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>代理の人なんていないよ！,<br>μ’ｓは私達９人で<br>頑張ってここまで<br>来たんじゃない！'
+                    )
+            ],
+            #BGMフェードアウト
+            [
+                4,
+                =>
+                    @gp_object.honoka.setEmote('bikkuri')
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>！？,<br>！！！！！？？？？？？？'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.honoka.setEmote('gabin')
+                    @gp_object.honoka.randomShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>あーーーーーーーーーー<br>ーーーーーーーーーっ！！！！！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_object.playBgm('bgm_gyakkyou')
+                    @gp_sentence.txtEnd()
+                    @unsetEmote()
+                    @faceSet(@gp_object.rin, 180, 0)
+                    @faceSet(@gp_object.hanayo, 50, 0)
+                    @faceSet(@gp_object.maki, 300, 0)
+                    @faceSet(@gp_object.honoka, 180, 90, true)
+                    @faceSet(@gp_object.kotori, 300, 90, true)
+                    @faceSet(@gp_object.umi, 50, 90)
+                    @faceSet(@gp_object.nozomi, 170, 190)
+                    @faceSet(@gp_object.nico, 40, 190)
+                    @faceSet(@gp_object.eli, 300, 190)
+                    @gp_object.rin.scaleChange(0.7)
+                    @gp_object.hanayo.scaleChange(0.7)
+                    @gp_object.maki.scaleChange(0.7)
+                    @gp_object.honoka.scaleChange(0.7)
+                    @gp_object.kotori.scaleChange(0.7)
+                    @gp_object.umi.scaleChange(0.7)
+                    @gp_object.nozomi.scaleChange(0.7)
+                    @gp_object.nico.scaleChange(0.7)
+                    @gp_object.eli.scaleChange(0.7)
+            ],
+            #BGM逆境からのスタート
+            [
+                4,
+                =>
+                    @gp_object.umi.setEmote('ase')
+                    @gp_object.umi.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '海未<br>なんだ、,やっと気付いたのですね？'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.rin.setEmote('onpu')
+                    @gp_object.rin.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '凛<br>とんだお寝坊さんだにゃ'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.nozomi.setEmote('onpu')
+                    @gp_object.nozomi.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '希<br>スピリチュアルな夢でも見とったん？'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.maki.setEmote('ase')
+                    @gp_object.maki.rotateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '真姫<br>イミワカンナイ'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.eli.setEmote('ase')
+                    @gp_object.eli.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '絵里<br>ハラショーな夢だわ'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.hanayo.setEmote('bikkuri')
+                    @gp_object.hanayo.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '花陽<br>そろそろライブ,始まっちゃいますよ？'
+                    )
+            ],
+            [
+                4,
+                =>
+                    @gp_object.nico.setEmote('bikkuri')
+                    @gp_object.nico.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'にこ<br>見せてやるわよ、,<br>私達の１年間の集大成！！'
+                    )
+            ],
+            [
+                4
+                =>
+                    @gp_object.kotori.setEmote('bikkuri')
+                    @gp_object.kotori.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>いくよ、,ホノカチャン！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.honoka.setEmote('bikkuri')
+                    @gp_object.honoka.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>うん、,ごめんね！,<br>今完全に目が覚めたよ！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @unsetEmote()
+                    @gp_object.honoka.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>そう、,私たちは、,<br>お金の力なんかじゃない！'
+                    )
+            ],
+            [
+                7,
+                =>
+                    @gp_object.honoka.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>私達９人で、,<br>高校生活という<br>限られた時間の中で,<br>精一杯頑張って<br>ここまで来たんだから！'
+                    )
+            ],
+            [
+                5,
+                =>
+                    @gp_object.honoka.setEmote('bikkuri')
+                    @gp_object.honoka.tateShake2()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>行くよ！,ファイナル！,せーのっ'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @unsetEmote()
+                    @gp_object.honoka.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '穂乃果<br>１！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_object.kotori.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'ことり<br>２！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_object.umi.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '海未<br>３！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_object.maki.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '真姫<br>４！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_object.rin.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '凛<br>５！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_object.hanayo.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '花陽<br>６！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_object.nico.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        'にこ<br>７！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_object.nozomi.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '希<br>８！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_object.eli.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '絵里<br>９！'
+                    )
+            ],
+            [
+                2,
+                =>
+                    @gp_sentence.txtEnd()
+                    console.log('俺「１０！！」')
+            ],
+            [
+                6,
+                =>
+                    @gp_object.honoka.tateShake()
+                    @gp_object.kotori.tateShake()
+                    @gp_object.umi.tateShake()
+                    @gp_object.maki.tateShake()
+                    @gp_object.rin.tateShake()
+                    @gp_object.hanayo.tateShake()
+                    @gp_object.nico.tateShake()
+                    @gp_object.nozomi.tateShake()
+                    @gp_object.eli.tateShake()
+                    @gp_sentence.txtEnd()
+                    @gp_sentence.txtSet(
+                        '全員<br>μ’ｓ、,,ミュージック、,,スタート！！'
+                    )
+            ],
+            [
+                0,
+                =>
+                    game.endStory()
+            ]
+        ]
+        @startScene()
 
 ###
 テスト用、空のシーン
@@ -5901,6 +7584,11 @@ class StoryPanorama extends Panorama
         @image = game.imageload(image)
         @x = 5
         @y = Math.floor((game.height - h) / 2)
+        @opacity = 1
+    hide:()->
+        @opacity = 0
+    show:()->
+        @opacity = 1
 
 class effect extends appSprite
     constructor: (w, h) ->
@@ -6910,18 +8598,18 @@ class Button extends System
 ###
 class pauseButton extends Button
     constructor: () ->
-        super 36, 36
+        super 90, 36
         @image = game.imageload("pause")
-        @x = 430
+        @x = 380
         @y = 76
     ontouchend: (e)->
         game.setPauseScene()
 
 class largePauseButton extends Button
     constructor:()->
-        super 100, 150
-        @x = 380
-        @y = 40
+        super 130, 100
+        @x = 350
+        @y = 60
     ontouchend: (e)->
         game.setPauseScene()
 
@@ -7065,7 +8753,7 @@ class heighBetButtonPause extends buttonHtml
         super 33, 33
         @class.push('triangle-top')
         @x = 90
-        @y = 245
+        @y = 175
         @setHtml()
     ontouchend: () ->
         game.pause_scene.pause_main_layer.betSetting(true)
@@ -7100,7 +8788,7 @@ class lowBetButtonPause extends buttonHtml
         super 33, 33
         @class.push('triangle-bottom')
         @x = 90
-        @y = 245
+        @y = 175
         @setHtml()
     ontouchend: () ->
         game.pause_scene.pause_main_layer.betSetting(false)
@@ -7148,23 +8836,29 @@ class storyTextWindow extends Dialog
         @opacity = 0.8
         @x = 10
         @y = game.width + Math.floor((game.height - game.width) / 2) - h - 10
+###
+顔
+###
 class Face extends System
     constructor: (w, h) ->
         super w, h
         @x = 0
         @y = 210
+        @emoteX = -30 #顔アイコンから感情アイコンまでの相対位置
+        @emoteY = -50 #顔アイコンから感情アイコンまでの相対位置
+        @emoteSize = 1 #感情アイコンの大きさ
     ###
     縦揺れ
     ###
     tateShake:()->
-        @tl.moveBy(0, -10, 4, enchant.Easing.QUAD_EASEOUT).moveBy(0, 10, 2, enchant.Easing.QUAD_EASEIN)
-        @tl.moveBy(0, 20, 6, enchant.Easing.QUAD_EASEOUT).moveBy(0, -20, 8, enchant.Easing.QUAD_EASEIN)
+        @tl.moveBy(0, -10 * @emoteSize, 4, enchant.Easing.QUAD_EASEOUT).moveBy(0, 10 * @emoteSize, 2, enchant.Easing.QUAD_EASEIN)
+        @tl.moveBy(0, 20 * @emoteSize, 6, enchant.Easing.QUAD_EASEOUT).moveBy(0, -20 * @emoteSize, 8, enchant.Easing.QUAD_EASEIN)
     tateShake2:()->
         @_tateShake()
     _tateShake:()->
         for i in [1..2]
-            @tl.moveBy(0, -10, 2, enchant.Easing.QUAD_EASEOUT).moveBy(0, 10, 1, enchant.Easing.QUAD_EASEIN)
-            @tl.moveBy(0, 10, 1, enchant.Easing.QUAD_EASEOUT).moveBy(0, -10, 2, enchant.Easing.QUAD_EASEIN)
+            @tl.moveBy(0, -10 * @emoteSize, 2, enchant.Easing.QUAD_EASEOUT).moveBy(0, 10 * @emoteSize, 1, enchant.Easing.QUAD_EASEIN)
+            @tl.moveBy(0, 10 * @emoteSize, 1, enchant.Easing.QUAD_EASEOUT).moveBy(0, -10 * @emoteSize, 2, enchant.Easing.QUAD_EASEIN)
     ###
     回転揺れ
     ###
@@ -7180,14 +8874,11 @@ class Face extends System
         max = 3
         initx = @x
         inity = @y
-        rdx = Math.floor(max * 2 * Math.random()) - max
-        rdy = Math.floor(max * 2 * Math.random()) - max
-        @tl.moveBy(rdx, rdy, 2, enchant.Easing.QUAD_EASEOUT)
-        for i in [1..24]
-            rdx = -rdx + Math.floor(max * 2 * Math.random()) - max
-            rdy = -rdy + Math.floor(max * 2 * Math.random()) - max
-            @tl.moveBy(rdx, rdy, 2, enchant.Easing.QUART_EASEINOUT)
-        @tl.moveTo(initx, inity, 2, enchant.Easing.QUAD_EASEIN)
+        for i in [1..48]
+            rdx = Math.floor(20 * max * Math.random()) / 10 - max
+            rdy = Math.floor(20 * max * Math.random()) / 10 - max
+            @tl.moveTo(initx + rdx, inity + rdy, 1, enchant.Easing.QUART_EASEINOUT)
+        @tl.moveTo(initx, inity, 2, enchant.Easing.QUART_EASEINOUT)
     ###
     大きくなって戻る
     ###
@@ -7204,18 +8895,112 @@ class Face extends System
     scaleOut:()->
         @tl.scaleTo(1, 1, 24, enchant.Easing.CUBIC_EASEIN)
 
+    setEmote:(type='', size=1)->
+        emote = game.story_scene.gp_object_up.emote
+        emote.changeImage(type)
+        _emoteX = @emoteX
+        _emoteY = @emoteY
+        if @emoteSize != 1
+            emote.scaleX = @emoteSize
+            emote.scaleY = @emoteSize
+            _emoteX = Math.floor(_emoteX * @emoteSize)
+            _emoteY = Math.floor(_emoteY * @emoteSize)
+        emote.set(@x + _emoteX, @y + _emoteY)
+
+    scaleChange:(scale=1)->
+        @scaleX = scale
+        @scaleY = scale
+        @emoteSize = scale
+
+
 class kotoriFace extends Face
     constructor: () ->
         super 135, 135
         @image = game.imageload("face_kotori")
+        @emoteX = -30
+        @emoteY = -50
 class honokaFace extends Face
     constructor: () ->
         super 135, 135
         @image = game.imageload("face_honoka")
+        @emoteX = -30
+        @emoteY = -50
 class umiFace extends Face
     constructor: () ->
         super 140, 140
         @image = game.imageload("face_umi")
+        @emoteX = -30
+        @emoteY = -50
+class makiFace extends Face
+    constructor: () ->
+        super 135, 135
+        @image = game.imageload("face_maki")
+        @emoteX = -30
+        @emoteY = -50
+class rinFace extends Face
+    constructor: () ->
+        super 135, 135
+        @image = game.imageload("face_rin")
+        @emoteX = -30
+        @emoteY = -50
+class hanayoFace extends Face
+    constructor: () ->
+        super 135, 135
+        @image = game.imageload("face_hanayo")
+        @emoteX = -30
+        @emoteY = -50
+class nicoFace extends Face
+    constructor: () ->
+        super 160, 135
+        @image = game.imageload("face_nico")
+        @emoteX = -10
+        @emoteY = -50
+class nozomiFace extends Face
+    constructor: () ->
+        super 165, 165
+        @image = game.imageload("face_nozomi")
+        @emoteX = -10
+        @emoteY = -50
+class eliFace extends Face
+    constructor: () ->
+        super 140, 140
+        @image = game.imageload("face_eli")
+        @emoteX = -30
+        @emoteY = -45
+
+###
+感情アイコン
+###
+class Emote extends System
+    constructor:()->
+        super 70, 70
+        @image = game.imageload("emote")
+        @opacity = 0
+        @type = {'bikkuri':0, 'hatena':1,'onpu':2, 'heart':3, 'ase':4, 'gabin':5, 'ten':6}
+        @prev_frame = 0
+        @frame = 0
+        @sound = null
+    set:(x, y)->
+        @opacity = 1
+        @x = x
+        @y = y
+    unset:()->
+        @opacity = 0
+    changeImage:(name)->
+        type = @prev_frame
+        if name != ''
+            type = @type[name]
+        @frame = type
+        @prev_frame = @frame
+        switch name
+            when 'bikkuri' then @sound = game.soundload('emote1')
+            when 'hatena'  then @sound = game.soundload('emote2')
+            when 'onpu'    then @sound = game.soundload('emote3')
+            when 'heart'   then @sound = game.soundload('emote3')
+            when 'ase'     then @sound = game.soundload('emote4')
+            when 'gabin'   then @sound = game.soundload('emote4')
+            when 'ten'     then @sound = game.soundload('emote2')
+        game.sePlay(@sound)
 class Param extends System
     constructor: (w, h) ->
         super w, h

@@ -25,7 +25,7 @@ class betCheckboxHtml extends checkboxHtml
         super
         @text = '掛け金を自動で上げる'
         @x = 90
-        @y = 305
+        @y = 235
         @setCheck()
     setCheck:()->
         if game.auto_bet is 1

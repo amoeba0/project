@@ -200,3 +200,12 @@
     height: 20px;
     cursor: pointer;
 }
+.white-text {
+    color: #ffffff;
+    font: 40px Consolas Monaco MSゴシック;
+}
+.batu-button {
+    color: #ffffff;
+    font: 40px Consolas Monaco MSゴシック;
+    cursor: pointer;
+}
