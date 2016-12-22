@@ -213,3 +213,12 @@ class storyBackBtn extends Button
         @y = game.height - @height - 50
     ontouchend: () ->
         game.endStory()
+
+class storyPauseBtn extends Button
+    constructor: (w, h)->
+        super w, h
+        @image = @drawRect("#aaa")
+        @x = 10
+        @y = game.height - @height - 50
+    ontouchend: () ->
+        game.storyPause()

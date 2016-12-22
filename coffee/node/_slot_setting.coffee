@@ -28,9 +28,11 @@ class slotSetting extends appNode
             11:35, 12:35, 13:35, 14:35, 15:35, 16:35, 17:35, 18:35, 19:35
         }
         @allRoles = {
+            11:[11],12:[12],13:[13],14:[14],15:[15],16:[16],17:[17],18:[18],19:[19],
             21:[14,15,16], 22:[11,12,13], 23:[17,18,19], 24:[11,12,16], 25:[13,15,18], 26:[14,17,19], 27:[15,16,17], 28:[13,14,19],
-            31:[11,15], 32:[12,16], 33:[17,18], 34:[12,13], 35:[14,15], 36:[18,19], 37:[14,17], 38:[13,19]
+            31:[11,15], 32:[12,16], 33:[17,18], 34:[12,13], 35:[14,15], 36:[18,19], 37:[14,17], 38:[13,19],
         }
+        @allRolesKey = [21,22,23,24,25,26,27,28,31,32,33,34,35,36,37,38,11,12,13,14,15,16,17,18,19]
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
         11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
@@ -167,12 +169,12 @@ class slotSetting extends appNode
             },
             25:{
                 'bgm':[
-                    {'name':'anone_ganbare', 'time':102, 'title':'あ・の・ね・が・ん・ば・れ', 'unit':'lily white<br>(園田海未、星空凛、東條希)', 'image':'bgm_25'}
+                    {'name':'hutari_hapinesu', 'time':160, 'title':'ふたりハピネス', 'unit':'lily white<br>(園田海未、星空凛、東條希)', 'image':'bgm_25'}
                 ]
             },
             26:{
                 'bgm':[
-                    {'name':'love_novels', 'time':100, 'title':'ラブノベルス', 'unit':'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)', 'image':'bgm_26'}
+                    {'name':'cutie_panther', 'time':122, 'title':'CutiePanther', 'unit':'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)', 'image':'bgm_26'}
                 ]
             },
             27:{
@@ -296,7 +298,7 @@ class slotSetting extends appNode
             6:{
                 'name':'完っ全にフルハウスね',
                 'image':'item_6',
-                'discription':'3回に1回の確率で<br>CHANCE!!状態になる',
+                'discription':'CHANCE!!状態になる確率が<br>2倍になる（最大で30％）',
                 'price':20000000,
                 'durationSec':90,
                 'conditoin':'',
@@ -326,7 +328,7 @@ class slotSetting extends appNode
             9:{
                 'name':'ファイトだよっ',
                 'image':'item_9',
-                'discription':'CHANCE!!でスロットが揃う時に<br>3回に1回の確率でFEVER!!が出る',
+                'discription':'CHANCE!!でスロットが揃う時に<br>FEVER!!が出る確率が2倍になる<br>（最大で20％）',
                 'price':10000000000,
                 'durationSec':90,
                 'conditoin':'',
@@ -339,7 +341,7 @@ class slotSetting extends appNode
                 'image':'item_11',
                 'discription':'スロットに穂乃果が挿入されるようになる。',
                 'price':0,
-                'conditoin':'穂乃果でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(11)
             },
@@ -348,7 +350,7 @@ class slotSetting extends appNode
                 'image':'item_12',
                 'discription':'スロットにことりが挿入されるようになる。',
                 'price':0,
-                'conditoin':'ことりでスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(12)
             },
@@ -357,7 +359,7 @@ class slotSetting extends appNode
                 'image':'item_13',
                 'discription':'スロットに海未が挿入されるようになる。',
                 'price':0,
-                'conditoin':'海未でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(13)
             },
@@ -366,7 +368,7 @@ class slotSetting extends appNode
                 'image':'item_14',
                 'discription':'スロットに真姫が挿入されるようになる。',
                 'price':0,
-                'conditoin':'真姫でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(14)
             },
@@ -375,7 +377,7 @@ class slotSetting extends appNode
                 'image':'item_15',
                 'discription':'スロットに凛が挿入されるようになる。',
                 'price':0,
-                'conditoin':'凛でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(15)
             },
@@ -384,7 +386,7 @@ class slotSetting extends appNode
                 'image':'item_16',
                 'discription':'スロットに花陽が挿入されるようになる。',
                 'price':0,
-                'conditoin':'花陽でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(16)
             },
@@ -393,7 +395,7 @@ class slotSetting extends appNode
                 'image':'item_17',
                 'discription':'スロットににこが挿入されるようになる。',
                 'price':0,
-                'conditoin':'にこでスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(17)
             },
@@ -402,7 +404,7 @@ class slotSetting extends appNode
                 'image':'item_18',
                 'discription':'スロットに希が挿入されるようになる。',
                 'price':0,
-                'conditoin':'希でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(18)
             },
@@ -411,7 +413,7 @@ class slotSetting extends appNode
                 'image':'item_19',
                 'discription':'スロットに絵里が挿入されるようになる。',
                 'price':0,
-                'conditoin':'絵里でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(19)
             },
@@ -485,7 +487,7 @@ class slotSetting extends appNode
         @prev_osusume_role = 0
 
         #セーブする変数
-        @prev_muse = [] #過去にスロットに入ったμ’ｓ番号(TODO 使ってない？不要か検証してから消す)
+        #@prev_muse = [] #過去にスロットに入ったμ’ｓ番号(TODO 使ってない？不要か検証してから消す)
         @now_muse_num = 0 #現在ランダムに選択されてスロットに入るμ’ｓ番号
 
     setItemPointValue:()->
@@ -520,22 +522,22 @@ class slotSetting extends appNode
     setGravity:()->
         if game.bet < 10
             val = 0.35
-            @prize_div = 1
+            @prize_div = 2
         else if game.bet < 50
             val = 0.40
-            @prize_div = 1
+            @prize_div = 1.9
         else if game.bet < 100
             val = 0.44
-            @prize_div = 1
+            @prize_div = 1.8
         else if game.bet < 500
             val = 0.48
-            @prize_div = 1
+            @prize_div = 1.6
         else if game.bet < 1000
             val = 0.5
-            @prize_div = 1
+            @prize_div = 1.4
         else if game.bet < 5000
             val = 0.53
-            @prize_div = 1
+            @prize_div = 1.2
         else if game.bet < 10000 #1万
             val = 0.55
             @prize_div = 1
@@ -580,15 +582,33 @@ class slotSetting extends appNode
             @prize_div = 0.5
         else if game.bet < 100000000000
             val = 1.8
-            @prize_div = 0.4
+            @prize_div = 0.5
         else if game.bet < 500000000000
             val = 2
-            @prize_div = 0.3
+            @prize_div = 0.4
         else if game.bet < 1000000000000 #1兆
-            val = 2.5
-            @prize_div = 0.2
-        else
+            val = 2.2
+            @prize_div = 0.4
+        else if game.bet < 5000000000000
+            val = 2.6
+            @prize_div = 0.3
+        else if game.bet < 10000000000000
             val = 3
+            @prize_div = 0.3
+        else if game.bet < 50000000000000
+            val = 3.4
+            @prize_div = 0.2
+        else if game.bet < 100000000000000 #100兆
+            val = 3.8
+            @prize_div = 0.2
+        else if game.bet < 500000000000000
+            val = 4.2
+            @prize_div = 0.1
+        else if game.bet < 1000000000000000
+            val = 4.6
+            @prize_div = 0.1
+        else
+            val = 5
             @prize_div = 0.1
         div = 1
         val = Math.floor(val * div * 100) / 100
@@ -618,9 +638,9 @@ class slotSetting extends appNode
         result = false
         length = game.member_set_now.length
         rate = 40
-        if length is 2
+        if length is 2 || game.past_fever_num is 1
             rate = 60
-        else if 3 <= length
+        if 3 <= length || game.past_fever_num is 0
             rate = 80
         random = Math.floor(Math.random() * 100)
         if random < rate
@@ -638,6 +658,7 @@ class slotSetting extends appNode
     setMuseMember:(force)->
         full = [11,12,13,14,15,16,17,18,19]
         remain = []
+        member = 0
         if game.arrIndexOf(game.prev_fever_muse, full)
             @now_muse_num = 0
         else
@@ -647,9 +668,6 @@ class slotSetting extends appNode
             random = Math.floor(Math.random() * remain.length)
             member = remain[random]
             @now_muse_num = member
-            if @prev_muse.indexOf(member) is -1
-                @prev_muse.push(member)
-        #game.pause_scene.pause_member_set_layer.dispSetMemberList()
 
 
     ###
@@ -663,7 +681,7 @@ class slotSetting extends appNode
     スロットを強制的に当たりにするかどうかを決める
     コンボ数 * 0.1 ％
     テンションMAXで+20補正
-    過去のフィーバー回数が少ないほど上方補正かける 0回:+9,1回:+6,2回:+3
+    過去のフィーバー回数が少ないほど上方補正かける 0回:+12,1回:+8,2回:+4
     最大値は30％
     フィーバー中は強制的に当たり
     @return boolean true:当たり
@@ -672,8 +690,10 @@ class slotSetting extends appNode
         result = false
         rate = Math.floor((game.combo * 0.1) + ((game.tension / @tension_max) * 20))
         if game.past_fever_num <= 2
-            rate += ((3 - game.past_fever_num)) * 3
-        if rate > 30 || game.isItemSet(6) || game.main_scene.gp_back_panorama.now_back_effect_flg is true
+            rate += ((3 - game.past_fever_num)) * 4
+        if game.isItemSet(6)
+            rate *= 2
+        if rate > 30 || game.main_scene.gp_back_panorama.now_back_effect_flg is true
             rate = 30
         if game.debug.half_slot_hit is true
             rate = 50
@@ -705,8 +725,10 @@ class slotSetting extends appNode
             if div < 1
                 div = 1
             ret_money = Math.floor(ret_money / div)
+        else
+            ret_money = Math.floor(ret_money / 2)
         if game.main_scene.gp_back_panorama.now_back_effect_flg is true
-            ret_money *= 3
+            ret_money *= 2
         if ret_money > 100000000000000
             ret_money = 100000000000000
         return ret_money
@@ -883,7 +905,8 @@ class slotSetting extends appNode
         else
             fixTime = 1
             randomTime = 15
-        fixTime += Math.floor((1 - @item_gravity) * 10) / 10
+        if @item_gravity < 1
+            fixTime += Math.floor((1 - @item_gravity) * 10) / 10
         ret = fixTime + Math.floor(Math.random() * randomTime) / 10
         return ret
     ###
@@ -929,8 +952,7 @@ class slotSetting extends appNode
         if num < 10
             rslt = true
         else if num < 20
-            if game.prev_fever_muse.indexOf(parseInt(num)) != -1
-                rslt = true
+            rslt = true
         else if num is 21
             if 50 <= game.max_combo
                 rslt = true
@@ -950,12 +972,15 @@ class slotSetting extends appNode
     ###
     setMemberItemPrice:()->
         cnt = 0
-        list = game.getDeduplicationList(game.prev_fever_muse)
-        for key, val of list
-            if 11 <= val && val <= 19
-                if 0 == @item_list[val].price
-                    @item_list[val].price = @member_item_price[cnt]
-                cnt++
+        if 0 < game.item_have_now.length
+            have_muse = []
+            for key, val of game.item_have_now
+                if 11 <= val && val <= 19
+                    have_muse.push(val)
+            cnt = have_muse.length
+        for val in [11..19]
+            @item_list[val].price = @member_item_price[cnt]
+
     ###
     現在セットされているメンバーから次にスロットに挿入するμ’ｓメンバーを決めて返します
     ###
@@ -986,11 +1011,8 @@ class slotSetting extends appNode
     ###
     isForceFever:()->
         tension_rate = Math.floor((game.tension * 100)/ @tension_max)
-        if game.isItemSet(9)
-            if game.past_fever_num <= 3
-                rate = 30
-        else if tension_rate is 100
-                rate = 20
+        if tension_rate is 100
+            rate = 20
         else if 85 <= tension_rate
             if game.past_fever_num <= 3
                 rate = 16
@@ -1011,6 +1033,10 @@ class slotSetting extends appNode
                 rate = 5
         else
             rate = 2
+        if game.isItemSet(9)
+            rate *= 2
+        if 20 < rate
+            rate = 20
         result = false
         random = Math.floor(Math.random() * 100)
         if game.debug.force_fever is true || random <= rate
@@ -1052,10 +1078,8 @@ class slotSetting extends appNode
     setForceFeverRole:(left_lille)->
         role = []
         roles = []
-        for key, val of left_lille
-            if val > 10 && game.prev_fever_muse.indexOf(parseInt(val)) is -1
-                roles.push([val])
-        for roleNum, member of @allRoles
+        for i, roleNum of @allRolesKey
+            member = @allRoles[roleNum]
             if game.arrIndexOf(left_lille, member) && game.prev_fever_muse.indexOf(parseInt(roleNum)) is -1
                 roles.push(member)
         if roles[0] != undefined
@@ -1098,12 +1122,18 @@ class slotSetting extends appNode
                 val = 100000000
             else if bet < 10000000000
                 val = 1000000000
-            else if bet < 10000000000
-                val = 1000000000
-            else if bet < 10000000000
-                val = 1000000000
-            else
+            else if bet < 100000000000
                 val = 10000000000
+            else if bet < 1000000000000
+                val = 100000000000
+            else if bet < 10000000000000
+                val = 1000000000000
+            else if bet < 100000000000000
+                val = 10000000000000
+            else if bet < 1000000000000000
+                val = 100000000000000
+            else
+                val = 1000000000000000
         else
             if bet <= 10
                 val = -1
@@ -1129,15 +1159,21 @@ class slotSetting extends appNode
                 val = -10000000000
             else if bet <= 1000000000000
                 val = -100000000000
-            else
+            else if bet <= 10000000000000
                 val = -1000000000000
+            else if bet <= 100000000000000
+                val = -10000000000000
+            else if bet <= 1000000000000000
+                val = -100000000000000
+            else
+                val = -1000000000000000
         game.bet += val
         if game.bet < 1
             game.bet = 1
         else if game.bet > game.money
             game.bet -= val
-        else if game.bet > 100000000000
-            game.bet = 100000000000
+        else if game.bet > 1000000000000000
+            game.bet = 1000000000000000
         if up is false and game.auto_bet is 1 and game.bet < Math.floor(game.money / 100)
             game.auto_bet = 0
 
@@ -1162,6 +1198,6 @@ class slotSetting extends appNode
             if game.bet < tmp_bet
                 digit = Math.pow(10, (String(tmp_bet).length - 1))
                 game.bet = Math.floor(tmp_bet / digit) * digit
-                if game.bet > 100000000000
-                    game.bet = 100000000000
+                if game.bet > 1000000000000000
+                    game.bet = 1000000000000000
                 game.main_scene.gp_system.bet_text.setValue()

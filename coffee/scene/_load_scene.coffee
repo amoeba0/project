@@ -7,3 +7,19 @@ class loadScene extends appScene
     onenterframe: (e) ->
         if @wait < @age
             game.popLoadScene()
+
+class kaisetuScene extends appScene
+    constructor:()->
+        super
+        @gp_kaisetu = new gpKaisetu()
+        @addChild(@gp_kaisetu)
+
+class storyPauseScene extends appScene
+    constructor:()->
+        super
+        @gp_story_pause = new gpStoryPause()
+        @msg = new storyPauseMsgTxt()
+        @restart = new storyPauseEndTxt()
+        @addChild(@gp_story_pause)
+        @addChild(@msg)
+        @addChild(@restart)

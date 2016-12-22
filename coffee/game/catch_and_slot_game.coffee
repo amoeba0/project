@@ -18,7 +18,7 @@ class LoveliveGame extends catchAndSlotGame
         @fps = 24
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
-                    'heart', 'explosion', 'items', 'coin_pla']
+                    'heart', 'explosion', 'items', 'coin_pla', 'title', 'discription']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm_maid']
 
@@ -59,6 +59,7 @@ class LoveliveGame extends catchAndSlotGame
         @now_speed = 1 #現在の移動速度とジャンプ力
         @auto_bet = 1 #自動的に掛け金を上げる
         @retry = false #リトライ中
+        @kaisetu_watched = false #画面説明を見た
 
         @init_load_val = {
             'money':100,
@@ -79,6 +80,7 @@ class LoveliveGame extends catchAndSlotGame
             'prev_item':[],
             'auto_bet':1,
             'retry':0,
+            'kaisetu_watched':0,
             'left_lille':@arrayCopy(@slot_setting.lille_array_0[0]),
             'middle_lille':@arrayCopy(@slot_setting.lille_array_0[1]),
             'right_lille':@arrayCopy(@slot_setting.lille_array_0[2])
@@ -313,20 +315,13 @@ class LoveliveGame extends catchAndSlotGame
     設定された部員は自動的に空にする
     ###
     autoMemberSetBeforeFever:()->
-        if @arrIndexOf(@prev_fever_muse, [11,12,13,14,15,16,17,18,19])
-            @member_set_now = []
-            @next_auto_set_member = @slot_setting.getRoleAbleMemberList()
-            @musePreLoadMulti(@next_auto_set_member)
-            #@pause_scene.pause_member_set_layer.dispSetMemberList()
-
-    ###
-    フィーバー終了直後にあらかじめロードしておいた次の部員を自動的に設定
-    手動で設定された部員がいない時のみ実行
-    ###
-    autoMemberSetAfeterFever:()->
-        if @next_auto_set_member.length != 0 && @member_set_now.length is 0
-            @member_set_now = @next_auto_set_member
-            #@pause_scene.pause_member_set_layer.dispSetMemberList()
+        @member_set_now = []
+        @member_set_now = @slot_setting.getRoleAbleMemberList()
+        if @member_set_now.length is 0
+            @slot_setting.setMuseMember()
+        else
+            @slot_setting.now_muse_num = 0
+        @musePreLoadMulti(@member_set_now)
 
     ###
     アイテムを取った時にテンションゲージを増減する
@@ -398,6 +393,14 @@ class LoveliveGame extends catchAndSlotGame
         else
             @_restartFeverBgm()
 
+    setKaisetuScene:()->
+        @kaisetu_scene = new kaisetuScene()
+        @pushScene(@kaisetu_scene)
+
+    popKaisetuScene:()->
+        @popScene(@kaisetu_scene)
+        @setLoadScene()
+
     #フィーバー中なら覚えたBGMの曲と位置から再開
     _restartFeverBgm:()->
         @bgmPlay(@now_play_fever_bgm)
@@ -458,6 +461,7 @@ class LoveliveGame extends catchAndSlotGame
     ###
     _pushStory:()->
         @story_scene = new stolyScene()
+        @story_pause_scene = new storyPauseScene()
         @pushScene(@story_scene)
 
     ###
@@ -466,6 +470,17 @@ class LoveliveGame extends catchAndSlotGame
     endStory:()->
         @story_scene.bgmStop()
         @popScene(@story_scene)
+
+    ###
+    ストーリー一時停止
+    ###
+    storyPause:()->
+        @pushScene(@story_pause_scene)
+        @nowPlayBgmPause()
+
+    storyPauseEnd:()->
+        @popScene(@story_pause_scene)
+        @nowPlayBgmRestart()
 
     ###
     ゲームをロードする
@@ -504,7 +519,8 @@ class LoveliveGame extends catchAndSlotGame
             'max_set_item_num':0,
             'prev_item':'[]',
             'auto_bet':0,
-            'retry':0
+            'retry':0,
+            'kaisetu_watched':0
         }
         ret = null
         if data[key] is undefined
@@ -539,7 +555,8 @@ class LoveliveGame extends catchAndSlotGame
             'prev_item':JSON.stringify(@prev_item),
             'now_speed': @now_speed,
             'auto_bet':@auto_bet,
-            'retry':@retry
+            'retry':@retry,
+            'kaisetu_watched':@kaisetu_watched
         }
         for key, val of saveData
             @local_storage.setItem(key, val)
@@ -571,6 +588,7 @@ class LoveliveGame extends catchAndSlotGame
             @now_speed = @_loadStorage('now_speed', 'num')
             @auto_bet = @_loadStorage('auto_bet', 'num')
             @retry = @_loadStorage('retry', 'num')
+            @kaisetu_watched = @_loadStorage('kaisetu_watched', 'num')
     ###
     ローカルストレージから指定のキーの値を取り出して返す
     @param string key ロードするデータのキー
@@ -630,6 +648,7 @@ class LoveliveGame extends catchAndSlotGame
         @now_speed = @_loadGameFixUnit(data, 'now_speed')
         @auto_bet = @_loadGameFixUnit(data, 'auto_bet')
         @retry = @_loadGameFixUnit(data, 'retry')
+        @kaisetu_watched = @_loadGameFixUnit(data, 'kaisetu_watched')
 
     _loadGameFixUnit:(data, key)->
         if data[key] != undefined
@@ -643,9 +662,11 @@ class LoveliveGame extends catchAndSlotGame
     ###
     _gameInitSetting:()->
         #一人目のμ’ｓメンバーを決めて素材をロードする
-        if @slot_setting.now_muse_num is 0
-            @slot_setting.setMuseMember()
-        @musePreLoad()
+        #if @slot_setting.now_muse_num is 0
+        #    @slot_setting.setMuseMember()
+        if @member_set_now.length is 0
+            @autoMemberSetBeforeFever()
+        #@musePreLoad()
         sys = @main_scene.gp_system
         sys.money_text.setValue()
         sys.bet_text.setValue()

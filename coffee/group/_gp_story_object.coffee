@@ -3,8 +3,12 @@ class gpStoryObject extends appGroup
         super
         @back_btn = new storyBackBtn(80, 40)
         @back_txt = new storyBackTxt(80, 40)
+        @pause_btn = new storyPauseBtn(140, 40)
+        @pause_txt = new storyPauseTxt(140, 40)
         @addChild(@back_btn)
         @addChild(@back_txt)
+        @addChild(@pause_btn)
+        @addChild(@pause_txt)
         @kotori = new kotoriFace()
         @honoka = new honokaFace()
         @umi    = new umiFace()

@@ -191,6 +191,27 @@ class trophyOkButtonHtml extends baseOkButtonHtml
     touchendEvent:() ->
         game.pause_scene.removeTrophySelectmenu()
 
+class helpOkButtonHtml extends baseOkButtonHtml
+    constructor:()->
+        super
+        @x = 170
+        @y = 500
+    touchendEvent:() ->
+        game.pause_scene.helpEnd()
+
+class helpNextButtonHtml extends buttonHtml
+    constructor:()->
+        super 150, 45
+        @x = 170
+        @y = 500
+        @class.push('base-buy-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
+        @text = '次へ'
+        @setHtml()
+    ontouchend: (e) ->
+        game.sePlay(@dicisionSe)
+        game.pause_scene.pause_help_layer.goNext()
 
 ###
 キャンセルボタン
@@ -359,7 +380,7 @@ class titleMenuButtonHtml extends buttonHtml
 class startGameButtonHtml extends titleMenuButtonHtml
     constructor: () ->
         super
-        @y = 610
+        @y = 630
         @text = '続きから'
         @setHtml()
     touchendEvent:() ->
@@ -368,7 +389,7 @@ class startGameButtonHtml extends titleMenuButtonHtml
 class newGameButtonHtml extends titleMenuButtonHtml
     constructor: () ->
         super
-        @y = 530
+        @y = 550
         @text = '初めから'
         @setHtml()
     touchendEvent:() ->
@@ -377,7 +398,7 @@ class newGameButtonHtml extends titleMenuButtonHtml
 class story1stButtonHtml extends titleMenuButtonHtml
     constructor: () ->
         super
-        @y = 450
+        @y = 470
         @text = '第1話'
         @setHtml()
     touchendEvent:() ->
@@ -428,6 +449,14 @@ class recordDialogCloseButton extends dialogCloseButton
         game.sePlay(@cancelSe)
         game.pause_scene.removeRecordMenu()
 
+class helpDialogCloseButton extends dialogCloseButton
+    constructor:()->
+        super
+        @y = 80
+    ontouchend: () ->
+        game.sePlay(@cancelSe)
+        game.pause_scene.helpEnd()
+
 ###
 部員のおすすめ編成
 ###
@@ -439,11 +468,13 @@ class autoMemberSetButtonHtml extends buttonHtml
         @class.push('osusume-button')
         if game.isSumaho()
             @class.push('base-ok-button-sp')
-        @text = 'おすすめ'
+        @text = 'おまかせ'
         @setHtml()
     ontouchend: (e) ->
         game.sePlay(@dicisionSe)
         game.member_set_now = game.slot_setting.getRoleAbleMemberList()
+        if game.member_set_now.indexOf(game.slot_setting.now_muse_num) != -1
+            game.slot_setting.now_muse_num = 0
         game.pause_scene.pause_member_set_layer.dispSetMemberList()
 
 ###
@@ -505,3 +536,16 @@ class endingButtonHtml extends storyButtonHtml
         @setHtml()
     ontouchend: (e) ->
         game.startEdStory()
+
+class helpButtonHtml extends buttonHtml
+    constructor:(type=0, x=0, y=0)->
+        super 70, 25
+        @type = type
+        @x = x
+        @y = y
+        @text = 'HELP'
+        @class.push('help-button')
+        @setHtml()
+    ontouchend:(e)->
+        game.sePlay(@dicisionSe)
+        game.pause_scene.helpDsp(@type)

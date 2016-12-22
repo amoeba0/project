@@ -92,13 +92,45 @@ class tensionText extends text
 class storyBackTxt extends text
     constructor: (width, height) ->
         super
-        @text = '戻る'
+        @text = '終了'
         @color = 'black'
         @font = (height - 8) + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
         @x = game.width - width - 10 + 9
         @y = game.height - height - 50 + 2
     ontouchend: () ->
         game.endStory()
+
+class storyPauseTxt extends text
+    constructor: (width, height) ->
+        super
+        @text = '一時停止'
+        @color = 'black'
+        @font = (height - 8) + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = 12
+        @y = game.height - height - 50 + 2
+    ontouchend: () ->
+        game.storyPause()
+
+class storyPauseMsgTxt extends text
+    constructor:()->
+        super
+        @text = 'PAUSE'
+        @color = 'white'
+        @font = "86px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = Math.floor(game.width / 5) + 20
+        @y = Math.floor(game.height / 2) - 86
+
+class storyPauseEndTxt extends text
+    constructor:()->
+        super
+        @text = '再開'
+        @color = 'white'
+        @font = "54px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = Math.floor(game.width / 2) - 54
+        @y = Math.floor(game.height / 2) + 86
+    ontouchend:()->
+        game.storyPauseEnd()
+
 
 class storyMessage extends text
     constructor: (width, height) ->
@@ -151,3 +183,27 @@ class storyMessage extends text
         @nowSplited = 0
         @wait = 0
         @text = ""
+
+class kaisetuOkButton extends text
+    constructor:()->
+        super
+        @text = 'OK'
+        @color = 'white'
+        @font_size = 86
+        @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = 200
+        @y = 550
+    ontouchend:()->
+        game.popKaisetuScene()
+
+class kaisetuXButton extends text
+    constructor:()->
+        super
+        @text = '×'
+        @color = 'white'
+        @font_size = 52
+        @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = 430
+        @y = 0
+    ontouchend:()->
+        game.popKaisetuScene()

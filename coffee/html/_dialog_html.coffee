@@ -240,3 +240,63 @@ class memberSetDiscription extends longTitleDiscription
         @y = 80
         @text = '部員を編成する'
         @setHtml()
+
+class titleDiscription extends dialogHtml
+    constructor:()->
+        super game.width, 200
+        @x = 0
+        @y = 200
+        @sousa = '←→・・・横移動、　z・・・ジャンプ<br>
+            ↑↓・・・掛け金の変更、　x・・・メニュー画面'
+        @sp = ''
+        if game.isSumaho() is true
+            @sousa = '←→・・・横移動<br>
+                ● または 画面の中央何も無い所・・・ジャンプ<br>
+                ↑↓・・・掛け金の変更、　MENU・・・メニュー画面'
+            @sp = '-sp'
+        @text= '<div class="title-head'+@sp+'">・遊び方</div>
+            <div class="title-dsc'+@sp+'">
+                上からおやつが降ってくるのでキャッチして下さい。<br>
+                キャッチに成功するとスロットマシンが止まります。
+            </div>
+            <div class="title-head'+@sp+'">・操作方法</div>
+            <div class="title-dsc'+@sp+'">'+@sousa+'</div>'
+        @class.push('title-scene-discription')
+        @setHtml()
+
+class helpTitle extends dialogHtml
+    constructor:(txt)->
+        super 300, 50
+        @x = 70
+        @y = 130
+        @sp = ''
+        if game.isSumaho() is true then @sp = '-sp'
+        @class.push('help-title' + @sp)
+        @text = txt
+        @setHtml()
+
+class pageNum extends dialogHtml
+    constructor:(txt)->
+        super 100, 30
+        @x = 190
+        @y = 180
+        @sp = ''
+        if game.isSumaho() is true then @sp = '-sp'
+        @class.push('help-discription' + @sp)
+        @setText(txt)
+    setText:(txt)->
+        @text = txt
+        @setHtml()
+
+class helpDiscription extends dialogHtml
+    constructor:(txt)->
+        super 420, 460
+        @x = 70
+        @y = 220
+        @sp = ''
+        if game.isSumaho() is true then @sp = '-sp'
+        @class.push('help-discription' + @sp)
+        @setText(txt)
+    setText:(txt)->
+        @text = txt
+        @setHtml()

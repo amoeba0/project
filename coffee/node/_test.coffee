@@ -29,7 +29,10 @@ class Test extends appNode
         #@appload()
         #@multiload()
         #@isAddMuse()
-        @manySoundLoad()
+        #@manySoundLoad()
+        #@setMemberItemPrice()
+        #@autoMemberSetBeforeFever()
+        @getIsForceSlotHit()
 
     #以下、テスト用関数
 
@@ -185,4 +188,20 @@ class Test extends appNode
         game.appLoad('sounds/bgm/anemone_heart.mp3')
         game.appLoad('sounds/bgm/anone_ganbare.mp3')
         window.setTimeout(console.log(game.loadedFile), 5000)
+
+    setMemberItemPrice:()->
+        game.slot_setting.setMemberItemPrice()
+        console.log(game.slot_setting.item_list)
+
+    autoMemberSetBeforeFever:()->
+        for i in [1..30]
+            game.autoMemberSetBeforeFever()
+            console.log('member_set_now')
+            console.log(game.member_set_now)
+            console.log('prev_fever_muse')
+            console.log(game.prev_fever_muse)
+
+    getIsForceSlotHit:()->
+        game.slot_setting.getIsForceSlotHit()
+        game.slot_setting.isForceFever()
 

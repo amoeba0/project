@@ -107,5 +107,7 @@ class pauseMemberUseSelectLayer extends appDomLayer
             if (game.max_set_member_num <= game.member_set_now.length)
                 game.member_set_now.shift()
             game.member_set_now.push(kind)
+            if game.slot_setting.now_muse_num is kind
+                game.slot_setting.now_muse_num = 0
         else
             game.member_set_now = game.arrayValueDel(game.member_set_now, kind)

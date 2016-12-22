@@ -112,7 +112,6 @@ class mainScene extends appScene
             if @gp_stage_front.notItemFallFlg is false && game.tension <= @tension_05
                 @gp_stage_front.notItemFallFlg = true
             if game.tension <= 0
-                game.autoMemberSetAfeterFever()
                 game.main_scene.gp_slot.upperFrame.frame = 0
                 game.pause_scene.pause_main_layer.save_game_button.makeAble()
                 game.bgmStop(game.main_scene.gp_slot.fever_bgm)

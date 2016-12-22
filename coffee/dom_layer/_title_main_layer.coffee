@@ -7,3 +7,7 @@ class titleMainLayer extends appDomLayer
         @addChild(@new_game_button)
         @story_button = new story1stButtonHtml()
         @addChild(@story_button)
+        @title = new titleLogo()
+        @addChild(@title)
+        @discription = new titleDiscription()
+        @addChild(@discription)

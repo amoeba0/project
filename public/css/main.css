@@ -46,11 +46,15 @@
 	background-color: #6695FF;
 }
 .title-menu-button {
-    background-color: #ffffff;
+    background-color: #ece8e4;
     width: 200px;
     font: 30px Consolas Monaco MSゴシック;
     padding: 10px 0px;
-    border: solid 3px #cccccc;
+    border: solid 1px #cccccc;
+    border-radius: 10px;
+    border-bottom: 4px solid #c1c1c1;
+    background-image: linear-gradient(to bottom, #ffffff, #d8d8d8);
+    box-shadow: inset 1px 1px 0 #afafaf;
 }
 .base-ok-button {
     background-color: #FF5495;
@@ -208,4 +212,46 @@
     color: #ffffff;
     font: 40px Consolas Monaco MSゴシック;
     cursor: pointer;
+}
+
+.title-scene-discription {
+    width: 480px;
+    height: 200px;
+    margin: 0px 20px;
+}
+.title-head {
+    font: 24px Consolas Monaco MSゴシック;
+    margin-top: 10px;
+}
+.title-dsc {
+    font: 20px Consolas Monaco MSゴシック;
+    margin: 5px 10px;
+    line-height: 1.5em;
+}
+.title-head-sp {
+    font: 20px Consolas Monaco MSゴシック;
+    margin-top: 8px;
+}
+.title-dsc-sp {
+    font: 16px Consolas Monaco MSゴシック;
+    margin: 4px 8px;
+    line-height: 1.5em;
+}
+.help-button {
+    font: 24px Consolas Monaco MSゴシック;
+    color: white;
+    background-color: blue;
+    padding: 5px;
+}
+.help-discription {
+    font: 20px Consolas Monaco MSゴシック;
+}
+.help-discription-sp {
+    font: 16px Consolas Monaco MSゴシック;
+}
+.help-title {
+    font: 26px Consolas Monaco MSゴシック;
+}
+.help-title-sp {
+    font: 22px Consolas Monaco MSゴシック;
 }

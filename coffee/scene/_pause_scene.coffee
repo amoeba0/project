@@ -17,6 +17,7 @@ class pauseScene extends appScene
         @pause_record_layer = new pauseRecordLayer()
         @pause_record_select_layer = new pauseRecordSelectLayer()
         @pause_trophy_select_layer = new pauseTrophySelectLayer()
+        @pause_help_layer = new pauseHelpLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
     setSaveConfirmMenu: () ->
@@ -106,6 +107,13 @@ class pauseScene extends appScene
     removeTrophySelectmenu:()->
         @removeChild(@pause_trophy_select_layer)
         @pause_trophy_select_layer = null
+    helpDsp:(type)->
+        @pause_help_layer = new pauseHelpLayer()
+        @pause_help_layer.setHelp(type)
+        @addChild(@pause_help_layer)
+    helpEnd:()->
+        @removeChild(@pause_help_layer)
+        @pause_help_layer = null
     onenterframe: (e) ->
         @_pauseKeyPush()
     ###
@@ -115,7 +123,11 @@ class pauseScene extends appScene
         if game.input.x is true || @buttonList.pause is true
             if @keyList.pause is false
                 game.popPauseScene()
-                game.setLoadScene()
+                if game.past_fever_num is 1 and game.fever is false and game.kaisetu_watched is 0
+                    game.kaisetu_watched = true
+                    game.setKaisetuScene()
+                else
+                    game.setLoadScene()
                 @_pauseEndRun()
                 @keyList.pause = true
         else

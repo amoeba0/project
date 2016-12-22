@@ -16,7 +16,7 @@ class gpBackPanorama extends gpPanorama
     setBackEffect:()->
         if game.fever is false && @now_back_effect_flg is false
             random = Math.floor(Math.random() * @back_effect_rate)
-            if random is 1
+            if random is 2
                 @_setBigKotori()
     ###
     進撃のことりを設置

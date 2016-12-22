@@ -457,6 +457,66 @@ class appSprite extends Sprite
         @context.stroke()
         return @surface
 
+class pauseHelpLayer extends appDomLayer
+    constructor: () ->
+        super
+        @dialog = new menuDialogHtml()
+        @close_button = new helpDialogCloseButton()
+        @addChild(@modal)
+        @addChild(@dialog)
+        @addChild(@close_button)
+        @type = 0
+        @nowPage = 0
+        @txts = {
+            0:{
+                'title':'test'
+                'text' :[
+                    'test'
+                ]
+            },
+            1:{
+                'title':'たいとる'
+                'text' :[
+                    'ないよう'
+                ]
+            },
+            2:{
+                'title':'たいとるに'
+                'text' :[
+                    'ふがふが',
+                    'ほげほげ'
+                ]
+            }
+        }
+    setHelp:(type)->
+        @type = type
+        @text = new helpDiscription(@txts[type]['text'][0])
+        @title = new helpTitle(@txts[type]['title'])
+        @addChild(@text)
+        @addChild(@title)
+        @ok_btn = new helpOkButtonHtml()
+        @next_btn = new helpNextButtonHtml()
+        if @txts[type]['text'].length is 1
+            @addChild(@ok_btn)
+        else
+            @addChild(@next_btn)
+            page = @setPageText()
+            @page_num = new pageNum(page)
+            @addChild(@page_num)
+    goNext:()->
+        @nowPage++
+        @text.setText(@txts[@type]['text'][@nowPage])
+        page = @setPageText()
+        @page_num.setText(page)
+        if @txts[@type]['text'].length - 1 <= @nowPage
+            @removeChild(@next_btn)
+            @addChild(@ok_btn)
+    setPageText:()->
+        page = @nowPage + 1
+        all = @txts[@type]['text'].length
+        return page + '／' + all + 'ページ'
+
+
 class pauseItemBuyLayer extends appDomLayer
     constructor: () ->
         super
@@ -482,6 +542,8 @@ class pauseItemBuyLayer extends appDomLayer
         @addChild(@member_title)
         @trophy_title = new trophyItemBuyDiscription()
         @addChild(@trophy_title)
+        @skill_help_btn = new helpButtonHtml(2, 50, 80)
+        @addChild(@skill_help_btn)
     setItemList:()->
         for item_key, item_val of @item_list
             @addChild(item_val)
@@ -580,12 +642,17 @@ class pauseItemBuySelectLayer extends appDomLayer
         game.money -= @item_options.price
         game.pause_scene.pause_main_layer.statusDsp()
         game.item_have_now.push(@item_kind)
+        if 11 <= @item_kind && @item_kind <= 19
+            game.slot_setting.setMemberItemPrice()
         game.pause_scene.removeItemBuySelectMenu()
         game.pause_scene.pause_item_buy_layer.resetItemList()
         game.main_scene.gp_system.money_text.setValue()
         if 21 <= @item_kind
-            game.pause_scene.pause_record_layer.resetTrophyList()
-            game.now_speed = game.speedItemHave()
+            switch @item_kind
+                when 21 then game.start2ndStory()
+                when 22 then game.start3rdStory()
+                when 23 then game.start4thStory()
+                when 24 then game.startEdStory()
 
 class pauseItemUseLayer extends appDomLayer
     constructor: () ->
@@ -895,6 +962,8 @@ class pauseMemberUseSelectLayer extends appDomLayer
             if (game.max_set_member_num <= game.member_set_now.length)
                 game.member_set_now.shift()
             game.member_set_now.push(kind)
+            if game.slot_setting.now_muse_num is kind
+                game.slot_setting.now_muse_num = 0
         else
             game.member_set_now = game.arrayValueDel(game.member_set_now, kind)
 class pauseRecordLayer extends appDomLayer
@@ -1070,6 +1139,10 @@ class titleMainLayer extends appDomLayer
         @addChild(@new_game_button)
         @story_button = new story1stButtonHtml()
         @addChild(@story_button)
+        @title = new titleLogo()
+        @addChild(@title)
+        @discription = new titleDiscription()
+        @addChild(@discription)
 
 class catchAndSlotGame extends appGame
     constructor:(w, h)->
@@ -1091,7 +1164,7 @@ class LoveliveGame extends catchAndSlotGame
         @fps = 24
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
-                    'heart', 'explosion', 'items', 'coin_pla']
+                    'heart', 'explosion', 'items', 'coin_pla', 'title', 'discription']
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm_maid']
 
@@ -1132,6 +1205,7 @@ class LoveliveGame extends catchAndSlotGame
         @now_speed = 1 #現在の移動速度とジャンプ力
         @auto_bet = 1 #自動的に掛け金を上げる
         @retry = false #リトライ中
+        @kaisetu_watched = false #画面説明を見た
 
         @init_load_val = {
             'money':100,
@@ -1152,6 +1226,7 @@ class LoveliveGame extends catchAndSlotGame
             'prev_item':[],
             'auto_bet':1,
             'retry':0,
+            'kaisetu_watched':0,
             'left_lille':@arrayCopy(@slot_setting.lille_array_0[0]),
             'middle_lille':@arrayCopy(@slot_setting.lille_array_0[1]),
             'right_lille':@arrayCopy(@slot_setting.lille_array_0[2])
@@ -1386,20 +1461,13 @@ class LoveliveGame extends catchAndSlotGame
     設定された部員は自動的に空にする
     ###
     autoMemberSetBeforeFever:()->
-        if @arrIndexOf(@prev_fever_muse, [11,12,13,14,15,16,17,18,19])
-            @member_set_now = []
-            @next_auto_set_member = @slot_setting.getRoleAbleMemberList()
-            @musePreLoadMulti(@next_auto_set_member)
-            #@pause_scene.pause_member_set_layer.dispSetMemberList()
-
-    ###
-    フィーバー終了直後にあらかじめロードしておいた次の部員を自動的に設定
-    手動で設定された部員がいない時のみ実行
-    ###
-    autoMemberSetAfeterFever:()->
-        if @next_auto_set_member.length != 0 && @member_set_now.length is 0
-            @member_set_now = @next_auto_set_member
-            #@pause_scene.pause_member_set_layer.dispSetMemberList()
+        @member_set_now = []
+        @member_set_now = @slot_setting.getRoleAbleMemberList()
+        if @member_set_now.length is 0
+            @slot_setting.setMuseMember()
+        else
+            @slot_setting.now_muse_num = 0
+        @musePreLoadMulti(@member_set_now)
 
     ###
     アイテムを取った時にテンションゲージを増減する
@@ -1471,6 +1539,14 @@ class LoveliveGame extends catchAndSlotGame
         else
             @_restartFeverBgm()
 
+    setKaisetuScene:()->
+        @kaisetu_scene = new kaisetuScene()
+        @pushScene(@kaisetu_scene)
+
+    popKaisetuScene:()->
+        @popScene(@kaisetu_scene)
+        @setLoadScene()
+
     #フィーバー中なら覚えたBGMの曲と位置から再開
     _restartFeverBgm:()->
         @bgmPlay(@now_play_fever_bgm)
@@ -1531,6 +1607,7 @@ class LoveliveGame extends catchAndSlotGame
     ###
     _pushStory:()->
         @story_scene = new stolyScene()
+        @story_pause_scene = new storyPauseScene()
         @pushScene(@story_scene)
 
     ###
@@ -1539,6 +1616,17 @@ class LoveliveGame extends catchAndSlotGame
     endStory:()->
         @story_scene.bgmStop()
         @popScene(@story_scene)
+
+    ###
+    ストーリー一時停止
+    ###
+    storyPause:()->
+        @pushScene(@story_pause_scene)
+        @nowPlayBgmPause()
+
+    storyPauseEnd:()->
+        @popScene(@story_pause_scene)
+        @nowPlayBgmRestart()
 
     ###
     ゲームをロードする
@@ -1577,7 +1665,8 @@ class LoveliveGame extends catchAndSlotGame
             'max_set_item_num':0,
             'prev_item':'[]',
             'auto_bet':0,
-            'retry':0
+            'retry':0,
+            'kaisetu_watched':0
         }
         ret = null
         if data[key] is undefined
@@ -1612,7 +1701,8 @@ class LoveliveGame extends catchAndSlotGame
             'prev_item':JSON.stringify(@prev_item),
             'now_speed': @now_speed,
             'auto_bet':@auto_bet,
-            'retry':@retry
+            'retry':@retry,
+            'kaisetu_watched':@kaisetu_watched
         }
         for key, val of saveData
             @local_storage.setItem(key, val)
@@ -1644,6 +1734,7 @@ class LoveliveGame extends catchAndSlotGame
             @now_speed = @_loadStorage('now_speed', 'num')
             @auto_bet = @_loadStorage('auto_bet', 'num')
             @retry = @_loadStorage('retry', 'num')
+            @kaisetu_watched = @_loadStorage('kaisetu_watched', 'num')
     ###
     ローカルストレージから指定のキーの値を取り出して返す
     @param string key ロードするデータのキー
@@ -1703,6 +1794,7 @@ class LoveliveGame extends catchAndSlotGame
         @now_speed = @_loadGameFixUnit(data, 'now_speed')
         @auto_bet = @_loadGameFixUnit(data, 'auto_bet')
         @retry = @_loadGameFixUnit(data, 'retry')
+        @kaisetu_watched = @_loadGameFixUnit(data, 'kaisetu_watched')
 
     _loadGameFixUnit:(data, key)->
         if data[key] != undefined
@@ -1716,9 +1808,11 @@ class LoveliveGame extends catchAndSlotGame
     ###
     _gameInitSetting:()->
         #一人目のμ’ｓメンバーを決めて素材をロードする
-        if @slot_setting.now_muse_num is 0
-            @slot_setting.setMuseMember()
-        @musePreLoad()
+        #if @slot_setting.now_muse_num is 0
+        #    @slot_setting.setMuseMember()
+        if @member_set_now.length is 0
+            @autoMemberSetBeforeFever()
+        #@musePreLoad()
         sys = @main_scene.gp_system
         sys.money_text.setValue()
         sys.bet_text.setValue()
@@ -1806,6 +1900,26 @@ class gpLoadStory extends appGroup
         @addChild(@modal)
         @arc = new storyLoadArc()
         @addChild(@arc)
+
+class gpKaisetu extends appGroup
+    constructor:()->
+        super
+        @modal = new blackBack()
+        @modal.opacity = 0.5
+        @addChild(@modal)
+        @kaisetu = new gamenKaisetu()
+        @addChild(@kaisetu)
+        @okBtn = new kaisetuOkButton()
+        @addChild(@okBtn)
+        @xBtn = new kaisetuXButton()
+        @addChild(@xBtn)
+
+class gpStoryPause extends appGroup
+    constructor:()->
+        super
+        @modal = new blackBack()
+        @modal.opacity = 0.5
+        @addChild(@modal)
 class gpPanorama extends appGroup
     constructor:()->
         super
@@ -1824,7 +1938,7 @@ class gpBackPanorama extends gpPanorama
     setBackEffect:()->
         if game.fever is false && @now_back_effect_flg is false
             random = Math.floor(Math.random() * @back_effect_rate)
-            if random is 1
+            if random is 2
                 @_setBigKotori()
     ###
     進撃のことりを設置
@@ -2029,20 +2143,20 @@ class gpSlot extends appGroup
                     game.prev_fever_muse.push(@hit_role)
                     #game.pause_scene.pause_record_layer.resetRecordList()
                     game.pause_scene.pause_main_layer.save_game_button.makeDisable()
-                    game.slot_setting.setMemberItemPrice()
+                    #game.slot_setting.setMemberItemPrice()
                     game.tensionSetValue(game.slot_setting.tension_max)
                     game.fever = true
                     game.past_fever_num += 1
 
-                    game.slot_setting.setMuseMember()
+                    #game.slot_setting.setMuseMember()
+                    game.autoMemberSetBeforeFever()
                     if game.isSumaho() is true
                         bgm = @_getFeverBgm(hit_eye)
                         bgm2 = @_getFeverBgm(game.slot_setting.now_muse_num)
                         game.spBeforeLoad([
                             'sounds/bgm/' + bgm['name'] + '.mp3', 'sounds/bgm/' + bgm2['name'] + '.mp3'
                         ])
-                    game.musePreLoad()
-                    game.autoMemberSetBeforeFever()
+                    #game.musePreLoad()
 
                     game.fever_hit_eye = hit_eye
                     game.main_scene.gp_system.changeBetChangeFlg(false)
@@ -2229,7 +2343,7 @@ class stageFront extends gpStage
         @itemFallFrm = 0 #アイテムを降らせる周期（フレーム）
         @catchItems = [] #キャッチアイテムのインスタンスを格納
         @nowCatchItemsNum = 0
-        @missItemFallSycle = 4 #ハズレアイテムを取る周期
+        @missItemFallSycle = 1 #ハズレアイテムを取る周期
         @missItemFallSycleNow = 0
         @catchMissItems = []
         @nowCatchMissItemsNum = 0
@@ -2334,7 +2448,7 @@ class stageBack extends gpStage
     constructor: () ->
         super
         @prizeMoneyItemsInstance = [] #スロット当選金のインスタンスを格納
-        @prizeMoneyItemsNum = {1:0,10:0,100:0,1000:0,10000:0,100000:0,1000000:0,10000000:0,100000000:0,1000000000:0,10000000000:0,100000000000:0} #当選金を降らせる各コイン数の内訳
+        @prizeMoneyItemsNum = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0,13:0,14:0,15:0} #当選金を降らせる各コイン数の内訳
         @nowPrizeMoneyItemsNum = 0
         @prizeMoneyFallIntervalFrm = 4 #スロットの当選金を降らせる間隔（フレーム）
         @prizeMoneyFallPeriodSec = 5 #スロットの当選金額が振っている時間（秒）
@@ -2342,7 +2456,7 @@ class stageBack extends gpStage
         @oneSetMoney = 1 #1フレームに設置するコインの数
 
         @returnMoneyItemsInstance = [] #掛け金の戻り分のインスタンスを格納
-        @returnMoneyItemsNum = {1:0,10:0,100:0,1000:0,10000:0,100000:0,1000000:0,10000000:0,100000000:0,1000000000:0,10000000000:0,100000000000:0} #掛け金の戻り分を降らせる各コイン数の内訳
+        @returnMoneyItemsNum = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0,13:0,14:0,15:0}#掛け金の戻り分を降らせる各コイン数の内訳
         @nowReturnMoneyItemsNum = 0
         @returnMoneyFallIntervalFrm = 4 #掛け金の戻り分を降らせる間隔（フレーム）
     onenterframe: () ->
@@ -2354,16 +2468,16 @@ class stageBack extends gpStage
     ###
     fallPrizeMoneyStart:(value) ->
         stage = game.main_scene.gp_stage_front
-        if value < 1000000000000
+        if value < 10000000000000000
             @prizeMoneyFallIntervalFrm = 4
-        else if value < 10000000000000
+        else if value < 100000000000000000
             @prizeMoneyFallIntervalFrm = 2
         else
             @prizeMoneyFallIntervalFrm = 1
         @prizeMoneyItemsNum = @_calcMoneyItemsNum(value, true)
         @prizeMoneyItemsInstance = @_setMoneyItemsInstance(@prizeMoneyItemsNum, true)
-        if @prizeMoneyItemsNum[100000000000] > 1000
-            @oneSetMoney = Math.floor(@prizeMoneyItemsNum[100000000000] / 1000)
+        if @prizeMoneyItemsNum[15] > 1000
+            @oneSetMoney = Math.floor(@prizeMoneyItemsNum[15] / 1000)
         @prizeMoneyFallPeriodSec = Math.ceil((@prizeMoneyItemsInstance.length / @oneSetMoney) * @prizeMoneyFallIntervalFrm / game.fps) + stage.itemFallSecInit
         if @prizeMoneyFallPeriodSec > stage.itemFallSecInit
             stage.setItemFallFrm(@prizeMoneyFallPeriodSec)
@@ -2389,163 +2503,279 @@ class stageBack extends gpStage
     @prize boolean true:当選金額
     ###
     _calcMoneyItemsNum:(value, prize)->
-        ret_data = {1:0,10:0,100:0,1000:0,10000:0,100000:0,1000000:0,10000000:0,100000000:0,1000000000:0,10000000000:0,100000000000:0}
+        ret_data = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0,13:0,14:0,15:0}
         if value <= 20 #全部1円
-            ret_data[1] = value
+            ret_data[0] = value
+            ret_data[1] = 0
+            ret_data[2] = 0
+            ret_data[3] = 0
+            ret_data[4] = 0
+            ret_data[5] = 0
+            ret_data[6] = 0
+            ret_data[7] = 0
+            ret_data[8] = 0
+            ret_data[9] = 0
             ret_data[10] = 0
-            ret_data[100] = 0
-            ret_data[1000] = 0
-            ret_data[10000] = 0
-            ret_data[100000] = 0
-            ret_data[1000000] = 0
-            ret_data[10000000] = 0
-            ret_data[100000000] = 0
-            ret_data[1000000000] = 0
-            ret_data[10000000000] = 0
-            ret_data[100000000000] = 0
+            ret_data[11] = 0
+            ret_data[12] = 0
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
         else if value < 100 #1円と10円と端数
-            ret_data[1] = game.getDigitNum(value, 1) + 10
-            ret_data[10] = game.getDigitNum(value, 2) - 1
-            ret_data[100] = 0
-            ret_data[1000] = 0
-            ret_data[10000] = 0
-            ret_data[100000] = 0
-            ret_data[1000000] = 0
-            ret_data[10000000] = 0
-            ret_data[100000000] = 0
-            ret_data[1000000000] = 0
-            ret_data[10000000000] = 0
-            ret_data[100000000000] = 0
+            ret_data[0] = game.getDigitNum(value, 1) + 10
+            ret_data[1] = game.getDigitNum(value, 2) - 1
+            ret_data[2] = 0
+            ret_data[3] = 0
+            ret_data[4] = 0
+            ret_data[5] = 0
+            ret_data[6] = 0
+            ret_data[7] = 0
+            ret_data[8] = 0
+            ret_data[9] = 0
+            ret_data[10] = 0
+            ret_data[11] = 0
+            ret_data[12] = 0
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
         else if value < 1000 #10円と100円と端数
-            ret_data[1] = game.getDigitNum(value, 1)
-            ret_data[10] = game.getDigitNum(value, 2) + 10
-            ret_data[100] = game.getDigitNum(value, 3) - 1
-            ret_data[1000] = 0
-            ret_data[10000] = 0
-            ret_data[100000] = 0
-            ret_data[1000000] = 0
-            ret_data[10000000] = 0
-            ret_data[100000000] = 0
-            ret_data[1000000000] = 0
-            ret_data[10000000000] = 0
-            ret_data[100000000000] = 0
+            ret_data[0] = game.getDigitNum(value, 1)
+            ret_data[1] = game.getDigitNum(value, 2) + 10
+            ret_data[2] = game.getDigitNum(value, 3) - 1
+            ret_data[3] = 0
+            ret_data[4] = 0
+            ret_data[5] = 0
+            ret_data[6] = 0
+            ret_data[7] = 0
+            ret_data[8] = 0
+            ret_data[9] = 0
+            ret_data[10] = 0
+            ret_data[11] = 0
+            ret_data[12] = 0
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
         else if value < 10000 #1000円と100円と端数
-            ret_data[1] = game.getDigitNum(value, 1)
-            ret_data[10] = game.getDigitNum(value, 2)
-            ret_data[100] = game.getDigitNum(value, 3) + 10
-            ret_data[1000] = game.getDigitNum(value, 4) - 1
-            ret_data[10000] = 0
-            ret_data[100000] = 0
-            ret_data[1000000] = 0
-            ret_data[10000000] = 0
-            ret_data[100000000] = 0
-            ret_data[1000000000] = 0
-            ret_data[10000000000] = 0
-            ret_data[100000000000] = 0
+            ret_data[0] = game.getDigitNum(value, 1)
+            ret_data[1] = game.getDigitNum(value, 2)
+            ret_data[2] = game.getDigitNum(value, 3) + 10
+            ret_data[3] = game.getDigitNum(value, 4) - 1
+            ret_data[4] = 0
+            ret_data[5] = 0
+            ret_data[6] = 0
+            ret_data[7] = 0
+            ret_data[8] = 0
+            ret_data[9] = 0
+            ret_data[10] = 0
+            ret_data[11] = 0
+            ret_data[12] = 0
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
         else if value < 100000
-            ret_data[1] = 0
-            ret_data[10] = game.getDigitNum(value, 2)
-            ret_data[100] = game.getDigitNum(value, 3)
-            ret_data[1000] = game.getDigitNum(value, 4) + 10
-            ret_data[10000] = game.getDigitNum(value, 5) - 1
-            ret_data[100000] = 0
-            ret_data[1000000] = 0
-            ret_data[10000000] = 0
-            ret_data[100000000] = 0
-            ret_data[1000000000] = 0
-            ret_data[10000000000] = 0
-            ret_data[100000000000] = 0
+            ret_data[0] = 0
+            ret_data[1] = game.getDigitNum(value, 2)
+            ret_data[2] = game.getDigitNum(value, 3)
+            ret_data[3] = game.getDigitNum(value, 4) + 10
+            ret_data[4] = game.getDigitNum(value, 5) - 1
+            ret_data[5] = 0
+            ret_data[6] = 0
+            ret_data[7] = 0
+            ret_data[8] = 0
+            ret_data[9] = 0
+            ret_data[10] = 0
+            ret_data[11] = 0
+            ret_data[12] = 0
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
         else if value < 1000000
+            ret_data[0] = 0
             ret_data[1] = 0
+            ret_data[2] = game.getDigitNum(value, 3)
+            ret_data[3] = game.getDigitNum(value, 4)
+            ret_data[4] = game.getDigitNum(value, 5) + 10
+            ret_data[5] = game.getDigitNum(value, 6) - 1
+            ret_data[6] = 0
+            ret_data[7] = 0
+            ret_data[8] = 0
+            ret_data[9] = 0
             ret_data[10] = 0
-            ret_data[100] = game.getDigitNum(value, 3)
-            ret_data[1000] = game.getDigitNum(value, 4)
-            ret_data[10000] = game.getDigitNum(value, 5) + 10
-            ret_data[100000] = game.getDigitNum(value, 6) - 1
-            ret_data[1000000] = 0
-            ret_data[10000000] = 0
-            ret_data[100000000] = 0
-            ret_data[1000000000] = 0
-            ret_data[10000000000] = 0
-            ret_data[100000000000] = 0
+            ret_data[11] = 0
+            ret_data[12] = 0
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
         else if value < 10000000
+            ret_data[0] = 0
             ret_data[1] = 0
+            ret_data[2] = 0
+            ret_data[3] = game.getDigitNum(value, 4)
+            ret_data[4] = game.getDigitNum(value, 5)
+            ret_data[5] = game.getDigitNum(value, 6) + 10
+            ret_data[6] = game.getDigitNum(value, 7) - 1
+            ret_data[7] = 0
+            ret_data[8] = 0
+            ret_data[9] = 0
             ret_data[10] = 0
-            ret_data[100] = 0
-            ret_data[1000] = game.getDigitNum(value, 4)
-            ret_data[10000] = game.getDigitNum(value, 5)
-            ret_data[100000] = game.getDigitNum(value, 6) + 10
-            ret_data[1000000] = game.getDigitNum(value, 7) - 1
-            ret_data[10000000] = 0
-            ret_data[100000000] = 0
-            ret_data[1000000000] = 0
-            ret_data[10000000000] = 0
-            ret_data[100000000000] = 0
+            ret_data[11] = 0
+            ret_data[12] = 0
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
         else if value < 100000000
+            ret_data[0] = 0
             ret_data[1] = 0
+            ret_data[2] = 0
+            ret_data[3] = 0
+            ret_data[4] = game.getDigitNum(value, 5)
+            ret_data[5] = game.getDigitNum(value, 6)
+            ret_data[6] = game.getDigitNum(value, 7) + 10
+            ret_data[7] = game.getDigitNum(value, 8) - 1
+            ret_data[8] = 0
+            ret_data[9] = 0
             ret_data[10] = 0
-            ret_data[100] = 0
-            ret_data[1000] = 0
-            ret_data[10000] = game.getDigitNum(value, 5)
-            ret_data[100000] = game.getDigitNum(value, 6)
-            ret_data[1000000] = game.getDigitNum(value, 7) + 10
-            ret_data[10000000] = game.getDigitNum(value, 8) - 1
-            ret_data[100000000] = 0
-            ret_data[1000000000] = 0
-            ret_data[10000000000] = 0
-            ret_data[100000000000] = 0
+            ret_data[11] = 0
+            ret_data[12] = 0
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
         else if value < 1000000000
+            ret_data[0] = 0
             ret_data[1] = 0
+            ret_data[2] = 0
+            ret_data[3] = 0
+            ret_data[4] = 0
+            ret_data[5] = game.getDigitNum(value, 6)
+            ret_data[6] = game.getDigitNum(value, 7)
+            ret_data[7] = game.getDigitNum(value, 8) + 10
+            ret_data[8] = game.getDigitNum(value, 9) - 1
+            ret_data[9] = 0
             ret_data[10] = 0
-            ret_data[100] = 0
-            ret_data[1000] = 0
-            ret_data[10000] = 0
-            ret_data[100000] = game.getDigitNum(value, 6)
-            ret_data[1000000] = game.getDigitNum(value, 7)
-            ret_data[10000000] = game.getDigitNum(value, 8) + 10
-            ret_data[100000000] = game.getDigitNum(value, 9) - 1
-            ret_data[1000000000] = 0
-            ret_data[10000000000] = 0
-            ret_data[100000000000] = 0
+            ret_data[11] = 0
+            ret_data[12] = 0
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
         else if value < 10000000000
+            ret_data[0] = 0
             ret_data[1] = 0
+            ret_data[2] = 0
+            ret_data[3] = 0
+            ret_data[4] = 0
+            ret_data[5] = 0
+            ret_data[6] = game.getDigitNum(value, 7)
+            ret_data[7] = game.getDigitNum(value, 8)
+            ret_data[8] = game.getDigitNum(value, 9) + 10
+            ret_data[9] = game.getDigitNum(value, 10) - 1
             ret_data[10] = 0
-            ret_data[100] = 0
-            ret_data[1000] = 0
-            ret_data[10000] = 0
-            ret_data[100000] = 0
-            ret_data[1000000] = game.getDigitNum(value, 7)
-            ret_data[10000000] = game.getDigitNum(value, 8)
-            ret_data[100000000] = game.getDigitNum(value, 9) + 10
-            ret_data[1000000000] = game.getDigitNum(value, 10) - 1
-            ret_data[10000000000] = 0
-            ret_data[100000000000] = 0
+            ret_data[11] = 0
+            ret_data[12] = 0
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
         else if value < 100000000000
+            ret_data[0] = 0
             ret_data[1] = 0
+            ret_data[2] = 0
+            ret_data[3] = 0
+            ret_data[4] = 0
+            ret_data[5] = 0
+            ret_data[6] = 0
+            ret_data[7] = game.getDigitNum(value, 8)
+            ret_data[8] = game.getDigitNum(value, 9)
+            ret_data[9] = game.getDigitNum(value, 10) + 10
+            ret_data[10] = game.getDigitNum(value, 11) - 1
+            ret_data[11] = 0
+            ret_data[12] = 0
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
+        else if value < 1000000000000
+            ret_data[0] = 0
+            ret_data[1] = 0
+            ret_data[2] = 0
+            ret_data[3] = 0
+            ret_data[4] = 0
+            ret_data[5] = 0
+            ret_data[6] = 0
+            ret_data[7] = 0
+            ret_data[8] = game.getDigitNum(value, 9)
+            ret_data[9] = game.getDigitNum(value, 10)
+            ret_data[10] = game.getDigitNum(value, 11) + 10
+            ret_data[11] = game.getDigitNum(value, 12) - 1
+            ret_data[12] = 0
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
+        else if value < 10000000000000
+            ret_data[0] = 0
+            ret_data[1] = 0
+            ret_data[2] = 0
+            ret_data[3] = 0
+            ret_data[4] = 0
+            ret_data[5] = 0
+            ret_data[6] = 0
+            ret_data[7] = 0
+            ret_data[8] = 0
+            ret_data[9] = game.getDigitNum(value, 10)
+            ret_data[10] = game.getDigitNum(value, 11)
+            ret_data[11] = game.getDigitNum(value, 12) + 10
+            ret_data[12] = game.getDigitNum(value, 13) - 1
+            ret_data[13] = 0
+            ret_data[14] = 0
+            ret_data[15] = 0
+        else if value < 100000000000000
+            ret_data[0] = 0
+            ret_data[1] = 0
+            ret_data[2] = 0
+            ret_data[3] = 0
+            ret_data[4] = 0
+            ret_data[5] = 0
+            ret_data[6] = 0
+            ret_data[7] = 0
+            ret_data[8] = 0
+            ret_data[9] = 0
+            ret_data[10] = game.getDigitNum(value, 11)
+            ret_data[11] = game.getDigitNum(value, 12)
+            ret_data[12] = game.getDigitNum(value, 13) + 10
+            ret_data[13] = game.getDigitNum(value, 14) - 1
+            ret_data[14] = 0
+            ret_data[15] = 0
+        else if value < 1000000000000000
+            ret_data[0] = 0
+            ret_data[1] = 0
+            ret_data[2] = 0
+            ret_data[3] = 0
+            ret_data[4] = 0
+            ret_data[5] = 0
+            ret_data[6] = 0
+            ret_data[7] = 0
+            ret_data[8] = 0
+            ret_data[9] = 0
             ret_data[10] = 0
-            ret_data[100] = 0
-            ret_data[1000] = 0
-            ret_data[10000] = 0
-            ret_data[100000] = 0
-            ret_data[1000000] = 0
-            ret_data[10000000] = game.getDigitNum(value, 8)
-            ret_data[100000000] = game.getDigitNum(value, 9)
-            ret_data[1000000000] = game.getDigitNum(value, 10) + 10
-            ret_data[10000000000] = game.getDigitNum(value, 11) - 1
-            ret_data[100000000000] = 0
+            ret_data[11] = game.getDigitNum(value, 12)
+            ret_data[12] = game.getDigitNum(value, 13)
+            ret_data[13] = game.getDigitNum(value, 14) + 10
+            ret_data[14] = game.getDigitNum(value, 15) - 1
+            ret_data[15] = 0
         else
+            ret_data[0] = 0
             ret_data[1] = 0
+            ret_data[2] = 0
+            ret_data[3] = 0
+            ret_data[4] = 0
+            ret_data[5] = 0
+            ret_data[6] = 0
+            ret_data[7] = 0
+            ret_data[8] = 0
+            ret_data[9] = 0
             ret_data[10] = 0
-            ret_data[100] = 0
-            ret_data[1000] = 0
-            ret_data[10000] = 0
-            ret_data[100000] = 0
-            ret_data[1000000] = 0
-            ret_data[10000000] = 0
-            ret_data[100000000] = game.getDigitNum(value, 9)
-            ret_data[1000000000] = game.getDigitNum(value, 10)
-            ret_data[10000000000] = game.getDigitNum(value, 11) + 10
-            ret_data[100000000000] = Math.floor(value/100000000000)
+            ret_data[11] = 0
+            ret_data[12] = game.getDigitNum(value, 13)
+            ret_data[13] = game.getDigitNum(value, 14)
+            ret_data[14] = game.getDigitNum(value, 15)
+            ret_data[15] = Math.floor(value/100000000000000)
         return ret_data
 
     ###
@@ -2556,42 +2786,54 @@ class stageBack extends gpStage
     ###
     _setMoneyItemsInstance:(itemsNum, isHoming)->
         ret_data = []
+        if itemsNum[0] > 0
+            for i in [1..itemsNum[0]]
+                ret_data.push(new OneMoney(isHoming))
         if itemsNum[1] > 0
             for i in [1..itemsNum[1]]
-                ret_data.push(new OneMoney(isHoming))
+                ret_data.push(new TenMoney(isHoming))
+        if itemsNum[2] > 0
+            for i in [1..itemsNum[2]]
+                ret_data.push(new HundredMoney(isHoming))
+        if itemsNum[3] > 0
+            for i in [1..itemsNum[3]]
+                ret_data.push(new ThousandMoney(isHoming))
+        if itemsNum[4] > 0
+            for i in [1..itemsNum[4]]
+                ret_data.push(new TenThousandMoney(isHoming))
+        if itemsNum[5] > 0
+            for i in [1..itemsNum[5]]
+                ret_data.push(new HundredThousandMoney(isHoming))
+        if itemsNum[6] > 0
+            for i in [1..itemsNum[6]]
+                ret_data.push(new OneMillionMoney(isHoming))
+        if itemsNum[7] > 0
+            for i in [1..itemsNum[7]]
+                ret_data.push(new TenMillionMoney(isHoming))
+        if itemsNum[8] > 0
+            for i in [1..itemsNum[8]]
+                ret_data.push(new OneHundredMillionMoney(isHoming))
+        if itemsNum[9] > 0
+            for i in [1..itemsNum[9]]
+                ret_data.push(new BillionMoney(isHoming))
         if itemsNum[10] > 0
             for i in [1..itemsNum[10]]
-                ret_data.push(new TenMoney(isHoming))
-        if itemsNum[100] > 0
-            for i in [1..itemsNum[100]]
-                ret_data.push(new HundredMoney(isHoming))
-        if itemsNum[1000] > 0
-            for i in [1..itemsNum[1000]]
-                ret_data.push(new ThousandMoney(isHoming))
-        if itemsNum[10000] > 0
-            for i in [1..itemsNum[10000]]
-                ret_data.push(new TenThousandMoney(isHoming))
-        if itemsNum[100000] > 0
-            for i in [1..itemsNum[100000]]
-                ret_data.push(new HundredThousandMoney(isHoming))
-        if itemsNum[1000000] > 0
-            for i in [1..itemsNum[1000000]]
-                ret_data.push(new OneMillionMoney(isHoming))
-        if itemsNum[10000000] > 0
-            for i in [1..itemsNum[10000000]]
-                ret_data.push(new TenMillionMoney(isHoming))
-        if itemsNum[100000000] > 0
-            for i in [1..itemsNum[100000000]]
-                ret_data.push(new OneHundredMillionMoney(isHoming))
-        if itemsNum[1000000000] > 0
-            for i in [1..itemsNum[1000000000]]
-                ret_data.push(new BillionMoney(isHoming))
-        if itemsNum[10000000000] > 0
-            for i in [1..itemsNum[10000000000]]
                 ret_data.push(new TenBillionMoney(isHoming))
-        if itemsNum[100000000000] > 0
-            for i in [1..itemsNum[100000000000]]
+        if itemsNum[11] > 0
+            for i in [1..itemsNum[11]]
                 ret_data.push(new OneHundredBillionMoney(isHoming))
+        if itemsNum[12] > 0
+            for i in [1..itemsNum[12]]
+                ret_data.push(new OneTrillionMoney(isHoming))
+        if itemsNum[13] > 0
+            for i in [1..itemsNum[13]]
+                ret_data.push(new TenTrillionMoney(isHoming))
+        if itemsNum[14] > 0
+            for i in [1..itemsNum[14]]
+                ret_data.push(new OneHundredTrillionMoney(isHoming))
+        if itemsNum[15] > 0
+            for i in [1..itemsNum[15]]
+                ret_data.push(new AThousandTrillionMoney(isHoming))
         return ret_data
 
     ###
@@ -2620,8 +2862,16 @@ class stageBack extends gpStage
             val = Math.floor(val / 1000000000) * 1000000000
         else if val < 100000000000
             val = Math.floor(val / 10000000000) * 10000000000
-        else
+        else if val < 1000000000000
             val = Math.floor(val / 100000000000) * 100000000000
+        else if val < 10000000000000
+            val = Math.floor(val / 1000000000000) * 1000000000000
+        else if val < 100000000000000
+            val = Math.floor(val / 10000000000000) * 10000000000000
+        else if val < 1000000000000000
+            val = Math.floor(val / 100000000000000) * 100000000000000
+        else
+            val = Math.floor(val / 1000000000000000) * 1000000000000000
         @returnMoneyItemsNum = @_calcMoneyItemsNum(val, false)
         @returnMoneyItemsInstance = @_setMoneyItemsInstance(@returnMoneyItemsNum, false)
         stage = game.main_scene.gp_stage_front
@@ -2645,8 +2895,12 @@ class gpStoryObject extends appGroup
         super
         @back_btn = new storyBackBtn(80, 40)
         @back_txt = new storyBackTxt(80, 40)
+        @pause_btn = new storyPauseBtn(140, 40)
+        @pause_txt = new storyPauseTxt(140, 40)
         @addChild(@back_btn)
         @addChild(@back_txt)
+        @addChild(@pause_btn)
+        @addChild(@pause_txt)
         @kotori = new kotoriFace()
         @honoka = new honokaFace()
         @umi    = new umiFace()
@@ -3104,6 +3358,27 @@ class trophyOkButtonHtml extends baseOkButtonHtml
     touchendEvent:() ->
         game.pause_scene.removeTrophySelectmenu()
 
+class helpOkButtonHtml extends baseOkButtonHtml
+    constructor:()->
+        super
+        @x = 170
+        @y = 500
+    touchendEvent:() ->
+        game.pause_scene.helpEnd()
+
+class helpNextButtonHtml extends buttonHtml
+    constructor:()->
+        super 150, 45
+        @x = 170
+        @y = 500
+        @class.push('base-buy-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
+        @text = '次へ'
+        @setHtml()
+    ontouchend: (e) ->
+        game.sePlay(@dicisionSe)
+        game.pause_scene.pause_help_layer.goNext()
 
 ###
 キャンセルボタン
@@ -3272,7 +3547,7 @@ class titleMenuButtonHtml extends buttonHtml
 class startGameButtonHtml extends titleMenuButtonHtml
     constructor: () ->
         super
-        @y = 610
+        @y = 630
         @text = '続きから'
         @setHtml()
     touchendEvent:() ->
@@ -3281,7 +3556,7 @@ class startGameButtonHtml extends titleMenuButtonHtml
 class newGameButtonHtml extends titleMenuButtonHtml
     constructor: () ->
         super
-        @y = 530
+        @y = 550
         @text = '初めから'
         @setHtml()
     touchendEvent:() ->
@@ -3290,7 +3565,7 @@ class newGameButtonHtml extends titleMenuButtonHtml
 class story1stButtonHtml extends titleMenuButtonHtml
     constructor: () ->
         super
-        @y = 450
+        @y = 470
         @text = '第1話'
         @setHtml()
     touchendEvent:() ->
@@ -3341,6 +3616,14 @@ class recordDialogCloseButton extends dialogCloseButton
         game.sePlay(@cancelSe)
         game.pause_scene.removeRecordMenu()
 
+class helpDialogCloseButton extends dialogCloseButton
+    constructor:()->
+        super
+        @y = 80
+    ontouchend: () ->
+        game.sePlay(@cancelSe)
+        game.pause_scene.helpEnd()
+
 ###
 部員のおすすめ編成
 ###
@@ -3352,11 +3635,13 @@ class autoMemberSetButtonHtml extends buttonHtml
         @class.push('osusume-button')
         if game.isSumaho()
             @class.push('base-ok-button-sp')
-        @text = 'おすすめ'
+        @text = 'おまかせ'
         @setHtml()
     ontouchend: (e) ->
         game.sePlay(@dicisionSe)
         game.member_set_now = game.slot_setting.getRoleAbleMemberList()
+        if game.member_set_now.indexOf(game.slot_setting.now_muse_num) != -1
+            game.slot_setting.now_muse_num = 0
         game.pause_scene.pause_member_set_layer.dispSetMemberList()
 
 ###
@@ -3418,6 +3703,19 @@ class endingButtonHtml extends storyButtonHtml
         @setHtml()
     ontouchend: (e) ->
         game.startEdStory()
+
+class helpButtonHtml extends buttonHtml
+    constructor:(type=0, x=0, y=0)->
+        super 70, 25
+        @type = type
+        @x = x
+        @y = y
+        @text = 'HELP'
+        @class.push('help-button')
+        @setHtml()
+    ontouchend:(e)->
+        game.sePlay(@dicisionSe)
+        game.pause_scene.helpDsp(@type)
 class dialogHtml extends systemHtml
     constructor: (width, height) ->
         super width, height
@@ -3659,6 +3957,66 @@ class memberSetDiscription extends longTitleDiscription
         @x = 120
         @y = 80
         @text = '部員を編成する'
+        @setHtml()
+
+class titleDiscription extends dialogHtml
+    constructor:()->
+        super game.width, 200
+        @x = 0
+        @y = 200
+        @sousa = '←→・・・横移動、　z・・・ジャンプ<br>
+            ↑↓・・・掛け金の変更、　x・・・メニュー画面'
+        @sp = ''
+        if game.isSumaho() is true
+            @sousa = '←→・・・横移動<br>
+                ● または 画面の中央何も無い所・・・ジャンプ<br>
+                ↑↓・・・掛け金の変更、　MENU・・・メニュー画面'
+            @sp = '-sp'
+        @text= '<div class="title-head'+@sp+'">・遊び方</div>
+            <div class="title-dsc'+@sp+'">
+                上からおやつが降ってくるのでキャッチして下さい。<br>
+                キャッチに成功するとスロットマシンが止まります。
+            </div>
+            <div class="title-head'+@sp+'">・操作方法</div>
+            <div class="title-dsc'+@sp+'">'+@sousa+'</div>'
+        @class.push('title-scene-discription')
+        @setHtml()
+
+class helpTitle extends dialogHtml
+    constructor:(txt)->
+        super 300, 50
+        @x = 70
+        @y = 130
+        @sp = ''
+        if game.isSumaho() is true then @sp = '-sp'
+        @class.push('help-title' + @sp)
+        @text = txt
+        @setHtml()
+
+class pageNum extends dialogHtml
+    constructor:(txt)->
+        super 100, 30
+        @x = 190
+        @y = 180
+        @sp = ''
+        if game.isSumaho() is true then @sp = '-sp'
+        @class.push('help-discription' + @sp)
+        @setText(txt)
+    setText:(txt)->
+        @text = txt
+        @setHtml()
+
+class helpDiscription extends dialogHtml
+    constructor:(txt)->
+        super 420, 460
+        @x = 70
+        @y = 220
+        @sp = ''
+        if game.isSumaho() is true then @sp = '-sp'
+        @class.push('help-discription' + @sp)
+        @setText(txt)
+    setText:(txt)->
+        @text = txt
         @setHtml()
 class formHtml extends systemHtml
     constructor: (width, height) ->
@@ -4013,13 +4371,45 @@ class tensionText extends text
 class storyBackTxt extends text
     constructor: (width, height) ->
         super
-        @text = '戻る'
+        @text = '終了'
         @color = 'black'
         @font = (height - 8) + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
         @x = game.width - width - 10 + 9
         @y = game.height - height - 50 + 2
     ontouchend: () ->
         game.endStory()
+
+class storyPauseTxt extends text
+    constructor: (width, height) ->
+        super
+        @text = '一時停止'
+        @color = 'black'
+        @font = (height - 8) + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = 12
+        @y = game.height - height - 50 + 2
+    ontouchend: () ->
+        game.storyPause()
+
+class storyPauseMsgTxt extends text
+    constructor:()->
+        super
+        @text = 'PAUSE'
+        @color = 'white'
+        @font = "86px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = Math.floor(game.width / 5) + 20
+        @y = Math.floor(game.height / 2) - 86
+
+class storyPauseEndTxt extends text
+    constructor:()->
+        super
+        @text = '再開'
+        @color = 'white'
+        @font = "54px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = Math.floor(game.width / 2) - 54
+        @y = Math.floor(game.height / 2) + 86
+    ontouchend:()->
+        game.storyPauseEnd()
+
 
 class storyMessage extends text
     constructor: (width, height) ->
@@ -4072,6 +4462,30 @@ class storyMessage extends text
         @nowSplited = 0
         @wait = 0
         @text = ""
+
+class kaisetuOkButton extends text
+    constructor:()->
+        super
+        @text = 'OK'
+        @color = 'white'
+        @font_size = 86
+        @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = 200
+        @y = 550
+    ontouchend:()->
+        game.popKaisetuScene()
+
+class kaisetuXButton extends text
+    constructor:()->
+        super
+        @text = '×'
+        @color = 'white'
+        @font_size = 52
+        @font = @font_size + "px 'Consolas', 'Monaco', 'ＭＳ ゴシック'"
+        @x = 430
+        @y = 0
+    ontouchend:()->
+        game.popKaisetuScene()
 ###
 デバッグ用設定
 ###
@@ -4094,26 +4508,27 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':987654321,
-            'bet':10000,
+            'money':100000000000000000,
+            'bet':1000000000000000,
             'combo':0,
             'max_combo':200,
             'tension':0,
-            'past_fever_num':0,
+            'past_fever_num':1,
             'item_point':500,
             'next_add_member_key':0,
-            'now_muse_num':0,
-            'max_set_item_num':4,
+            'now_muse_num':14,
+            'max_set_item_num':2,
             'now_speed':1,
-            'item_have_now':[3,4,5,11,12,13,14,15,16,17,18,19,21,22,23,24],
-            'item_set_now':[1,2,3],
-            'member_set_now':[11,12,13],
-            'prev_fever_muse':[11,12,13,14,15,16,17,18,19],
+            'item_have_now':[],
+            'item_set_now':[],
+            'member_set_now':[],
+            'prev_fever_muse':[],
             'prev_item':[],
             'left_lille':[],
             'middle_lille':[],
             'right_lille':[],
-            'retry':0
+            'retry':0,
+            'kaisetu_watched':0
         }
 
         #デバッグ用リールにすりかえる
@@ -4172,6 +4587,15 @@ class Debug extends appNode
 
         if @force_pause_flg is true
             @force_main_flg = true
+class gameCycle extends appNode
+    constructor: () ->
+        super
+class objectCtrl extends appNode
+    constructor: () ->
+        super
+class slotCtrl extends appNode
+    constructor: () ->
+        super
 ###
 スロットのリールの並びや掛け金に対する当選額
 テンションによるリールの変化確率など
@@ -4202,9 +4626,11 @@ class slotSetting extends appNode
             11:35, 12:35, 13:35, 14:35, 15:35, 16:35, 17:35, 18:35, 19:35
         }
         @allRoles = {
+            11:[11],12:[12],13:[13],14:[14],15:[15],16:[16],17:[17],18:[18],19:[19],
             21:[14,15,16], 22:[11,12,13], 23:[17,18,19], 24:[11,12,16], 25:[13,15,18], 26:[14,17,19], 27:[15,16,17], 28:[13,14,19],
-            31:[11,15], 32:[12,16], 33:[17,18], 34:[12,13], 35:[14,15], 36:[18,19], 37:[14,17], 38:[13,19]
+            31:[11,15], 32:[12,16], 33:[17,18], 34:[12,13], 35:[14,15], 36:[18,19], 37:[14,17], 38:[13,19],
         }
+        @allRolesKey = [21,22,23,24,25,26,27,28,31,32,33,34,35,36,37,38,11,12,13,14,15,16,17,18,19]
         ###
         カットインやフィーバー時の音楽などに使うμ’ｓの素材リスト
         11:高坂穂乃果、12:南ことり、13：園田海未、14：西木野真姫、15：星空凛、16：小泉花陽、17：矢澤にこ、18：東條希、19：絢瀬絵里
@@ -4341,12 +4767,12 @@ class slotSetting extends appNode
             },
             25:{
                 'bgm':[
-                    {'name':'anone_ganbare', 'time':102, 'title':'あ・の・ね・が・ん・ば・れ', 'unit':'lily white<br>(園田海未、星空凛、東條希)', 'image':'bgm_25'}
+                    {'name':'hutari_hapinesu', 'time':160, 'title':'ふたりハピネス', 'unit':'lily white<br>(園田海未、星空凛、東條希)', 'image':'bgm_25'}
                 ]
             },
             26:{
                 'bgm':[
-                    {'name':'love_novels', 'time':100, 'title':'ラブノベルス', 'unit':'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)', 'image':'bgm_26'}
+                    {'name':'cutie_panther', 'time':122, 'title':'CutiePanther', 'unit':'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)', 'image':'bgm_26'}
                 ]
             },
             27:{
@@ -4470,7 +4896,7 @@ class slotSetting extends appNode
             6:{
                 'name':'完っ全にフルハウスね',
                 'image':'item_6',
-                'discription':'3回に1回の確率で<br>CHANCE!!状態になる',
+                'discription':'CHANCE!!状態になる確率が<br>2倍になる（最大で30％）',
                 'price':20000000,
                 'durationSec':90,
                 'conditoin':'',
@@ -4500,7 +4926,7 @@ class slotSetting extends appNode
             9:{
                 'name':'ファイトだよっ',
                 'image':'item_9',
-                'discription':'CHANCE!!でスロットが揃う時に<br>3回に1回の確率でFEVER!!が出る',
+                'discription':'CHANCE!!でスロットが揃う時に<br>FEVER!!が出る確率が2倍になる<br>（最大で20％）',
                 'price':10000000000,
                 'durationSec':90,
                 'conditoin':'',
@@ -4513,7 +4939,7 @@ class slotSetting extends appNode
                 'image':'item_11',
                 'discription':'スロットに穂乃果が挿入されるようになる。',
                 'price':0,
-                'conditoin':'穂乃果でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(11)
             },
@@ -4522,7 +4948,7 @@ class slotSetting extends appNode
                 'image':'item_12',
                 'discription':'スロットにことりが挿入されるようになる。',
                 'price':0,
-                'conditoin':'ことりでスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(12)
             },
@@ -4531,7 +4957,7 @@ class slotSetting extends appNode
                 'image':'item_13',
                 'discription':'スロットに海未が挿入されるようになる。',
                 'price':0,
-                'conditoin':'海未でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(13)
             },
@@ -4540,7 +4966,7 @@ class slotSetting extends appNode
                 'image':'item_14',
                 'discription':'スロットに真姫が挿入されるようになる。',
                 'price':0,
-                'conditoin':'真姫でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(14)
             },
@@ -4549,7 +4975,7 @@ class slotSetting extends appNode
                 'image':'item_15',
                 'discription':'スロットに凛が挿入されるようになる。',
                 'price':0,
-                'conditoin':'凛でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(15)
             },
@@ -4558,7 +4984,7 @@ class slotSetting extends appNode
                 'image':'item_16',
                 'discription':'スロットに花陽が挿入されるようになる。',
                 'price':0,
-                'conditoin':'花陽でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(16)
             },
@@ -4567,7 +4993,7 @@ class slotSetting extends appNode
                 'image':'item_17',
                 'discription':'スロットににこが挿入されるようになる。',
                 'price':0,
-                'conditoin':'にこでスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(17)
             },
@@ -4576,7 +5002,7 @@ class slotSetting extends appNode
                 'image':'item_18',
                 'discription':'スロットに希が挿入されるようになる。',
                 'price':0,
-                'conditoin':'希でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(18)
             },
@@ -4585,7 +5011,7 @@ class slotSetting extends appNode
                 'image':'item_19',
                 'discription':'スロットに絵里が挿入されるようになる。',
                 'price':0,
-                'conditoin':'絵里でスロットを3つ揃える',
+                'conditoin':'',
                 'condFunc':()->
                     return game.slot_setting.itemConditinon(19)
             },
@@ -4659,7 +5085,7 @@ class slotSetting extends appNode
         @prev_osusume_role = 0
 
         #セーブする変数
-        @prev_muse = [] #過去にスロットに入ったμ’ｓ番号(TODO 使ってない？不要か検証してから消す)
+        #@prev_muse = [] #過去にスロットに入ったμ’ｓ番号(TODO 使ってない？不要か検証してから消す)
         @now_muse_num = 0 #現在ランダムに選択されてスロットに入るμ’ｓ番号
 
     setItemPointValue:()->
@@ -4694,22 +5120,22 @@ class slotSetting extends appNode
     setGravity:()->
         if game.bet < 10
             val = 0.35
-            @prize_div = 1
+            @prize_div = 2
         else if game.bet < 50
             val = 0.40
-            @prize_div = 1
+            @prize_div = 1.9
         else if game.bet < 100
             val = 0.44
-            @prize_div = 1
+            @prize_div = 1.8
         else if game.bet < 500
             val = 0.48
-            @prize_div = 1
+            @prize_div = 1.6
         else if game.bet < 1000
             val = 0.5
-            @prize_div = 1
+            @prize_div = 1.4
         else if game.bet < 5000
             val = 0.53
-            @prize_div = 1
+            @prize_div = 1.2
         else if game.bet < 10000 #1万
             val = 0.55
             @prize_div = 1
@@ -4754,15 +5180,33 @@ class slotSetting extends appNode
             @prize_div = 0.5
         else if game.bet < 100000000000
             val = 1.8
-            @prize_div = 0.4
+            @prize_div = 0.5
         else if game.bet < 500000000000
             val = 2
-            @prize_div = 0.3
+            @prize_div = 0.4
         else if game.bet < 1000000000000 #1兆
-            val = 2.5
-            @prize_div = 0.2
-        else
+            val = 2.2
+            @prize_div = 0.4
+        else if game.bet < 5000000000000
+            val = 2.6
+            @prize_div = 0.3
+        else if game.bet < 10000000000000
             val = 3
+            @prize_div = 0.3
+        else if game.bet < 50000000000000
+            val = 3.4
+            @prize_div = 0.2
+        else if game.bet < 100000000000000 #100兆
+            val = 3.8
+            @prize_div = 0.2
+        else if game.bet < 500000000000000
+            val = 4.2
+            @prize_div = 0.1
+        else if game.bet < 1000000000000000
+            val = 4.6
+            @prize_div = 0.1
+        else
+            val = 5
             @prize_div = 0.1
         div = 1
         val = Math.floor(val * div * 100) / 100
@@ -4792,9 +5236,9 @@ class slotSetting extends appNode
         result = false
         length = game.member_set_now.length
         rate = 40
-        if length is 2
+        if length is 2 || game.past_fever_num is 1
             rate = 60
-        else if 3 <= length
+        if 3 <= length || game.past_fever_num is 0
             rate = 80
         random = Math.floor(Math.random() * 100)
         if random < rate
@@ -4812,6 +5256,7 @@ class slotSetting extends appNode
     setMuseMember:(force)->
         full = [11,12,13,14,15,16,17,18,19]
         remain = []
+        member = 0
         if game.arrIndexOf(game.prev_fever_muse, full)
             @now_muse_num = 0
         else
@@ -4821,9 +5266,6 @@ class slotSetting extends appNode
             random = Math.floor(Math.random() * remain.length)
             member = remain[random]
             @now_muse_num = member
-            if @prev_muse.indexOf(member) is -1
-                @prev_muse.push(member)
-        #game.pause_scene.pause_member_set_layer.dispSetMemberList()
 
 
     ###
@@ -4837,7 +5279,7 @@ class slotSetting extends appNode
     スロットを強制的に当たりにするかどうかを決める
     コンボ数 * 0.1 ％
     テンションMAXで+20補正
-    過去のフィーバー回数が少ないほど上方補正かける 0回:+9,1回:+6,2回:+3
+    過去のフィーバー回数が少ないほど上方補正かける 0回:+12,1回:+8,2回:+4
     最大値は30％
     フィーバー中は強制的に当たり
     @return boolean true:当たり
@@ -4846,8 +5288,10 @@ class slotSetting extends appNode
         result = false
         rate = Math.floor((game.combo * 0.1) + ((game.tension / @tension_max) * 20))
         if game.past_fever_num <= 2
-            rate += ((3 - game.past_fever_num)) * 3
-        if rate > 30 || game.isItemSet(6) || game.main_scene.gp_back_panorama.now_back_effect_flg is true
+            rate += ((3 - game.past_fever_num)) * 4
+        if game.isItemSet(6)
+            rate *= 2
+        if rate > 30 || game.main_scene.gp_back_panorama.now_back_effect_flg is true
             rate = 30
         if game.debug.half_slot_hit is true
             rate = 50
@@ -4879,8 +5323,10 @@ class slotSetting extends appNode
             if div < 1
                 div = 1
             ret_money = Math.floor(ret_money / div)
+        else
+            ret_money = Math.floor(ret_money / 2)
         if game.main_scene.gp_back_panorama.now_back_effect_flg is true
-            ret_money *= 3
+            ret_money *= 2
         if ret_money > 100000000000000
             ret_money = 100000000000000
         return ret_money
@@ -5057,7 +5503,8 @@ class slotSetting extends appNode
         else
             fixTime = 1
             randomTime = 15
-        fixTime += Math.floor((1 - @item_gravity) * 10) / 10
+        if @item_gravity < 1
+            fixTime += Math.floor((1 - @item_gravity) * 10) / 10
         ret = fixTime + Math.floor(Math.random() * randomTime) / 10
         return ret
     ###
@@ -5103,8 +5550,7 @@ class slotSetting extends appNode
         if num < 10
             rslt = true
         else if num < 20
-            if game.prev_fever_muse.indexOf(parseInt(num)) != -1
-                rslt = true
+            rslt = true
         else if num is 21
             if 50 <= game.max_combo
                 rslt = true
@@ -5124,12 +5570,15 @@ class slotSetting extends appNode
     ###
     setMemberItemPrice:()->
         cnt = 0
-        list = game.getDeduplicationList(game.prev_fever_muse)
-        for key, val of list
-            if 11 <= val && val <= 19
-                if 0 == @item_list[val].price
-                    @item_list[val].price = @member_item_price[cnt]
-                cnt++
+        if 0 < game.item_have_now.length
+            have_muse = []
+            for key, val of game.item_have_now
+                if 11 <= val && val <= 19
+                    have_muse.push(val)
+            cnt = have_muse.length
+        for val in [11..19]
+            @item_list[val].price = @member_item_price[cnt]
+
     ###
     現在セットされているメンバーから次にスロットに挿入するμ’ｓメンバーを決めて返します
     ###
@@ -5160,11 +5609,8 @@ class slotSetting extends appNode
     ###
     isForceFever:()->
         tension_rate = Math.floor((game.tension * 100)/ @tension_max)
-        if game.isItemSet(9)
-            if game.past_fever_num <= 3
-                rate = 30
-        else if tension_rate is 100
-                rate = 20
+        if tension_rate is 100
+            rate = 20
         else if 85 <= tension_rate
             if game.past_fever_num <= 3
                 rate = 16
@@ -5185,6 +5631,10 @@ class slotSetting extends appNode
                 rate = 5
         else
             rate = 2
+        if game.isItemSet(9)
+            rate *= 2
+        if 20 < rate
+            rate = 20
         result = false
         random = Math.floor(Math.random() * 100)
         if game.debug.force_fever is true || random <= rate
@@ -5226,10 +5676,8 @@ class slotSetting extends appNode
     setForceFeverRole:(left_lille)->
         role = []
         roles = []
-        for key, val of left_lille
-            if val > 10 && game.prev_fever_muse.indexOf(parseInt(val)) is -1
-                roles.push([val])
-        for roleNum, member of @allRoles
+        for i, roleNum of @allRolesKey
+            member = @allRoles[roleNum]
             if game.arrIndexOf(left_lille, member) && game.prev_fever_muse.indexOf(parseInt(roleNum)) is -1
                 roles.push(member)
         if roles[0] != undefined
@@ -5272,12 +5720,18 @@ class slotSetting extends appNode
                 val = 100000000
             else if bet < 10000000000
                 val = 1000000000
-            else if bet < 10000000000
-                val = 1000000000
-            else if bet < 10000000000
-                val = 1000000000
-            else
+            else if bet < 100000000000
                 val = 10000000000
+            else if bet < 1000000000000
+                val = 100000000000
+            else if bet < 10000000000000
+                val = 1000000000000
+            else if bet < 100000000000000
+                val = 10000000000000
+            else if bet < 1000000000000000
+                val = 100000000000000
+            else
+                val = 1000000000000000
         else
             if bet <= 10
                 val = -1
@@ -5303,15 +5757,21 @@ class slotSetting extends appNode
                 val = -10000000000
             else if bet <= 1000000000000
                 val = -100000000000
-            else
+            else if bet <= 10000000000000
                 val = -1000000000000
+            else if bet <= 100000000000000
+                val = -10000000000000
+            else if bet <= 1000000000000000
+                val = -100000000000000
+            else
+                val = -1000000000000000
         game.bet += val
         if game.bet < 1
             game.bet = 1
         else if game.bet > game.money
             game.bet -= val
-        else if game.bet > 100000000000
-            game.bet = 100000000000
+        else if game.bet > 1000000000000000
+            game.bet = 1000000000000000
         if up is false and game.auto_bet is 1 and game.bet < Math.floor(game.money / 100)
             game.auto_bet = 0
 
@@ -5336,8 +5796,8 @@ class slotSetting extends appNode
             if game.bet < tmp_bet
                 digit = Math.pow(10, (String(tmp_bet).length - 1))
                 game.bet = Math.floor(tmp_bet / digit) * digit
-                if game.bet > 100000000000
-                    game.bet = 100000000000
+                if game.bet > 1000000000000000
+                    game.bet = 1000000000000000
                 game.main_scene.gp_system.bet_text.setValue()
 ###
 テストコード用
@@ -5370,7 +5830,10 @@ class Test extends appNode
         #@appload()
         #@multiload()
         #@isAddMuse()
-        @manySoundLoad()
+        #@manySoundLoad()
+        #@setMemberItemPrice()
+        #@autoMemberSetBeforeFever()
+        @getIsForceSlotHit()
 
     #以下、テスト用関数
 
@@ -5527,6 +5990,22 @@ class Test extends appNode
         game.appLoad('sounds/bgm/anone_ganbare.mp3')
         window.setTimeout(console.log(game.loadedFile), 5000)
 
+    setMemberItemPrice:()->
+        game.slot_setting.setMemberItemPrice()
+        console.log(game.slot_setting.item_list)
+
+    autoMemberSetBeforeFever:()->
+        for i in [1..30]
+            game.autoMemberSetBeforeFever()
+            console.log('member_set_now')
+            console.log(game.member_set_now)
+            console.log('prev_fever_muse')
+            console.log(game.prev_fever_muse)
+
+    getIsForceSlotHit:()->
+        game.slot_setting.getIsForceSlotHit()
+        game.slot_setting.isForceFever()
+
 
 class loadScene extends appScene
     constructor: () ->
@@ -5537,6 +6016,22 @@ class loadScene extends appScene
     onenterframe: (e) ->
         if @wait < @age
             game.popLoadScene()
+
+class kaisetuScene extends appScene
+    constructor:()->
+        super
+        @gp_kaisetu = new gpKaisetu()
+        @addChild(@gp_kaisetu)
+
+class storyPauseScene extends appScene
+    constructor:()->
+        super
+        @gp_story_pause = new gpStoryPause()
+        @msg = new storyPauseMsgTxt()
+        @restart = new storyPauseEndTxt()
+        @addChild(@gp_story_pause)
+        @addChild(@msg)
+        @addChild(@restart)
 class mainScene extends appScene
     constructor:()->
         super
@@ -5651,7 +6146,6 @@ class mainScene extends appScene
             if @gp_stage_front.notItemFallFlg is false && game.tension <= @tension_05
                 @gp_stage_front.notItemFallFlg = true
             if game.tension <= 0
-                game.autoMemberSetAfeterFever()
                 game.main_scene.gp_slot.upperFrame.frame = 0
                 game.pause_scene.pause_main_layer.save_game_button.makeAble()
                 game.bgmStop(game.main_scene.gp_slot.fever_bgm)
@@ -5705,6 +6199,7 @@ class pauseScene extends appScene
         @pause_record_layer = new pauseRecordLayer()
         @pause_record_select_layer = new pauseRecordSelectLayer()
         @pause_trophy_select_layer = new pauseTrophySelectLayer()
+        @pause_help_layer = new pauseHelpLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
     setSaveConfirmMenu: () ->
@@ -5794,6 +6289,13 @@ class pauseScene extends appScene
     removeTrophySelectmenu:()->
         @removeChild(@pause_trophy_select_layer)
         @pause_trophy_select_layer = null
+    helpDsp:(type)->
+        @pause_help_layer = new pauseHelpLayer()
+        @pause_help_layer.setHelp(type)
+        @addChild(@pause_help_layer)
+    helpEnd:()->
+        @removeChild(@pause_help_layer)
+        @pause_help_layer = null
     onenterframe: (e) ->
         @_pauseKeyPush()
     ###
@@ -5803,7 +6305,11 @@ class pauseScene extends appScene
         if game.input.x is true || @buttonList.pause is true
             if @keyList.pause is false
                 game.popPauseScene()
-                game.setLoadScene()
+                if game.past_fever_num is 1 and game.fever is false and game.kaisetu_watched is 0
+                    game.kaisetu_watched = true
+                    game.setKaisetuScene()
+                else
+                    game.setLoadScene()
                 @_pauseEndRun()
                 @keyList.pause = true
         else
@@ -8508,6 +9014,54 @@ class OneHundredBillionMoney extends Money
         @price = 100000000000
         @frame = 8
         @frame_init = 8
+
+###
+1兆円
+@param boolean isHoming trueならコインがホーミングする
+###
+class OneTrillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
+        @price = 1000000000000
+        @frame = 8
+        @frame_init = 8
+
+###
+10兆円
+@param boolean isHoming trueならコインがホーミングする
+###
+class TenTrillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
+        @price = 10000000000000
+        @frame = 8
+        @frame_init = 8
+
+###
+100兆円
+@param boolean isHoming trueならコインがホーミングする
+###
+class OneHundredTrillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
+        @price = 100000000000000
+        @frame = 8
+        @frame_init = 8
+
+###
+1000兆円
+@param boolean isHoming trueならコインがホーミングする
+###
+class AThousandTrillionMoney extends Money
+    constructor: (isHoming) ->
+        super isHoming, 30, 30
+        @image = game.imageload("coin_pla")
+        @price = 1000000000000000
+        @frame = 8
+        @frame_init = 8
 class Slot extends appSprite
     constructor: (w, h) ->
         super w, h
@@ -8803,6 +9357,15 @@ class storyBackBtn extends Button
         @y = game.height - @height - 50
     ontouchend: () ->
         game.endStory()
+
+class storyPauseBtn extends Button
+    constructor: (w, h)->
+        super w, h
+        @image = @drawRect("#aaa")
+        @x = 10
+        @y = game.height - @height - 50
+    ontouchend: () ->
+        game.storyPause()
 class Dialog extends System
     constructor: (w, h) ->
         super w, h
@@ -8833,9 +9396,23 @@ class storyTextWindow extends Dialog
     constructor:(w, h)->
         super w, h
         @image = @drawRect('#ff69b4')
-        @opacity = 0.8
+        @opacity = 0.9
         @x = 10
         @y = game.width + Math.floor((game.height - game.width) / 2) - h - 10
+
+class titleLogo extends System
+    constructor:()->
+        super 410, 117
+        @image = game.imageload('title')
+        @x = Math.floor((game.width - @w) / 2)
+        @y = 40
+
+class gamenKaisetu extends System
+    constructor:()->
+        super 480, 500
+        @image = game.imageload('discription')
+        @x = 0
+        @y = 0
 ###
 顔
 ###

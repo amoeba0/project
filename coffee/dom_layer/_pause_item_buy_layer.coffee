@@ -23,6 +23,8 @@ class pauseItemBuyLayer extends appDomLayer
         @addChild(@member_title)
         @trophy_title = new trophyItemBuyDiscription()
         @addChild(@trophy_title)
+        @skill_help_btn = new helpButtonHtml(2, 50, 80)
+        @addChild(@skill_help_btn)
     setItemList:()->
         for item_key, item_val of @item_list
             @addChild(item_val)
@@ -121,9 +123,14 @@ class pauseItemBuySelectLayer extends appDomLayer
         game.money -= @item_options.price
         game.pause_scene.pause_main_layer.statusDsp()
         game.item_have_now.push(@item_kind)
+        if 11 <= @item_kind && @item_kind <= 19
+            game.slot_setting.setMemberItemPrice()
         game.pause_scene.removeItemBuySelectMenu()
         game.pause_scene.pause_item_buy_layer.resetItemList()
         game.main_scene.gp_system.money_text.setValue()
         if 21 <= @item_kind
-            game.pause_scene.pause_record_layer.resetTrophyList()
-            game.now_speed = game.speedItemHave()
+            switch @item_kind
+                when 21 then game.start2ndStory()
+                when 22 then game.start3rdStory()
+                when 23 then game.start4thStory()
+                when 24 then game.startEdStory()
