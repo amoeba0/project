@@ -47,3 +47,6 @@ Temporary Items
 *.js
 
 public/
+*.png
+*.mp3
+*.html
