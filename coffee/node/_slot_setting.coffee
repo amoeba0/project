@@ -24,8 +24,8 @@ class slotSetting extends appNode
         ]
         #リールの目に対する当選額の倍率
         @bairitu = {
-            1:10, 2:15, 3:20, 4:25, 5:35,
-            11:35, 12:35, 13:35, 14:35, 15:35, 16:35, 17:35, 18:35, 19:35
+            1:10, 2:10, 3:13, 4:16, 5:20,
+            11:20, 12:20, 13:20, 14:20, 15:20, 16:20, 17:20, 18:20, 19:20
         }
         @allRoles = {
             11:[11],12:[12],13:[13],14:[14],15:[15],16:[16],17:[17],18:[18],19:[19],
@@ -49,6 +49,9 @@ class slotSetting extends appNode
                     {'name':'11_1', 'width':730, 'height':662, 'direction':'left'},
                     {'name':'11_2', 'width':563, 'height':570, 'direction':'left'}
                 ],
+                'cut_in2':[
+                    {'name':'11_0', 'width':360, 'height':570, 'direction':'left'}
+                ],
                 'bgm':[
                     {'name':'yumenaki', 'time':109, 'title':'夢なき夢は夢じゃない', 'unit':'高坂穂乃果', 'image':'bgm_11'}
                 ],
@@ -59,6 +62,9 @@ class slotSetting extends appNode
                     {'name':'12_0', 'width':510, 'height':728, 'direction':'left'},
                     {'name':'12_1', 'width':640, 'height':648, 'direction':'right'},
                     {'name':'12_2', 'width':388, 'height':570, 'direction':'right'}
+                ],
+                'cut_in2':[
+                    {'name':'12_0', 'width':510, 'height':728, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'blueberry', 'time':100, 'title':'ぶる～べりぃとれいん', 'unit':'南ことり', 'image':'bgm_12'}
@@ -71,6 +77,9 @@ class slotSetting extends appNode
                     {'name':'13_1', 'width':408, 'height':570, 'direction':'left'},
                     {'name':'13_2', 'width':412, 'height':570, 'direction':'right'}
                 ],
+                'cut_in2':[
+                    {'name':'13_0', 'width':570, 'height':634, 'direction':'left'}
+                ],
                 'bgm':[
                     {'name':'reason', 'time':96, 'title':'勇気のReason', 'unit':'園田海未', 'image':'bgm_13'}
                 ],
@@ -81,6 +90,9 @@ class slotSetting extends appNode
                     {'name':'14_0', 'width':476, 'height':648, 'direction':'left'},
                     {'name':'14_1', 'width':650, 'height':570, 'direction':'right'},
                     {'name':'14_2', 'width':750, 'height':660, 'direction':'left'}
+                ],
+                'cut_in2':[
+                    {'name':'14_0', 'width':476, 'height':648, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'daring', 'time':93, 'title':'Darling！！', 'unit':'西木野真姫', 'image':'bgm_14'}
@@ -93,6 +105,9 @@ class slotSetting extends appNode
                     {'name':'15_1', 'width':601, 'height':638, 'direction':'left'},
                     {'name':'15_2', 'width':563, 'height':570, 'direction':'right'}
                 ],
+                'cut_in2':[
+                    {'name':'15_0', 'width':502, 'height':570, 'direction':'right'}
+                ],
                 'bgm':[
                     {'name':'rinrinrin', 'time':130, 'title':'恋のシグナルRin rin rin！', 'unit':'星空凛', 'image':'bgm_15'}
                 ],
@@ -103,6 +118,9 @@ class slotSetting extends appNode
                     {'name':'16_0', 'width':438, 'height':570, 'direction':'right'},
                     {'name':'16_1', 'width':580, 'height':644, 'direction':'left'},
                     {'name':'16_2', 'width':450, 'height':570, 'direction':'left'}
+                ],
+                'cut_in2':[
+                    {'name':'16_0', 'width':438, 'height':570, 'direction':'right'}
                 ],
                 'bgm':[
                     {'name':'nawatobi', 'time':166, 'title':'なわとび', 'unit':'小泉花陽', 'image':'bgm_16'}
@@ -115,6 +133,9 @@ class slotSetting extends appNode
                     {'name':'17_1', 'width':361, 'height':570, 'direction':'left'},
                     {'name':'17_2', 'width':378, 'height':570, 'direction':'left'}
                 ],
+                'cut_in2':[
+                    {'name':'17_0', 'width':465, 'height':705, 'direction':'left'}
+                ],
                 'bgm':[
                     {'name':'mahoutukai', 'time':107, 'title':'まほうつかいはじめました', 'unit':'矢澤にこ', 'image':'bgm_17'}
                 ],
@@ -126,6 +147,9 @@ class slotSetting extends appNode
                     {'name':'18_1', 'width':380, 'height':675, 'direction':'left'},
                     {'name':'18_2', 'width':433, 'height':602, 'direction':'right'}
                 ],
+                'cut_in2':[
+                    {'name':'18_0', 'width':599, 'height':606, 'direction':'right'}
+                ],
                 'bgm':[
                     {'name':'junai', 'time':129, 'title':'純愛レンズ', 'unit':'東條希', 'image':'bgm_18'}
                 ],
@@ -136,6 +160,9 @@ class slotSetting extends appNode
                     {'name':'19_0', 'width':460, 'height':570, 'direction':'left'},
                     {'name':'19_1', 'width':670, 'height':650, 'direction':'right'},
                     {'name':'19_2', 'width':797, 'height':595, 'direction':'left'}
+                ],
+                'cut_in2':[
+                    {'name':'19_0', 'width':460, 'height':570, 'direction':'left'}
                 ],
                 'bgm':[
                     {'name':'arihureta', 'time':95, 'title':'ありふれた悲しみの果て', 'unit':'絢瀬絵里', 'image':'bgm_19'}
@@ -239,219 +266,140 @@ class slotSetting extends appNode
                 'name':'アイテム',
                 'image':'test_image',
                 'discription':'アイテムの説明',
-                'price':100, #値段
-                'durationSec':90, #持続時間(秒)
-                'conditoin':'出現条件',
-                'condFunc':()-> #出現条件の関数 true:出す、false:隠す
-                    return true
+                'price':100
             },
             1:{
                 'name':'まきちゃんかわいい',
                 'image':'item_1',
                 'discription':'スロットが揃った時以外の<br>コインがたくさん降ってくるようになる',
-                'price':1000,
-                'durationSec':90,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(1)
+                'price':1000
             },
             2:{
                 'name':'チーズケーキ鍋',
                 'image':'item_2',
                 'discription':'チーズケーキしか降ってこなくなる<br>爆弾は降ってこなくなる',
-                'price':7000,
-                'durationSec':90,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(2)
+                'price':7000
             },
             3:{
                 'name':'テンション上がるにゃー！',
                 'image':'item_3',
                 'discription':'移動速度とジャンプ力が上がる<br>テンションの上がり幅が1.3倍になる',
-                'price':60000,
-                'durationSec':90,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(3)
+                'price':60000
             },
             4:{
                 'name':'チョットマッテテー',
                 'image':'item_4',
                 'discription':'おやつが降ってくる速度が<br>ちょっとだけ遅くなる',
-                'price':400000,
-                'durationSec':90,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(4)
+                'price':400000
             },
             5:{
                 'name':'認められないわぁ',
                 'image':'item_5',
                 'discription':'アイテムを落としてもコンボが減らず<br>テンションも下がらないようになる',
-                'price':3000000,
-                'durationSec':90,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(5)
+                'price':3000000
             },
             6:{
                 'name':'完っ全にフルハウスね',
                 'image':'item_6',
-                'discription':'CHANCE!!状態になる確率が<br>2倍になる（最大で30％）',
-                'price':20000000,
-                'durationSec':90,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(6)
+                'discription':'CHANCE!!が出て来る確率が<br>2倍になる（最大で30％）',
+                'price':20000000
             },
             7:{
                 'name':'ラブアローシュート',
                 'image':'item_7',
                 'discription':'おやつが近くに落ちてくる',
-                'price':200000000,
-                'durationSec':90,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(7)
+                'price':200000000
             },
             8:{
                 'name':'鈍いのですね',
                 'image':'item_8',
                 'discription':'おやつが降ってくる速度が<br>だいぶ遅くなる<br>チョットマッテテー（遅）と組み合わせると<br>更に遅くなる',
-                'price':1000000000,
-                'durationSec':90,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(8)
+                'price':1000000000
             },
             9:{
                 'name':'ファイトだよっ',
                 'image':'item_9',
                 'discription':'CHANCE!!でスロットが揃う時に<br>FEVER!!が出る確率が2倍になる<br>（最大で20％）',
-                'price':10000000000,
-                'durationSec':90,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(9)
+                'price':10000000000
             },
 
             11:{
                 'name':'高坂穂乃果',
                 'image':'item_11',
-                'discription':'スロットに穂乃果が挿入されるようになる。',
-                'price':0,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(11)
+                'discription':'スロットが揃ったときに<br>一定確率でスロット内のリトライが<br>穂乃果と入れ替わる。',
+                'price':0
             },
             12:{
                 'name':'南ことり',
                 'image':'item_12',
-                'discription':'スロットにことりが挿入されるようになる。',
-                'price':0,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(12)
+                'discription':'スロットが揃ったときに<br>一定確率でスロット内のリトライが<br>ことりと入れ替わる。',
+                'price':0
             },
             13:{
                 'name':'園田海未',
                 'image':'item_13',
-                'discription':'スロットに海未が挿入されるようになる。',
-                'price':0,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(13)
+                'discription':'スロットが揃ったときに<br>一定確率でスロット内のリトライが<br>海未と入れ替わる。',
+                'price':0
             },
             14:{
                 'name':'西木野真姫',
                 'image':'item_14',
-                'discription':'スロットに真姫が挿入されるようになる。',
-                'price':0,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(14)
+                'discription':'スロットが揃ったときに<br>一定確率でスロット内のリトライが<br>真姫と入れ替わる。',
+                'price':0
             },
             15:{
                 'name':'星空凛',
                 'image':'item_15',
-                'discription':'スロットに凛が挿入されるようになる。',
-                'price':0,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(15)
+                'discription':'スロットが揃ったときに<br>一定確率でスロット内のリトライが<br>凛と入れ替わる。',
+                'price':0
             },
             16:{
                 'name':'小泉花陽',
                 'image':'item_16',
-                'discription':'スロットに花陽が挿入されるようになる。',
-                'price':0,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(16)
+                'discription':'スロットが揃ったときに<br>一定確率でスロット内のリトライが<br>花陽と入れ替わる。',
+                'price':0
             },
             17:{
                 'name':'矢澤にこ',
                 'image':'item_17',
-                'discription':'スロットににこが挿入されるようになる。',
-                'price':0,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(17)
+                'discription':'スロットが揃ったときに<br>一定確率でスロット内のリトライが<br>にこと入れ替わる。',
+                'price':0
             },
             18:{
                 'name':'東條希',
                 'image':'item_18',
-                'discription':'スロットに希が挿入されるようになる。',
-                'price':0,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(18)
+                'discription':'スロットが揃ったときに<br>一定確率でスロット内のリトライが<br>希と入れ替わる。',
+                'price':0
             },
             19:{
                 'name':'絢瀬絵里',
                 'image':'item_19',
-                'discription':'スロットに絵里が挿入されるようになる。',
-                'price':0,
-                'conditoin':'',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(19)
+                'discription':'スロットが揃ったときに<br>一定確率でスロット内のリトライが<br>絵里と入れ替わる。',
+                'price':0
             },
             21:{
                 'name':'ブロンズことり',
                 'image':'item_21',
                 'discription':'第２話が見れる<br>移動速度とジャンプ力がアップする',
-                'price':1000000,
-                'conditoin':'50コンボ達成する',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(21)
+                'price':1000000
             },
             22:{
                 'name':'シルバーことり',
                 'image':'item_22',
                 'discription':'第３話が見れる<br>スキルのスロットが1つ増える',
-                'price':100000000,
-                'conditoin':'100コンボ達成する<br>または、楽曲を9曲以上達成する',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(22)
+                'price':100000000
             },
             23:{
                 'name':'ゴールドことり',
                 'image':'item_23',
                 'discription':'第４話が見れる<br>移動速度とジャンプ力がアップする<br>スキルのスロットが1つ増える',
-                'price':10000000000,
-                'conditoin':'100コンボ達成する<br>かつ、楽曲を9曲以上達成する',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(23)
+                'price':10000000000
             },
             24:{
                 'name':'プラチナことり',
                 'image':'item_24',
                 'discription':'最終話が見れる',
-                'price':1000000000000,
-                'conditoin':'楽曲を15曲以上達成する',
-                'condFunc':()->
-                    return game.slot_setting.itemConditinon(24)
+                'price':1000000000000
             }
         }
 
@@ -725,8 +673,6 @@ class slotSetting extends appNode
             if div < 1
                 div = 1
             ret_money = Math.floor(ret_money / div)
-        else
-            ret_money = Math.floor(ret_money / 2)
         if game.main_scene.gp_back_panorama.now_back_effect_flg is true
             ret_money *= 2
         if ret_money > 100000000000000

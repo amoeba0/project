@@ -22,6 +22,10 @@ class pauseRecordLayer extends appDomLayer
         @resetRecordList()
         @setTrophyList()
         @resetTrophyList()
+        @song_help_btn = new helpButtonHtml(4, 50, 80)
+        @addChild(@song_help_btn)
+        @torophy_help_btn = new helpButtonHtml(5, 50, 520)
+        @addChild(@torophy_help_btn)
     setRecordList:()->
         for record_key, record_val of @recordList
             @addChild(record_val)

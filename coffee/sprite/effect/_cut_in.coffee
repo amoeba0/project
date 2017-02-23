@@ -22,13 +22,13 @@ class cutIn extends effect
             muse_num = setting.now_muse_num
         else
             muse_num = num
-        cut_in_list = setting.muse_material_list[muse_num]['cut_in']
+        cut_in_list = setting.muse_material_list[muse_num]['cut_in'+game.cut_in_set]
         cut_in_random = Math.floor(Math.random() * cut_in_list.length)
         @cut_in = cut_in_list[cut_in_random]
         @voices = setting.muse_material_list[muse_num]['voice']
 
     _setInit:()->
-        @image = game.imageload('cut_in/'+@cut_in['name'])
+        @image = game.imageload('cut_in'+game.cut_in_set+'/'+@cut_in['name'])
         if @cut_in['direction'] is 'left'
             @x = game.width
         else

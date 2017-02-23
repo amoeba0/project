@@ -124,6 +124,7 @@ class mainScene extends appScene
                 game.slot_setting.betUpExe()
                 game.resetMainScene()
                 game.setPauseScene()
+                game.pause_scene.helpDspAuto()
 
     _gyroMove:()->
         window.addEventListener("deviceorientation",

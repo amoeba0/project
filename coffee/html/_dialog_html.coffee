@@ -134,6 +134,14 @@ class useSetDiscription extends titleDiscription
         @text = 'セット中'
         @setHtml()
 
+class memberUseDiscription extends titleDiscription
+    constructor:()->
+        super
+        @x = 130
+        @y = 170
+        @text = 'ユニット編成中'
+        @setHtml()
+
 class useHaveDiscription extends titleDiscription
     constructor:()->
         super
@@ -290,8 +298,8 @@ class pageNum extends dialogHtml
 
 class helpDiscription extends dialogHtml
     constructor:(txt)->
-        super 420, 460
-        @x = 70
+        super 380, 460
+        @x = 50
         @y = 220
         @sp = ''
         if game.isSumaho() is true then @sp = '-sp'

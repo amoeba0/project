@@ -35,3 +35,9 @@ class gpStoryPause extends appGroup
         @modal = new blackBack()
         @modal.opacity = 0.5
         @addChild(@modal)
+
+class gpPreload extends appGroup
+    constructor:(gw, gh)->
+        super
+        @arc = new preloadArc(gw, gh)
+        @addChild(@arc)

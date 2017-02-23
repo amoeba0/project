@@ -23,3 +23,32 @@ class storyPauseScene extends appScene
         @addChild(@gp_story_pause)
         @addChild(@msg)
         @addChild(@restart)
+
+class preloadScene extends appScene
+    constructor:(gw, gh, toubai)->
+        super
+        @setSize(gw, gh, toubai)
+        @backgroundColor = '#FFF'
+        @gp_preload = new gpPreload(gw, gh)
+        @addChild(@gp_preload)
+        @addEventListener('progress', (e)->
+            angle = Math.floor(360 * e.loaded / e.total)
+            @gp_preload.arc.setImage(angle)
+        )
+        @addEventListener('load', (e)->
+            game.removeScene(@)
+            game.dispatchEvent(e)
+        )
+    setSize:(gw, gh, toubai)->
+        browserAspect = window.innerHeight / window.innerWidth
+        gameAspect = gh / gw
+        if toubai
+            @width = gw
+            @height = gh
+        else
+            if browserAspect < gameAspect
+                @width = Math.floor(window.innerHeight * gw/ gh)
+                @height = window.innerHeight
+            else
+                @width = window.innerWidth
+                @height = Math.floor(window.innerWidth * gh/ gw)

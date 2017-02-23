@@ -240,8 +240,11 @@
 .help-button {
     font: 24px Consolas Monaco MSゴシック;
     color: white;
-    background-color: blue;
+    background-color: #7777fd;
     padding: 5px;
+}
+.help-button.help-button-unread {
+    background-color: red;
 }
 .help-discription {
     font: 20px Consolas Monaco MSゴシック;
@@ -254,4 +257,7 @@
 }
 .help-title-sp {
     font: 22px Consolas Monaco MSゴシック;
+}
+.red {
+    color: #f00;
 }

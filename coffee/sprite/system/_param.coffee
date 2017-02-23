@@ -103,3 +103,12 @@ class storyLoadArc extends Param
         @y = game.height / 2 - @height / 2
     onenterframe:(e)->
         @rotate(10)
+
+class preloadArc extends Param
+    constructor:(gw, gh)->
+        super 80, 80
+        @setImage()
+        @x = gw / 2 - @width / 2
+        @y = gh / 2 - @height / 2
+    setImage:(angle=0)->
+        @image = @drawArc('#aba5a1', 10, angle)

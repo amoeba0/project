@@ -114,6 +114,10 @@ class pauseScene extends appScene
     helpEnd:()->
         @removeChild(@pause_help_layer)
         @pause_help_layer = null
+    helpDspAuto:()->
+        if game.past_fever_num is 1 then @helpDsp(6)
+        if game.past_fever_num is 2 then @helpDsp(7)
+
     onenterframe: (e) ->
         @_pauseKeyPush()
     ###

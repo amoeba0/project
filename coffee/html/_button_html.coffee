@@ -194,7 +194,7 @@ class trophyOkButtonHtml extends baseOkButtonHtml
 class helpOkButtonHtml extends baseOkButtonHtml
     constructor:()->
         super
-        @x = 170
+        @x = 260
         @y = 500
     touchendEvent:() ->
         game.pause_scene.helpEnd()
@@ -202,7 +202,7 @@ class helpOkButtonHtml extends baseOkButtonHtml
 class helpNextButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
-        @x = 170
+        @x = 260
         @y = 500
         @class.push('base-buy-button')
         if game.isSumaho()
@@ -212,6 +212,20 @@ class helpNextButtonHtml extends buttonHtml
     ontouchend: (e) ->
         game.sePlay(@dicisionSe)
         game.pause_scene.pause_help_layer.goNext()
+
+class helpPrevButtonHtml extends buttonHtml
+    constructor:()->
+        super 150, 45
+        @x = 60
+        @y = 500
+        @class.push('base-buy-button')
+        if game.isSumaho()
+            @class.push('base-ok-button-sp')
+        @text = '前へ'
+        @setHtml()
+    ontouchend: (e) ->
+        game.sePlay(@dicisionSe)
+        game.pause_scene.pause_help_layer.goPrev()
 
 ###
 キャンセルボタン
@@ -545,7 +559,18 @@ class helpButtonHtml extends buttonHtml
         @y = y
         @text = 'HELP'
         @class.push('help-button')
-        @setHtml()
+        @setUnread()
     ontouchend:(e)->
         game.sePlay(@dicisionSe)
-        game.pause_scene.helpDsp(@type)
+        @helpDsp(@type)
+    helpDsp:(type)->
+        game.pause_scene.helpDsp(type)
+        if game.help_read.indexOf(type) is -1
+            game.help_read.push(type)
+            @setUnread()
+    setUnread:()->
+        if game.help_read.indexOf(@type) is -1
+            @class.push('help-button-unread')
+        else
+            @class = game.arrayValueDel(@class, 'help-button-unread')
+        @setHtml()

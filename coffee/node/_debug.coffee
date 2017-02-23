@@ -9,10 +9,16 @@ class Debug extends appNode
         @force_main_flg = false
         #開始後いきなりポーズ画面
         @force_pause_flg = false
+        #開始後いきなりヘルプ
+        @force_help_flg = false
+        #開始後表示するヘルプの番号
+        @force_hep_num = 7
         #開始後いきなりオープニング
         @foece_story_flg = false
         #デバッグで流すストーリーのエピソード
         @test_stroy_episode = 5
+        #フィーバーのBGMを一括ロードせずに、フィーバー直前に都度ロードする
+        @bgm_load_every_time = false
 
         #ゲーム開始時ロードをしない
         @not_load_flg = false
@@ -23,9 +29,9 @@ class Debug extends appNode
             'money':100000000000000000,
             'bet':1000000000000000,
             'combo':0,
-            'max_combo':200,
+            'max_combo':2,
             'tension':0,
-            'past_fever_num':1,
+            'past_fever_num':0,
             'item_point':500,
             'next_add_member_key':0,
             'now_muse_num':14,
@@ -40,7 +46,8 @@ class Debug extends appNode
             'middle_lille':[],
             'right_lille':[],
             'retry':0,
-            'kaisetu_watched':0
+            'kaisetu_watched':0,
+            'help_read':[]
         }
 
         #デバッグ用リールにすりかえる
@@ -96,6 +103,9 @@ class Debug extends appNode
         @fix_tention_item_fall_val = 0
         #スロットが当たった時のテンション増減固定値
         @fix_tention_slot_hit_flg = 200
+
+        if @force_help_flg is true
+            @force_pause_flg = true
 
         if @force_pause_flg is true
             @force_main_flg = true

@@ -30,6 +30,10 @@ class pauseItemUseLayer extends appDomLayer
         @setItemList()
         @dspSetItemList()
         @setSpeedList()
+        @skill_help_btn = new helpButtonHtml(1, 40, 130)
+        @addChild(@skill_help_btn)
+        @speed_help_btn = new helpButtonHtml(2, 40, 590)
+        @addChild(@speed_help_btn)
     setItemList:()->
         for item_key, item_val of @item_list
             @addChild(item_val)
@@ -127,8 +131,6 @@ class pauseItemUseSelectLayer extends appDomLayer
         @item_discription.setText(discription)
     _setDiscription:()->
         text = '効果：'+@item_options.discription
-        #if @item_options.durationSec != undefined
-        #    text += '<br>持続時間：'+@item_options.durationSec+'秒'
         return text
     setItem:()->
         @_itemSet(@item_kind)

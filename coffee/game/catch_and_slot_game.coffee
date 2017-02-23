@@ -9,12 +9,14 @@ class LoveliveGame extends catchAndSlotGame
         @debug = new Debug()
         @slot_setting = new slotSetting()
         @test = new Test()
+        @loadingScene = new preloadScene()
         @width = 480
         @height = 720
         if @debug.toubai
             @scale = 1
         else
             @scale = @getWindowScale()
+        @loadingScene = new preloadScene(@width, @height, @debug.toubai)
         @fps = 24
         #画像リスト
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
@@ -22,12 +24,18 @@ class LoveliveGame extends catchAndSlotGame
         #音声リスト
         @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm_maid']
 
+        #フィーバーのBGMを一括ロードせずに、フィーバー直前に都度ロードする
+        @bgmLoadEveryTime = false
+        if @isSumaho　|| @debug.bgmLoadEveryTime
+            @bgmLoadEveryTime = true
+
         @keybind(90, 'z')
         @keybind(88, 'x')
         @keybind(67, 'c')
         @preloadAll()
 
         #ゲーム中どこからでもアクセスのある数値
+        @cut_in_set = '' #カットインに使うフォルダ番号
         @money_init = 100 #ゲーム開始時の所持金
         @fever = false #trueならフィーバー中
         @fever_down_tension = 0
@@ -60,6 +68,7 @@ class LoveliveGame extends catchAndSlotGame
         @auto_bet = 1 #自動的に掛け金を上げる
         @retry = false #リトライ中
         @kaisetu_watched = false #画面説明を見た
+        @help_read = [] #読んだヘルプ
 
         @init_load_val = {
             'money':100,
@@ -81,6 +90,7 @@ class LoveliveGame extends catchAndSlotGame
             'auto_bet':1,
             'retry':0,
             'kaisetu_watched':0,
+            'help_read':[],
             'left_lille':@arrayCopy(@slot_setting.lille_array_0[0]),
             'middle_lille':@arrayCopy(@slot_setting.lille_array_0[1]),
             'right_lille':@arrayCopy(@slot_setting.lille_array_0[2])
@@ -109,6 +119,8 @@ class LoveliveGame extends catchAndSlotGame
                 @pushScene(@main_scene)
                 if @debug.force_pause_flg is true
                     @setPauseScene()
+                    if @debug.force_help_flg is true
+                        @pause_scene.helpDsp(@debug.force_hep_num)
             else if @debug.foece_story_flg is true
                 @startTestStory()
 
@@ -153,14 +165,17 @@ class LoveliveGame extends catchAndSlotGame
     ###
     musePreLoadByMemberSetNow:()->
         roles = @getRoleByMemberSetNow()
+        @_beforeLoadForRoles(roles)
+        @musePreLoadMulti(roles)
+        @musePreLoad()
+
+    _beforeLoadForRoles:(roles)->
         if game.isSumaho() is true
             bgms = []
             bgms.push(@_getFeverBgmName(game.slot_setting.now_muse_num))
             for i, role of roles
                 bgms.push(@_getFeverBgmName(role))
             game.spBeforeLoad(bgms)
-        @musePreLoadMulti(roles)
-        @musePreLoad()
 
     _getFeverBgmName:(role)->
         material = game.slot_setting.muse_material_list
@@ -209,9 +224,9 @@ class LoveliveGame extends catchAndSlotGame
         @already_added_material.push(muse_num)
         if @slot_setting.muse_material_list[muse_num] != undefined
             material = @slot_setting.muse_material_list[muse_num]
-            if material['cut_in'] != undefined && material['cut_in'].length > 0
-                for key, val of material['cut_in']
-                    @appLoad('images/cut_in/'+val.name + '.png')
+            if material['cut_in'+@cut_in_set] != undefined && material['cut_in'+@cut_in_set].length > 0
+                for key, val of material['cut_in'+@cut_in_set]
+                    @appLoad('images/cut_in'+@cut_in_set+'/'+val.name + '.png')
             if material['voice'] != undefined && material['voice'].length > 0
                 for key, val of material['voice']
                     @appLoad('sounds/voice/'+val+'.mp3')
@@ -509,15 +524,16 @@ class LoveliveGame extends catchAndSlotGame
             'now_muse_num': 0,
             'next_add_member_key': 0,
             'now_speed':0,
-            'left_lille': '[]',
-            'middle_lille': '[]',
-            'right_lille': '[]',
-            'item_have_now':'[]',
-            'item_set_now':'[]',
-            'member_set_now':'[]',
-            'prev_fever_muse':'[]',
+            'left_lille': [],
+            'middle_lille': [],
+            'right_lille': [],
+            'item_have_now':[],
+            'item_set_now':[],
+            'member_set_now':[],
+            'prev_fever_muse':[],
+            'help_read':[],
             'max_set_item_num':0,
-            'prev_item':'[]',
+            'prev_item':[],
             'auto_bet':0,
             'retry':0,
             'kaisetu_watched':0
@@ -551,6 +567,7 @@ class LoveliveGame extends catchAndSlotGame
             'item_set_now':JSON.stringify(@item_set_now),
             'member_set_now':JSON.stringify(@member_set_now),
             'prev_fever_muse':JSON.stringify(@prev_fever_muse),
+            'help_read':JSON.stringify(@help_read),
             'max_set_item_num':@max_set_item_num,
             'prev_item':JSON.stringify(@prev_item),
             'now_speed': @now_speed,
@@ -583,6 +600,7 @@ class LoveliveGame extends catchAndSlotGame
             @item_set_now = @_loadStorage('item_set_now', 'json')
             @member_set_now = @_loadStorage('member_set_now', 'json')
             @prev_fever_muse = @_loadStorage('prev_fever_muse', 'json')
+            @help_read = @_loadStorage('help_read', 'json')
             @max_set_item_num = @_loadStorage('max_set_item_num', 'num')
             @prev_item = @_loadStorage('prev_item', 'json')
             @now_speed = @_loadStorage('now_speed', 'num')
@@ -640,6 +658,7 @@ class LoveliveGame extends catchAndSlotGame
         @prev_fever_muse = @_loadGameFixUnit(data, 'prev_fever_muse')
         @member_set_now = @_loadGameFixUnit(data, 'member_set_now')
         @max_set_item_num = @_loadGameFixUnit(data, 'max_set_item_num')
+        @help_read = @_loadGameFixUnit(data, 'help_read')
         @slot_setting.now_muse_num = @_loadGameFixUnit(data, 'now_muse_num')
         @main_scene.gp_slot.left_lille.lilleArray = @_loadGameFixUnit(data, 'left_lille')
         @main_scene.gp_slot.middle_lille.lilleArray = @_loadGameFixUnit(data, 'middle_lille')

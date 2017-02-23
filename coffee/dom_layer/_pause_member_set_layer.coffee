@@ -4,7 +4,7 @@ class pauseMemberSetLayer extends appDomLayer
         @dialog = new memberSetDialogHtml()
         @close_button = new memberSetDialogCloseButton()
         @menu_title = new memberSetDiscription()
-        @set_title = new useSetDiscription()
+        @set_title = new memberUseDiscription()
         @have_title = new useHaveDiscription()
         @auto_button = new autoMemberSetButtonHtml()
         @unset_button = new autoMemberUnsetButtonHtml()
@@ -27,6 +27,8 @@ class pauseMemberSetLayer extends appDomLayer
             @addChild(@set_member_list[i])
         @setItemList()
         @dispSetMemberList()
+        @member_help_btn = new helpButtonHtml(3, 40, 80)
+        @addChild(@member_help_btn)
     setItemList:()->
         for member_key, member_val of @member_list
             @addChild(member_val)

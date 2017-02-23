@@ -23,8 +23,12 @@ class pauseItemBuyLayer extends appDomLayer
         @addChild(@member_title)
         @trophy_title = new trophyItemBuyDiscription()
         @addChild(@trophy_title)
-        @skill_help_btn = new helpButtonHtml(2, 50, 80)
+        @skill_help_btn = new helpButtonHtml(1, 50, 80)
         @addChild(@skill_help_btn)
+        @member_help_btn = new helpButtonHtml(3, 50, 310)
+        @addChild(@member_help_btn)
+        @torophy_help_btn = new helpButtonHtml(5, 50, 540)
+        @addChild(@torophy_help_btn)
     setItemList:()->
         for item_key, item_val of @item_list
             @addChild(item_val)
@@ -46,7 +50,7 @@ class pauseItemBuyLayer extends appDomLayer
         @_resetItemList(@trophy_list, master_list)
     _resetItemList:(item_list, master_list)->
         for item_key, item_val of item_list
-            if master_list[item_key].condFunc() is false || master_list[item_key].price > game.money
+            if master_list[item_key].price > game.money
                 item_val.opacity = 0.5
                 item_val.is_exist = true
                 item_val.changeIsButton()
@@ -96,21 +100,10 @@ class pauseItemBuySelectLayer extends appDomLayer
         @_setButton()
     _setDiscription:()->
         text = '効果：'+@item_options.discription
-        #if @item_options.durationSec != undefined
-        #    text += '<br>持続時間：'+@item_options.durationSec+'秒'
-        if @item_options.condFunc() is true || 20 < @item_kind
-            text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'+'(所持金'+game.toJPUnit(game.money)+'円)'
-        if @item_options.condFunc() is false || 20 < @item_kind
-            text += '<br>出現条件：'+@item_options.conditoin
-            if @item_kind is 21
-                text += '<br>(MAXコンボ'+game.max_combo+')'
-            if @item_kind is 22 || @item_kind is 23
-                text += '<br>(MAXコンボ'+game.max_combo+'、'+game.countFullMusic()+'曲達成済)'
-            if @item_kind is 24
-                text += '<br>('+game.countFullMusic()+'曲達成済)'
+        text += '<br>値段：'+game.toJPUnit(@item_options.price)+'円'+'(所持金'+game.toJPUnit(game.money)+'円)'
         return text
     _setButton:()->
-        if @item_options.condFunc() is true && game.money >= @item_options.price
+        if game.money >= @item_options.price
             @cancel_button.setBuyPossiblePosition()
             @buy_button.setBuyPossiblePosition()
         else
