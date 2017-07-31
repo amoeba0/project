@@ -181,7 +181,7 @@ class gpSlot extends appGroup
                 if game.prev_fever_muse.indexOf(parseInt(hit_eye)) is -1
                     game.prev_fever_muse.push(@hit_role)
                     #game.pause_scene.pause_record_layer.resetRecordList()
-                    game.pause_scene.pause_main_layer.save_game_button.makeDisable()
+                    #game.pause_scene.pause_main_layer.save_game_button.makeDisable()
                     #game.slot_setting.setMemberItemPrice()
                     game.tensionSetValue(game.slot_setting.tension_max)
                     game.fever = true
@@ -189,16 +189,19 @@ class gpSlot extends appGroup
 
                     #game.slot_setting.setMuseMember()
                     game.autoMemberSetBeforeFever()
+                    ###
                     if game.isSumaho() is true
                         bgm = @_getFeverBgm(hit_eye)
                         bgm2 = @_getFeverBgm(game.slot_setting.now_muse_num)
                         game.spBeforeLoad([
                             'sounds/bgm/' + bgm['name'] + '.mp3', 'sounds/bgm/' + bgm2['name'] + '.mp3'
                         ])
+                    ###
                     #game.musePreLoad()
 
                     game.fever_hit_eye = hit_eye
                     game.main_scene.gp_system.changeBetChangeFlg(false)
+                    game.main_scene.gp_system.pause_button.hide()
                     game.main_scene.gp_effect.feverEffectSet()
                     @slotAddMuseAll(hit_eye)
                     @forceFeverRole = []

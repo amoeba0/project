@@ -32,7 +32,8 @@ class Test extends appNode
         #@manySoundLoad()
         #@setMemberItemPrice()
         #@autoMemberSetBeforeFever()
-        @getIsForceSlotHit()
+        #@getIsForceSlotHit()
+        @textView()
 
     #以下、テスト用関数
 
@@ -205,3 +206,7 @@ class Test extends appNode
         game.slot_setting.getIsForceSlotHit()
         game.slot_setting.isForceFever()
 
+    textView:()->
+        gp_test = game.test_scene.gp_test
+        txt = new moneyText()
+        gp_test.addChild(txt)

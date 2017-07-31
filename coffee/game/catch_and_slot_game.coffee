@@ -35,7 +35,7 @@ class LoveliveGame extends catchAndSlotGame
         @preloadAll()
 
         #ゲーム中どこからでもアクセスのある数値
-        @cut_in_set = '' #カットインに使うフォルダ番号
+        @cut_in_set = 2 #カットインに使うフォルダ番号
         @money_init = 100 #ゲーム開始時の所持金
         @fever = false #trueならフィーバー中
         @fever_down_tension = 0
@@ -141,7 +141,6 @@ class LoveliveGame extends catchAndSlotGame
     ###
     loadGameStart:()->
         @main_scene = new mainScene()
-        @pause_scene = new pauseScene()
         @loadGame()
         @bgmPlayOnTension()
         @pushScene(@main_scene)
@@ -151,7 +150,6 @@ class LoveliveGame extends catchAndSlotGame
     ###
     newGameStart:()->
         @main_scene = new mainScene()
-        @pause_scene = new pauseScene()
         @_loadGameInit()
         @_gameInitSetting()
         @bgmPlayOnTension()
@@ -208,8 +206,8 @@ class LoveliveGame extends catchAndSlotGame
     ###
     musePreLoadMulti:(nums)->
         for key, val of nums
-            if @already_added_material.indexOf(val) == -1
-                @musePreLoad(val)
+            #if @already_added_material.indexOf(val) == -1
+            @musePreLoad(val)
 
 
     ###
@@ -248,15 +246,6 @@ class LoveliveGame extends catchAndSlotGame
         else if @tension > @slot_setting.tension_max
             @tension = @slot_setting.tension_max
         @main_scene.gp_system.tension_gauge.setValue()
-        @_bgmPlayStopOnTension(prev_tension)
-
-    _bgmPlayStopOnTension:(prev_tension)->
-        if @fever is false
-            half = Math.floor(@slot_setting.tension_max / 2)
-            if prev_tension < half && half <= @tension
-                @bgmPlayOnTension()
-            if @tension < half && half <= prev_tension
-                @bgmStop(@main_scene.bgm)
 
     ###
     現在アイテムがセットされているかを確認する
@@ -330,13 +319,16 @@ class LoveliveGame extends catchAndSlotGame
     設定された部員は自動的に空にする
     ###
     autoMemberSetBeforeFever:()->
+        load_member = []
         @member_set_now = []
         @member_set_now = @slot_setting.getRoleAbleMemberList()
         if @member_set_now.length is 0
             @slot_setting.setMuseMember()
+            load_member.push(@slot_setting.now_muse_num)
         else
             @slot_setting.now_muse_num = 0
-        @musePreLoadMulti(@member_set_now)
+            load_member = @member_set_now
+        @musePreLoadMulti(load_member)
 
     ###
     アイテムを取った時にテンションゲージを増減する
@@ -369,17 +361,18 @@ class LoveliveGame extends catchAndSlotGame
     ポーズシーンをセットする
     ###
     setPauseScene:()->
-        @sePlay(@main_scene.gp_stage_front.dicision_se)
-        @pause_scene = new pauseScene()
-        @pause_scene.keyList.pause = true
-        @pushScene(@pause_scene)
-        @pause_scene.pause_item_buy_layer.resetItemList()
-        @pause_scene.pause_main_layer.statusDsp()
-        @pause_scene.pause_main_layer.bet_checkbox.setCheck()
         if @fever is false
-            @nowPlayBgmPause()
-        else
-            @_remainFeverBgm()
+            @sePlay(@main_scene.gp_stage_front.dicision_se)
+            @pause_scene = new pauseScene()
+            @pause_scene.keyList.pause = true
+            @pushScene(@pause_scene)
+            @pause_scene.pause_item_buy_layer.resetItemList()
+            @pause_scene.pause_main_layer.statusDsp()
+            @pause_scene.pause_main_layer.bet_checkbox.setCheck()
+            if @fever is false
+                @nowPlayBgmPause()
+            else
+                @_remainFeverBgm()
 
     #フィーバー中ならBGMの曲と位置を記憶
     _remainFeverBgm:()->
@@ -693,12 +686,6 @@ class LoveliveGame extends catchAndSlotGame
         sys.combo_text.setXposition()
         sys.tension_gauge.setValue()
         sys.itemDsp()
-        @pause_scene.pause_item_buy_layer.resetItemList()
-        @pause_scene.pause_item_use_layer.dspSetItemList()
-        @pause_scene.pause_item_use_layer.setSpeedList()
-        @pause_scene.pause_member_set_layer.dispSetMemberList()
-        @pause_scene.pause_record_layer.resetRecordList()
-        @pause_scene.pause_record_layer.resetTrophyList()
         @slot_setting.setMemberItemPrice()
         @slot_setting.setItemPointMax()
         @slot_setting.setItemDecreasePoint()
@@ -708,3 +695,24 @@ class LoveliveGame extends catchAndSlotGame
         @main_scene.setTension05()
         if @retry is true
             @main_scene.gp_system.changeBetChangeFlg(false)
+    _mainSeneResetSetting:()->
+        sys = @main_scene.gp_system
+        sys.money_text.setValue()
+        sys.bet_text.setValue()
+        sys.combo_text.setValue()
+        sys.combo_text.setXposition()
+        sys.tension_gauge.setValue()
+        sys.itemDsp()
+
+    feverEnd:()->
+        @fever = false
+        @main_scene.gp_system.changeBetChangeFlg(true)
+        @slot_setting.betUpExe()
+        if @debug.not_auto_save is false
+            @saveGame()
+        @resetMainScene()
+        @_mainSeneResetSetting()
+        @bgmPlay(@main_scene.bgm, true)
+        if @debug.not_fever_end_menu is false
+            @setPauseScene()
+            @pause_scene.helpDspAuto()

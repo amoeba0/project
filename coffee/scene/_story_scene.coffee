@@ -54,6 +54,8 @@ class stolyScene extends appScene
     bgmStop:()->
         if @gp_object.bgm != null
             game.bgmStop(@gp_object.bgm)
+            if game.main_scene != undefined && game.main_scene.bgm != undefined
+                game.nowPlayBgm = game.main_scene.bgm
     #http://wise9.github.io/enchant.js/doc/core/ja/symbols/enchant.Timeline.html
     #http://r.jsgames.jp/games/1687/
     ###
@@ -1170,7 +1172,7 @@ class stolyScene extends appScene
                     @gp_object.nozomi.tateShake2()
                     @gp_sentence.txtEnd()
                     @gp_sentence.txtSet(
-                        '希<br>もっともっと、,金が！,<br>ざっと見て『1兆円』は必要やで！！！'
+                        '希<br>もっともっと、,金が！,<br>ざっと見て『１００兆円』は必要やで！！！'
                     )
             ],
             [
@@ -1186,7 +1188,7 @@ class stolyScene extends appScene
                     @gp_object.eli.randomShake()
                     @gp_sentence.txtEnd()
                     @gp_sentence.txtSet(
-                        '絵里<br>ちょっと待って２人共、,<br>何もかもがおかしいわ？,<br>『1兆円』！？'
+                        '絵里<br>ちょっと待って２人共、,<br>何もかもがおかしいわ？,<br>『１００兆円』！？'
                     )
             ],
             [
@@ -1196,7 +1198,7 @@ class stolyScene extends appScene
                     @gp_object.eli.tateShake()
                     @gp_sentence.txtEnd()
                     @gp_sentence.txtSet(
-                        '絵里<br>国家予算じゃないんだから、,<br>それにさっきから聞いてて、,<br>突っ込みどころ満載よ？'
+                        '絵里<br>デタラメにも程があるわ、,<br>それにさっきから聞いてて、,<br>突っ込みどころ満載よ？'
                     )
             ],
             [
@@ -1206,7 +1208,7 @@ class stolyScene extends appScene
                     @gp_object.nico.tateShake2()
                     @gp_sentence.txtEnd()
                     @gp_sentence.txtSet(
-                        'にこ<br>そういうことだから、,<br>頑張ってね！,『1兆円』！'
+                        'にこ<br>そういうことだから、,<br>頑張ってね！,『１００兆円』！'
                     )
             ],
             [
@@ -1268,7 +1270,7 @@ class stolyScene extends appScene
                     @gp_object.honoka.setEmote('onpu')
                     @gp_object.honoka.tateShake2()
                     @gp_sentence.txtSet(
-                        '穂乃果<br>すごいよすごいよ！,<br>１兆円だよ！,１兆円！'
+                        '穂乃果<br>すごいよすごいよ！,<br>１００兆円だよ！,１００兆円！'
                     )
             ],
             [

@@ -50,10 +50,10 @@ class slotSetting extends appNode
                     {'name':'11_2', 'width':563, 'height':570, 'direction':'left'}
                 ],
                 'cut_in2':[
-                    {'name':'11_0', 'width':360, 'height':570, 'direction':'left'}
+                    {'name':'11_0', 'width':258, 'height':344, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'yumenaki', 'time':109, 'title':'夢なき夢は夢じゃない', 'unit':'高坂穂乃果', 'image':'bgm_11'}
+                    {'name':'yumenaki', 'time':47, 'title':'夢なき夢は夢じゃない', 'unit':'高坂穂乃果', 'image':'bgm_11'}
                 ],
                 'voice':['11_0', '11_1', '11_2']
             },
@@ -64,10 +64,10 @@ class slotSetting extends appNode
                     {'name':'12_2', 'width':388, 'height':570, 'direction':'right'}
                 ],
                 'cut_in2':[
-                    {'name':'12_0', 'width':510, 'height':728, 'direction':'left'}
+                    {'name':'12_0', 'width':244, 'height':325, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'blueberry', 'time':100, 'title':'ぶる～べりぃとれいん', 'unit':'南ことり', 'image':'bgm_12'}
+                    {'name':'blueberry', 'time':40, 'title':'ぶる～べりぃとれいん', 'unit':'南ことり', 'image':'bgm_12'}
                 ],
                 'voice':['12_0', '12_1', '12_2']
             },
@@ -78,10 +78,10 @@ class slotSetting extends appNode
                     {'name':'13_2', 'width':412, 'height':570, 'direction':'right'}
                 ],
                 'cut_in2':[
-                    {'name':'13_0', 'width':570, 'height':634, 'direction':'left'}
+                    {'name':'13_0', 'width':239, 'height':346, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'reason', 'time':96, 'title':'勇気のReason', 'unit':'園田海未', 'image':'bgm_13'}
+                    {'name':'reason', 'time':41, 'title':'勇気のReason', 'unit':'園田海未', 'image':'bgm_13'}
                 ],
                 'voice':['13_0', '13_1', '13_2']
             },
@@ -92,10 +92,10 @@ class slotSetting extends appNode
                     {'name':'14_2', 'width':750, 'height':660, 'direction':'left'}
                 ],
                 'cut_in2':[
-                    {'name':'14_0', 'width':476, 'height':648, 'direction':'left'}
+                    {'name':'14_0', 'width':183, 'height':309, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'daring', 'time':93, 'title':'Darling！！', 'unit':'西木野真姫', 'image':'bgm_14'}
+                    {'name':'daring', 'time':35, 'title':'Darling！！', 'unit':'西木野真姫', 'image':'bgm_14'}
                 ],
                 'voice':['14_0', '14_1', '14_2']
             },
@@ -106,10 +106,10 @@ class slotSetting extends appNode
                     {'name':'15_2', 'width':563, 'height':570, 'direction':'right'}
                 ],
                 'cut_in2':[
-                    {'name':'15_0', 'width':502, 'height':570, 'direction':'right'}
+                    {'name':'15_0', 'width':191, 'height':314, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'rinrinrin', 'time':130, 'title':'恋のシグナルRin rin rin！', 'unit':'星空凛', 'image':'bgm_15'}
+                    {'name':'rinrinrin', 'time':53, 'title':'恋のシグナルRin rin rin！', 'unit':'星空凛', 'image':'bgm_15'}
                 ],
                 'voice':['15_0', '15_1', '15_2']
             },
@@ -120,10 +120,10 @@ class slotSetting extends appNode
                     {'name':'16_2', 'width':450, 'height':570, 'direction':'left'}
                 ],
                 'cut_in2':[
-                    {'name':'16_0', 'width':438, 'height':570, 'direction':'right'}
+                    {'name':'16_0', 'width':209, 'height':329, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'nawatobi', 'time':166, 'title':'なわとび', 'unit':'小泉花陽', 'image':'bgm_16'}
+                    {'name':'nawatobi', 'time':56, 'title':'なわとび', 'unit':'小泉花陽', 'image':'bgm_16'}
                 ],
                 'voice':['16_0', '16_1', '16_2']
             },
@@ -134,10 +134,10 @@ class slotSetting extends appNode
                     {'name':'17_2', 'width':378, 'height':570, 'direction':'left'}
                 ],
                 'cut_in2':[
-                    {'name':'17_0', 'width':465, 'height':705, 'direction':'left'}
+                    {'name':'17_0', 'width':268, 'height':314, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'mahoutukai', 'time':107, 'title':'まほうつかいはじめました', 'unit':'矢澤にこ', 'image':'bgm_17'}
+                    {'name':'mahoutukai', 'time':47, 'title':'まほうつかいはじめました', 'unit':'矢澤にこ', 'image':'bgm_17'}
                 ],
                 'voice':['17_0', '17_1', '17_2']
             },
@@ -148,10 +148,10 @@ class slotSetting extends appNode
                     {'name':'18_2', 'width':433, 'height':602, 'direction':'right'}
                 ],
                 'cut_in2':[
-                    {'name':'18_0', 'width':599, 'height':606, 'direction':'right'}
+                    {'name':'18_0', 'width':275, 'height':327, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'junai', 'time':129, 'title':'純愛レンズ', 'unit':'東條希', 'image':'bgm_18'}
+                    {'name':'junai', 'time':55, 'title':'純愛レンズ', 'unit':'東條希', 'image':'bgm_18'}
                 ],
                 'voice':['18_0', '18_1', '18_2']
             },
@@ -162,10 +162,10 @@ class slotSetting extends appNode
                     {'name':'19_2', 'width':797, 'height':595, 'direction':'left'}
                 ],
                 'cut_in2':[
-                    {'name':'19_0', 'width':460, 'height':570, 'direction':'left'}
+                    {'name':'19_0', 'width':246, 'height':353, 'direction':'left'}
                 ],
                 'bgm':[
-                    {'name':'arihureta', 'time':95, 'title':'ありふれた悲しみの果て', 'unit':'絢瀬絵里', 'image':'bgm_19'}
+                    {'name':'arihureta', 'time':44, 'title':'ありふれた悲しみの果て', 'unit':'絢瀬絵里', 'image':'bgm_19'}
                 ],
                 'voice':['19_0', '19_1', '19_2']
             },
@@ -176,82 +176,82 @@ class slotSetting extends appNode
             },
             21:{
                 'bgm':[
-                    {'name':'hello_hoshi', 'time':94, 'title':'Hello，星を数えて ', 'unit':'1年生<br>（星空凛、西木野真姫、小泉花陽）', 'image':'bgm_21'}
+                    {'name':'hello_hoshi', 'time':42, 'title':'Hello，星を数えて ', 'unit':'1年生<br>（星空凛、西木野真姫、小泉花陽）', 'image':'bgm_21'}
                 ]
             },
             22:{
                 'bgm':[
-                    {'name':'future_style', 'time':95, 'title':'Future style', 'unit':'2年生<br>（高坂穂乃果、南ことり、園田海未）', 'image':'bgm_22'}
+                    {'name':'future_style', 'time':50, 'title':'Future style', 'unit':'2年生<br>（高坂穂乃果、南ことり、園田海未）', 'image':'bgm_22'}
                 ]
             },
             23:{
                 'bgm':[
-                    {'name':'hatena_heart', 'time':85, 'title':'？←HEARTBEAT', 'unit':'3年生<br>（絢瀬絵里、東條希、矢澤にこ）', 'image':'bgm_23'}
+                    {'name':'hatena_heart', 'time':44, 'title':'？←HEARTBEAT', 'unit':'3年生<br>（絢瀬絵里、東條希、矢澤にこ）', 'image':'bgm_23'}
                 ]
             },
             24:{
                 'bgm':[
-                    {'name':'sweet_holiday', 'time':116, 'title':'sweet＆sweet holiday', 'unit':'Printemps<br>(高坂穂乃果、南ことり、小泉花陽)', 'image':'bgm_24'}
+                    {'name':'sweet_holiday', 'time':49, 'title':'sweet＆sweet holiday', 'unit':'Printemps<br>(高坂穂乃果、南ことり、小泉花陽)', 'image':'bgm_24'}
                 ]
             },
             25:{
                 'bgm':[
-                    {'name':'hutari_hapinesu', 'time':160, 'title':'ふたりハピネス', 'unit':'lily white<br>(園田海未、星空凛、東條希)', 'image':'bgm_25'}
+                    {'name':'hutari_hapinesu', 'time':72, 'title':'ふたりハピネス', 'unit':'lily white<br>(園田海未、星空凛、東條希)', 'image':'bgm_25'}
                 ]
             },
             26:{
                 'bgm':[
-                    {'name':'cutie_panther', 'time':122, 'title':'CutiePanther', 'unit':'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)', 'image':'bgm_26'}
+                    {'name':'cutie_panther', 'time':53, 'title':'CutiePanther', 'unit':'BiBi<br>(絢瀬絵里、西木野真姫、矢澤にこ)', 'image':'bgm_26'}
                 ]
             },
             27:{
                 'bgm':[
-                    {'name':'listen_to_my_heart', 'time':139, 'title':'Listen to my heart！！', 'unit':'にこりんぱな<br>(矢澤にこ、星空凛、小泉花陽)', 'image':'bgm_27'}
+                    {'name':'listen_to_my_heart', 'time':46, 'title':'Listen to my heart！！', 'unit':'にこりんぱな<br>(矢澤にこ、星空凛、小泉花陽)', 'image':'bgm_27'}
                 ]
             },
             28:{
                 'bgm':[
-                    {'name':'soldier_game', 'time':92, 'title':'soldier game', 'unit':'<br>園田海未、西木野真姫、絢瀬絵里', 'image':'bgm_28'}
+                    {'name':'soldier_game', 'time':38, 'title':'soldier game', 'unit':'<br>園田海未、西木野真姫、絢瀬絵里', 'image':'bgm_28'}
                 ]
             },
             31:{
                 'bgm':[
-                    {'name':'mermaid2', 'time':124, 'title':'Mermaid festa vol．2', 'unit':'高坂穂乃果、星空凛', 'image':'bgm_31'}
+                    {'name':'mermaid2', 'time':64, 'title':'Mermaid festa vol．2', 'unit':'高坂穂乃果、星空凛', 'image':'bgm_31'}
                 ]
             },
             32:{
                 'bgm':[
-                    {'name':'kokuhaku', 'time':100, 'title':'告白日和、です！', 'unit':'南ことり、小泉花陽', 'image':'bgm_32'}
+                    {'name':'kokuhaku', 'time':52, 'title':'告白日和、です！', 'unit':'南ことり、小泉花陽', 'image':'bgm_32'}
                 ]
             },
             33:{
                 'bgm':[
-                    {'name':'otomesiki', 'time':102, 'title':'乙女式れんあい塾', 'unit':'矢澤にこ、東條希', 'image':'bgm_33'}
+                    {'name':'otomesiki', 'time':38, 'title':'乙女式れんあい塾', 'unit':'矢澤にこ、東條希', 'image':'bgm_33'}
                 ]
             },
             34:{
                 'bgm':[
-                    {'name':'anemone_heart', 'time':102, 'title':'Anemone heart', 'unit':'南ことり、園田海未', 'image':'bgm_34'}
+                    {'name':'anemone_heart', 'time':45, 'title':'Anemone heart', 'unit':'南ことり、園田海未', 'image':'bgm_34'}
                 ]
             },
             35:{
                 'bgm':[
-                    {'name':'beat_in_angel', 'time':107, 'title':'Beat in Angel', 'unit':'西木野真姫、星空凛', 'image':'bgm_35'}
+                    {'name':'beat_in_angel', 'time':47, 'title':'Beat in Angel', 'unit':'西木野真姫、星空凛', 'image':'bgm_35'}
                 ]
             },
             36:{
                 'bgm':[
-                    {'name':'garasu', 'time':105, 'title':'硝子の花園', 'unit':'東條希、絢瀬絵里', 'image':'bgm_36'}
+                    {'name':'garasu', 'time':41, 'title':'硝子の花園', 'unit':'東條希、絢瀬絵里', 'image':'bgm_36'}
                 ]
             },
             37:{
                 'bgm':[
-                    {'name':'magnetic', 'time':113, 'title':'ずるいよMagnetic today', 'unit':'矢澤にこ、西木野真姫', 'image':'bgm_37'}
+                    {'name':'magnetic', 'time':41, 'title':'ずるいよMagnetic today', 'unit':'矢澤にこ、西木野真姫', 'image':'bgm_37'}
                 ]
             },
             38:{
                 'bgm':[
-                    {'name':'storm', 'time':118, 'title':'Storm in Lover', 'unit':'園田海未、絢瀬絵里', 'image':'bgm_38'}
+                    {'name':'storm', 'time':44, 'title':'Storm in Lover', 'unit':'園田海未、絢瀬絵里', 'image':'bgm_38'}
                 ]
             }
         }
@@ -319,7 +319,7 @@ class slotSetting extends appNode
             9:{
                 'name':'ファイトだよっ',
                 'image':'item_9',
-                'discription':'CHANCE!!でスロットが揃う時に<br>FEVER!!が出る確率が2倍になる<br>（最大で20％）',
+                'discription':'CHANCE!!でスロットが揃う時に<br>FEVER!!が出る確率が3倍になる',
                 'price':10000000000
             },
 
@@ -399,7 +399,7 @@ class slotSetting extends appNode
                 'name':'プラチナことり',
                 'image':'item_24',
                 'discription':'最終話が見れる',
-                'price':1000000000000
+                'price':100000000000000
             }
         }
 
@@ -441,7 +441,7 @@ class slotSetting extends appNode
     setItemPointValue:()->
         @item_point_value[0] = Math.floor(@item_point_max * 1000 / (@item_point_recovery_sec * game.fps)) / 1000
         for i in [1..9]
-            @item_point_value[i] = Math.floor(@item_point_max_init * 1000 / (@item_list[i].durationSec * game.fps)) / 1000
+            @item_point_value[i] = Math.floor(@item_point_max_init * 1000 / (90 * game.fps)) / 1000
 
     ###
     単位時間で減少するアイテムポイントの値を決定する
@@ -521,43 +521,43 @@ class slotSetting extends appNode
             @prize_div = 0.7
         else if game.bet < 5000000000
             val = 1.2
-            @prize_div = 0.6
+            @prize_div = 0.7
         else if game.bet < 10000000000 #100億
             val = 1.4
-            @prize_div = 0.6
+            @prize_div = 0.7
         else if game.bet < 50000000000
             val = 1.6
-            @prize_div = 0.5
+            @prize_div = 0.6
         else if game.bet < 100000000000
             val = 1.8
-            @prize_div = 0.5
+            @prize_div = 0.6
         else if game.bet < 500000000000
             val = 2
-            @prize_div = 0.4
+            @prize_div = 0.6
         else if game.bet < 1000000000000 #1兆
             val = 2.2
-            @prize_div = 0.4
+            @prize_div = 0.6
         else if game.bet < 5000000000000
             val = 2.6
-            @prize_div = 0.3
+            @prize_div = 0.5
         else if game.bet < 10000000000000
             val = 3
-            @prize_div = 0.3
+            @prize_div = 0.5
         else if game.bet < 50000000000000
             val = 3.4
-            @prize_div = 0.2
+            @prize_div = 0.5
         else if game.bet < 100000000000000 #100兆
             val = 3.8
-            @prize_div = 0.2
+            @prize_div = 0.5
         else if game.bet < 500000000000000
             val = 4.2
-            @prize_div = 0.1
+            @prize_div = 0.5
         else if game.bet < 1000000000000000
             val = 4.6
-            @prize_div = 0.1
+            @prize_div = 0.5
         else
             val = 5
-            @prize_div = 0.1
+            @prize_div = 0.5
         div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
@@ -579,17 +579,17 @@ class slotSetting extends appNode
     ###
     スロットにμ’sが入るかどうかを返す
     カットインはリトライ以外が当たった時、確率で起こる
-    部員0-1人セットで40%、2人セットで60%、3人セットで80%
+    部員0-1人セットで60%、2人セットで80%、3人セットで100%
     @return boolean
     ###
     isAddMuse:()->
         result = false
         length = game.member_set_now.length
-        rate = 40
+        rate = 60
         if length is 2 || game.past_fever_num is 1
-            rate = 60
-        if 3 <= length || game.past_fever_num is 0
             rate = 80
+        if 3 <= length || game.past_fever_num is 0
+            rate = 100
         random = Math.floor(Math.random() * 100)
         if random < rate
             result = true
@@ -667,12 +667,14 @@ class slotSetting extends appNode
     ###
     calcPrizeMoney: (eye) ->
         ret_money = Math.floor(game.bet * @bairitu[eye] * @prize_div)
+        ###
         if game.fever is true
             time = @muse_material_list[game.fever_hit_eye]['bgm'][0]['time']
             div = Math.floor(time * 10 / 90) / 10
             if div < 1
                 div = 1
             ret_money = Math.floor(ret_money / div)
+        ###
         if game.main_scene.gp_back_panorama.now_back_effect_flg is true
             ret_money *= 2
         if ret_money > 100000000000000
@@ -958,7 +960,7 @@ class slotSetting extends appNode
     isForceFever:()->
         tension_rate = Math.floor((game.tension * 100)/ @tension_max)
         if tension_rate is 100
-            rate = 20
+            rate = 80
         else if 85 <= tension_rate
             if game.past_fever_num <= 3
                 rate = 16
@@ -980,9 +982,9 @@ class slotSetting extends appNode
         else
             rate = 2
         if game.isItemSet(9)
-            rate *= 2
-        if 20 < rate
-            rate = 20
+            rate *= 3
+        if 100 < rate
+            rate = 100
         result = false
         random = Math.floor(Math.random() * 100)
         if game.debug.force_fever is true || random <= rate

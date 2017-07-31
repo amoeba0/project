@@ -14,6 +14,10 @@ class pauseButton extends Button
         @y = 76
     ontouchend: (e)->
         game.setPauseScene()
+    hide:()->
+        @opacity = 0
+    show:()->
+        @opacity = 1
 
 class largePauseButton extends Button
     constructor:()->
@@ -54,9 +58,11 @@ class leftButton extends controllerButton
 
 class largeLeftButton extends Button
     constructor: () ->
-        super 150 ,150
+        super 150 ,300
         @x = 0
         @y = game.height - @height
+        #@image = @drawRect('blue')
+        #@opacity = 0.3
     ontouchstart: () ->
         game.main_scene.buttonList.left = true
     ontouchend: () ->
@@ -70,7 +76,7 @@ class rightButton extends controllerButton
         super
         @image = @drawLeftTriangle(@color)
         @scaleX = -1
-        @x = game.width - @w - 40
+        @x = (game.width - @w) / 2
     ontouchstart: () ->
         game.main_scene.buttonList.right = true
     ontouchend: () ->
@@ -78,9 +84,11 @@ class rightButton extends controllerButton
 
 class largeRightButton extends Button
     constructor: () ->
-        super 150 ,150
-        @x = game.width - @width
+        super 150 ,300
+        @x = (game.width - @w) / 2
         @y = game.height - @height
+        #@image = @drawRect('blue')
+        #@opacity = 0.3
     ontouchstart: () ->
         game.main_scene.buttonList.right = true
     ontouchend: () ->
@@ -93,7 +101,7 @@ class jumpButton extends controllerButton
     constructor: () ->
         super
         @image = @drawCircle(@color)
-        @x = (game.width - @w) / 2
+        @x = game.width - @w - 40
     ontouchstart: () ->
         game.main_scene.buttonList.jump = true
     ontouchend: () ->
@@ -105,9 +113,11 @@ class jumpButton extends controllerButton
 
 class largeJumpButton extends Button
     constructor: () ->
-        super 150, 150
-        @x = (game.width - @w) / 2
+        super 150, 300
+        @x = game.width - @width
         @y = game.height - @height
+        #@image = @drawRect('blue')
+        #@opacity = 0.3
     ontouchstart: () ->
         game.main_scene.buttonList.jump = true
     ontouchend: () ->

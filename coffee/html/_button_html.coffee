@@ -44,9 +44,9 @@ class returnGameButtonHtml extends pauseMainMenuButtonHtml
 class batuButtonHtml extends buttonHtml
     constructor: () ->
         super 70, 70
-        @x = 400
+        @x = 420
         @y = 30
-        @text = '　×'
+        @text = '×'
         @class = ['batu-button']
         @setHtml()
     ontouchend: (e) ->
@@ -152,7 +152,7 @@ class saveOkButtonHtml extends baseOkButtonHtml
     constructor:()->
         super
         @x = 170
-        @y = 330
+        @y = 334
     touchendEvent:() ->
         game.pause_scene.removeSaveMenu()
 
@@ -160,7 +160,7 @@ class saveConfirmOkButtonHtml extends baseOkButtonHtml
     constructor:()->
         super
         @x = 80
-        @y = 330
+        @y = 334
     touchendEvent:()->
         game.pause_scene.setSaveMenu()
 
@@ -171,7 +171,7 @@ class titleConfirmOkButtonHtml extends baseOkButtonHtml
     constructor:()->
         super
         @x = 80
-        @y = 330
+        @y = 334
     touchendEvent:() ->
         game.returnToTitle()
 
@@ -179,7 +179,7 @@ class recordOkButtonHtml extends baseOkButtonHtml
     constructor:()->
         super
         @x = 170
-        @y = 480
+        @y = 484
     touchendEvent:() ->
         game.pause_scene.removeRecordSelectMenu()
 
@@ -187,7 +187,7 @@ class trophyOkButtonHtml extends baseOkButtonHtml
     constructor:()->
         super
         @x = 170
-        @y = 480
+        @y = 484
     touchendEvent:() ->
         game.pause_scene.removeTrophySelectmenu()
 
@@ -302,7 +302,7 @@ class baseByuButtonHtml extends buttonHtml
         super 150, 45
         @class.push('base-buy-button')
         if game.isSumaho()
-            @class.push('base-ok-button-sp')
+            @class.push('base-buy-button-sp')
         @text = '購入'
         @setHtml()
     ontouchend: (e) ->

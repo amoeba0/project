@@ -104,50 +104,56 @@ class titleDiscription extends discriptionTextDialogHtml
 
 class itemItemBuyDiscription extends titleDiscription
     constructor:()->
-        super 100, 20
-        @x = 210
+        super 120, 20
+        @x = 180
         @y = 80
         @text = 'スキル'
+        @class.push('head2-discription')
         @setHtml()
 
 class memberItemBuyDiscription extends titleDiscription
     constructor:()->
-        super
-        @x = 220
+        super 120, 20
+        @x = 180
         @y = 310
         @text = '部員'
+        @class.push('head2-discription')
         @setHtml()
 
 class trophyItemBuyDiscription extends titleDiscription
     constructor:()->
-        super
-        @x = 200
+        super 180, 20
+        @x = 160
         @y = 530
         @text = 'トロフィー'
+        @class.push('head2-discription')
         @setHtml()
 
 class useSetDiscription extends titleDiscription
     constructor:()->
-        super
-        @x = 180
+        super 160, 20
+        @x = 160
         @y = 170
         @text = 'セット中'
+        @class.push('head2-discription')
         @setHtml()
 
 class memberUseDiscription extends titleDiscription
     constructor:()->
-        super
+        super 250, 20
         @x = 130
         @y = 170
         @text = 'ユニット編成中'
+        @class.push('head2-discription')
         @setHtml()
 
 class useHaveDiscription extends titleDiscription
     constructor:()->
-        super
-        @x = 170
+        super 200, 20
+        @x = 150
         @y = 370
         @text = '所持リスト'
+        @class.push('head2-discription')
         @setHtml()
 
 class recordDiscription extends titleDiscription
@@ -156,22 +162,25 @@ class recordDiscription extends titleDiscription
         @x = 200
         @y = 80
         @text = '楽曲'
+        @class.push('head2-discription')
         @setHtml()
 
 class trophyDiscription extends titleDiscription
     constructor:()->
-        super
-        @x = 170
+        super 180, 20
+        @x = 160
         @y = 520
         @text = 'トロフィー'
+        @class.push('head2-discription')
         @setHtml()
 
 class speedDiscription extends titleDiscription
     constructor:()->
-        super
+        super 340, 20
         @x = 80
         @y = 530
         @text = '移動速度とジャンプ力'
+        @class.push('head2-discription')
         @setHtml()
 
 class menuDiscription extends titleDiscription
@@ -239,14 +248,17 @@ class itemUseDiscription extends longTitleDiscription
         @x = 110
         @y = 80
         @text = 'スキルをセットする'
+        @class.push('head1-discription')
         @setHtml()
 
 class memberSetDiscription extends longTitleDiscription
     constructor:()->
         super
-        @x = 120
+        @x = 150
         @y = 80
         @text = '部員を編成する'
+        @class.push('head1-discription')
+        @width = 220
         @setHtml()
 
 class titleDiscription extends dialogHtml
@@ -259,7 +271,7 @@ class titleDiscription extends dialogHtml
         @sp = ''
         if game.isSumaho() is true
             @sousa = '←→・・・横移動<br>
-                ● または 画面の中央何も無い所・・・ジャンプ<br>
+                ●・・・ジャンプ<br>
                 ↑↓・・・掛け金の変更、　MENU・・・メニュー画面'
             @sp = '-sp'
         @text= '<div class="title-head'+@sp+'">・遊び方</div>
@@ -286,7 +298,11 @@ class helpTitle extends dialogHtml
 class pageNum extends dialogHtml
     constructor:(txt)->
         super 100, 30
-        @x = 190
+        if game.isSumaho()
+            @x = 190
+        else
+            @x = 180
+            @width = 120
         @y = 180
         @sp = ''
         if game.isSumaho() is true then @sp = '-sp'

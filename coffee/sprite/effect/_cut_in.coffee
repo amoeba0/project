@@ -34,6 +34,8 @@ class cutIn extends effect
         else
             @x = -@w
         @y = game.height - @h
+        if game.cut_in_set is 2
+            @y = 220
         @vx = @_setVxFast()
         game.main_scene.gp_stage_front.setItemFallFrm(6)
         @set_age = @age

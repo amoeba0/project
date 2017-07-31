@@ -16,30 +16,30 @@ class Debug extends appNode
         #開始後いきなりオープニング
         @foece_story_flg = false
         #デバッグで流すストーリーのエピソード
-        @test_stroy_episode = 5
+        @test_stroy_episode = 1
         #フィーバーのBGMを一括ロードせずに、フィーバー直前に都度ロードする
         @bgm_load_every_time = false
 
-        #ゲーム開始時ロードをしない
+        #ゲーム開始時ロードをしない シークレットウィンドウでテストする時はtrueにする
         @not_load_flg = false
         #テストロードに切り替え
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':100000000000000000,
-            'bet':1000000000000000,
+            'money':1000000000000,
+            'bet':1000000000,
             'combo':0,
-            'max_combo':2,
+            'max_combo':200,
             'tension':0,
             'past_fever_num':0,
             'item_point':500,
             'next_add_member_key':0,
-            'now_muse_num':14,
-            'max_set_item_num':2,
+            'now_muse_num':0,
+            'max_set_item_num':1,
             'now_speed':1,
-            'item_have_now':[],
-            'item_set_now':[],
-            'member_set_now':[],
+            'item_have_now':[1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19],
+            'item_set_now':[9],
+            'member_set_now':[17,18,19],
             'prev_fever_muse':[],
             'prev_item':[],
             'left_lille':[],
@@ -71,7 +71,7 @@ class Debug extends appNode
         @white_back = false
         #ゲームのサイズが等倍
         @toubai = false
-        #自動セーブしない
+        #自動セーブしない シークレットウィンドウでテストする時はtrueにする
         @not_auto_save = false
 
         #降ってくるアイテムの位置が常にプレイヤーの頭上
@@ -96,9 +96,11 @@ class Debug extends appNode
         @not_miss_item_flg = false
         #フィーバー時間が短い
         @short_fever = false
+        #フィーバー終了時にメニュー画面が開かない
+        @not_fever_end_menu = false
 
         #アイテムを取った時のテンション増減固定値
-        @fix_tention_item_catch_val = 50
+        @fix_tention_item_catch_val = 100
         #アイテムを落とした時のテンション増減固定値
         @fix_tention_item_fall_val = 0
         #スロットが当たった時のテンション増減固定値

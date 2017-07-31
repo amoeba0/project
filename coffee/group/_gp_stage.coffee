@@ -75,7 +75,7 @@ class stageFront extends gpStage
             game.auto_bet = 0
             game.bet = game.slot_setting.betDown()
             game.main_scene.gp_system.bet_text.setValue()
-        if 0 < game.money && game.retry is false
+        if 0 < game.money && (game.retry is false || game.retry is 0)
             game.money -= game.bet
         if game.retry is true
             game.retry = false

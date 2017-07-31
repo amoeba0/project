@@ -12,8 +12,10 @@ class appGame extends Game
         @mstVolume = 1 #ゲームの全体的な音量
         @multiLoadFilesNum = 0 #複数ロードするファイルの残り数
         @_getIsServer()
+        ###
         if @isSumaho()
             @beforeunload()
+        ###
 
     ###
     動かしてる環境がローカルか、サーバーかを判定
@@ -61,13 +63,13 @@ class appGame extends Game
     ###
     bgmPlay:(bgm, bgm_loop = false)->
         if bgm != undefined
-            bgm.play()
             @nowPlayBgm = bgm
             if bgm_loop is true
                 if @is_server is true
                     bgm.src.loop = true
                 else
                     bgm._element.loop = true
+            bgm.play()
 
     ###
     BGMを止める

@@ -19,6 +19,13 @@
     padding: 10px 0px;
     border: solid 3px #ffffff;
     border-radius: 10px;
+    background-position: 0 0, 10px 10px;
+    background-size: 20px 20px;
+    text-shadow: #6b6b6b 1px 1px 0px, #6b6b6b -1px 1px 0px,
+             #6b6b6b 1px -1px 0px, #6b6b6b -1px -1px 0px;
+    background-image:
+        linear-gradient(45deg, #808080 25%, transparent 25%, transparent 75%, #808080 75%, #808080),
+        linear-gradient(45deg, #808080 25%, transparent 25%, transparent 75%, #808080 75%, #808080);
 }
 .pause-main-menu-button-small {
 	width: 120px;
@@ -28,22 +35,42 @@
 }
 .pause-main-menu-button-white {
 	background-color: #EFEFEF;
-	color: #333333;
+	background-image:
+        linear-gradient(45deg, #e5e5e5 25%, transparent 25%, transparent 75%, #e5e5e5 75%, #e5e5e5),
+        linear-gradient(45deg, #e5e5e5 25%, transparent 25%, transparent 75%, #e5e5e5 75%, #e5e5e5);
+    color: #333333;
+    text-shadow: white 1px 1px 0px, white -1px 1px 0px,
+             white 1px -1px 0px, white -1px -1px 0px;
 }
 .pause-main-menu-button-green {
 	background-color: #28DE82;
+    background-image:
+        linear-gradient(45deg, #18d274 25%, transparent 25%, transparent 75%, #18d274 75%, #18d274),
+        linear-gradient(45deg, #18d274 25%, transparent 25%, transparent 75%, #18d274 75%, #18d274);
 }
 .pause-main-menu-button-red {
 	background-color: #FF7A7A;
+    background-image:
+        linear-gradient(45deg, #f56f6f 25%, transparent 25%, transparent 75%, #f56f6f 75%, #f56f6f),
+        linear-gradient(45deg, #f56f6f 25%, transparent 25%, transparent 75%, #f56f6f 75%, #f56f6f);
 }
 .pause-main-menu-button-orange {
 	background-color: #FB7744;
+    background-image:
+        linear-gradient(45deg, #f36c38 25%, transparent 25%, transparent 75%, #f36c38 75%, #f36c38),
+        linear-gradient(45deg, #f36c38 25%, transparent 25%, transparent 75%, #f36c38 75%, #f36c38);
 }
 .pause-main-menu-button-purple {
 	background-color: #C77FEC;
+    background-image:
+        linear-gradient(45deg, #b86dde 25%, transparent 25%, transparent 75%, #b86dde 75%, #b86dde),
+        linear-gradient(45deg, #b86dde 25%, transparent 25%, transparent 75%, #b86dde 75%, #b86dde);
 }
 .pause-main-menu-button-blue {
 	background-color: #6695FF;
+    background-image:
+        linear-gradient(45deg, #5886ef 25%, transparent 25%, transparent 75%, #5886ef 75%, #5886ef),
+        linear-gradient(45deg, #5886ef 25%, transparent 25%, transparent 75%, #5886ef 75%, #5886ef);
 }
 .title-menu-button {
     background-color: #ece8e4;
@@ -60,20 +87,36 @@
     background-color: #FF5495;
     width: 150px;
     padding: 10px 0px;
-    font: 37px Consolas Monaco MSゴシック;
+    font: 26px Consolas Monaco MSゴシック;
     border: solid 3px #cccccc;
     color: white;
+    background-position: 0 0, 10px 10px;
+    background-size: 20px 20px;
+    text-shadow: #6b6b6b 1px 1px 0px, #6b6b6b -1px 1px 0px,
+             #6b6b6b 1px -1px 0px, #6b6b6b -1px -1px 0px;
+    background-image:
+        linear-gradient(45deg, #f3498a 25%, transparent 25%, transparent 75%, #f3498a 75%, #f3498a),
+        linear-gradient(45deg, #f3498a 25%, transparent 25%, transparent 75%, #f3498a 75%, #f3498a);
+    box-shadow:0px 0px 1px 1px #6b6b6b ,0px 0px 1px 1px #6b6b6b inset;
 }
 .base-ok-button-sp {
-	font-size: 29px;
+	font-size: 26px;
 }
 .base-cancel-button {
     background-color: #4FA2E8;
     width: 150px;
     padding: 10px 0px;
-    font: 30px Consolas Monaco MSゴシック;
+    font: 24px Consolas Monaco MSゴシック;
     border: solid 3px #cccccc;
     color: white;
+    background-position: 0 0, 10px 10px;
+    background-size: 20px 20px;
+    text-shadow: #6b6b6b 1px 1px 0px, #6b6b6b -1px 1px 0px,
+             #6b6b6b 1px -1px 0px, #6b6b6b -1px -1px 0px;
+    background-image:
+        linear-gradient(45deg, #4499e0 25%, transparent 25%, transparent 75%, #4499e0 75%, #4499e0),
+        linear-gradient(45deg, #4499e0 25%, transparent 25%, transparent 75%, #4499e0 75%, #4499e0);
+    box-shadow:0px 0px 1px 1px #6b6b6b ,0px 0px 1px 1px #6b6b6b inset;
 }
 .base-cancel-button-sp {
 	font-size: 24px;
@@ -82,9 +125,20 @@
     background-color: #29DE7A;
     width: 150px;
     padding: 5px 0px;
-    font: 37px Consolas Monaco MSゴシック;
+    font: 31px Consolas Monaco MSゴシック;
     border: solid 3px #cccccc;
     color: white;
+    background-position: 0 0, 10px 10px;
+    background-size: 20px 20px;
+    text-shadow: #6b6b6b 1px 1px 0px, #6b6b6b -1px 1px 0px,
+             #6b6b6b 1px -1px 0px, #6b6b6b -1px -1px 0px;
+    background-image:
+        linear-gradient(45deg, #22d873 25%, transparent 25%, transparent 75%, #22d873 75%, #22d873),
+        linear-gradient(45deg, #22d873 25%, transparent 25%, transparent 75%, #22d873 75%, #22d873);
+    box-shadow:0px 0px 1px 1px #6b6b6b ,0px 0px 1px 1px #6b6b6b inset;
+}
+.base-buy-button-sp {
+    font-size: 31px;
 }
 .osusume-button {
     background-color: #29DE7A;
@@ -93,6 +147,14 @@
     font: 37px Consolas Monaco MSゴシック;
     border: solid 3px #cccccc;
     color: white;
+    background-position: 0 0, 10px 10px;
+    background-size: 20px 20px;
+    text-shadow: #6b6b6b 1px 1px 0px, #6b6b6b -1px 1px 0px,
+             #6b6b6b 1px -1px 0px, #6b6b6b -1px -1px 0px;
+    background-image:
+        linear-gradient(45deg, #22d873 25%, transparent 25%, transparent 75%, #22d873 75%, #22d873),
+        linear-gradient(45deg, #22d873 25%, transparent 25%, transparent 75%, #22d873 75%, #22d873);
+    box-shadow:0px 0px 1px 1px #6b6b6b ,0px 0px 1px 1px #6b6b6b inset;
 }
 .story-button {
     background-color: #29DE7A;
@@ -101,14 +163,30 @@
     font: 37px Consolas Monaco MSゴシック;
     border: solid 3px #cccccc;
     color: white;
+    background-position: 0 0, 10px 10px;
+    background-size: 20px 20px;
+    text-shadow: #6b6b6b 1px 1px 0px, #6b6b6b -1px 1px 0px,
+             #6b6b6b 1px -1px 0px, #6b6b6b -1px -1px 0px;
+    background-image:
+        linear-gradient(45deg, #22d873 25%, transparent 25%, transparent 75%, #22d873 75%, #22d873),
+        linear-gradient(45deg, #22d873 25%, transparent 25%, transparent 75%, #22d873 75%, #22d873);
+    box-shadow:0px 0px 1px 1px #6b6b6b ,0px 0px 1px 1px #6b6b6b inset;
 }
 .base-set-button {
     background-color: #29DE7A;
     width: 150px;
     padding: 7px 0px;
-    font: 37px Consolas Monaco MSゴシック;
+    font: 28px Consolas Monaco MSゴシック;
     border: solid 3px #cccccc;
     color: white;
+    background-position: 0 0, 10px 10px;
+    background-size: 20px 20px;
+    text-shadow: #6b6b6b 1px 1px 0px, #6b6b6b -1px 1px 0px,
+             #6b6b6b 1px -1px 0px, #6b6b6b -1px -1px 0px;
+    background-image:
+        linear-gradient(45deg, #22d873 25%, transparent 25%, transparent 75%, #22d873 75%, #22d873),
+        linear-gradient(45deg, #22d873 25%, transparent 25%, transparent 75%, #22d873 75%, #22d873);
+    box-shadow:0px 0px 1px 1px #6b6b6b ,0px 0px 1px 1px #6b6b6b inset;
 }
 
 
@@ -119,6 +197,9 @@
     font: 22px Consolas Monaco MSゴシック;
     border: solid 3px #aaaaaa;
     border-radius: 10px;
+    background-image: radial-gradient(#fff7fc 40%, transparent 0), radial-gradient(#fff7fc 40%, transparent 0);
+    background-position: 0 0, 30px 30px;
+    background-size: 60px 60px;
 }
 .base-dialog-save {
     padding: 100px 0px 200px 0px;
@@ -145,24 +226,41 @@
 }
 
 .base-discription{
-    font: 20px Consolas Monaco MSゴシック;
+    font: 17px Consolas Monaco MSゴシック;
     line-height: 1.2em;
 }
 .base-discription-sp{
 	font-size:17px;
 }
 .title-discription{
-    font-size: 34px;
+    font-size: 27px;
 }
 .title-discription-sp{
     font-size: 27px;
 }
 .head-title-discription{
-    font-size: 34px;
-    text-decoration: underline;
+    font-size: 27px;
 }
 .head-title-discription-sp{
 	font-size: 27px;
+}
+.head1-discription {
+    text-align: center;
+    border: solid 2px;
+    border-radius: 50px;
+    padding: 3px;
+    color: #fff;
+    border-color: #fff;
+    background-color: #ff4baf;
+    box-shadow:0px 0px 1px 1px #6b6b6b ,0px 0px 1px 1px #6b6b6b inset;
+}
+.head2-discription {
+    text-align: center;
+    border: solid 2px;
+    border-radius: 50px;
+    padding: 3px;
+    border-color: #ff4baf;
+    background-color: #fff;
 }
 
 .grayscale{
@@ -224,7 +322,7 @@
     margin-top: 10px;
 }
 .title-dsc {
-    font: 20px Consolas Monaco MSゴシック;
+    font: 18px Consolas Monaco MSゴシック;
     margin: 5px 10px;
     line-height: 1.5em;
 }
@@ -238,22 +336,23 @@
     line-height: 1.5em;
 }
 .help-button {
-    font: 24px Consolas Monaco MSゴシック;
+    font: 21px Consolas Monaco MSゴシック;
     color: white;
     background-color: #7777fd;
     padding: 5px;
+    border-radius: 50px;
 }
 .help-button.help-button-unread {
     background-color: red;
 }
 .help-discription {
-    font: 20px Consolas Monaco MSゴシック;
+    font: 16px Consolas Monaco MSゴシック;
 }
 .help-discription-sp {
     font: 16px Consolas Monaco MSゴシック;
 }
 .help-title {
-    font: 26px Consolas Monaco MSゴシック;
+    font: 22px Consolas Monaco MSゴシック;
 }
 .help-title-sp {
     font: 22px Consolas Monaco MSゴシック;
