@@ -8,7 +8,7 @@ class gpEffect extends appGroup
         @kirakira_num = 40
         #スマホの処理落ちはこのキラキラが重いせいかも
         if game.isSumaho()
-            @kirakira_num = 10
+            @kirakira_num = 40
         @item_catch_effect = []
 
     cutInSet:(num = 0)->

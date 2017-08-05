@@ -26,21 +26,21 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':1000000000000,
-            'bet':1000000000,
-            'combo':0,
+            'money':25252100000,
+            'bet':500000000,
+            'combo':20,
             'max_combo':200,
-            'tension':0,
-            'past_fever_num':0,
-            'item_point':500,
+            'tension':200,
+            'past_fever_num':3,
+            'item_point':1000,
             'next_add_member_key':0,
             'now_muse_num':0,
-            'max_set_item_num':1,
+            'max_set_item_num':3,
             'now_speed':1,
-            'item_have_now':[1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19],
-            'item_set_now':[9],
+            'item_have_now':[1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23,24],
+            'item_set_now':[4,5,6],
             'member_set_now':[17,18,19],
-            'prev_fever_muse':[],
+            'prev_fever_muse':[11,12,13],
             'prev_item':[],
             'left_lille':[],
             'middle_lille':[],
@@ -100,11 +100,11 @@ class Debug extends appNode
         @not_fever_end_menu = false
 
         #アイテムを取った時のテンション増減固定値
-        @fix_tention_item_catch_val = 100
+        @fix_tention_item_catch_val = 1
         #アイテムを落とした時のテンション増減固定値
         @fix_tention_item_fall_val = 0
         #スロットが当たった時のテンション増減固定値
-        @fix_tention_slot_hit_flg = 200
+        @fix_tention_slot_hit_flg = 1
 
         if @force_help_flg is true
             @force_pause_flg = true

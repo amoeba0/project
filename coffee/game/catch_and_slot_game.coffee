@@ -22,7 +22,7 @@ class LoveliveGame extends catchAndSlotGame
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
                     'heart', 'explosion', 'items', 'coin_pla', 'title', 'discription']
         #音声リスト
-        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm_maid']
+        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm_maid', 'syan']
 
         #フィーバーのBGMを一括ロードせずに、フィーバー直前に都度ロードする
         @bgmLoadEveryTime = false
@@ -133,6 +133,7 @@ class LoveliveGame extends catchAndSlotGame
     タイトルへ戻る
     ###
     returnToTitle:()->
+        @bgmStop(@main_scene.bgm)
         @popScene(@pause_scene)
         @popScene(@main_scene)
 
@@ -370,7 +371,8 @@ class LoveliveGame extends catchAndSlotGame
             @pause_scene.pause_main_layer.statusDsp()
             @pause_scene.pause_main_layer.bet_checkbox.setCheck()
             if @fever is false
-                @nowPlayBgmPause()
+                #@nowPlayBgmPause()
+                @nowPlayBgmStop()
             else
                 @_remainFeverBgm()
 
@@ -397,7 +399,7 @@ class LoveliveGame extends catchAndSlotGame
     popLoadScene:()->
         @popScene(@load_scene)
         if @fever is false
-            @nowPlayBgmRestart()
+            @nowPlayBgmRestart(true)
         else
             @_restartFeverBgm()
 

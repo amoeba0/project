@@ -3,7 +3,7 @@ class gpSlot extends appGroup
         super
         @underFrame = new UnderFrame()
         @addChild(@underFrame)
-        @lille_stop_se = game.soundload('dicision')
+        @lille_stop_se = game.soundload('syan')
         @slot_hit_se = game.soundload('start')
         @fever_bgm = game.soundload('bgm/zenkai_no_lovelive')
         @isStopping = false #スロット停止中

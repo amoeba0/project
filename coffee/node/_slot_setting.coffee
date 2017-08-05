@@ -509,55 +509,55 @@ class slotSetting extends appNode
             @prize_div = 0.9
         else if game.bet < 50000000
             val = 0.76
-            @prize_div = 0.8
+            @prize_div = 0.9
         else if game.bet < 100000000 #１億
             val = 0.8
-            @prize_div = 0.8
+            @prize_div = 0.9
         else if game.bet < 500000000
             val = 0.9
-            @prize_div = 0.7
+            @prize_div = 0.9
         else if game.bet < 1000000000
             val = 1
-            @prize_div = 0.7
+            @prize_div = 0.9
         else if game.bet < 5000000000
             val = 1.2
-            @prize_div = 0.7
+            @prize_div = 0.8
         else if game.bet < 10000000000 #100億
             val = 1.4
-            @prize_div = 0.7
+            @prize_div = 0.8
         else if game.bet < 50000000000
             val = 1.6
-            @prize_div = 0.6
+            @prize_div = 0.8
         else if game.bet < 100000000000
             val = 1.8
-            @prize_div = 0.6
+            @prize_div = 0.8
         else if game.bet < 500000000000
             val = 2
-            @prize_div = 0.6
+            @prize_div = 0.8
         else if game.bet < 1000000000000 #1兆
             val = 2.2
-            @prize_div = 0.6
+            @prize_div = 0.8
         else if game.bet < 5000000000000
             val = 2.6
-            @prize_div = 0.5
+            @prize_div = 0.7
         else if game.bet < 10000000000000
             val = 3
-            @prize_div = 0.5
+            @prize_div = 0.7
         else if game.bet < 50000000000000
             val = 3.4
-            @prize_div = 0.5
+            @prize_div = 0.7
         else if game.bet < 100000000000000 #100兆
             val = 3.8
-            @prize_div = 0.5
+            @prize_div = 0.7
         else if game.bet < 500000000000000
             val = 4.2
-            @prize_div = 0.5
+            @prize_div = 0.7
         else if game.bet < 1000000000000000
             val = 4.6
-            @prize_div = 0.5
+            @prize_div = 0.7
         else
             val = 5
-            @prize_div = 0.5
+            @prize_div = 0.6
         div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
@@ -677,8 +677,8 @@ class slotSetting extends appNode
         ###
         if game.main_scene.gp_back_panorama.now_back_effect_flg is true
             ret_money *= 2
-        if ret_money > 100000000000000
-            ret_money = 100000000000000
+        if ret_money > 1000000000000000
+            ret_money = 1000000000000000
         return ret_money
 
     ###

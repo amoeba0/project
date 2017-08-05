@@ -513,7 +513,7 @@ class storyButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
         @x = 70
-        @y = 480
+        @y = 483
         @class.push('story-button')
         @text = ''
     ontouchend: (e) ->

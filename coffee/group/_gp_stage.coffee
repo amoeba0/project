@@ -21,7 +21,7 @@ class stageFront extends gpStage
         @nowCatchMissItemsNum = 0
         @isCatchItemExist = false
         @notItemFallFlg = false
-        @item_fall_se = game.soundload('dicision')
+        @item_fall_se = game.soundload('select')
         @miss_fall_se = game.soundload('cancel')
         @dicision_se = @item_fall_se
         @cancel_se = @miss_fall_se

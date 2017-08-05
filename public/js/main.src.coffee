@@ -18,9 +18,13 @@ class appGame extends Game
         @soundList = []
         @nowPlayBgm = null
         @loadedFile = [] #ロード済みのファイル
-        @mstVolume = 1 #ゲームの全体的な音量
+        if @isSumaho()
+            @mstVolume = 0.8 #ゲームの全体的な音量
+        else
+            @mstVolume = 0.3
         @multiLoadFilesNum = 0 #複数ロードするファイルの残り数
         @_getIsServer()
+        @bgmLoop = 0
         ###
         if @isSumaho()
             @beforeunload()
@@ -65,35 +69,64 @@ class appGame extends Game
     ###
     sePlay:(se)->
         if se != undefined
-            se.clone().play()
+            clone = se.clone()
+            clone.volume = @mstVolume
+            clone.play()
 
     ###
     BGMをならす
     ###
     bgmPlay:(bgm, bgm_loop = false)->
         if bgm != undefined
+            bgm.volume = @mstVolume
             @nowPlayBgm = bgm
-            if bgm_loop is true
-                if @is_server is true
+            if bgm_loop
+                if bgm.src
+                    bgm.play()
                     bgm.src.loop = true
-                else
+                else if bgm._element
                     bgm._element.loop = true
+                    bgm.play()
+                else
+                    @bgmLoop = true
+                    @addEventListener('enterframe', ()->
+                        @bgmLoopPlay(bgm)
+                    )
+            else
+                bgm.play()
+
+    bgmLoopPlay:(bgm)->
+        if @bgmLoop is true
             bgm.play()
+
+    bgmLoopStop:(bgm)->
+        if @bgmLoop is true
+            @bgmLoop = false
+        @removeEventListener('enterframe', ()->
+            @bgmLoopPlay(bgm)
+        )
 
     ###
     BGMを止める
     ###
-    bgmStop:(bgm)->
+    bgmStop:(bgm, nowBgmKill=true)->
         if bgm != undefined
+            @bgmLoopStop(bgm)
             bgm.stop()
-            @nowPlayBgm = null
+            if nowBgmKill
+                @nowPlayBgm = null
 
     ###
     BGMの中断
     ###
     bgmPause:(bgm)->
         if bgm != undefined
+            @bgmLoopStop(bgm)
             bgm.pause()
+
+    nowPlayBgmStop:()->
+        if @nowPlayBgm != null
+            @bgmStop(@nowPlayBgm, false)
 
     ###
     現在再生中のBGMを一時停止する
@@ -1092,10 +1125,10 @@ class pauseRecordLayer extends appDomLayer
         for record_key, record_val of @recordList
             if game.prev_fever_muse.indexOf(parseInt(record_val.kind)) != -1
                 record_val.opacity = 1
-                #record_val.removeDomClass('grayscale', true)
+                record_val.removeDomClass('grayscale', true)
             else
                 record_val.opacity = 0.5
-                #record_val.addDomClass('grayscale', true)
+                record_val.addDomClass('grayscale', true)
     setTrophyList:()->
         for trophy_key, trophy_val of @trophyList
             @addChild(trophy_val)
@@ -1137,11 +1170,11 @@ class pauseRecordSelectLayer extends pauseBaseRecordSelectLayer
         @item_image.setImage(@item_options.image)
         if game.prev_fever_muse.indexOf(parseInt(kind)) != -1
             @item_image.opacity = 1
-            #@item_image.removeDomClass('grayscale', true)
+            @item_image.removeDomClass('grayscale', true)
             @item_name.setText(@item_options.title)
         else
             @item_image.opacity = 0.5
-            #@item_image.addDomClass('grayscale', true)
+            @item_image.addDomClass('grayscale', true)
             @item_name.setText('？？？')
         discription = @_setDiscription()
         @item_discription.setText(discription)
@@ -1255,7 +1288,7 @@ class LoveliveGame extends catchAndSlotGame
         @imgList = ['chun', 'sweets', 'lille', 'okujou', 'sky', 'coin', 'frame', 'pause', 'chance', 'fever', 'kira', 'big-kotori'
                     'heart', 'explosion', 'items', 'coin_pla', 'title', 'discription']
         #音声リスト
-        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm_maid']
+        @soundList = ['dicision', 'medal', 'select', 'start', 'cancel', 'jump', 'clear', 'explosion', 'bgm_maid', 'syan']
 
         #フィーバーのBGMを一括ロードせずに、フィーバー直前に都度ロードする
         @bgmLoadEveryTime = false
@@ -1366,6 +1399,7 @@ class LoveliveGame extends catchAndSlotGame
     タイトルへ戻る
     ###
     returnToTitle:()->
+        @bgmStop(@main_scene.bgm)
         @popScene(@pause_scene)
         @popScene(@main_scene)
 
@@ -1603,7 +1637,8 @@ class LoveliveGame extends catchAndSlotGame
             @pause_scene.pause_main_layer.statusDsp()
             @pause_scene.pause_main_layer.bet_checkbox.setCheck()
             if @fever is false
-                @nowPlayBgmPause()
+                #@nowPlayBgmPause()
+                @nowPlayBgmStop()
             else
                 @_remainFeverBgm()
 
@@ -1630,7 +1665,7 @@ class LoveliveGame extends catchAndSlotGame
     popLoadScene:()->
         @popScene(@load_scene)
         if @fever is false
-            @nowPlayBgmRestart()
+            @nowPlayBgmRestart(true)
         else
             @_restartFeverBgm()
 
@@ -1959,7 +1994,7 @@ class gpEffect extends appGroup
         @kirakira_num = 40
         #スマホの処理落ちはこのキラキラが重いせいかも
         if game.isSumaho()
-            @kirakira_num = 10
+            @kirakira_num = 40
         @item_catch_effect = []
 
     cutInSet:(num = 0)->
@@ -2084,7 +2119,7 @@ class gpSlot extends appGroup
         super
         @underFrame = new UnderFrame()
         @addChild(@underFrame)
-        @lille_stop_se = game.soundload('dicision')
+        @lille_stop_se = game.soundload('syan')
         @slot_hit_se = game.soundload('start')
         @fever_bgm = game.soundload('bgm/zenkai_no_lovelive')
         @isStopping = false #スロット停止中
@@ -2472,7 +2507,7 @@ class stageFront extends gpStage
         @nowCatchMissItemsNum = 0
         @isCatchItemExist = false
         @notItemFallFlg = false
-        @item_fall_se = game.soundload('dicision')
+        @item_fall_se = game.soundload('select')
         @miss_fall_se = game.soundload('cancel')
         @dicision_se = @item_fall_se
         @cancel_se = @miss_fall_se
@@ -3806,7 +3841,7 @@ class storyButtonHtml extends buttonHtml
     constructor:()->
         super 150, 45
         @x = 70
-        @y = 480
+        @y = 483
         @class.push('story-button')
         @text = ''
     ontouchend: (e) ->
@@ -4689,21 +4724,21 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':1000000000000,
-            'bet':1000000000,
-            'combo':0,
+            'money':25252100000,
+            'bet':500000000,
+            'combo':20,
             'max_combo':200,
-            'tension':0,
-            'past_fever_num':0,
-            'item_point':500,
+            'tension':200,
+            'past_fever_num':3,
+            'item_point':1000,
             'next_add_member_key':0,
             'now_muse_num':0,
-            'max_set_item_num':1,
+            'max_set_item_num':3,
             'now_speed':1,
-            'item_have_now':[1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19],
-            'item_set_now':[9],
+            'item_have_now':[1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23,24],
+            'item_set_now':[4,5,6],
             'member_set_now':[17,18,19],
-            'prev_fever_muse':[],
+            'prev_fever_muse':[11,12,13],
             'prev_item':[],
             'left_lille':[],
             'middle_lille':[],
@@ -4763,11 +4798,11 @@ class Debug extends appNode
         @not_fever_end_menu = false
 
         #アイテムを取った時のテンション増減固定値
-        @fix_tention_item_catch_val = 100
+        @fix_tention_item_catch_val = 1
         #アイテムを落とした時のテンション増減固定値
         @fix_tention_item_fall_val = 0
         #スロットが当たった時のテンション増減固定値
-        @fix_tention_slot_hit_flg = 200
+        @fix_tention_slot_hit_flg = 1
 
         if @force_help_flg is true
             @force_pause_flg = true
@@ -5294,55 +5329,55 @@ class slotSetting extends appNode
             @prize_div = 0.9
         else if game.bet < 50000000
             val = 0.76
-            @prize_div = 0.8
+            @prize_div = 0.9
         else if game.bet < 100000000 #１億
             val = 0.8
-            @prize_div = 0.8
+            @prize_div = 0.9
         else if game.bet < 500000000
             val = 0.9
-            @prize_div = 0.7
+            @prize_div = 0.9
         else if game.bet < 1000000000
             val = 1
-            @prize_div = 0.7
+            @prize_div = 0.9
         else if game.bet < 5000000000
             val = 1.2
-            @prize_div = 0.7
+            @prize_div = 0.8
         else if game.bet < 10000000000 #100億
             val = 1.4
-            @prize_div = 0.7
+            @prize_div = 0.8
         else if game.bet < 50000000000
             val = 1.6
-            @prize_div = 0.6
+            @prize_div = 0.8
         else if game.bet < 100000000000
             val = 1.8
-            @prize_div = 0.6
+            @prize_div = 0.8
         else if game.bet < 500000000000
             val = 2
-            @prize_div = 0.6
+            @prize_div = 0.8
         else if game.bet < 1000000000000 #1兆
             val = 2.2
-            @prize_div = 0.6
+            @prize_div = 0.8
         else if game.bet < 5000000000000
             val = 2.6
-            @prize_div = 0.5
+            @prize_div = 0.7
         else if game.bet < 10000000000000
             val = 3
-            @prize_div = 0.5
+            @prize_div = 0.7
         else if game.bet < 50000000000000
             val = 3.4
-            @prize_div = 0.5
+            @prize_div = 0.7
         else if game.bet < 100000000000000 #100兆
             val = 3.8
-            @prize_div = 0.5
+            @prize_div = 0.7
         else if game.bet < 500000000000000
             val = 4.2
-            @prize_div = 0.5
+            @prize_div = 0.7
         else if game.bet < 1000000000000000
             val = 4.6
-            @prize_div = 0.5
+            @prize_div = 0.7
         else
             val = 5
-            @prize_div = 0.5
+            @prize_div = 0.6
         div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
@@ -5462,8 +5497,8 @@ class slotSetting extends appNode
         ###
         if game.main_scene.gp_back_panorama.now_back_effect_flg is true
             ret_money *= 2
-        if ret_money > 100000000000000
-            ret_money = 100000000000000
+        if ret_money > 1000000000000000
+            ret_money = 1000000000000000
         return ret_money
 
     ###

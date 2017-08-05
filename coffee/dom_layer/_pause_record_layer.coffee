@@ -34,10 +34,10 @@ class pauseRecordLayer extends appDomLayer
         for record_key, record_val of @recordList
             if game.prev_fever_muse.indexOf(parseInt(record_val.kind)) != -1
                 record_val.opacity = 1
-                #record_val.removeDomClass('grayscale', true)
+                record_val.removeDomClass('grayscale', true)
             else
                 record_val.opacity = 0.5
-                #record_val.addDomClass('grayscale', true)
+                record_val.addDomClass('grayscale', true)
     setTrophyList:()->
         for trophy_key, trophy_val of @trophyList
             @addChild(trophy_val)
@@ -79,11 +79,11 @@ class pauseRecordSelectLayer extends pauseBaseRecordSelectLayer
         @item_image.setImage(@item_options.image)
         if game.prev_fever_muse.indexOf(parseInt(kind)) != -1
             @item_image.opacity = 1
-            #@item_image.removeDomClass('grayscale', true)
+            @item_image.removeDomClass('grayscale', true)
             @item_name.setText(@item_options.title)
         else
             @item_image.opacity = 0.5
-            #@item_image.addDomClass('grayscale', true)
+            @item_image.addDomClass('grayscale', true)
             @item_name.setText('？？？')
         discription = @_setDiscription()
         @item_discription.setText(discription)

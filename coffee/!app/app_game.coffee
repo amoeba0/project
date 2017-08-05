@@ -9,9 +9,13 @@ class appGame extends Game
         @soundList = []
         @nowPlayBgm = null
         @loadedFile = [] #ロード済みのファイル
-        @mstVolume = 1 #ゲームの全体的な音量
+        if @isSumaho()
+            @mstVolume = 0.8 #ゲームの全体的な音量
+        else
+            @mstVolume = 0.3
         @multiLoadFilesNum = 0 #複数ロードするファイルの残り数
         @_getIsServer()
+        @bgmLoop = 0
         ###
         if @isSumaho()
             @beforeunload()
@@ -56,35 +60,64 @@ class appGame extends Game
     ###
     sePlay:(se)->
         if se != undefined
-            se.clone().play()
+            clone = se.clone()
+            clone.volume = @mstVolume
+            clone.play()
 
     ###
     BGMをならす
     ###
     bgmPlay:(bgm, bgm_loop = false)->
         if bgm != undefined
+            bgm.volume = @mstVolume
             @nowPlayBgm = bgm
-            if bgm_loop is true
-                if @is_server is true
+            if bgm_loop
+                if bgm.src
+                    bgm.play()
                     bgm.src.loop = true
-                else
+                else if bgm._element
                     bgm._element.loop = true
+                    bgm.play()
+                else
+                    @bgmLoop = true
+                    @addEventListener('enterframe', ()->
+                        @bgmLoopPlay(bgm)
+                    )
+            else
+                bgm.play()
+
+    bgmLoopPlay:(bgm)->
+        if @bgmLoop is true
             bgm.play()
+
+    bgmLoopStop:(bgm)->
+        if @bgmLoop is true
+            @bgmLoop = false
+        @removeEventListener('enterframe', ()->
+            @bgmLoopPlay(bgm)
+        )
 
     ###
     BGMを止める
     ###
-    bgmStop:(bgm)->
+    bgmStop:(bgm, nowBgmKill=true)->
         if bgm != undefined
+            @bgmLoopStop(bgm)
             bgm.stop()
-            @nowPlayBgm = null
+            if nowBgmKill
+                @nowPlayBgm = null
 
     ###
     BGMの中断
     ###
     bgmPause:(bgm)->
         if bgm != undefined
+            @bgmLoopStop(bgm)
             bgm.pause()
+
+    nowPlayBgmStop:()->
+        if @nowPlayBgm != null
+            @bgmStop(@nowPlayBgm, false)
 
     ###
     現在再生中のBGMを一時停止する
