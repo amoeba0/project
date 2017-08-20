@@ -32,6 +32,9 @@ class pauseMainLayer extends appDomLayer
         @bet_checkbox = new betCheckboxHtml()
         @addChild(@bet_checkbox)
         @y = -20
+        @keyList = {'up':false, 'down':false}
+        @keyUpTime = 0
+        @keyDownTime = 0
     statusDsp:()->
         @money_text.setValue()
         @money_text.setPositionPause()
@@ -50,3 +53,31 @@ class pauseMainLayer extends appDomLayer
             @bet_text.setValue()
             @bet_text.setPositionPause()
             @low_bet_button.setXposition()
+    onenterframe: (e) ->
+        @_betSetting()
+    _betSetting: ()->
+        if game.main_scene.gp_system.paermit_bet_change_flg is true
+            if game.main_scene.keyList['up'] is true
+                @keyUpTime += 1
+                if @keyList['up'] is false
+                    @betSetting(true)
+                    @keyList['up'] = true
+                else
+                    if (game.fps < @keyUpTime && @keyUpTime % 2 is 0) || (game.fps * 3 < @keyUpTime)
+                        @betSetting(true)
+            else
+                if @keyList['up'] is true
+                    @keyList['up'] = false
+                @keyUpTime = 0
+            if game.main_scene.keyList['down'] is true
+                @keyDownTime += 1
+                if @keyList['down'] is false
+                    @betSetting(false)
+                    @keyList['down'] = true
+                else
+                    if (game.fps < @keyDownTime && @keyDownTime % 2 is 0) || (game.fps * 3 < @keyDownTime)
+                        @betSetting(false)
+            else
+                if @keyList['down'] is true
+                    @keyList['down'] = false
+                @keyDownTime = 0

@@ -10,7 +10,7 @@ class appGame extends Game
         @nowPlayBgm = null
         @loadedFile = [] #ロード済みのファイル
         if @isSumaho()
-            @mstVolume = 0.8 #ゲームの全体的な音量
+            @mstVolume = 0.6 #ゲームの全体的な音量
         else
             @mstVolume = 0.3
         @multiLoadFilesNum = 0 #複数ロードするファイルの残り数
@@ -294,8 +294,8 @@ class appGame extends Game
     ###
     数値の単位を漢数字で区切る
     ###
-    toJPUnit:(num)->
-        fra = @_delFraction(num)
+    toJPUnit:(num, cut=0)->
+        fra = @_delFraction(num, cut)
         num = fra[0]
         keta = fra[1]
         str = num + ''
@@ -303,7 +303,7 @@ class appGame extends Game
         n_ = ''
         count = 0
         ptr = 0
-        kNameArr = ['', '万', '億', '兆', '京', '垓', '𥝱', '穣']
+        kNameArr = ['', '万', '億', '兆', '京', '垓', '抒', '穣', '溝', '澗', '正', '載', '極', '恒', '阿', '那', '不', '無']
         kName = kNameArr.slice(keta, kNameArr.length)
         i = str.length - 1
         while i >= 0
@@ -323,10 +323,13 @@ class appGame extends Game
     数値の端数を0にする
     1兆円超えたら下4桁削る
     ###
-    _delFraction:(num)->
-        oku = 100000000
+    _delFraction:(num, cut=0)->
+        if cut is 1
+            oku = 1
+        else
+            oku = 100000000
         man = 10000
-        ketaMax = 4
+        ketaMax = 17
         ketaMin = 0
         for i in [ketaMax..1]
             keta = Math.pow(man, i)
@@ -334,6 +337,17 @@ class appGame extends Game
                 num = Math.floor(num / keta)
                 ketaMin = i
         return [num, ketaMin]
+
+    numDigit:(num)->
+        digit = 0
+        str = '' + num
+        if str.indexOf('e+') != -1
+            spl = str.split('e+')
+            digit = parseInt(spl[1]) + 1
+        else
+            digit = str.length
+        return digit
+
 
     ###
     ユーザーエージェントの判定
@@ -361,6 +375,14 @@ class appGame extends Game
         if ua.Mobile[0] is true || ua.Tablet is true
             rslt = true
         return rslt
+    isIos:()->
+        rslt = false
+        u = window.navigator.userAgent.toLowerCase()
+        if u.indexOf('iphone') != -1 or u.indexOf('ipad') != -1
+            rslt = true
+        return rslt
+
+
     ###
     ページ離脱前に警告を出す
     ###

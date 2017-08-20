@@ -265,10 +265,11 @@ class itemBuyCancelButtonHtml extends baseCancelButtonHtml
     constructor:()->
         super
         @y = 500
+        
     touchendEvent:() ->
         game.pause_scene.removeItemBuySelectMenu()
     setBuyImpossiblePositon:()->
-        @x = 170
+        @x = 250
     setBuyPossiblePosition:()->
         @x = 250
 
@@ -306,7 +307,6 @@ class baseByuButtonHtml extends buttonHtml
         @text = '購入'
         @setHtml()
     ontouchend: (e) ->
-        game.sePlay(@dicisionSe)
         @touchendEvent()
 
 ###
@@ -316,12 +316,23 @@ class itemBuyBuyButtonHtml extends baseByuButtonHtml
     constructor:()->
         super
         @y = 500
+        @impossible = true
     touchendEvent:() ->
-        game.pause_scene.pause_item_buy_select_layer.buyItem()
+        if @impossible is false
+            game.sePlay(@dicisionSe)
+            game.pause_scene.pause_item_buy_select_layer.buyItem()
     setBuyImpossiblePositon:()->
-        @x = -200
+        @x = 70
+        @class.push('grayscale')
+        @opacity = 0.5
+        @setHtml()
+        @impossible = true
     setBuyPossiblePosition:()->
         @x = 70
+        @class = game.arrayValueDel(@class, 'grayscale')
+        @opacity = 1
+        @setHtml()
+        @impossible = false
 
 ###
 セットボタン

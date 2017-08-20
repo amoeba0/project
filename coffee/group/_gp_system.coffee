@@ -57,6 +57,8 @@ class gpSystem extends appGroup
             @addChild(@large_pause_button)
         @keyList = {'up':false, 'down':false}
         @isWhiteBack = false
+        @keyUpTime = 0
+        @keyDownTime = 0
     onenterframe: (e) ->
         @_betSetting()
         @_setItemPoint()
@@ -66,26 +68,37 @@ class gpSystem extends appGroup
     _betSetting: ()->
         if @paermit_bet_change_flg is true
             if game.main_scene.keyList['up'] is true
+                @keyUpTime += 1
                 if @keyList['up'] is false
                     @_getBetSettingValue(true)
                     @keyList['up'] = true
+                else
+                    if (game.fps < @keyUpTime && @keyUpTime % 2 is 0) || (game.fps * 3 < @keyUpTime)
+                        @_getBetSettingValue(true)
             else
                 if @keyList['up'] is true
                     @keyList['up'] = false
+                @keyUpTime = 0
             if game.main_scene.keyList['down'] is true
+                @keyDownTime += 1
                 if @keyList['down'] is false
                     @_getBetSettingValue(false)
                     @keyList['down'] = true
+                else
+                    if (game.fps < @keyDownTime && @keyDownTime % 2 is 0) || (game.fps * 3 < @keyDownTime)
+                        @_getBetSettingValue(false)
             else
                 if @keyList['down'] is true
                     @keyList['down'] = false
+                @keyDownTime = 0
 
     ###
     掛け金の変更
     ###
     _getBetSettingValue:(up)->
-        game.slot_setting.betChange(up)
-        @bet_text.setValue()
+        if game.fever is false
+            game.slot_setting.betChange(up)
+            @bet_text.setValue()
     ###
     掛け金の変更が可能かを変更する
     @param boolean flg true:変更可能、false:変更不可能

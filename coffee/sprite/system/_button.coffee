@@ -175,8 +175,10 @@ class heighBetButtonPause extends buttonHtml
         @x = 90
         @y = 175
         @setHtml()
+    ontouchstart: () ->
+        game.main_scene.keyList.up = true
     ontouchend: () ->
-        game.pause_scene.pause_main_layer.betSetting(true)
+        game.main_scene.keyList.up = false
 
 ###
 掛け金を減らすボタン
@@ -210,8 +212,10 @@ class lowBetButtonPause extends buttonHtml
         @x = 90
         @y = 175
         @setHtml()
+    ontouchstart: () ->
+        game.main_scene.keyList.down = true
     ontouchend: () ->
-        game.pause_scene.pause_main_layer.betSetting(false)
+        game.main_scene.keyList.down = false
     setXposition:()->
         @x = 160 + game.pause_scene.pause_main_layer.bet_text._boundWidth
 

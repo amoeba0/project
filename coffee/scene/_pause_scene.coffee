@@ -20,6 +20,12 @@ class pauseScene extends appScene
         @pause_help_layer = new pauseHelpLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
+        if game.main_scene.keyList.up is true
+            game.main_scene.keyList.up = false
+            game.main_scene.gp_system.heigh_bet_button.changePullColor()
+        if game.main_scene.keyList.down is true
+            game.main_scene.keyList.down = false
+            game.main_scene.gp_system.low_bet_button.changePullColor()
     setSaveConfirmMenu: () ->
         @pause_save_confirm_layer = new pauseSaveConfirmLayer()
         @addChild(@pause_save_confirm_layer)

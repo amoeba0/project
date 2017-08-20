@@ -145,6 +145,7 @@ class LoveliveGame extends catchAndSlotGame
         @loadGame()
         @bgmPlayOnTension()
         @pushScene(@main_scene)
+        @retry = false
 
     ###
     最初からゲーム開始

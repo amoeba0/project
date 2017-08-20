@@ -19,7 +19,7 @@ class appGame extends Game
         @nowPlayBgm = null
         @loadedFile = [] #ロード済みのファイル
         if @isSumaho()
-            @mstVolume = 0.8 #ゲームの全体的な音量
+            @mstVolume = 0.6 #ゲームの全体的な音量
         else
             @mstVolume = 0.3
         @multiLoadFilesNum = 0 #複数ロードするファイルの残り数
@@ -303,8 +303,8 @@ class appGame extends Game
     ###
     数値の単位を漢数字で区切る
     ###
-    toJPUnit:(num)->
-        fra = @_delFraction(num)
+    toJPUnit:(num, cut=0)->
+        fra = @_delFraction(num, cut)
         num = fra[0]
         keta = fra[1]
         str = num + ''
@@ -312,7 +312,7 @@ class appGame extends Game
         n_ = ''
         count = 0
         ptr = 0
-        kNameArr = ['', '万', '億', '兆', '京', '垓', '𥝱', '穣']
+        kNameArr = ['', '万', '億', '兆', '京', '垓', '抒', '穣', '溝', '澗', '正', '載', '極', '恒', '阿', '那', '不', '無']
         kName = kNameArr.slice(keta, kNameArr.length)
         i = str.length - 1
         while i >= 0
@@ -332,10 +332,13 @@ class appGame extends Game
     数値の端数を0にする
     1兆円超えたら下4桁削る
     ###
-    _delFraction:(num)->
-        oku = 100000000
+    _delFraction:(num, cut=0)->
+        if cut is 1
+            oku = 1
+        else
+            oku = 100000000
         man = 10000
-        ketaMax = 4
+        ketaMax = 17
         ketaMin = 0
         for i in [ketaMax..1]
             keta = Math.pow(man, i)
@@ -343,6 +346,17 @@ class appGame extends Game
                 num = Math.floor(num / keta)
                 ketaMin = i
         return [num, ketaMin]
+
+    numDigit:(num)->
+        digit = 0
+        str = '' + num
+        if str.indexOf('e+') != -1
+            spl = str.split('e+')
+            digit = parseInt(spl[1]) + 1
+        else
+            digit = str.length
+        return digit
+
 
     ###
     ユーザーエージェントの判定
@@ -370,6 +384,14 @@ class appGame extends Game
         if ua.Mobile[0] is true || ua.Tablet is true
             rslt = true
         return rslt
+    isIos:()->
+        rslt = false
+        u = window.navigator.userAgent.toLowerCase()
+        if u.indexOf('iphone') != -1 or u.indexOf('ipad') != -1
+            rslt = true
+        return rslt
+
+
     ###
     ページ離脱前に警告を出す
     ###
@@ -956,6 +978,9 @@ class pauseMainLayer extends appDomLayer
         @bet_checkbox = new betCheckboxHtml()
         @addChild(@bet_checkbox)
         @y = -20
+        @keyList = {'up':false, 'down':false}
+        @keyUpTime = 0
+        @keyDownTime = 0
     statusDsp:()->
         @money_text.setValue()
         @money_text.setPositionPause()
@@ -974,6 +999,34 @@ class pauseMainLayer extends appDomLayer
             @bet_text.setValue()
             @bet_text.setPositionPause()
             @low_bet_button.setXposition()
+    onenterframe: (e) ->
+        @_betSetting()
+    _betSetting: ()->
+        if game.main_scene.gp_system.paermit_bet_change_flg is true
+            if game.main_scene.keyList['up'] is true
+                @keyUpTime += 1
+                if @keyList['up'] is false
+                    @betSetting(true)
+                    @keyList['up'] = true
+                else
+                    if (game.fps < @keyUpTime && @keyUpTime % 2 is 0) || (game.fps * 3 < @keyUpTime)
+                        @betSetting(true)
+            else
+                if @keyList['up'] is true
+                    @keyList['up'] = false
+                @keyUpTime = 0
+            if game.main_scene.keyList['down'] is true
+                @keyDownTime += 1
+                if @keyList['down'] is false
+                    @betSetting(false)
+                    @keyList['down'] = true
+                else
+                    if (game.fps < @keyDownTime && @keyDownTime % 2 is 0) || (game.fps * 3 < @keyDownTime)
+                        @betSetting(false)
+            else
+                if @keyList['down'] is true
+                    @keyList['down'] = false
+                @keyDownTime = 0
 class pauseMemberSetLayer extends appDomLayer
     constructor: () ->
         super
@@ -1411,6 +1464,7 @@ class LoveliveGame extends catchAndSlotGame
         @loadGame()
         @bgmPlayOnTension()
         @pushScene(@main_scene)
+        @retry = false
 
     ###
     最初からゲーム開始
@@ -2501,7 +2555,7 @@ class stageFront extends gpStage
         @itemFallFrm = 0 #アイテムを降らせる周期（フレーム）
         @catchItems = [] #キャッチアイテムのインスタンスを格納
         @nowCatchItemsNum = 0
-        @missItemFallSycle = 1 #ハズレアイテムを取る周期
+        @missItemFallSycle = 0 #ハズレアイテムを取る周期
         @missItemFallSycleNow = 0
         @catchMissItems = []
         @nowCatchMissItemsNum = 0
@@ -2548,11 +2602,17 @@ class stageFront extends gpStage
             game.main_scene.gp_back_panorama.setBackEffect()
             if @itemFallSec != @itemFallSecInit
                 @setItemFallFrm(@itemFallSecInit)
-        if @missItemFallSycleNow is @missItemFallSycle && @age % @itemFallFrm is @itemFallFrm / 2
+        if 1 <= @missItemFallSycle && @missItemFallSycleNow >= @missItemFallSycle && @age % @itemFallFrm is @itemFallFrm / 2
             if game.debug.not_miss_item_flg is false && game.isItemSet(2) is false && game.fever is false
                 @_missCatchFall()
             @missItemFallSycleNow = 0
-
+        if 0 < @missItemFallSycle && @missItemFallSycle < 1 && game.debug.not_miss_item_flg is false && game.fever is false
+            dilay = game.fps
+            if @missItemFallSycle is 0.5 then dilay = game.fps * 1.5
+            if @missItemFallSycle is 0.2 then dilay = 20
+            if @missItemFallSycle is 0.1 then dilay = 10
+            if ((@age % @itemFallFrm) % Math.floor(@itemFallFrm * @missItemFallSycle) is dilay)
+                @_missCatchFall()
     ###
     キャッチアイテムをランダムな位置から降らせる
     ###
@@ -2580,7 +2640,7 @@ class stageFront extends gpStage
             game.main_scene.gp_slot.endForceSlotHit()
 
     _missCatchFall:()->
-        if game.money >= game.bet && game.past_fever_num >= 2
+        if game.money >= game.bet
             @catchMissItems.push(new OnionCatch())
             @addChild(@catchMissItems[@nowCatchMissItemsNum])
             game.sePlay(@miss_fall_se)
@@ -2606,7 +2666,7 @@ class stageBack extends gpStage
     constructor: () ->
         super
         @prizeMoneyItemsInstance = [] #スロット当選金のインスタンスを格納
-        @prizeMoneyItemsNum = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0,13:0,14:0,15:0} #当選金を降らせる各コイン数の内訳
+        @prizeMoneyItemsNum = {} #当選金を降らせる各コイン数の内訳
         @nowPrizeMoneyItemsNum = 0
         @prizeMoneyFallIntervalFrm = 4 #スロットの当選金を降らせる間隔（フレーム）
         @prizeMoneyFallPeriodSec = 5 #スロットの当選金額が振っている時間（秒）
@@ -2614,7 +2674,7 @@ class stageBack extends gpStage
         @oneSetMoney = 1 #1フレームに設置するコインの数
 
         @returnMoneyItemsInstance = [] #掛け金の戻り分のインスタンスを格納
-        @returnMoneyItemsNum = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0,13:0,14:0,15:0}#掛け金の戻り分を降らせる各コイン数の内訳
+        @returnMoneyItemsNum = {} #掛け金の戻り分を降らせる各コイン数の内訳
         @nowReturnMoneyItemsNum = 0
         @returnMoneyFallIntervalFrm = 4 #掛け金の戻り分を降らせる間隔（フレーム）
     onenterframe: () ->
@@ -2626,16 +2686,9 @@ class stageBack extends gpStage
     ###
     fallPrizeMoneyStart:(value) ->
         stage = game.main_scene.gp_stage_front
-        if value < 10000000000000000
-            @prizeMoneyFallIntervalFrm = 4
-        else if value < 100000000000000000
-            @prizeMoneyFallIntervalFrm = 2
-        else
-            @prizeMoneyFallIntervalFrm = 1
+        @prizeMoneyFallIntervalFrm = 4
         @prizeMoneyItemsNum = @_calcMoneyItemsNum(value, true)
         @prizeMoneyItemsInstance = @_setMoneyItemsInstance(@prizeMoneyItemsNum, true)
-        if @prizeMoneyItemsNum[15] > 1000
-            @oneSetMoney = Math.floor(@prizeMoneyItemsNum[15] / 1000)
         @prizeMoneyFallPeriodSec = Math.ceil((@prizeMoneyItemsInstance.length / @oneSetMoney) * @prizeMoneyFallIntervalFrm / game.fps) + stage.itemFallSecInit
         if @prizeMoneyFallPeriodSec > stage.itemFallSecInit
             stage.setItemFallFrm(@prizeMoneyFallPeriodSec)
@@ -2661,279 +2714,22 @@ class stageBack extends gpStage
     @prize boolean true:当選金額
     ###
     _calcMoneyItemsNum:(value, prize)->
-        ret_data = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0,13:0,14:0,15:0}
+        ret_data = {}
         if value <= 20 #全部1円
             ret_data[0] = value
-            ret_data[1] = 0
-            ret_data[2] = 0
-            ret_data[3] = 0
-            ret_data[4] = 0
-            ret_data[5] = 0
-            ret_data[6] = 0
-            ret_data[7] = 0
-            ret_data[8] = 0
-            ret_data[9] = 0
-            ret_data[10] = 0
-            ret_data[11] = 0
-            ret_data[12] = 0
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
         else if value < 100 #1円と10円と端数
             ret_data[0] = game.getDigitNum(value, 1) + 10
             ret_data[1] = game.getDigitNum(value, 2) - 1
-            ret_data[2] = 0
-            ret_data[3] = 0
-            ret_data[4] = 0
-            ret_data[5] = 0
-            ret_data[6] = 0
-            ret_data[7] = 0
-            ret_data[8] = 0
-            ret_data[9] = 0
-            ret_data[10] = 0
-            ret_data[11] = 0
-            ret_data[12] = 0
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
         else if value < 1000 #10円と100円と端数
             ret_data[0] = game.getDigitNum(value, 1)
             ret_data[1] = game.getDigitNum(value, 2) + 10
             ret_data[2] = game.getDigitNum(value, 3) - 1
-            ret_data[3] = 0
-            ret_data[4] = 0
-            ret_data[5] = 0
-            ret_data[6] = 0
-            ret_data[7] = 0
-            ret_data[8] = 0
-            ret_data[9] = 0
-            ret_data[10] = 0
-            ret_data[11] = 0
-            ret_data[12] = 0
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
-        else if value < 10000 #1000円と100円と端数
-            ret_data[0] = game.getDigitNum(value, 1)
-            ret_data[1] = game.getDigitNum(value, 2)
-            ret_data[2] = game.getDigitNum(value, 3) + 10
-            ret_data[3] = game.getDigitNum(value, 4) - 1
-            ret_data[4] = 0
-            ret_data[5] = 0
-            ret_data[6] = 0
-            ret_data[7] = 0
-            ret_data[8] = 0
-            ret_data[9] = 0
-            ret_data[10] = 0
-            ret_data[11] = 0
-            ret_data[12] = 0
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
-        else if value < 100000
-            ret_data[0] = 0
-            ret_data[1] = game.getDigitNum(value, 2)
-            ret_data[2] = game.getDigitNum(value, 3)
-            ret_data[3] = game.getDigitNum(value, 4) + 10
-            ret_data[4] = game.getDigitNum(value, 5) - 1
-            ret_data[5] = 0
-            ret_data[6] = 0
-            ret_data[7] = 0
-            ret_data[8] = 0
-            ret_data[9] = 0
-            ret_data[10] = 0
-            ret_data[11] = 0
-            ret_data[12] = 0
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
-        else if value < 1000000
-            ret_data[0] = 0
-            ret_data[1] = 0
-            ret_data[2] = game.getDigitNum(value, 3)
-            ret_data[3] = game.getDigitNum(value, 4)
-            ret_data[4] = game.getDigitNum(value, 5) + 10
-            ret_data[5] = game.getDigitNum(value, 6) - 1
-            ret_data[6] = 0
-            ret_data[7] = 0
-            ret_data[8] = 0
-            ret_data[9] = 0
-            ret_data[10] = 0
-            ret_data[11] = 0
-            ret_data[12] = 0
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
-        else if value < 10000000
-            ret_data[0] = 0
-            ret_data[1] = 0
-            ret_data[2] = 0
-            ret_data[3] = game.getDigitNum(value, 4)
-            ret_data[4] = game.getDigitNum(value, 5)
-            ret_data[5] = game.getDigitNum(value, 6) + 10
-            ret_data[6] = game.getDigitNum(value, 7) - 1
-            ret_data[7] = 0
-            ret_data[8] = 0
-            ret_data[9] = 0
-            ret_data[10] = 0
-            ret_data[11] = 0
-            ret_data[12] = 0
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
-        else if value < 100000000
-            ret_data[0] = 0
-            ret_data[1] = 0
-            ret_data[2] = 0
-            ret_data[3] = 0
-            ret_data[4] = game.getDigitNum(value, 5)
-            ret_data[5] = game.getDigitNum(value, 6)
-            ret_data[6] = game.getDigitNum(value, 7) + 10
-            ret_data[7] = game.getDigitNum(value, 8) - 1
-            ret_data[8] = 0
-            ret_data[9] = 0
-            ret_data[10] = 0
-            ret_data[11] = 0
-            ret_data[12] = 0
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
-        else if value < 1000000000
-            ret_data[0] = 0
-            ret_data[1] = 0
-            ret_data[2] = 0
-            ret_data[3] = 0
-            ret_data[4] = 0
-            ret_data[5] = game.getDigitNum(value, 6)
-            ret_data[6] = game.getDigitNum(value, 7)
-            ret_data[7] = game.getDigitNum(value, 8) + 10
-            ret_data[8] = game.getDigitNum(value, 9) - 1
-            ret_data[9] = 0
-            ret_data[10] = 0
-            ret_data[11] = 0
-            ret_data[12] = 0
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
-        else if value < 10000000000
-            ret_data[0] = 0
-            ret_data[1] = 0
-            ret_data[2] = 0
-            ret_data[3] = 0
-            ret_data[4] = 0
-            ret_data[5] = 0
-            ret_data[6] = game.getDigitNum(value, 7)
-            ret_data[7] = game.getDigitNum(value, 8)
-            ret_data[8] = game.getDigitNum(value, 9) + 10
-            ret_data[9] = game.getDigitNum(value, 10) - 1
-            ret_data[10] = 0
-            ret_data[11] = 0
-            ret_data[12] = 0
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
-        else if value < 100000000000
-            ret_data[0] = 0
-            ret_data[1] = 0
-            ret_data[2] = 0
-            ret_data[3] = 0
-            ret_data[4] = 0
-            ret_data[5] = 0
-            ret_data[6] = 0
-            ret_data[7] = game.getDigitNum(value, 8)
-            ret_data[8] = game.getDigitNum(value, 9)
-            ret_data[9] = game.getDigitNum(value, 10) + 10
-            ret_data[10] = game.getDigitNum(value, 11) - 1
-            ret_data[11] = 0
-            ret_data[12] = 0
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
-        else if value < 1000000000000
-            ret_data[0] = 0
-            ret_data[1] = 0
-            ret_data[2] = 0
-            ret_data[3] = 0
-            ret_data[4] = 0
-            ret_data[5] = 0
-            ret_data[6] = 0
-            ret_data[7] = 0
-            ret_data[8] = game.getDigitNum(value, 9)
-            ret_data[9] = game.getDigitNum(value, 10)
-            ret_data[10] = game.getDigitNum(value, 11) + 10
-            ret_data[11] = game.getDigitNum(value, 12) - 1
-            ret_data[12] = 0
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
-        else if value < 10000000000000
-            ret_data[0] = 0
-            ret_data[1] = 0
-            ret_data[2] = 0
-            ret_data[3] = 0
-            ret_data[4] = 0
-            ret_data[5] = 0
-            ret_data[6] = 0
-            ret_data[7] = 0
-            ret_data[8] = 0
-            ret_data[9] = game.getDigitNum(value, 10)
-            ret_data[10] = game.getDigitNum(value, 11)
-            ret_data[11] = game.getDigitNum(value, 12) + 10
-            ret_data[12] = game.getDigitNum(value, 13) - 1
-            ret_data[13] = 0
-            ret_data[14] = 0
-            ret_data[15] = 0
-        else if value < 100000000000000
-            ret_data[0] = 0
-            ret_data[1] = 0
-            ret_data[2] = 0
-            ret_data[3] = 0
-            ret_data[4] = 0
-            ret_data[5] = 0
-            ret_data[6] = 0
-            ret_data[7] = 0
-            ret_data[8] = 0
-            ret_data[9] = 0
-            ret_data[10] = game.getDigitNum(value, 11)
-            ret_data[11] = game.getDigitNum(value, 12)
-            ret_data[12] = game.getDigitNum(value, 13) + 10
-            ret_data[13] = game.getDigitNum(value, 14) - 1
-            ret_data[14] = 0
-            ret_data[15] = 0
-        else if value < 1000000000000000
-            ret_data[0] = 0
-            ret_data[1] = 0
-            ret_data[2] = 0
-            ret_data[3] = 0
-            ret_data[4] = 0
-            ret_data[5] = 0
-            ret_data[6] = 0
-            ret_data[7] = 0
-            ret_data[8] = 0
-            ret_data[9] = 0
-            ret_data[10] = 0
-            ret_data[11] = game.getDigitNum(value, 12)
-            ret_data[12] = game.getDigitNum(value, 13)
-            ret_data[13] = game.getDigitNum(value, 14) + 10
-            ret_data[14] = game.getDigitNum(value, 15) - 1
-            ret_data[15] = 0
         else
-            ret_data[0] = 0
-            ret_data[1] = 0
-            ret_data[2] = 0
-            ret_data[3] = 0
-            ret_data[4] = 0
-            ret_data[5] = 0
-            ret_data[6] = 0
-            ret_data[7] = 0
-            ret_data[8] = 0
-            ret_data[9] = 0
-            ret_data[10] = 0
-            ret_data[11] = 0
-            ret_data[12] = game.getDigitNum(value, 13)
-            ret_data[13] = game.getDigitNum(value, 14)
-            ret_data[14] = game.getDigitNum(value, 15)
-            ret_data[15] = Math.floor(value/100000000000000)
+            lng = game.numDigit(value)
+            ret_data[lng - 4] = game.getDigitNum(value, lng - 3)
+            ret_data[lng - 3] = game.getDigitNum(value, lng - 2)
+            ret_data[lng - 2] = game.getDigitNum(value, lng - 1) + 10
+            ret_data[lng - 1] = game.getDigitNum(value, lng) - 1
         return ret_data
 
     ###
@@ -2944,54 +2740,11 @@ class stageBack extends gpStage
     ###
     _setMoneyItemsInstance:(itemsNum, isHoming)->
         ret_data = []
-        if itemsNum[0] > 0
-            for i in [1..itemsNum[0]]
-                ret_data.push(new OneMoney(isHoming))
-        if itemsNum[1] > 0
-            for i in [1..itemsNum[1]]
-                ret_data.push(new TenMoney(isHoming))
-        if itemsNum[2] > 0
-            for i in [1..itemsNum[2]]
-                ret_data.push(new HundredMoney(isHoming))
-        if itemsNum[3] > 0
-            for i in [1..itemsNum[3]]
-                ret_data.push(new ThousandMoney(isHoming))
-        if itemsNum[4] > 0
-            for i in [1..itemsNum[4]]
-                ret_data.push(new TenThousandMoney(isHoming))
-        if itemsNum[5] > 0
-            for i in [1..itemsNum[5]]
-                ret_data.push(new HundredThousandMoney(isHoming))
-        if itemsNum[6] > 0
-            for i in [1..itemsNum[6]]
-                ret_data.push(new OneMillionMoney(isHoming))
-        if itemsNum[7] > 0
-            for i in [1..itemsNum[7]]
-                ret_data.push(new TenMillionMoney(isHoming))
-        if itemsNum[8] > 0
-            for i in [1..itemsNum[8]]
-                ret_data.push(new OneHundredMillionMoney(isHoming))
-        if itemsNum[9] > 0
-            for i in [1..itemsNum[9]]
-                ret_data.push(new BillionMoney(isHoming))
-        if itemsNum[10] > 0
-            for i in [1..itemsNum[10]]
-                ret_data.push(new TenBillionMoney(isHoming))
-        if itemsNum[11] > 0
-            for i in [1..itemsNum[11]]
-                ret_data.push(new OneHundredBillionMoney(isHoming))
-        if itemsNum[12] > 0
-            for i in [1..itemsNum[12]]
-                ret_data.push(new OneTrillionMoney(isHoming))
-        if itemsNum[13] > 0
-            for i in [1..itemsNum[13]]
-                ret_data.push(new TenTrillionMoney(isHoming))
-        if itemsNum[14] > 0
-            for i in [1..itemsNum[14]]
-                ret_data.push(new OneHundredTrillionMoney(isHoming))
-        if itemsNum[15] > 0
-            for i in [1..itemsNum[15]]
-                ret_data.push(new AThousandTrillionMoney(isHoming))
+        for i in [0..70]
+            if itemsNum[i] != undefined && itemsNum[i] > 0
+                num = itemsNum[i]
+                for j in [1..num]
+                    ret_data.push(new valiableMoney(isHoming, i))
         return ret_data
 
     ###
@@ -2999,37 +2752,9 @@ class stageBack extends gpStage
     ###
     returnMoneyFallStart:()->
         val = game.slot_setting.getReturnMoneyFallValue()
-        if val < 10
-        else if val < 100
-            val = Math.floor(val / 10) * 10
-        else if val < 1000
-            val = Math.floor(val / 100) * 100
-        else if val < 10000
-            val = Math.floor(val / 1000) * 1000
-        else if val < 100000
-            val = Math.floor(val / 10000) * 10000
-        else if val < 1000000
-            val = Math.floor(val / 100000) * 100000
-        else if val < 10000000
-            val = Math.floor(val / 1000000) * 1000000
-        else if val < 100000000
-            val = Math.floor(val / 10000000) * 10000000
-        else if val < 1000000000
-            val = Math.floor(val / 100000000) * 100000000
-        else if val < 10000000000
-            val = Math.floor(val / 1000000000) * 1000000000
-        else if val < 100000000000
-            val = Math.floor(val / 10000000000) * 10000000000
-        else if val < 1000000000000
-            val = Math.floor(val / 100000000000) * 100000000000
-        else if val < 10000000000000
-            val = Math.floor(val / 1000000000000) * 1000000000000
-        else if val < 100000000000000
-            val = Math.floor(val / 10000000000000) * 10000000000000
-        else if val < 1000000000000000
-            val = Math.floor(val / 100000000000000) * 100000000000000
-        else
-            val = Math.floor(val / 1000000000000000) * 1000000000000000
+        lng = game.numDigit(val)
+        if 10 <= val
+            val = Math.floor(val / Math.pow(10, lng - 1)) * Math.pow(10, lng - 1)
         @returnMoneyItemsNum = @_calcMoneyItemsNum(val, false)
         @returnMoneyItemsInstance = @_setMoneyItemsInstance(@returnMoneyItemsNum, false)
         stage = game.main_scene.gp_stage_front
@@ -3160,6 +2885,8 @@ class gpSystem extends appGroup
             @addChild(@large_pause_button)
         @keyList = {'up':false, 'down':false}
         @isWhiteBack = false
+        @keyUpTime = 0
+        @keyDownTime = 0
     onenterframe: (e) ->
         @_betSetting()
         @_setItemPoint()
@@ -3169,26 +2896,37 @@ class gpSystem extends appGroup
     _betSetting: ()->
         if @paermit_bet_change_flg is true
             if game.main_scene.keyList['up'] is true
+                @keyUpTime += 1
                 if @keyList['up'] is false
                     @_getBetSettingValue(true)
                     @keyList['up'] = true
+                else
+                    if (game.fps < @keyUpTime && @keyUpTime % 2 is 0) || (game.fps * 3 < @keyUpTime)
+                        @_getBetSettingValue(true)
             else
                 if @keyList['up'] is true
                     @keyList['up'] = false
+                @keyUpTime = 0
             if game.main_scene.keyList['down'] is true
+                @keyDownTime += 1
                 if @keyList['down'] is false
                     @_getBetSettingValue(false)
                     @keyList['down'] = true
+                else
+                    if (game.fps < @keyDownTime && @keyDownTime % 2 is 0) || (game.fps * 3 < @keyDownTime)
+                        @_getBetSettingValue(false)
             else
                 if @keyList['down'] is true
                     @keyList['down'] = false
+                @keyDownTime = 0
 
     ###
     掛け金の変更
     ###
     _getBetSettingValue:(up)->
-        game.slot_setting.betChange(up)
-        @bet_text.setValue()
+        if game.fever is false
+            game.slot_setting.betChange(up)
+            @bet_text.setValue()
     ###
     掛け金の変更が可能かを変更する
     @param boolean flg true:変更可能、false:変更不可能
@@ -3593,10 +3331,11 @@ class itemBuyCancelButtonHtml extends baseCancelButtonHtml
     constructor:()->
         super
         @y = 500
+        
     touchendEvent:() ->
         game.pause_scene.removeItemBuySelectMenu()
     setBuyImpossiblePositon:()->
-        @x = 170
+        @x = 250
     setBuyPossiblePosition:()->
         @x = 250
 
@@ -3634,7 +3373,6 @@ class baseByuButtonHtml extends buttonHtml
         @text = '購入'
         @setHtml()
     ontouchend: (e) ->
-        game.sePlay(@dicisionSe)
         @touchendEvent()
 
 ###
@@ -3644,12 +3382,23 @@ class itemBuyBuyButtonHtml extends baseByuButtonHtml
     constructor:()->
         super
         @y = 500
+        @impossible = true
     touchendEvent:() ->
-        game.pause_scene.pause_item_buy_select_layer.buyItem()
+        if @impossible is false
+            game.sePlay(@dicisionSe)
+            game.pause_scene.pause_item_buy_select_layer.buyItem()
     setBuyImpossiblePositon:()->
-        @x = -200
+        @x = 70
+        @class.push('grayscale')
+        @opacity = 0.5
+        @setHtml()
+        @impossible = true
     setBuyPossiblePosition:()->
         @x = 70
+        @class = game.arrayValueDel(@class, 'grayscale')
+        @opacity = 1
+        @setHtml()
+        @impossible = false
 
 ###
 セットボタン
@@ -4532,9 +4281,9 @@ class betText extends text
         @y = 7
         @kakekin_text = '掛金'
         @yen_text = '円'
-        @text = @kakekin_text + game.toJPUnit(game.bet) + @yen_text
+        @text = @kakekin_text + game.toJPUnit(game.bet, 1) + @yen_text
     setValue: () ->
-        @text = @kakekin_text + game.toJPUnit(game.bet) + @yen_text
+        @text = @kakekin_text + game.toJPUnit(game.bet, 1) + @yen_text
         game.main_scene.gp_system.low_bet_button.setXposition()
     setPositionPause:()->
         @x = 140
@@ -4724,21 +4473,21 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':25252100000,
-            'bet':500000000,
+            'money':Math.pow(10, 24),
+            'bet':Math.pow(10, 22),
             'combo':20,
             'max_combo':200,
             'tension':200,
             'past_fever_num':3,
-            'item_point':1000,
+            'item_point':1500,
             'next_add_member_key':0,
             'now_muse_num':0,
             'max_set_item_num':3,
-            'now_speed':1,
-            'item_have_now':[1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23,24],
-            'item_set_now':[4,5,6],
-            'member_set_now':[17,18,19],
-            'prev_fever_muse':[11,12,13],
+            'now_speed':3,
+            'item_have_now':[1,2,3,4,5,6,7,8,9,21,22,23,24],
+            'item_set_now':[3,4,8],
+            'member_set_now':[],
+            'prev_fever_muse':[],
             'prev_item':[],
             'left_lille':[],
             'middle_lille':[],
@@ -4844,7 +4593,7 @@ class slotSetting extends appNode
         ]
         #リールの目に対する当選額の倍率
         @bairitu = {
-            1:10, 2:10, 3:13, 4:16, 5:20,
+            1:8, 2:10, 3:12, 4:14, 5:20,
             11:20, 12:20, 13:20, 14:20, 15:20, 16:20, 17:20, 18:20, 19:20
         }
         @allRoles = {
@@ -5097,7 +4846,7 @@ class slotSetting extends appNode
             2:{
                 'name':'チーズケーキ鍋',
                 'image':'item_2',
-                'discription':'チーズケーキしか降ってこなくなる<br>爆弾は降ってこなくなる',
+                'discription':'チーズケーキしか降ってこなくなる<br>爆弾は降ってこなくなる<br>(掛け金が1京円を超えると効果が無くなる)',
                 'price':7000
             },
             3:{
@@ -5121,7 +4870,7 @@ class slotSetting extends appNode
             6:{
                 'name':'完っ全にフルハウスね',
                 'image':'item_6',
-                'discription':'CHANCE!!が出て来る確率が<br>2倍になる（最大で30％）',
+                'discription':'CHANCE!!が出やすくなる',
                 'price':20000000
             },
             7:{
@@ -5139,7 +4888,7 @@ class slotSetting extends appNode
             9:{
                 'name':'ファイトだよっ',
                 'image':'item_9',
-                'discription':'CHANCE!!でスロットが揃う時に<br>FEVER!!が出る確率が3倍になる',
+                'discription':'FEVER!!が出やすくなる',
                 'price':10000000000
             },
 
@@ -5288,96 +5037,195 @@ class slotSetting extends appNode
     掛け金が多いほど速くする
     ###
     setGravity:()->
-        if game.bet < 10
+        missSycle = 0
+        if game.bet < 1 * Math.pow(10, 1)
             val = 0.35
             @prize_div = 2
-        else if game.bet < 50
+            missSycle = 0
+        else if game.bet < 5 * Math.pow(10, 1)
             val = 0.40
             @prize_div = 1.9
-        else if game.bet < 100
+            missSycle = 8
+        else if game.bet < 1 * Math.pow(10, 2)
             val = 0.44
             @prize_div = 1.8
-        else if game.bet < 500
+            missSycle = 7
+        else if game.bet < 5 * Math.pow(10, 2)
             val = 0.48
             @prize_div = 1.6
-        else if game.bet < 1000
+            missSycle = 6
+        else if game.bet < 1 * Math.pow(10, 3)
             val = 0.5
             @prize_div = 1.4
-        else if game.bet < 5000
+            missSycle = 5
+        else if game.bet < 5 * Math.pow(10, 3)
             val = 0.53
             @prize_div = 1.2
-        else if game.bet < 10000 #1万
+            missSycle = 4
+        else if game.bet < 1 * Math.pow(10, 4) #1万
             val = 0.55
             @prize_div = 1
-        else if game.bet < 50000
+            missSycle = 4
+        else if game.bet < 5 * Math.pow(10, 4)
             val = 0.58
             @prize_div = 1
-        else if game.bet < 100000
+            missSycle = 3
+        else if game.bet < 1 * Math.pow(10, 5)
             val = 0.61
             @prize_div = 1
-        else if game.bet < 500000
+            missSycle = 3
+        else if game.bet < 5 * Math.pow(10, 5)
             val = 0.64
             @prize_div = 1
-        else if game.bet < 1000000 #100万
+            missSycle = 2
+        else if game.bet < 1 * Math.pow(10, 6) #100万
             val = 0.67
             @prize_div = 1
-        else if game.bet < 5000000
+            missSycle = 2
+        else if game.bet < 5 * Math.pow(10, 6)
             val = 0.7
-            @prize_div = 0.9
-        else if game.bet < 10000000
+            @prize_div = 1
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 7)
             val = 0.73
-            @prize_div = 0.9
-        else if game.bet < 50000000
+            @prize_div = 1
+        else if game.bet < 5 * Math.pow(10, 7)
             val = 0.76
-            @prize_div = 0.9
-        else if game.bet < 100000000 #１億
+            @prize_div = 1
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 8) #１億
             val = 0.8
-            @prize_div = 0.9
-        else if game.bet < 500000000
+            @prize_div = 1
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 8)
             val = 0.9
-            @prize_div = 0.9
-        else if game.bet < 1000000000
+            @prize_div = 1
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 9)
             val = 1
             @prize_div = 0.9
-        else if game.bet < 5000000000
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 9)
             val = 1.2
-            @prize_div = 0.8
-        else if game.bet < 10000000000 #100億
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 10) #100億
             val = 1.4
-            @prize_div = 0.8
-        else if game.bet < 50000000000
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 10)
             val = 1.6
-            @prize_div = 0.8
-        else if game.bet < 100000000000
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 11)
             val = 1.8
-            @prize_div = 0.8
-        else if game.bet < 500000000000
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 11)
             val = 2
-            @prize_div = 0.8
-        else if game.bet < 1000000000000 #1兆
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 12) #1兆
             val = 2.2
             @prize_div = 0.8
-        else if game.bet < 5000000000000
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 12)
+            val = 2.4
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 13)
             val = 2.6
-            @prize_div = 0.7
-        else if game.bet < 10000000000000
-            val = 3
-            @prize_div = 0.7
-        else if game.bet < 50000000000000
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 13)
+            val = 2.8
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 14) #100兆
+            val = 3.0
+            @prize_div = 0.8
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 14)
             val = 3.4
-            @prize_div = 0.7
-        else if game.bet < 100000000000000 #100兆
+            @prize_div = 0.8
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 15)
             val = 3.8
-            @prize_div = 0.7
-        else if game.bet < 500000000000000
+            @prize_div = 0.8
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 15)
             val = 4.2
-            @prize_div = 0.7
-        else if game.bet < 1000000000000000
+            @prize_div = 0.8
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 16) #1京
             val = 4.6
-            @prize_div = 0.7
+            @prize_div = 0.8
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 16)
+            val = 5.0
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 17)
+            val = 5.4
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 5 * Math.pow(10, 17)
+            val = 5.8
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 18) #100京
+            val = 6.2
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 5 * Math.pow(10, 18)
+            val = 6.6
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 19)
+            val = 7.0
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 20) #1垓
+            val = 7.5
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 21)
+            val = 8.0
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 22)
+            val = 8.5
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 23)
+            val = 9.0
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 24) #1抒
+            val = 9.5
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 32) #1溝
+            val = 10.0
+            @prize_div = 0.8
+            missSycle = 0.4
+        else if game.bet < 1 * Math.pow(10, 40) #1正
+            val = 10.0
+            @prize_div = 0.8
+            missSycle = 0.3
+        else if game.bet < 1 * Math.pow(10, 48) #1極
+            val = 10.0
+            @prize_div = 0.8
+            missSycle = 0.3
+        else if game.bet < 1 * Math.pow(10, 56) #1阿僧祇
+            val = 10.0
+            @prize_div = 0.8
+            missSycle = 0.2
         else
-            val = 5
-            @prize_div = 0.6
+            val = 10.0
+            @prize_div = 0.8
+            missSycle = 0.1
+        game.main_scene.gp_stage_front.missItemFallSycle = missSycle
         div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
@@ -5459,9 +5307,7 @@ class slotSetting extends appNode
         rate = Math.floor((game.combo * 0.1) + ((game.tension / @tension_max) * 20))
         if game.past_fever_num <= 2
             rate += ((3 - game.past_fever_num)) * 4
-        if game.isItemSet(6)
-            rate *= 2
-        if rate > 30 || game.main_scene.gp_back_panorama.now_back_effect_flg is true
+        if rate > 30 || game.main_scene.gp_back_panorama.now_back_effect_flg is true || game.isItemSet(6)
             rate = 30
         if game.debug.half_slot_hit is true
             rate = 50
@@ -5479,7 +5325,10 @@ class slotSetting extends appNode
         up = game.combo
         if game.isItemSet(1) && game.combo < 200
             up = 200
-        return Math.floor(game.bet * up * 0.02)
+        div = 1
+        if Math.pow(10, 9) < game.bet then div = 0.9
+        if Math.pow(10, 13) < game.bet then div = 0.8
+        return Math.floor(game.bet * up * 0.02 * div)
 
     ###
     スロットの当選金額を計算
@@ -5497,8 +5346,6 @@ class slotSetting extends appNode
         ###
         if game.main_scene.gp_back_panorama.now_back_effect_flg is true
             ret_money *= 2
-        if ret_money > 1000000000000000
-            ret_money = 1000000000000000
         return ret_money
 
     ###
@@ -5617,25 +5464,10 @@ class slotSetting extends appNode
                 slot.slotLilleChange(@lille_array_0, true)
             else if before > tension_33 && after < tension_33
                 slot.slotLilleChange(@lille_array_0, false)
-                if 4 <= game.past_fever_num
-                    stage.missItemFallSycle = 4
-                else
-                    stage.missItemFallSycle = 8
-                stage.missItemFallSycleNow = 0
             else if before < tension_66 && after > tension_66
                 slot.slotLilleChange(@lille_array_2, false)
-                if 4 <= game.past_fever_num
-                    stage.missItemFallSycle = 2
-                else
-                    stage.missItemFallSycle = 4
-                stage.missItemFallSycleNow = 0
             else if (before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)
                 slot.slotLilleChange(@lille_array_1, false)
-                if 4 <= game.past_fever_num
-                    stage.missItemFallSycle = 1
-                else
-                    stage.missItemFallSycle = 2
-                stage.missItemFallSycleNow = 0
 
     ###
     落下するアイテムの種類を決める
@@ -5801,8 +5633,8 @@ class slotSetting extends appNode
                 rate = 5
         else
             rate = 2
-        if game.isItemSet(9)
-            rate *= 3
+        if tension_rate != 100 && game.isItemSet(9)
+            rate = 30
         if 100 < rate
             rate = 100
         result = false
@@ -5869,79 +5701,22 @@ class slotSetting extends appNode
     betChange:(up)->
         val = 1
         bet = game.bet
+        betStr = bet + ''
+        betLng = game.numDigit(bet)
+        betHead = betStr.slice(0, 1)
         if up is true
-            if bet < 10
-                val = 1
-            else if bet < 100
-                val = 10
-            else if bet < 1000
-                val = 100
-            else if bet < 10000
-                val = 1000
-            else if bet < 100000
-                val = 10000
-            else if bet < 1000000
-                val = 100000
-            else if bet < 10000000
-                val = 1000000
-            else if bet < 100000000
-                val = 10000000
-            else if bet < 1000000000
-                val = 100000000
-            else if bet < 10000000000
-                val = 1000000000
-            else if bet < 100000000000
-                val = 10000000000
-            else if bet < 1000000000000
-                val = 100000000000
-            else if bet < 10000000000000
-                val = 1000000000000
-            else if bet < 100000000000000
-                val = 10000000000000
-            else if bet < 1000000000000000
-                val = 100000000000000
-            else
-                val = 1000000000000000
+            val = Math.pow(10, betLng - 1)
         else
-            if bet <= 10
-                val = -1
-            else if bet <= 100
-                val = -10
-            else if bet <= 1000
-                val = -100
-            else if bet <= 10000
-                val = -1000
-            else if bet <= 100000
-                val = -10000
-            else if bet <= 1000000
-                val = -100000
-            else if bet <= 10000000
-                val = -1000000
-            else if bet <= 100000000
-                val = -10000000
-            else if bet <= 1000000000
-                val = -100000000
-            else if bet <= 10000000000
-                val = -1000000000
-            else if bet <= 100000000000
-                val = -10000000000
-            else if bet <= 1000000000000
-                val = -100000000000
-            else if bet <= 10000000000000
-                val = -1000000000000
-            else if bet <= 100000000000000
-                val = -10000000000000
-            else if bet <= 1000000000000000
-                val = -100000000000000
+            if betHead is '1'
+                val = Math.pow(10, betLng - 2)
             else
-                val = -1000000000000000
+                val = Math.pow(10, betLng - 1)
+            val *= -1
         game.bet += val
         if game.bet < 1
             game.bet = 1
         else if game.bet > game.money
             game.bet -= val
-        else if game.bet > 1000000000000000
-            game.bet = 1000000000000000
         if up is false and game.auto_bet is 1 and game.bet < Math.floor(game.money / 100)
             game.auto_bet = 0
 
@@ -5949,13 +5724,12 @@ class slotSetting extends appNode
     掛け金が所持金を上回った時に掛け金を減らす
     ###
     betDown:()->
-        digit = Math.pow(10, (String(game.money).length - 1))
+        digit = Math.pow(10, (game.numDigit(game.money) - 1))
         val = Math.floor(game.money / digit) * digit / 100
         if val < 1
             val = 1
         return val
 
-    #TODO 掛け金が1000億円を超える
     betUp:()->
         if game.fever is false and @isForceSlotHit is false
             @betUpExe()
@@ -5964,10 +5738,8 @@ class slotSetting extends appNode
         if game.auto_bet is 1
             tmp_bet = Math.floor(game.money / 50)
             if game.bet < tmp_bet
-                digit = Math.pow(10, (String(tmp_bet).length - 1))
+                digit = Math.pow(10, (game.numDigit(tmp_bet) - 1))
                 game.bet = Math.floor(tmp_bet / digit) * digit
-                if game.bet > 1000000000000000
-                    game.bet = 1000000000000000
                 game.main_scene.gp_system.bet_text.setValue()
 ###
 テストコード用
@@ -5987,6 +5759,7 @@ class Test extends appNode
         #@preLoadMulti()
         #@addMuse()
         #@moneyFormat()
+        @moneyFormat2()
         #@itemCatchTension()
         #@chanceTime()
         #@forceFever()
@@ -6004,7 +5777,11 @@ class Test extends appNode
         #@setMemberItemPrice()
         #@autoMemberSetBeforeFever()
         #@getIsForceSlotHit()
-        @textView()
+        #@textView()
+        #@betChange()
+        #@calcMoneyItemsNum()
+        #@fallPrizeMoneyStart()
+        #@numDigit()
 
     #以下、テスト用関数
 
@@ -6054,6 +5831,35 @@ class Test extends appNode
         console.log(game.toJPUnit(1234561234567890123456))
         console.log(game.toJPUnit(12345612345678901234567890))
         console.log(game.toJPUnit(123456123456789012345678901234))
+        console.log(game.toJPUnit(1234561234567890123456789012341234))
+        console.log(game.toJPUnit(12345612345678901234567890123412341234))
+        console.log(game.toJPUnit(123456123456789012345678901234123412341234))
+        console.log(game.toJPUnit(1234561234567890123456789012341234123412341234))
+        console.log(game.toJPUnit(123456123456789012345678901234123412341234123412634))
+        console.log(game.toJPUnit(1234561234567890123456789012341234123412341234126341234))
+
+    moneyFormat2:()->
+        console.log(game.toJPUnit(1, 1))
+        console.log(game.toJPUnit(12, 1))
+        console.log(game.toJPUnit(123, 1))
+        console.log(game.toJPUnit(1234, 1))
+        console.log(game.toJPUnit(12345, 1))
+        console.log(game.toJPUnit(123456, 1))
+        console.log(game.toJPUnit(1234567, 1))
+        console.log(game.toJPUnit(12345678, 1))
+        console.log(game.toJPUnit(123456789, 1))
+        console.log(game.toJPUnit(1234567890, 1))
+        console.log(game.toJPUnit(12345678901, 1))
+        console.log(game.toJPUnit(123456789012, 1))
+        console.log(game.toJPUnit(1234567890123, 1))
+        console.log(game.toJPUnit(12345678901234, 1))
+        console.log(game.toJPUnit(123456789012345, 1))
+        console.log(game.toJPUnit(1234567890123456, 1))
+        console.log(game.toJPUnit(12345678901234567, 1))
+        console.log(game.toJPUnit(123456789012345678, 1))
+        console.log(game.toJPUnit(1234567890123456789, 1))
+        console.log(game.toJPUnit(12345678901234567890, 1))
+
 
     itemCatchTension:()->
         game.past_fever_num = 0
@@ -6181,6 +5987,26 @@ class Test extends appNode
         gp_test = game.test_scene.gp_test
         txt = new moneyText()
         gp_test.addChild(txt)
+
+    betChange:()->
+        console.log(game.bet)
+        game.slot_setting.betChange(false)
+
+    calcMoneyItemsNum:()->
+        val = 2234567890
+        rslt = game.main_scene.gp_stage_back._calcMoneyItemsNum(val)
+        console.log(rslt)
+
+    fallPrizeMoneyStart:()->
+        val = 2234567890
+        rslt = game.main_scene.gp_stage_back.fallPrizeMoneyStart(val)
+
+    numDigit:()->
+        val = 1234561234567890123456789012341234123412341234126341234
+        #val = 1234561234567890
+        console.log(val)
+        rslt = game.numDigit(val)
+        console.log(rslt)
 class loadScene extends appScene
     constructor: () ->
         super
@@ -6404,6 +6230,12 @@ class pauseScene extends appScene
         @pause_help_layer = new pauseHelpLayer()
         @addChild(@pause_back)
         @addChild(@pause_main_layer)
+        if game.main_scene.keyList.up is true
+            game.main_scene.keyList.up = false
+            game.main_scene.gp_system.heigh_bet_button.changePullColor()
+        if game.main_scene.keyList.down is true
+            game.main_scene.keyList.down = false
+            game.main_scene.gp_system.low_bet_button.changePullColor()
     setSaveConfirmMenu: () ->
         @pause_save_confirm_layer = new pauseSaveConfirmLayer()
         @addChild(@pause_save_confirm_layer)
@@ -8269,6 +8101,7 @@ class testScene extends appScene
 class titleScene extends appScene
     constructor: () ->
         super
+        @backgroundColor = '#FFF'
         @title_main_layer = new titleMainLayer()
         @addChild(@title_main_layer)
 class backGround extends appSprite
@@ -9088,192 +8921,31 @@ class Money extends Item
                 @frame = @frame_init
 
 
-
-###
-1円
-@param boolean isHoming trueならコインがホーミングする
-###
-class OneMoney extends Money
-    constructor: (isHoming) ->
+class valiableMoney extends Money
+    constructor: (isHoming, pow) ->
         super isHoming, 26, 30
-        @price = 1
-        @frame = 0
-        @frame_init = 0
-
-###
-10円
-@param boolean isHoming trueならコインがホーミングする
-###
-class TenMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 26, 30
-        @price = 10
-        @frame = 0
-        @frame_init = 0
-
-###
-100円
-@param boolean isHoming trueならコインがホーミングする
-###
-class HundredMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 26, 30
-        @price = 100
-        @frame = 4
-        @frame_init = 4
-
-###
-1000円
-@param boolean isHoming trueならコインがホーミングする
-###
-class ThousandMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 26, 30
-        @price = 1000
-        @frame = 4
-        @frame_init = 4
-
-###
-一万円
-@param boolean isHoming trueならコインがホーミングする
-###
-class TenThousandMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 26, 30
-        @price = 10000
-        @frame = 8
-        @frame_init = 8
-
-###
-10万円
-@param boolean isHoming trueならコインがホーミングする
-###
-class HundredThousandMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 26, 30
-        @price = 100000
-        @frame = 8
-        @frame_init = 8
-
-###
-100万円
-@param boolean isHoming trueならコインがホーミングする
-###
-class OneMillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 1000000
-        @frame = 0
-        @frame_init = 0
-
-###
-1000万円
-@param boolean isHoming trueならコインがホーミングする
-###
-class TenMillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 10000000
-        @frame = 0
-        @frame_init = 0
-
-###
-1億円
-@param boolean isHoming trueならコインがホーミングする
-###
-class OneHundredMillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 100000000
-        @frame = 4
-        @frame_init = 4
-
-###
-10億円
-@param boolean isHoming trueならコインがホーミングする
-###
-class BillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 1000000000
-        @frame = 4
-        @frame_init = 4
-
-###
-100億円
-@param boolean isHoming trueならコインがホーミングする
-###
-class TenBillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 10000000000
-        @frame = 8
-        @frame_init = 8
-
-###
-1000億円
-@param boolean isHoming trueならコインがホーミングする
-###
-class OneHundredBillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 100000000000
-        @frame = 8
-        @frame_init = 8
-
-###
-1兆円
-@param boolean isHoming trueならコインがホーミングする
-###
-class OneTrillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 1000000000000
-        @frame = 8
-        @frame_init = 8
-
-###
-10兆円
-@param boolean isHoming trueならコインがホーミングする
-###
-class TenTrillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 10000000000000
-        @frame = 8
-        @frame_init = 8
-
-###
-100兆円
-@param boolean isHoming trueならコインがホーミングする
-###
-class OneHundredTrillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 100000000000000
-        @frame = 8
-        @frame_init = 8
-
-###
-1000兆円
-@param boolean isHoming trueならコインがホーミングする
-###
-class AThousandTrillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 1000000000000000
-        @frame = 8
-        @frame_init = 8
+        if 9 <= pow
+            @width = 30
+            @image = game.imageload("coin_pla")
+        @price = Math.pow(10, pow)
+        if pow <= 2
+            @frame = 0
+            @frame_init = 0
+        else if pow <= 5
+            @frame = 4
+            @frame_init = 4
+        else if pow <= 8
+            @frame = 8
+            @frame_init = 8
+        else if pow <= 11
+            @frame = 0
+            @frame_init = 0
+        else if pow <= 14
+            @frame = 4
+            @frame_init = 4
+        else
+            @frame = 8
+            @frame_init = 8
 class Slot extends appSprite
     constructor: (w, h) ->
         super w, h
@@ -9531,8 +9203,10 @@ class heighBetButtonPause extends buttonHtml
         @x = 90
         @y = 175
         @setHtml()
+    ontouchstart: () ->
+        game.main_scene.keyList.up = true
     ontouchend: () ->
-        game.pause_scene.pause_main_layer.betSetting(true)
+        game.main_scene.keyList.up = false
 
 ###
 掛け金を減らすボタン
@@ -9566,8 +9240,10 @@ class lowBetButtonPause extends buttonHtml
         @x = 90
         @y = 175
         @setHtml()
+    ontouchstart: () ->
+        game.main_scene.keyList.down = true
     ontouchend: () ->
-        game.pause_scene.pause_main_layer.betSetting(false)
+        game.main_scene.keyList.down = false
     setXposition:()->
         @x = 160 + game.pause_scene.pause_main_layer.bet_text._boundWidth
 

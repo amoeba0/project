@@ -43,9 +43,9 @@ class betText extends text
         @y = 7
         @kakekin_text = '掛金'
         @yen_text = '円'
-        @text = @kakekin_text + game.toJPUnit(game.bet) + @yen_text
+        @text = @kakekin_text + game.toJPUnit(game.bet, 1) + @yen_text
     setValue: () ->
-        @text = @kakekin_text + game.toJPUnit(game.bet) + @yen_text
+        @text = @kakekin_text + game.toJPUnit(game.bet, 1) + @yen_text
         game.main_scene.gp_system.low_bet_button.setXposition()
     setPositionPause:()->
         @x = 140

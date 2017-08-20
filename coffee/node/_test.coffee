@@ -16,6 +16,7 @@ class Test extends appNode
         #@preLoadMulti()
         #@addMuse()
         #@moneyFormat()
+        @moneyFormat2()
         #@itemCatchTension()
         #@chanceTime()
         #@forceFever()
@@ -33,7 +34,11 @@ class Test extends appNode
         #@setMemberItemPrice()
         #@autoMemberSetBeforeFever()
         #@getIsForceSlotHit()
-        @textView()
+        #@textView()
+        #@betChange()
+        #@calcMoneyItemsNum()
+        #@fallPrizeMoneyStart()
+        #@numDigit()
 
     #以下、テスト用関数
 
@@ -83,6 +88,35 @@ class Test extends appNode
         console.log(game.toJPUnit(1234561234567890123456))
         console.log(game.toJPUnit(12345612345678901234567890))
         console.log(game.toJPUnit(123456123456789012345678901234))
+        console.log(game.toJPUnit(1234561234567890123456789012341234))
+        console.log(game.toJPUnit(12345612345678901234567890123412341234))
+        console.log(game.toJPUnit(123456123456789012345678901234123412341234))
+        console.log(game.toJPUnit(1234561234567890123456789012341234123412341234))
+        console.log(game.toJPUnit(123456123456789012345678901234123412341234123412634))
+        console.log(game.toJPUnit(1234561234567890123456789012341234123412341234126341234))
+
+    moneyFormat2:()->
+        console.log(game.toJPUnit(1, 1))
+        console.log(game.toJPUnit(12, 1))
+        console.log(game.toJPUnit(123, 1))
+        console.log(game.toJPUnit(1234, 1))
+        console.log(game.toJPUnit(12345, 1))
+        console.log(game.toJPUnit(123456, 1))
+        console.log(game.toJPUnit(1234567, 1))
+        console.log(game.toJPUnit(12345678, 1))
+        console.log(game.toJPUnit(123456789, 1))
+        console.log(game.toJPUnit(1234567890, 1))
+        console.log(game.toJPUnit(12345678901, 1))
+        console.log(game.toJPUnit(123456789012, 1))
+        console.log(game.toJPUnit(1234567890123, 1))
+        console.log(game.toJPUnit(12345678901234, 1))
+        console.log(game.toJPUnit(123456789012345, 1))
+        console.log(game.toJPUnit(1234567890123456, 1))
+        console.log(game.toJPUnit(12345678901234567, 1))
+        console.log(game.toJPUnit(123456789012345678, 1))
+        console.log(game.toJPUnit(1234567890123456789, 1))
+        console.log(game.toJPUnit(12345678901234567890, 1))
+
 
     itemCatchTension:()->
         game.past_fever_num = 0
@@ -210,3 +244,23 @@ class Test extends appNode
         gp_test = game.test_scene.gp_test
         txt = new moneyText()
         gp_test.addChild(txt)
+
+    betChange:()->
+        console.log(game.bet)
+        game.slot_setting.betChange(false)
+
+    calcMoneyItemsNum:()->
+        val = 2234567890
+        rslt = game.main_scene.gp_stage_back._calcMoneyItemsNum(val)
+        console.log(rslt)
+
+    fallPrizeMoneyStart:()->
+        val = 2234567890
+        rslt = game.main_scene.gp_stage_back.fallPrizeMoneyStart(val)
+
+    numDigit:()->
+        val = 1234561234567890123456789012341234123412341234126341234
+        #val = 1234561234567890
+        console.log(val)
+        rslt = game.numDigit(val)
+        console.log(rslt)

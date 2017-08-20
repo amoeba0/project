@@ -24,7 +24,7 @@ class slotSetting extends appNode
         ]
         #リールの目に対する当選額の倍率
         @bairitu = {
-            1:10, 2:10, 3:13, 4:16, 5:20,
+            1:8, 2:10, 3:12, 4:14, 5:20,
             11:20, 12:20, 13:20, 14:20, 15:20, 16:20, 17:20, 18:20, 19:20
         }
         @allRoles = {
@@ -277,7 +277,7 @@ class slotSetting extends appNode
             2:{
                 'name':'チーズケーキ鍋',
                 'image':'item_2',
-                'discription':'チーズケーキしか降ってこなくなる<br>爆弾は降ってこなくなる',
+                'discription':'チーズケーキしか降ってこなくなる<br>爆弾は降ってこなくなる<br>(掛け金が1京円を超えると効果が無くなる)',
                 'price':7000
             },
             3:{
@@ -301,7 +301,7 @@ class slotSetting extends appNode
             6:{
                 'name':'完っ全にフルハウスね',
                 'image':'item_6',
-                'discription':'CHANCE!!が出て来る確率が<br>2倍になる（最大で30％）',
+                'discription':'CHANCE!!が出やすくなる',
                 'price':20000000
             },
             7:{
@@ -319,7 +319,7 @@ class slotSetting extends appNode
             9:{
                 'name':'ファイトだよっ',
                 'image':'item_9',
-                'discription':'CHANCE!!でスロットが揃う時に<br>FEVER!!が出る確率が3倍になる',
+                'discription':'FEVER!!が出やすくなる',
                 'price':10000000000
             },
 
@@ -468,96 +468,195 @@ class slotSetting extends appNode
     掛け金が多いほど速くする
     ###
     setGravity:()->
-        if game.bet < 10
+        missSycle = 0
+        if game.bet < 1 * Math.pow(10, 1)
             val = 0.35
             @prize_div = 2
-        else if game.bet < 50
+            missSycle = 0
+        else if game.bet < 5 * Math.pow(10, 1)
             val = 0.40
             @prize_div = 1.9
-        else if game.bet < 100
+            missSycle = 8
+        else if game.bet < 1 * Math.pow(10, 2)
             val = 0.44
             @prize_div = 1.8
-        else if game.bet < 500
+            missSycle = 7
+        else if game.bet < 5 * Math.pow(10, 2)
             val = 0.48
             @prize_div = 1.6
-        else if game.bet < 1000
+            missSycle = 6
+        else if game.bet < 1 * Math.pow(10, 3)
             val = 0.5
             @prize_div = 1.4
-        else if game.bet < 5000
+            missSycle = 5
+        else if game.bet < 5 * Math.pow(10, 3)
             val = 0.53
             @prize_div = 1.2
-        else if game.bet < 10000 #1万
+            missSycle = 4
+        else if game.bet < 1 * Math.pow(10, 4) #1万
             val = 0.55
             @prize_div = 1
-        else if game.bet < 50000
+            missSycle = 4
+        else if game.bet < 5 * Math.pow(10, 4)
             val = 0.58
             @prize_div = 1
-        else if game.bet < 100000
+            missSycle = 3
+        else if game.bet < 1 * Math.pow(10, 5)
             val = 0.61
             @prize_div = 1
-        else if game.bet < 500000
+            missSycle = 3
+        else if game.bet < 5 * Math.pow(10, 5)
             val = 0.64
             @prize_div = 1
-        else if game.bet < 1000000 #100万
+            missSycle = 2
+        else if game.bet < 1 * Math.pow(10, 6) #100万
             val = 0.67
             @prize_div = 1
-        else if game.bet < 5000000
+            missSycle = 2
+        else if game.bet < 5 * Math.pow(10, 6)
             val = 0.7
-            @prize_div = 0.9
-        else if game.bet < 10000000
+            @prize_div = 1
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 7)
             val = 0.73
-            @prize_div = 0.9
-        else if game.bet < 50000000
+            @prize_div = 1
+        else if game.bet < 5 * Math.pow(10, 7)
             val = 0.76
-            @prize_div = 0.9
-        else if game.bet < 100000000 #１億
+            @prize_div = 1
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 8) #１億
             val = 0.8
-            @prize_div = 0.9
-        else if game.bet < 500000000
+            @prize_div = 1
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 8)
             val = 0.9
-            @prize_div = 0.9
-        else if game.bet < 1000000000
+            @prize_div = 1
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 9)
             val = 1
             @prize_div = 0.9
-        else if game.bet < 5000000000
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 9)
             val = 1.2
-            @prize_div = 0.8
-        else if game.bet < 10000000000 #100億
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 10) #100億
             val = 1.4
-            @prize_div = 0.8
-        else if game.bet < 50000000000
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 10)
             val = 1.6
-            @prize_div = 0.8
-        else if game.bet < 100000000000
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 11)
             val = 1.8
-            @prize_div = 0.8
-        else if game.bet < 500000000000
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 11)
             val = 2
-            @prize_div = 0.8
-        else if game.bet < 1000000000000 #1兆
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 12) #1兆
             val = 2.2
             @prize_div = 0.8
-        else if game.bet < 5000000000000
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 12)
+            val = 2.4
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 13)
             val = 2.6
-            @prize_div = 0.7
-        else if game.bet < 10000000000000
-            val = 3
-            @prize_div = 0.7
-        else if game.bet < 50000000000000
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 13)
+            val = 2.8
+            @prize_div = 0.9
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 14) #100兆
+            val = 3.0
+            @prize_div = 0.8
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 14)
             val = 3.4
-            @prize_div = 0.7
-        else if game.bet < 100000000000000 #100兆
+            @prize_div = 0.8
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 15)
             val = 3.8
-            @prize_div = 0.7
-        else if game.bet < 500000000000000
+            @prize_div = 0.8
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 15)
             val = 4.2
-            @prize_div = 0.7
-        else if game.bet < 1000000000000000
+            @prize_div = 0.8
+            missSycle = 1
+        else if game.bet < 1 * Math.pow(10, 16) #1京
             val = 4.6
-            @prize_div = 0.7
+            @prize_div = 0.8
+            missSycle = 1
+        else if game.bet < 5 * Math.pow(10, 16)
+            val = 5.0
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 17)
+            val = 5.4
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 5 * Math.pow(10, 17)
+            val = 5.8
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 18) #100京
+            val = 6.2
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 5 * Math.pow(10, 18)
+            val = 6.6
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 19)
+            val = 7.0
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 20) #1垓
+            val = 7.5
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 21)
+            val = 8.0
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 22)
+            val = 8.5
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 23)
+            val = 9.0
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 24) #1抒
+            val = 9.5
+            @prize_div = 0.8
+            missSycle = 0.5
+        else if game.bet < 1 * Math.pow(10, 32) #1溝
+            val = 10.0
+            @prize_div = 0.8
+            missSycle = 0.4
+        else if game.bet < 1 * Math.pow(10, 40) #1正
+            val = 10.0
+            @prize_div = 0.8
+            missSycle = 0.3
+        else if game.bet < 1 * Math.pow(10, 48) #1極
+            val = 10.0
+            @prize_div = 0.8
+            missSycle = 0.3
+        else if game.bet < 1 * Math.pow(10, 56) #1阿僧祇
+            val = 10.0
+            @prize_div = 0.8
+            missSycle = 0.2
         else
-            val = 5
-            @prize_div = 0.6
+            val = 10.0
+            @prize_div = 0.8
+            missSycle = 0.1
+        game.main_scene.gp_stage_front.missItemFallSycle = missSycle
         div = 1
         val = Math.floor(val * div * 100) / 100
         if 100 < game.combo
@@ -639,9 +738,7 @@ class slotSetting extends appNode
         rate = Math.floor((game.combo * 0.1) + ((game.tension / @tension_max) * 20))
         if game.past_fever_num <= 2
             rate += ((3 - game.past_fever_num)) * 4
-        if game.isItemSet(6)
-            rate *= 2
-        if rate > 30 || game.main_scene.gp_back_panorama.now_back_effect_flg is true
+        if rate > 30 || game.main_scene.gp_back_panorama.now_back_effect_flg is true || game.isItemSet(6)
             rate = 30
         if game.debug.half_slot_hit is true
             rate = 50
@@ -659,7 +756,10 @@ class slotSetting extends appNode
         up = game.combo
         if game.isItemSet(1) && game.combo < 200
             up = 200
-        return Math.floor(game.bet * up * 0.02)
+        div = 1
+        if Math.pow(10, 9) < game.bet then div = 0.9
+        if Math.pow(10, 13) < game.bet then div = 0.8
+        return Math.floor(game.bet * up * 0.02 * div)
 
     ###
     スロットの当選金額を計算
@@ -677,8 +777,6 @@ class slotSetting extends appNode
         ###
         if game.main_scene.gp_back_panorama.now_back_effect_flg is true
             ret_money *= 2
-        if ret_money > 1000000000000000
-            ret_money = 1000000000000000
         return ret_money
 
     ###
@@ -797,25 +895,10 @@ class slotSetting extends appNode
                 slot.slotLilleChange(@lille_array_0, true)
             else if before > tension_33 && after < tension_33
                 slot.slotLilleChange(@lille_array_0, false)
-                if 4 <= game.past_fever_num
-                    stage.missItemFallSycle = 4
-                else
-                    stage.missItemFallSycle = 8
-                stage.missItemFallSycleNow = 0
             else if before < tension_66 && after > tension_66
                 slot.slotLilleChange(@lille_array_2, false)
-                if 4 <= game.past_fever_num
-                    stage.missItemFallSycle = 2
-                else
-                    stage.missItemFallSycle = 4
-                stage.missItemFallSycleNow = 0
             else if (before < tension_33 || before > tension_66) && (after > tension_33 && after < tension_66)
                 slot.slotLilleChange(@lille_array_1, false)
-                if 4 <= game.past_fever_num
-                    stage.missItemFallSycle = 1
-                else
-                    stage.missItemFallSycle = 2
-                stage.missItemFallSycleNow = 0
 
     ###
     落下するアイテムの種類を決める
@@ -981,8 +1064,8 @@ class slotSetting extends appNode
                 rate = 5
         else
             rate = 2
-        if game.isItemSet(9)
-            rate *= 3
+        if tension_rate != 100 && game.isItemSet(9)
+            rate = 30
         if 100 < rate
             rate = 100
         result = false
@@ -1049,79 +1132,22 @@ class slotSetting extends appNode
     betChange:(up)->
         val = 1
         bet = game.bet
+        betStr = bet + ''
+        betLng = game.numDigit(bet)
+        betHead = betStr.slice(0, 1)
         if up is true
-            if bet < 10
-                val = 1
-            else if bet < 100
-                val = 10
-            else if bet < 1000
-                val = 100
-            else if bet < 10000
-                val = 1000
-            else if bet < 100000
-                val = 10000
-            else if bet < 1000000
-                val = 100000
-            else if bet < 10000000
-                val = 1000000
-            else if bet < 100000000
-                val = 10000000
-            else if bet < 1000000000
-                val = 100000000
-            else if bet < 10000000000
-                val = 1000000000
-            else if bet < 100000000000
-                val = 10000000000
-            else if bet < 1000000000000
-                val = 100000000000
-            else if bet < 10000000000000
-                val = 1000000000000
-            else if bet < 100000000000000
-                val = 10000000000000
-            else if bet < 1000000000000000
-                val = 100000000000000
-            else
-                val = 1000000000000000
+            val = Math.pow(10, betLng - 1)
         else
-            if bet <= 10
-                val = -1
-            else if bet <= 100
-                val = -10
-            else if bet <= 1000
-                val = -100
-            else if bet <= 10000
-                val = -1000
-            else if bet <= 100000
-                val = -10000
-            else if bet <= 1000000
-                val = -100000
-            else if bet <= 10000000
-                val = -1000000
-            else if bet <= 100000000
-                val = -10000000
-            else if bet <= 1000000000
-                val = -100000000
-            else if bet <= 10000000000
-                val = -1000000000
-            else if bet <= 100000000000
-                val = -10000000000
-            else if bet <= 1000000000000
-                val = -100000000000
-            else if bet <= 10000000000000
-                val = -1000000000000
-            else if bet <= 100000000000000
-                val = -10000000000000
-            else if bet <= 1000000000000000
-                val = -100000000000000
+            if betHead is '1'
+                val = Math.pow(10, betLng - 2)
             else
-                val = -1000000000000000
+                val = Math.pow(10, betLng - 1)
+            val *= -1
         game.bet += val
         if game.bet < 1
             game.bet = 1
         else if game.bet > game.money
             game.bet -= val
-        else if game.bet > 1000000000000000
-            game.bet = 1000000000000000
         if up is false and game.auto_bet is 1 and game.bet < Math.floor(game.money / 100)
             game.auto_bet = 0
 
@@ -1129,13 +1155,12 @@ class slotSetting extends appNode
     掛け金が所持金を上回った時に掛け金を減らす
     ###
     betDown:()->
-        digit = Math.pow(10, (String(game.money).length - 1))
+        digit = Math.pow(10, (game.numDigit(game.money) - 1))
         val = Math.floor(game.money / digit) * digit / 100
         if val < 1
             val = 1
         return val
 
-    #TODO 掛け金が1000億円を超える
     betUp:()->
         if game.fever is false and @isForceSlotHit is false
             @betUpExe()
@@ -1144,8 +1169,6 @@ class slotSetting extends appNode
         if game.auto_bet is 1
             tmp_bet = Math.floor(game.money / 50)
             if game.bet < tmp_bet
-                digit = Math.pow(10, (String(tmp_bet).length - 1))
+                digit = Math.pow(10, (game.numDigit(tmp_bet) - 1))
                 game.bet = Math.floor(tmp_bet / digit) * digit
-                if game.bet > 1000000000000000
-                    game.bet = 1000000000000000
                 game.main_scene.gp_system.bet_text.setValue()

@@ -79,189 +79,28 @@ class Money extends Item
                 @frame = @frame_init
 
 
-
-###
-1円
-@param boolean isHoming trueならコインがホーミングする
-###
-class OneMoney extends Money
-    constructor: (isHoming) ->
+class valiableMoney extends Money
+    constructor: (isHoming, pow) ->
         super isHoming, 26, 30
-        @price = 1
-        @frame = 0
-        @frame_init = 0
-
-###
-10円
-@param boolean isHoming trueならコインがホーミングする
-###
-class TenMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 26, 30
-        @price = 10
-        @frame = 0
-        @frame_init = 0
-
-###
-100円
-@param boolean isHoming trueならコインがホーミングする
-###
-class HundredMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 26, 30
-        @price = 100
-        @frame = 4
-        @frame_init = 4
-
-###
-1000円
-@param boolean isHoming trueならコインがホーミングする
-###
-class ThousandMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 26, 30
-        @price = 1000
-        @frame = 4
-        @frame_init = 4
-
-###
-一万円
-@param boolean isHoming trueならコインがホーミングする
-###
-class TenThousandMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 26, 30
-        @price = 10000
-        @frame = 8
-        @frame_init = 8
-
-###
-10万円
-@param boolean isHoming trueならコインがホーミングする
-###
-class HundredThousandMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 26, 30
-        @price = 100000
-        @frame = 8
-        @frame_init = 8
-
-###
-100万円
-@param boolean isHoming trueならコインがホーミングする
-###
-class OneMillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 1000000
-        @frame = 0
-        @frame_init = 0
-
-###
-1000万円
-@param boolean isHoming trueならコインがホーミングする
-###
-class TenMillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 10000000
-        @frame = 0
-        @frame_init = 0
-
-###
-1億円
-@param boolean isHoming trueならコインがホーミングする
-###
-class OneHundredMillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 100000000
-        @frame = 4
-        @frame_init = 4
-
-###
-10億円
-@param boolean isHoming trueならコインがホーミングする
-###
-class BillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 1000000000
-        @frame = 4
-        @frame_init = 4
-
-###
-100億円
-@param boolean isHoming trueならコインがホーミングする
-###
-class TenBillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 10000000000
-        @frame = 8
-        @frame_init = 8
-
-###
-1000億円
-@param boolean isHoming trueならコインがホーミングする
-###
-class OneHundredBillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 100000000000
-        @frame = 8
-        @frame_init = 8
-
-###
-1兆円
-@param boolean isHoming trueならコインがホーミングする
-###
-class OneTrillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 1000000000000
-        @frame = 8
-        @frame_init = 8
-
-###
-10兆円
-@param boolean isHoming trueならコインがホーミングする
-###
-class TenTrillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 10000000000000
-        @frame = 8
-        @frame_init = 8
-
-###
-100兆円
-@param boolean isHoming trueならコインがホーミングする
-###
-class OneHundredTrillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 100000000000000
-        @frame = 8
-        @frame_init = 8
-
-###
-1000兆円
-@param boolean isHoming trueならコインがホーミングする
-###
-class AThousandTrillionMoney extends Money
-    constructor: (isHoming) ->
-        super isHoming, 30, 30
-        @image = game.imageload("coin_pla")
-        @price = 1000000000000000
-        @frame = 8
-        @frame_init = 8
+        if 9 <= pow
+            @width = 30
+            @image = game.imageload("coin_pla")
+        @price = Math.pow(10, pow)
+        if pow <= 2
+            @frame = 0
+            @frame_init = 0
+        else if pow <= 5
+            @frame = 4
+            @frame_init = 4
+        else if pow <= 8
+            @frame = 8
+            @frame_init = 8
+        else if pow <= 11
+            @frame = 0
+            @frame_init = 0
+        else if pow <= 14
+            @frame = 4
+            @frame_init = 4
+        else
+            @frame = 8
+            @frame_init = 8
