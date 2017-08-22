@@ -178,7 +178,7 @@ class gpSlot extends appGroup
     _feverStart:(hit_eye)->
         if game.fever is false
             if (11 <= hit_eye && hit_eye <= 19) || (21 <= hit_eye)
-                if game.prev_fever_muse.indexOf(parseInt(hit_eye)) is -1
+                if game.prev_fever_muse.indexOf(parseInt(hit_eye)) is -1 || 25 <= game.prev_fever_muse.length
                     game.prev_fever_muse.push(@hit_role)
                     #game.pause_scene.pause_record_layer.resetRecordList()
                     #game.pause_scene.pause_main_layer.save_game_button.makeDisable()

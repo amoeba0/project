@@ -957,6 +957,7 @@ class pauseMainLayer extends appDomLayer
         @bet_dialog = new betDialogHtml()
         @menu_discription = new menuDiscription()
         @batu_button = new batuButtonHtml()
+        @tweet_button = new tweetButtonHtml()
         @addChild(@return_game_button)
         @addChild(@save_game_button)
         @addChild(@title_button)
@@ -967,6 +968,7 @@ class pauseMainLayer extends appDomLayer
         @addChild(@bet_dialog)
         @addChild(@menu_discription)
         @addChild(@batu_button)
+        @addChild(@tweet_button)
         @money_text = new moneyText()
         @addChild(@money_text)
         @bet_text = new betText()
@@ -2348,7 +2350,7 @@ class gpSlot extends appGroup
     _feverStart:(hit_eye)->
         if game.fever is false
             if (11 <= hit_eye && hit_eye <= 19) || (21 <= hit_eye)
-                if game.prev_fever_muse.indexOf(parseInt(hit_eye)) is -1
+                if game.prev_fever_muse.indexOf(parseInt(hit_eye)) is -1 || 25 <= game.prev_fever_muse.length
                     game.prev_fever_muse.push(@hit_role)
                     #game.pause_scene.pause_record_layer.resetRecordList()
                     #game.pause_scene.pause_main_layer.save_game_button.makeDisable()
@@ -3123,10 +3125,11 @@ class batuButtonHtml extends buttonHtml
 ###
 class saveGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
-        super 180, 45
+        super 100, 45
+        @x = 170
         @y = 325
         @text = 'セーブ'
-        @class.push('pause-main-menu-button-middle')
+        @class.push('pause-main-menu-button-mini')
         @class.push('pause-main-menu-button-blue')
         @setHtml()
     touchendEvent:() ->
@@ -3136,11 +3139,11 @@ class saveGameButtonHtml extends pauseMainMenuButtonHtml
 
 class returnTitleButtonHtml extends pauseMainMenuButtonHtml
     constructor:()->
-        super 180, 45
-        @x = 250
+        super 100, 45
+        @x = 310
         @y = 325
         @text = 'タイトル'
-        @class.push('pause-main-menu-button-middle')
+        @class.push('pause-main-menu-button-mini')
         @setHtml()
     touchendEvent:() ->
         game.sePlay(@dicisionSe)
@@ -3331,7 +3334,7 @@ class itemBuyCancelButtonHtml extends baseCancelButtonHtml
     constructor:()->
         super
         @y = 500
-        
+
     touchendEvent:() ->
         game.pause_scene.removeItemBuySelectMenu()
     setBuyImpossiblePositon:()->
@@ -3651,6 +3654,16 @@ class helpButtonHtml extends buttonHtml
         else
             @class = game.arrayValueDel(@class, 'help-button-unread')
         @setHtml()
+
+class tweetButtonHtml extends buttonHtml
+    constructor:()->
+        super 190, 45
+        @x = 30
+        @y = 343
+        @money = game.toJPUnit(game.money)
+        @_element.innerHTML = '<a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fkotoyayo.firebaseapp.com%2Fkotori%2Findex.html\&ref_src=twsrc%5Etfw\&tw_p=tweetbutton\&text=スロットことりのおやつで'+@money+'円稼いだよ！\&hashtags=スロットことりのおやつ"
+        class="base-button pause-main-menu-button pause-main-menu-button-mini pause-main-menu-button-sky button-pointer"
+        target="_blank">ツイート</a>'
 class dialogHtml extends systemHtml
     constructor: (width, height) ->
         super width, height

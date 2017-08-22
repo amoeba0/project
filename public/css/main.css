@@ -30,6 +30,12 @@
 .pause-main-menu-button-small {
 	width: 120px;
 }
+.pause-main-menu-button-mini {
+    width: 120px;
+    font-size: 30px;
+    text-decoration: none;
+    padding: 15px 0px;
+}
 .pause-main-menu-button-middle {
 	width: 180px;
 }
@@ -71,6 +77,12 @@
     background-image:
         linear-gradient(45deg, #5886ef 25%, transparent 25%, transparent 75%, #5886ef 75%, #5886ef),
         linear-gradient(45deg, #5886ef 25%, transparent 25%, transparent 75%, #5886ef 75%, #5886ef);
+}
+.pause-main-menu-button-sky {
+    background-color: #68bae0;
+    background-image:
+        linear-gradient(45deg, #58ccef 25%, transparent 25%, transparent 75%, #58ccef 75%, #58ccef),
+        linear-gradient(45deg, #58ccef 25%, transparent 25%, transparent 75%, #58ccef 75%, #58ccef);
 }
 .title-menu-button {
     background-color: #ece8e4;

@@ -57,10 +57,11 @@ class batuButtonHtml extends buttonHtml
 ###
 class saveGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
-        super 180, 45
+        super 100, 45
+        @x = 170
         @y = 325
         @text = 'セーブ'
-        @class.push('pause-main-menu-button-middle')
+        @class.push('pause-main-menu-button-mini')
         @class.push('pause-main-menu-button-blue')
         @setHtml()
     touchendEvent:() ->
@@ -70,11 +71,11 @@ class saveGameButtonHtml extends pauseMainMenuButtonHtml
 
 class returnTitleButtonHtml extends pauseMainMenuButtonHtml
     constructor:()->
-        super 180, 45
-        @x = 250
+        super 100, 45
+        @x = 310
         @y = 325
         @text = 'タイトル'
-        @class.push('pause-main-menu-button-middle')
+        @class.push('pause-main-menu-button-mini')
         @setHtml()
     touchendEvent:() ->
         game.sePlay(@dicisionSe)
@@ -265,7 +266,7 @@ class itemBuyCancelButtonHtml extends baseCancelButtonHtml
     constructor:()->
         super
         @y = 500
-        
+
     touchendEvent:() ->
         game.pause_scene.removeItemBuySelectMenu()
     setBuyImpossiblePositon:()->
@@ -585,3 +586,13 @@ class helpButtonHtml extends buttonHtml
         else
             @class = game.arrayValueDel(@class, 'help-button-unread')
         @setHtml()
+
+class tweetButtonHtml extends buttonHtml
+    constructor:()->
+        super 190, 45
+        @x = 30
+        @y = 343
+        @money = game.toJPUnit(game.money)
+        @_element.innerHTML = '<a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fkotoyayo.firebaseapp.com%2Fkotori%2Findex.html\&ref_src=twsrc%5Etfw\&tw_p=tweetbutton\&text=スロットことりのおやつで'+@money+'円稼いだよ！\&hashtags=スロットことりのおやつ"
+        class="base-button pause-main-menu-button pause-main-menu-button-mini pause-main-menu-button-sky button-pointer"
+        target="_blank">ツイート</a>'
