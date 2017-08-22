@@ -957,7 +957,8 @@ class pauseMainLayer extends appDomLayer
         @bet_dialog = new betDialogHtml()
         @menu_discription = new menuDiscription()
         @batu_button = new batuButtonHtml()
-        @tweet_button = new tweetButtonHtml()
+        if game.isSumaho() is false
+            @tweet_button = new tweetButtonHtml()
         @addChild(@return_game_button)
         @addChild(@save_game_button)
         @addChild(@title_button)
@@ -968,7 +969,8 @@ class pauseMainLayer extends appDomLayer
         @addChild(@bet_dialog)
         @addChild(@menu_discription)
         @addChild(@batu_button)
-        @addChild(@tweet_button)
+        if game.isSumaho() is false
+            @addChild(@tweet_button)
         @money_text = new moneyText()
         @addChild(@money_text)
         @bet_text = new betText()
@@ -3125,11 +3127,16 @@ class batuButtonHtml extends buttonHtml
 ###
 class saveGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
-        super 100, 45
-        @x = 170
+        super 180, 45
         @y = 325
+        if game.isSumaho() is false
+            @width = 180
+            @x = 170
         @text = 'セーブ'
-        @class.push('pause-main-menu-button-mini')
+        if game.isSumaho() is false
+            @class.push('pause-main-menu-button-mini')
+        else
+            @class.push('pause-main-menu-button-middle')
         @class.push('pause-main-menu-button-blue')
         @setHtml()
     touchendEvent:() ->
@@ -3139,11 +3146,17 @@ class saveGameButtonHtml extends pauseMainMenuButtonHtml
 
 class returnTitleButtonHtml extends pauseMainMenuButtonHtml
     constructor:()->
-        super 100, 45
-        @x = 310
+        super 180, 45
+        @x = 250
         @y = 325
+        if game.isSumaho() is false
+            @width = 100
+            @x = 310
         @text = 'タイトル'
-        @class.push('pause-main-menu-button-mini')
+        if game.isSumaho() is false
+            @class.push('pause-main-menu-button-mini')
+        else
+            @class.push('pause-main-menu-button-middle')
         @setHtml()
     touchendEvent:() ->
         game.sePlay(@dicisionSe)

@@ -57,11 +57,16 @@ class batuButtonHtml extends buttonHtml
 ###
 class saveGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
-        super 100, 45
-        @x = 170
+        super 180, 45
         @y = 325
+        if game.isSumaho() is false
+            @width = 180
+            @x = 170
         @text = 'セーブ'
-        @class.push('pause-main-menu-button-mini')
+        if game.isSumaho() is false
+            @class.push('pause-main-menu-button-mini')
+        else
+            @class.push('pause-main-menu-button-middle')
         @class.push('pause-main-menu-button-blue')
         @setHtml()
     touchendEvent:() ->
@@ -71,11 +76,17 @@ class saveGameButtonHtml extends pauseMainMenuButtonHtml
 
 class returnTitleButtonHtml extends pauseMainMenuButtonHtml
     constructor:()->
-        super 100, 45
-        @x = 310
+        super 180, 45
+        @x = 250
         @y = 325
+        if game.isSumaho() is false
+            @width = 100
+            @x = 310
         @text = 'タイトル'
-        @class.push('pause-main-menu-button-mini')
+        if game.isSumaho() is false
+            @class.push('pause-main-menu-button-mini')
+        else
+            @class.push('pause-main-menu-button-middle')
         @setHtml()
     touchendEvent:() ->
         game.sePlay(@dicisionSe)
