@@ -372,3 +372,13 @@
 .red {
     color: #f00;
 }
+.tweet-up {
+    font-size: 20px;
+    padding-top: 3px;
+}
+.tweet-low {
+    font-size: 28px;
+}
+.pause-main-menu-button-tweet {
+    padding: 0px !important;
+}

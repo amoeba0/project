@@ -57,16 +57,11 @@ class batuButtonHtml extends buttonHtml
 ###
 class saveGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
-        super 180, 45
-        @y = 325
-        if game.isSumaho() is false
-            @width = 180
-            @x = 170
+        super 100, 45
+        @x = 30
+        @y = 535
         @text = 'セーブ'
-        if game.isSumaho() is false
-            @class.push('pause-main-menu-button-mini')
-        else
-            @class.push('pause-main-menu-button-middle')
+        @class.push('pause-main-menu-button-mini')
         @class.push('pause-main-menu-button-blue')
         @setHtml()
     touchendEvent:() ->
@@ -76,17 +71,11 @@ class saveGameButtonHtml extends pauseMainMenuButtonHtml
 
 class returnTitleButtonHtml extends pauseMainMenuButtonHtml
     constructor:()->
-        super 180, 45
-        @x = 250
-        @y = 325
-        if game.isSumaho() is false
-            @width = 100
-            @x = 310
+        super 100, 45
+        @x = 310
+        @y = 535
         @text = 'タイトル'
-        if game.isSumaho() is false
-            @class.push('pause-main-menu-button-mini')
-        else
-            @class.push('pause-main-menu-button-middle')
+        @class.push('pause-main-menu-button-mini')
         @setHtml()
     touchendEvent:() ->
         game.sePlay(@dicisionSe)
@@ -95,7 +84,7 @@ class returnTitleButtonHtml extends pauseMainMenuButtonHtml
 class buyItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 400, 45
-        @y = 430
+        @y = 325
         @text = 'アイテムSHOP'
         @class.push('pause-main-menu-button-purple')
         @setHtml()
@@ -107,7 +96,7 @@ class useItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 100, 45
         @x = 30
-        @y = 535
+        @y = 430
         @text = 'スキル'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-green')
@@ -120,7 +109,7 @@ class setMemberButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 100, 45
         @x = 170
-        @y = 535
+        @y = 430
         @text = '部員'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-red')
@@ -133,7 +122,7 @@ class recordButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 100, 45
         @x = 310
-        @y = 535
+        @y = 430
         @text = '実績'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-orange')
@@ -598,12 +587,20 @@ class helpButtonHtml extends buttonHtml
             @class = game.arrayValueDel(@class, 'help-button-unread')
         @setHtml()
 
-class tweetButtonHtml extends buttonHtml
+class tweetButtonHtml extends pauseMainMenuButtonHtml
     constructor:()->
-        super 190, 45
-        @x = 30
-        @y = 343
-        @money = game.toJPUnit(game.money)
-        @_element.innerHTML = '<a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fkotoyayo.firebaseapp.com%2Fkotori%2Findex.html\&ref_src=twsrc%5Etfw\&tw_p=tweetbutton\&text=スロットことりのおやつで'+@money+'円稼いだよ！\&hashtags=スロットことりのおやつ"
-        class="base-button pause-main-menu-button pause-main-menu-button-mini pause-main-menu-button-sky button-pointer"
-        target="_blank">ツイート</a>'
+        super 100, 45
+        @x = 170
+        @y = 535
+        @text = '<div class="tweet-up">稼いだ金額を</div><div class="tweet-low">ツイート</div>'
+        @class.push('pause-main-menu-button-mini')
+        @class.push('pause-main-menu-button-sky')
+        @class.push('pause-main-menu-button-tweet')
+        @setHtml()
+        @money = game.toJPUnit(game.money, 0, 1)
+        if game.money >= Math.pow(10, 19)
+            @money += '＋端数　円くらい'
+        else
+            @money += '円'
+    ontouchend:(e)->
+        window.open('https://twitter.com/intent/tweet?url=https%3A%2F%2Fkotoyayo.firebaseapp.com%2Fkotori%2Findex.html\&ref_src=twsrc%5Etfw\&tw_p=tweetbutton\&text=スロットことりのおやつで'+@money+'稼いだよ！\&hashtags=スロットことりのおやつ')

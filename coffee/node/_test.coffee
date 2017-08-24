@@ -16,7 +16,8 @@ class Test extends appNode
         #@preLoadMulti()
         #@addMuse()
         #@moneyFormat()
-        @moneyFormat2()
+        #@moneyFormat2()
+        @moneyFormat3()
         #@itemCatchTension()
         #@chanceTime()
         #@forceFever()
@@ -116,6 +117,22 @@ class Test extends appNode
         console.log(game.toJPUnit(123456789012345678, 1))
         console.log(game.toJPUnit(1234567890123456789, 1))
         console.log(game.toJPUnit(12345678901234567890, 1))
+
+    moneyFormat3:()->
+        console.log(game.toJPUnit(1234, 0, 1))
+        console.log(game.toJPUnit(123456, 0, 1))
+        console.log(game.toJPUnit(1234561234, 0, 1))
+        console.log(game.toJPUnit(12345612345678, 0, 1))
+        console.log(game.toJPUnit(123456123456789012, 0, 1))
+        console.log(game.toJPUnit(1234561234567890123456, 0, 1))
+        console.log(game.toJPUnit(12345612345678901234567890, 0, 1))
+        console.log(game.toJPUnit(123456123456789012345678901234, 0, 1))
+        console.log(game.toJPUnit(1234561234567890123456789012341234, 0, 1))
+        console.log(game.toJPUnit(12345612345678901234567890123412341234, 0, 1))
+        console.log(game.toJPUnit(123456123456789012345678901234123412341234, 0, 1))
+        console.log(game.toJPUnit(1234561234567890123456789012341234123412341234, 0, 1))
+        console.log(game.toJPUnit(123456123456789012345678901234123412341234123412634, 0, 1))
+        console.log(game.toJPUnit(1234561234567890123456789012341234123412341234126341234, 0, 1))
 
 
     itemCatchTension:()->

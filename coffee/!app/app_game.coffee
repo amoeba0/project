@@ -294,8 +294,8 @@ class appGame extends Game
     ###
     数値の単位を漢数字で区切る
     ###
-    toJPUnit:(num, cut=0)->
-        fra = @_delFraction(num, cut)
+    toJPUnit:(num, cut=0, many=0)->
+        fra = @_delFraction(num, cut, many)
         num = fra[0]
         keta = fra[1]
         str = num + ''
@@ -304,6 +304,8 @@ class appGame extends Game
         count = 0
         ptr = 0
         kNameArr = ['', '万', '億', '兆', '京', '垓', '抒', '穣', '溝', '澗', '正', '載', '極', '恒', '阿', '那', '不', '無']
+        if many is 1
+            kNameArr = ['', '万', '億', '兆', '京', '垓', '抒', '穣', '溝', '澗', '正', '載', '極', '恒河沙', '阿僧祇', '那由多', '不可思議', '無量大数']
         kName = kNameArr.slice(keta, kNameArr.length)
         i = str.length - 1
         while i >= 0
@@ -323,9 +325,11 @@ class appGame extends Game
     数値の端数を0にする
     1兆円超えたら下4桁削る
     ###
-    _delFraction:(num, cut=0)->
+    _delFraction:(num, cut=0, many=0)->
         if cut is 1
             oku = 1
+        else if many is 1
+            oku = 1000000000000000
         else
             oku = 100000000
         man = 10000

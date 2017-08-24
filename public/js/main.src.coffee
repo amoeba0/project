@@ -303,8 +303,8 @@ class appGame extends Game
     ###
     数値の単位を漢数字で区切る
     ###
-    toJPUnit:(num, cut=0)->
-        fra = @_delFraction(num, cut)
+    toJPUnit:(num, cut=0, many=0)->
+        fra = @_delFraction(num, cut, many)
         num = fra[0]
         keta = fra[1]
         str = num + ''
@@ -313,6 +313,8 @@ class appGame extends Game
         count = 0
         ptr = 0
         kNameArr = ['', '万', '億', '兆', '京', '垓', '抒', '穣', '溝', '澗', '正', '載', '極', '恒', '阿', '那', '不', '無']
+        if many is 1
+            kNameArr = ['', '万', '億', '兆', '京', '垓', '抒', '穣', '溝', '澗', '正', '載', '極', '恒河沙', '阿僧祇', '那由多', '不可思議', '無量大数']
         kName = kNameArr.slice(keta, kNameArr.length)
         i = str.length - 1
         while i >= 0
@@ -332,9 +334,11 @@ class appGame extends Game
     数値の端数を0にする
     1兆円超えたら下4桁削る
     ###
-    _delFraction:(num, cut=0)->
+    _delFraction:(num, cut=0, many=0)->
         if cut is 1
             oku = 1
+        else if many is 1
+            oku = 1000000000000000
         else
             oku = 100000000
         man = 10000
@@ -957,8 +961,7 @@ class pauseMainLayer extends appDomLayer
         @bet_dialog = new betDialogHtml()
         @menu_discription = new menuDiscription()
         @batu_button = new batuButtonHtml()
-        if game.isSumaho() is false
-            @tweet_button = new tweetButtonHtml()
+        @tweet_button = new tweetButtonHtml()
         @addChild(@return_game_button)
         @addChild(@save_game_button)
         @addChild(@title_button)
@@ -969,8 +972,7 @@ class pauseMainLayer extends appDomLayer
         @addChild(@bet_dialog)
         @addChild(@menu_discription)
         @addChild(@batu_button)
-        if game.isSumaho() is false
-            @addChild(@tweet_button)
+        @addChild(@tweet_button)
         @money_text = new moneyText()
         @addChild(@money_text)
         @bet_text = new betText()
@@ -2352,7 +2354,7 @@ class gpSlot extends appGroup
     _feverStart:(hit_eye)->
         if game.fever is false
             if (11 <= hit_eye && hit_eye <= 19) || (21 <= hit_eye)
-                if game.prev_fever_muse.indexOf(parseInt(hit_eye)) is -1 || 25 <= game.prev_fever_muse.length
+                if game.prev_fever_muse.indexOf(parseInt(hit_eye)) is -1 || 25 <= game.past_fever_num
                     game.prev_fever_muse.push(@hit_role)
                     #game.pause_scene.pause_record_layer.resetRecordList()
                     #game.pause_scene.pause_main_layer.save_game_button.makeDisable()
@@ -3127,16 +3129,11 @@ class batuButtonHtml extends buttonHtml
 ###
 class saveGameButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
-        super 180, 45
-        @y = 325
-        if game.isSumaho() is false
-            @width = 180
-            @x = 170
+        super 100, 45
+        @x = 30
+        @y = 535
         @text = 'セーブ'
-        if game.isSumaho() is false
-            @class.push('pause-main-menu-button-mini')
-        else
-            @class.push('pause-main-menu-button-middle')
+        @class.push('pause-main-menu-button-mini')
         @class.push('pause-main-menu-button-blue')
         @setHtml()
     touchendEvent:() ->
@@ -3146,17 +3143,11 @@ class saveGameButtonHtml extends pauseMainMenuButtonHtml
 
 class returnTitleButtonHtml extends pauseMainMenuButtonHtml
     constructor:()->
-        super 180, 45
-        @x = 250
-        @y = 325
-        if game.isSumaho() is false
-            @width = 100
-            @x = 310
+        super 100, 45
+        @x = 310
+        @y = 535
         @text = 'タイトル'
-        if game.isSumaho() is false
-            @class.push('pause-main-menu-button-mini')
-        else
-            @class.push('pause-main-menu-button-middle')
+        @class.push('pause-main-menu-button-mini')
         @setHtml()
     touchendEvent:() ->
         game.sePlay(@dicisionSe)
@@ -3165,7 +3156,7 @@ class returnTitleButtonHtml extends pauseMainMenuButtonHtml
 class buyItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 400, 45
-        @y = 430
+        @y = 325
         @text = 'アイテムSHOP'
         @class.push('pause-main-menu-button-purple')
         @setHtml()
@@ -3177,7 +3168,7 @@ class useItemButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 100, 45
         @x = 30
-        @y = 535
+        @y = 430
         @text = 'スキル'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-green')
@@ -3190,7 +3181,7 @@ class setMemberButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 100, 45
         @x = 170
-        @y = 535
+        @y = 430
         @text = '部員'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-red')
@@ -3203,7 +3194,7 @@ class recordButtonHtml extends pauseMainMenuButtonHtml
     constructor: () ->
         super 100, 45
         @x = 310
-        @y = 535
+        @y = 430
         @text = '実績'
         @class.push('pause-main-menu-button-small')
         @class.push('pause-main-menu-button-orange')
@@ -3668,15 +3659,23 @@ class helpButtonHtml extends buttonHtml
             @class = game.arrayValueDel(@class, 'help-button-unread')
         @setHtml()
 
-class tweetButtonHtml extends buttonHtml
+class tweetButtonHtml extends pauseMainMenuButtonHtml
     constructor:()->
-        super 190, 45
-        @x = 30
-        @y = 343
-        @money = game.toJPUnit(game.money)
-        @_element.innerHTML = '<a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fkotoyayo.firebaseapp.com%2Fkotori%2Findex.html\&ref_src=twsrc%5Etfw\&tw_p=tweetbutton\&text=スロットことりのおやつで'+@money+'円稼いだよ！\&hashtags=スロットことりのおやつ"
-        class="base-button pause-main-menu-button pause-main-menu-button-mini pause-main-menu-button-sky button-pointer"
-        target="_blank">ツイート</a>'
+        super 100, 45
+        @x = 170
+        @y = 535
+        @text = '<div class="tweet-up">稼いだ金額を</div><div class="tweet-low">ツイート</div>'
+        @class.push('pause-main-menu-button-mini')
+        @class.push('pause-main-menu-button-sky')
+        @class.push('pause-main-menu-button-tweet')
+        @setHtml()
+        @money = game.toJPUnit(game.money, 0, 1)
+        if game.money >= Math.pow(10, 19)
+            @money += '＋端数　円くらい'
+        else
+            @money += '円'
+    ontouchend:(e)->
+        window.open('https://twitter.com/intent/tweet?url=https%3A%2F%2Fkotoyayo.firebaseapp.com%2Fkotori%2Findex.html\&ref_src=twsrc%5Etfw\&tw_p=tweetbutton\&text=スロットことりのおやつで'+@money+'稼いだよ！\&hashtags=スロットことりのおやつ')
 class dialogHtml extends systemHtml
     constructor: (width, height) ->
         super width, height
@@ -4499,21 +4498,21 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':Math.pow(10, 24),
-            'bet':Math.pow(10, 22),
+            'money':123456789012345678901234567890123456789012345678901234567890123456789012,
+            'bet':Math.pow(10, 4),
             'combo':20,
             'max_combo':200,
             'tension':200,
-            'past_fever_num':3,
+            'past_fever_num':24,
             'item_point':1500,
             'next_add_member_key':0,
             'now_muse_num':0,
             'max_set_item_num':3,
             'now_speed':3,
-            'item_have_now':[1,2,3,4,5,6,7,8,9,21,22,23,24],
+            'item_have_now':[1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23,24],
             'item_set_now':[3,4,8],
-            'member_set_now':[],
-            'prev_fever_muse':[],
+            'member_set_now':[14,13,19],
+            'prev_fever_muse':[11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,31,32,33,34,35,36,37],
             'prev_item':[],
             'left_lille':[],
             'middle_lille':[],
@@ -5157,99 +5156,87 @@ class slotSetting extends appNode
             missSycle = 1
         else if game.bet < 5 * Math.pow(10, 12)
             val = 2.4
-            @prize_div = 0.9
+            @prize_div = 0.8
             missSycle = 1
         else if game.bet < 1 * Math.pow(10, 13)
             val = 2.6
-            @prize_div = 0.9
+            @prize_div = 0.8
             missSycle = 1
         else if game.bet < 5 * Math.pow(10, 13)
             val = 2.8
-            @prize_div = 0.9
+            @prize_div = 0.8
             missSycle = 1
         else if game.bet < 1 * Math.pow(10, 14) #100兆
             val = 3.0
-            @prize_div = 0.8
+            @prize_div = 0.9
             missSycle = 1
         else if game.bet < 5 * Math.pow(10, 14)
             val = 3.4
-            @prize_div = 0.8
+            @prize_div = 0.9
             missSycle = 1
         else if game.bet < 1 * Math.pow(10, 15)
             val = 3.8
-            @prize_div = 0.8
+            @prize_div = 0.9
             missSycle = 1
         else if game.bet < 5 * Math.pow(10, 15)
             val = 4.2
-            @prize_div = 0.8
+            @prize_div = 0.9
             missSycle = 1
         else if game.bet < 1 * Math.pow(10, 16) #1京
             val = 4.6
-            @prize_div = 0.8
+            @prize_div = 0.9
             missSycle = 1
         else if game.bet < 5 * Math.pow(10, 16)
             val = 5.0
-            @prize_div = 0.8
+            @prize_div = 1
             missSycle = 0.5
         else if game.bet < 1 * Math.pow(10, 17)
             val = 5.4
-            @prize_div = 0.8
+            @prize_div = 1
             missSycle = 0.5
         else if game.bet < 5 * Math.pow(10, 17)
             val = 5.8
-            @prize_div = 0.8
+            @prize_div = 1
             missSycle = 0.5
         else if game.bet < 1 * Math.pow(10, 18) #100京
             val = 6.2
-            @prize_div = 0.8
+            @prize_div = 1
             missSycle = 0.5
         else if game.bet < 5 * Math.pow(10, 18)
             val = 6.6
-            @prize_div = 0.8
+            @prize_div = 1
             missSycle = 0.5
         else if game.bet < 1 * Math.pow(10, 19)
             val = 7.0
-            @prize_div = 0.8
+            @prize_div = 1
             missSycle = 0.5
         else if game.bet < 1 * Math.pow(10, 20) #1垓
             val = 7.5
-            @prize_div = 0.8
-            missSycle = 0.5
-        else if game.bet < 1 * Math.pow(10, 21)
-            val = 8.0
-            @prize_div = 0.8
-            missSycle = 0.5
-        else if game.bet < 1 * Math.pow(10, 22)
-            val = 8.5
-            @prize_div = 0.8
-            missSycle = 0.5
-        else if game.bet < 1 * Math.pow(10, 23)
-            val = 9.0
-            @prize_div = 0.8
+            @prize_div = 1.2
             missSycle = 0.5
         else if game.bet < 1 * Math.pow(10, 24) #1抒
-            val = 9.5
-            @prize_div = 0.8
-            missSycle = 0.5
-        else if game.bet < 1 * Math.pow(10, 32) #1溝
-            val = 10.0
-            @prize_div = 0.8
+            val = 8.0
+            @prize_div = 1.6
             missSycle = 0.4
+        else if game.bet < 1 * Math.pow(10, 32) #1溝
+            val = 8.0
+            @prize_div = 2
+            missSycle = 0.3
         else if game.bet < 1 * Math.pow(10, 40) #1正
-            val = 10.0
-            @prize_div = 0.8
-            missSycle = 0.3
-        else if game.bet < 1 * Math.pow(10, 48) #1極
-            val = 10.0
-            @prize_div = 0.8
-            missSycle = 0.3
-        else if game.bet < 1 * Math.pow(10, 56) #1阿僧祇
-            val = 10.0
-            @prize_div = 0.8
+            val = 8.0
+            @prize_div = 3
             missSycle = 0.2
+        else if game.bet < 1 * Math.pow(10, 48) #1極
+            val = 8.0
+            @prize_div = 3.5
+            missSycle = 0.2
+        else if game.bet < 1 * Math.pow(10, 56) #1阿僧祇
+            val = 8.0
+            @prize_div = 4
+            missSycle = 0.1
         else
             val = 10.0
-            @prize_div = 0.8
+            @prize_div = 5
             missSycle = 0.1
         game.main_scene.gp_stage_front.missItemFallSycle = missSycle
         div = 1
@@ -5683,10 +5670,11 @@ class slotSetting extends appNode
         roleCnt = 0
         returnRoles = @allRoles
         for roleNum, member of returnRoles
-            if game.arrIndexOf(game.item_have_now, member) && game.prev_fever_muse.indexOf(parseInt(roleNum)) is -1
-                roleCnt++
-                if @prev_osusume_role is 0 || @prev_osusume_role.indexOf(parseInt(roleNum)) is -1
-                    allRoles.push(roleNum)
+            if game.arrIndexOf(game.item_have_now, member)
+                if game.prev_fever_muse.indexOf(parseInt(roleNum)) is -1 || 25 <= game.past_fever_num
+                    roleCnt++
+                    if @prev_osusume_role is 0 || @prev_osusume_role.indexOf(parseInt(roleNum)) is -1
+                        allRoles.push(roleNum)
         if 0 < allRoles.length
             random = Math.floor(Math.random() * allRoles.length)
             role = returnRoles[allRoles[random]]
@@ -5706,7 +5694,7 @@ class slotSetting extends appNode
         roles = []
         for i, roleNum of @allRolesKey
             member = @allRoles[roleNum]
-            if game.arrIndexOf(left_lille, member) && game.prev_fever_muse.indexOf(parseInt(roleNum)) is -1
+            if game.arrIndexOf(left_lille, member) && (game.prev_fever_muse.indexOf(parseInt(roleNum)) is -1 || 25 <= game.past_fever_num)
                 roles.push(member)
         if roles[0] != undefined
             role = roles[0]
@@ -5785,7 +5773,8 @@ class Test extends appNode
         #@preLoadMulti()
         #@addMuse()
         #@moneyFormat()
-        @moneyFormat2()
+        #@moneyFormat2()
+        @moneyFormat3()
         #@itemCatchTension()
         #@chanceTime()
         #@forceFever()
@@ -5885,6 +5874,22 @@ class Test extends appNode
         console.log(game.toJPUnit(123456789012345678, 1))
         console.log(game.toJPUnit(1234567890123456789, 1))
         console.log(game.toJPUnit(12345678901234567890, 1))
+
+    moneyFormat3:()->
+        console.log(game.toJPUnit(1234, 0, 1))
+        console.log(game.toJPUnit(123456, 0, 1))
+        console.log(game.toJPUnit(1234561234, 0, 1))
+        console.log(game.toJPUnit(12345612345678, 0, 1))
+        console.log(game.toJPUnit(123456123456789012, 0, 1))
+        console.log(game.toJPUnit(1234561234567890123456, 0, 1))
+        console.log(game.toJPUnit(12345612345678901234567890, 0, 1))
+        console.log(game.toJPUnit(123456123456789012345678901234, 0, 1))
+        console.log(game.toJPUnit(1234561234567890123456789012341234, 0, 1))
+        console.log(game.toJPUnit(12345612345678901234567890123412341234, 0, 1))
+        console.log(game.toJPUnit(123456123456789012345678901234123412341234, 0, 1))
+        console.log(game.toJPUnit(1234561234567890123456789012341234123412341234, 0, 1))
+        console.log(game.toJPUnit(123456123456789012345678901234123412341234123412634, 0, 1))
+        console.log(game.toJPUnit(1234561234567890123456789012341234123412341234126341234, 0, 1))
 
 
     itemCatchTension:()->

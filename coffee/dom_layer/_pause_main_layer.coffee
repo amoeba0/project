@@ -11,8 +11,7 @@ class pauseMainLayer extends appDomLayer
         @bet_dialog = new betDialogHtml()
         @menu_discription = new menuDiscription()
         @batu_button = new batuButtonHtml()
-        if game.isSumaho() is false
-            @tweet_button = new tweetButtonHtml()
+        @tweet_button = new tweetButtonHtml()
         @addChild(@return_game_button)
         @addChild(@save_game_button)
         @addChild(@title_button)
@@ -23,8 +22,7 @@ class pauseMainLayer extends appDomLayer
         @addChild(@bet_dialog)
         @addChild(@menu_discription)
         @addChild(@batu_button)
-        if game.isSumaho() is false
-            @addChild(@tweet_button)
+        @addChild(@tweet_button)
         @money_text = new moneyText()
         @addChild(@money_text)
         @bet_text = new betText()

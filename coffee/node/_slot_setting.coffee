@@ -562,99 +562,87 @@ class slotSetting extends appNode
             missSycle = 1
         else if game.bet < 5 * Math.pow(10, 12)
             val = 2.4
-            @prize_div = 0.9
+            @prize_div = 0.8
             missSycle = 1
         else if game.bet < 1 * Math.pow(10, 13)
             val = 2.6
-            @prize_div = 0.9
+            @prize_div = 0.8
             missSycle = 1
         else if game.bet < 5 * Math.pow(10, 13)
             val = 2.8
-            @prize_div = 0.9
+            @prize_div = 0.8
             missSycle = 1
         else if game.bet < 1 * Math.pow(10, 14) #100兆
             val = 3.0
-            @prize_div = 0.8
+            @prize_div = 0.9
             missSycle = 1
         else if game.bet < 5 * Math.pow(10, 14)
             val = 3.4
-            @prize_div = 0.8
+            @prize_div = 0.9
             missSycle = 1
         else if game.bet < 1 * Math.pow(10, 15)
             val = 3.8
-            @prize_div = 0.8
+            @prize_div = 0.9
             missSycle = 1
         else if game.bet < 5 * Math.pow(10, 15)
             val = 4.2
-            @prize_div = 0.8
+            @prize_div = 0.9
             missSycle = 1
         else if game.bet < 1 * Math.pow(10, 16) #1京
             val = 4.6
-            @prize_div = 0.8
+            @prize_div = 0.9
             missSycle = 1
         else if game.bet < 5 * Math.pow(10, 16)
             val = 5.0
-            @prize_div = 0.8
+            @prize_div = 1
             missSycle = 0.5
         else if game.bet < 1 * Math.pow(10, 17)
             val = 5.4
-            @prize_div = 0.8
+            @prize_div = 1
             missSycle = 0.5
         else if game.bet < 5 * Math.pow(10, 17)
             val = 5.8
-            @prize_div = 0.8
+            @prize_div = 1
             missSycle = 0.5
         else if game.bet < 1 * Math.pow(10, 18) #100京
             val = 6.2
-            @prize_div = 0.8
+            @prize_div = 1
             missSycle = 0.5
         else if game.bet < 5 * Math.pow(10, 18)
             val = 6.6
-            @prize_div = 0.8
+            @prize_div = 1
             missSycle = 0.5
         else if game.bet < 1 * Math.pow(10, 19)
             val = 7.0
-            @prize_div = 0.8
+            @prize_div = 1
             missSycle = 0.5
         else if game.bet < 1 * Math.pow(10, 20) #1垓
             val = 7.5
-            @prize_div = 0.8
-            missSycle = 0.5
-        else if game.bet < 1 * Math.pow(10, 21)
-            val = 8.0
-            @prize_div = 0.8
-            missSycle = 0.5
-        else if game.bet < 1 * Math.pow(10, 22)
-            val = 8.5
-            @prize_div = 0.8
-            missSycle = 0.5
-        else if game.bet < 1 * Math.pow(10, 23)
-            val = 9.0
-            @prize_div = 0.8
+            @prize_div = 1.2
             missSycle = 0.5
         else if game.bet < 1 * Math.pow(10, 24) #1抒
-            val = 9.5
-            @prize_div = 0.8
-            missSycle = 0.5
-        else if game.bet < 1 * Math.pow(10, 32) #1溝
-            val = 10.0
-            @prize_div = 0.8
+            val = 8.0
+            @prize_div = 1.6
             missSycle = 0.4
+        else if game.bet < 1 * Math.pow(10, 32) #1溝
+            val = 8.0
+            @prize_div = 2
+            missSycle = 0.3
         else if game.bet < 1 * Math.pow(10, 40) #1正
-            val = 10.0
-            @prize_div = 0.8
-            missSycle = 0.3
-        else if game.bet < 1 * Math.pow(10, 48) #1極
-            val = 10.0
-            @prize_div = 0.8
-            missSycle = 0.3
-        else if game.bet < 1 * Math.pow(10, 56) #1阿僧祇
-            val = 10.0
-            @prize_div = 0.8
+            val = 8.0
+            @prize_div = 3
             missSycle = 0.2
+        else if game.bet < 1 * Math.pow(10, 48) #1極
+            val = 8.0
+            @prize_div = 3.5
+            missSycle = 0.2
+        else if game.bet < 1 * Math.pow(10, 56) #1阿僧祇
+            val = 8.0
+            @prize_div = 4
+            missSycle = 0.1
         else
             val = 10.0
-            @prize_div = 0.8
+            @prize_div = 5
             missSycle = 0.1
         game.main_scene.gp_stage_front.missItemFallSycle = missSycle
         div = 1
@@ -1088,10 +1076,11 @@ class slotSetting extends appNode
         roleCnt = 0
         returnRoles = @allRoles
         for roleNum, member of returnRoles
-            if game.arrIndexOf(game.item_have_now, member) && game.prev_fever_muse.indexOf(parseInt(roleNum)) is -1
-                roleCnt++
-                if @prev_osusume_role is 0 || @prev_osusume_role.indexOf(parseInt(roleNum)) is -1
-                    allRoles.push(roleNum)
+            if game.arrIndexOf(game.item_have_now, member)
+                if game.prev_fever_muse.indexOf(parseInt(roleNum)) is -1 || 25 <= game.past_fever_num
+                    roleCnt++
+                    if @prev_osusume_role is 0 || @prev_osusume_role.indexOf(parseInt(roleNum)) is -1
+                        allRoles.push(roleNum)
         if 0 < allRoles.length
             random = Math.floor(Math.random() * allRoles.length)
             role = returnRoles[allRoles[random]]
@@ -1111,7 +1100,7 @@ class slotSetting extends appNode
         roles = []
         for i, roleNum of @allRolesKey
             member = @allRoles[roleNum]
-            if game.arrIndexOf(left_lille, member) && game.prev_fever_muse.indexOf(parseInt(roleNum)) is -1
+            if game.arrIndexOf(left_lille, member) && (game.prev_fever_muse.indexOf(parseInt(roleNum)) is -1 || 25 <= game.past_fever_num)
                 roles.push(member)
         if roles[0] != undefined
             role = roles[0]
