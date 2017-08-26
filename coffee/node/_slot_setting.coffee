@@ -745,8 +745,8 @@ class slotSetting extends appNode
         if game.isItemSet(1) && game.combo < 200
             up = 200
         div = 1
-        if Math.pow(10, 9) < game.bet then div = 0.9
-        if Math.pow(10, 13) < game.bet then div = 0.8
+        if Math.pow(10, 9) < game.bet then div = 0.8
+        if Math.pow(10, 13) < game.bet then div = 0.7
         return Math.floor(game.bet * up * 0.02 * div)
 
     ###

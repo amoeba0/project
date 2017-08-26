@@ -2746,7 +2746,7 @@ class stageBack extends gpStage
     ###
     _setMoneyItemsInstance:(itemsNum, isHoming)->
         ret_data = []
-        for i in [0..70]
+        for i in [0..72]
             if itemsNum[i] != undefined && itemsNum[i] > 0
                 num = itemsNum[i]
                 for j in [1..num]
@@ -4498,8 +4498,8 @@ class Debug extends appNode
         @test_load_flg = false
         #テストロード用の値
         @test_load_val = {
-            'money':123456789012345678901234567890123456789012345678901234567890123456789012,
-            'bet':Math.pow(10, 4),
+            'money': 9.99999999999 * Math.pow(10, 71),
+            'bet':Math.pow(10, 71),
             'combo':20,
             'max_combo':200,
             'tension':200,
@@ -5339,8 +5339,8 @@ class slotSetting extends appNode
         if game.isItemSet(1) && game.combo < 200
             up = 200
         div = 1
-        if Math.pow(10, 9) < game.bet then div = 0.9
-        if Math.pow(10, 13) < game.bet then div = 0.8
+        if Math.pow(10, 9) < game.bet then div = 0.8
+        if Math.pow(10, 13) < game.bet then div = 0.7
         return Math.floor(game.bet * up * 0.02 * div)
 
     ###
@@ -8553,6 +8553,17 @@ class Character extends appObject
     @return num
     ###
     _speedWidthAir:(vx)->
+        air = 0.5
+        if @moveFlg.right is true && @stopAtRight() is true
+            if vx < 0
+                vx = 0
+            else if vx < Math.floor(@mx * 10 * air) / 10
+                vx += Math.floor(@ax * 10 * air) / 10
+        else if @moveFlg.left is true && @stopAtLeft() is true
+            if vx > 0
+                vx = 0
+            else if vx > Math.floor(@mx * -10 * air) / 10
+                vx -= Math.floor(@ax * 10 * air) / 10
         vx = @stopAtEnd(vx)
         return vx
 
@@ -8732,9 +8743,9 @@ class Player extends Character
     ###
     stopAtEnd:(vx)->
         if 0 != @vx
-            if @x <= 0
+            if @x <= 0 && @vx < 0
                 vx = 0
-            if @x + @w >= game.width
+            if @x + @w >= game.width && 0 < @vx
                 vx = 0
         return vx
 
@@ -8908,6 +8919,8 @@ class Money extends Item
             game.sePlay(@catch_se)
             game.main_scene.gp_stage_back.removeChild(@)
             game.money += @price
+            if 9.99999999999 * Math.pow(10, 71) < game.money
+                game.money　= 9.99999999999 * Math.pow(10, 71)
             game.main_scene.gp_system.money_text.setValue()
             game.slot_setting.betUp()
 

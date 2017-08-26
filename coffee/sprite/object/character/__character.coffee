@@ -91,6 +91,17 @@ class Character extends appObject
     @return num
     ###
     _speedWidthAir:(vx)->
+        air = 0.5
+        if @moveFlg.right is true && @stopAtRight() is true
+            if vx < 0
+                vx = 0
+            else if vx < Math.floor(@mx * 10 * air) / 10
+                vx += Math.floor(@ax * 10 * air) / 10
+        else if @moveFlg.left is true && @stopAtLeft() is true
+            if vx > 0
+                vx = 0
+            else if vx > Math.floor(@mx * -10 * air) / 10
+                vx -= Math.floor(@ax * 10 * air) / 10
         vx = @stopAtEnd(vx)
         return vx
 

@@ -34,9 +34,9 @@ class Player extends Character
     ###
     stopAtEnd:(vx)->
         if 0 != @vx
-            if @x <= 0
+            if @x <= 0 && @vx < 0
                 vx = 0
-            if @x + @w >= game.width
+            if @x + @w >= game.width && 0 < @vx
                 vx = 0
         return vx
 

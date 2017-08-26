@@ -35,6 +35,8 @@ class Money extends Item
             game.sePlay(@catch_se)
             game.main_scene.gp_stage_back.removeChild(@)
             game.money += @price
+            if 9.99999999999 * Math.pow(10, 71) < game.money
+                game.money　= 9.99999999999 * Math.pow(10, 71)
             game.main_scene.gp_system.money_text.setValue()
             game.slot_setting.betUp()
 

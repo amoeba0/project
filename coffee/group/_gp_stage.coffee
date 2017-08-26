@@ -200,7 +200,7 @@ class stageBack extends gpStage
     ###
     _setMoneyItemsInstance:(itemsNum, isHoming)->
         ret_data = []
-        for i in [0..70]
+        for i in [0..72]
             if itemsNum[i] != undefined && itemsNum[i] > 0
                 num = itemsNum[i]
                 for j in [1..num]
