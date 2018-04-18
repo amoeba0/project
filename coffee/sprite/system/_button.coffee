@@ -32,12 +32,12 @@ class largePauseButton extends Button
 ###
 class controllerButton extends Button
     constructor: () ->
-        super 60, 60
+        super 70, 70
         @color = "#888"
         @pushColor = "#333"
         @opacity = 0.4
         @x = 0
-        @y = 650
+        @y = 620
     changePushColor: () ->
         @image = @drawLeftTriangle(@pushColor)
     changePullColor: () ->

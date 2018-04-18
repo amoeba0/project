@@ -1,7 +1,7 @@
 class gpStage extends appGroup
     constructor: () ->
         super
-        @floor = 640 #床の位置
+        @floor = 570 #640 #床の位置
 
 ###
 ステージ前面

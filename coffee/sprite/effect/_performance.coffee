@@ -111,7 +111,7 @@ class panoramaEffect extends backGround
     constructor:(w, h)->
         super w,h
         @x_init = 0
-        @y_init = game.height - Math.floor(310 / 2)
+        @y_init = game.height - Math.floor(370 * 0.66)
     setInit:()->
         @age = 0
         @x = @x_init

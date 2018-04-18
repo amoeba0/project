@@ -37,6 +37,8 @@ class Money extends Item
             game.money += @price
             if 9.99999999999 * Math.pow(10, 71) < game.money
                 game.money　= 9.99999999999 * Math.pow(10, 71)
+            if game.max_money < game.money
+                game.max_money = game.money
             game.main_scene.gp_system.money_text.setValue()
             game.slot_setting.betUp()
 

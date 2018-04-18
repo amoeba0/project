@@ -121,7 +121,7 @@ class pauseItemBuySelectLayer extends appDomLayer
         game.pause_scene.removeItemBuySelectMenu()
         game.pause_scene.pause_item_buy_layer.resetItemList()
         game.main_scene.gp_system.money_text.setValue()
-        if 21 <= @item_kind
+        if 21 <= @item_kind && game.isSumaho() is false
             switch @item_kind
                 when 21 then game.start2ndStory()
                 when 22 then game.start3rdStory()

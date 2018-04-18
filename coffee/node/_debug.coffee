@@ -27,6 +27,7 @@ class Debug extends appNode
         #テストロード用の値
         @test_load_val = {
             'money': 9.99999999999 * Math.pow(10, 71),
+            'max_money': 9.99999999999 * Math.pow(10, 71),
             'bet':Math.pow(10, 71),
             'combo':20,
             'max_combo':200,
@@ -37,7 +38,7 @@ class Debug extends appNode
             'now_muse_num':0,
             'max_set_item_num':3,
             'now_speed':3,
-            'item_have_now':[1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23,24],
+            'item_have_now':[1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,21,22,23],
             'item_set_now':[3,4,8],
             'member_set_now':[14,13,19],
             'prev_fever_muse':[11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,31,32,33,34,35,36,37],

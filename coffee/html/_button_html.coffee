@@ -597,7 +597,7 @@ class tweetButtonHtml extends pauseMainMenuButtonHtml
         @class.push('pause-main-menu-button-sky')
         @class.push('pause-main-menu-button-tweet')
         @setHtml()
-        @money = game.toJPUnit(game.money, 0, 1)
+        @money = game.toJPUnit(game.max_money, 0, 1)
         if game.money >= Math.pow(10, 19)
             @money += '＋端数　円くらい'
         else

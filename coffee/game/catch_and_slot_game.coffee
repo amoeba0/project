@@ -51,6 +51,7 @@ class LoveliveGame extends catchAndSlotGame
 
         #セーブする変数(slot_settingにもあるので注意)
         @money = 0 #現在の所持金
+        @max_money = 0 #稼いだ最大の所持金
         @bet = 1 #現在の掛け金
         @combo = 0 #現在のコンボ
         @max_combo = 0 #MAXコンボ
@@ -72,6 +73,7 @@ class LoveliveGame extends catchAndSlotGame
 
         @init_load_val = {
             'money':100,
+            'max_money':100,
             'bet':1,
             'combo':0,
             'max_combo':0,
@@ -133,7 +135,6 @@ class LoveliveGame extends catchAndSlotGame
     タイトルへ戻る
     ###
     returnToTitle:()->
-        @bgmStop(@main_scene.bgm)
         @popScene(@pause_scene)
         @popScene(@main_scene)
 
@@ -427,7 +428,7 @@ class LoveliveGame extends catchAndSlotGame
     ###
     startStoryIfNoData:()->
         money = @local_storage.getItem('money')
-        if money is null
+        if money is null && @isSumaho() is false
             @startOpStory()
 
     ###
@@ -511,6 +512,7 @@ class LoveliveGame extends catchAndSlotGame
     _defaultLoadData:(key)->
         data = {
             'money'    : 0,
+            'max_money': 0,
             'bet'      : 0,
             'combo'    : 0,
             'max_combo': 0,
@@ -548,6 +550,7 @@ class LoveliveGame extends catchAndSlotGame
         @local_storage.clear()
         saveData = {
             'money'    : @money,
+            'max_money': @max_money,
             'bet'      : @bet,
             'combo'    : @combo,
             'max_combo': @max_combo,
@@ -581,6 +584,7 @@ class LoveliveGame extends catchAndSlotGame
         money = @local_storage.getItem('money')
         if money != null
             @money = parseInt(money)
+            @max_money = @_loadStorage('max_money', 'num')
             @bet = @_loadStorage('bet', 'num')
             @combo = @_loadStorage('combo', 'num')
             @max_combo = @_loadStorage('max_combo', 'num')
@@ -641,6 +645,7 @@ class LoveliveGame extends catchAndSlotGame
     ###
     _loadGameFix:(data)->
         @money = @_loadGameFixUnit(data, 'money')
+        @max_money = @_loadGameFixUnit(data, 'max_money')
         @bet = @_loadGameFixUnit(data, 'bet')
         @combo = @_loadGameFixUnit(data, 'combo')
         @max_combo = @_loadGameFixUnit(data, 'max_combo')
